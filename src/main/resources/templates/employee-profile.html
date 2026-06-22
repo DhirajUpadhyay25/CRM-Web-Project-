@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employee Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .profile-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 15px;
+        }
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .profile-avatar {
+            font-size: 8rem;
+            color: #6c757d;
+        }
+        .table th {
+            width: 30%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/employee-sidebar :: frg-employee-sidebar}"></div>
+
+    <div class="content">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <h2 th:text="'Welcome, ' + ${sessionEmp.name}"></h2>
+            <p>Employee Panel - Manage Your Profile</p>
+        </div>
+
+        <!-- Profile Section -->
+        <section class="container py-4">
+            <div class="row g-4">
+                
+                <!-- Avatar Card -->
+                <div class="col-lg-4">
+                    <div class="card shadow profile-card text-center p-4">
+                        <i class="bi bi-person-circle profile-avatar"></i>
+                        <h3 class="mt-3" th:text="${sessionEmp.name}"></h3>
+                        <span class="badge bg-primary">Active Employee</span>
+                    </div>
+                </div>
+                
+                <!-- Details Card -->
+                <div class="col-lg-8">
+                    <div class="card shadow profile-card">
+                        <div class="card-body">
+                            <h4 class="mb-4 text-center text-primary">Employee Details</h4>
+                            <table class="table table-striped table-hover align-middle">
+                                <tbody>
+                                    <tr>
+                                        <th>Name</th>
+                                        <td th:text="${sessionEmp.name}"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email</th>
+                                        <td th:text="${sessionEmp.email}"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Phone No.</th>
+                                        <td th:text="${sessionEmp.phoneno}"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>City</th>
+                                        <td th:text="${sessionEmp.city}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>

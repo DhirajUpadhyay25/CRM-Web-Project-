@@ -1,0 +1,24 @@
+@charset "UTF-8";
+.product-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: 0.3s;
+  background: #fff;
+}
+
+/* Hover lift */
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.card {
+    width: 15rem;
+    transition: transform 0.3s ease; /* Smooth animation */
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  border:2px solid red;
+  box-shadow: 0 15px 30px rgba(0,24,0,0.15);}
