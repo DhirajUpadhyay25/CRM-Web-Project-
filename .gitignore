@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets & Production Config ###
+application-prod.properties
+*.env
+.env.*
+
+### Upload directories ###
+/upload/
+/uploads/
+
+### Agents ###
+.agents/

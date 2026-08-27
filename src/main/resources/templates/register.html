@@ -1,265 +1,170 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-</head>
-<body>
-    <!-- header starts -->
-    <div th:replace="~{fragments/header :: crm-header}"></div>
-    <!-- header ends -->
+<head th:replace="~{fragments/base-head :: head('Register')}"></head>
 
-    <!-- main content starts -->
-    <main class="container-fluid" style="min-height: 550px">
-    <section class="container-fluid py-5 bg-light min-vh-100 d-flex align-items-center">
-    <div class="container">
-        <div class="row justify-content-center">
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center px-4 py-16">
+        <div class="w-full max-w-lg animate-fade-in">
+
             <!-- Registration Card -->
-            <div class="col-lg-5 col-md-7 col-sm-10">
+            <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 shadow-2xl">
 
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-
-                    <!-- Card Header -->
-                    <div class="bg-primary text-white text-center py-3">
-                        <h2 class="fw-bold mb-1">Create Account</h2>
-                        <p class="mb-0 small">Join us today and get started your journey.</p>
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="w-14 h-14 bg-brand-600/10 border border-brand-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="bi bi-person-plus-fill text-2xl text-brand-400"></i>
                     </div>
-
-                    <!-- Card Body -->
-                    <div class="card-body p-4">
-
-                        <!-- Success Message -->
-                        <div th:if="${successMsg}"
-                             class="alert alert-success alert-dismissible fade show"
-                             role="alert">
-
-                            <span th:text="${successMsg}"></span>
-
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="alert">
-                            </button>
-                        </div>
-
-                        <!-- IMPORTANT -->
-                        <!-- enctype is required for image upload -->
-                        <form action="regForm"
-                              method="post"
-                              enctype="multipart/form-data"
-                              onsubmit="return validateForm()"
-                              th:object="${user}">
-
-                            <!-- Profile Image Upload -->
-                            <div class="text-center mb-4">
-
-                                <!-- Preview Image -->
-                                <img id="previewImage"
-                                     src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                                     class="rounded-circle border shadow-sm mb-3"
-                                     width="120"
-                                     height="120"
-                                     style="object-fit: cover;">
-
-                                <div>
-                                    <label class="form-label fw-semibold d-block">
-                                        Upload Profile Image
-                                    </label>
-
-                                    <input type="file"
-                                           class="form-control"
-                                           name="image"
-                                           accept="image/*"
-                                           onchange="previewFile(this)"
-                                           required>
-                                </div>
-                            </div>
-
-                            <!-- Name -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Full Name
-                                </label>
-
-                                <input type="text"
-                                       class="form-control form-control-lg rounded-3"
-                                       name="name"
-                                       placeholder="Enter your full name"
-                                       th:field="*{name}"
-                                       required />
-
-                                <div class="text-danger small mt-1"
-                                     th:if="${#fields.hasErrors('name')}"
-                                     th:errors="*{name}">
-                                </div>
-                            </div>
-
-                            <!-- Email -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Email Address
-                                </label>
-
-                                <input type="email"
-                                       class="form-control form-control-lg rounded-3"
-                                       name="email"
-                                       placeholder="Enter your email"
-                                       th:field="*{email}"
-                                       required />
-
-                                <div class="text-danger small mt-1"
-                                     th:if="${#fields.hasErrors('email')}"
-                                     th:errors="*{email}">
-                                </div>
-                            </div>
-                            <!-- Password -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Password
-                                </label>
-                                <input type="password"
-                                       class="form-control form-control-lg rounded-3"
-                                       name="password"
-                                       placeholder="Create strong password"
-                                       th:field="*{password}"
-                                       required />
-                                       <div class="text-danger small mt-1"
-                                       th:if="${#fields.hasErrors('password')}"
-                                       th:errors="*{password}">
-                                       </div>
-                            </div>
-                            <!-- Phone -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    Phone Number </label>
-                                <input type="text"
-                                       class="form-control form-control-lg rounded-3"
-                                       name="phoneno"
-                                       placeholder="Enter phone number"
-                                       th:field="*{phoneno}"
-                                       required />
-                                       <div class="text-danger small mt-1"
-                                       th:if="${#fields.hasErrors('phoneno')}"
-                                       th:errors="*{phoneno}">
-                                       </div>
-                                       </div>
-                            <!-- City -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    City
-                                </label>
-
-                                <input type="text"
-                                       class="form-control form-control-lg rounded-3"
-                                       name="city"
-                                       placeholder="Enter your city"
-                                       th:field="*{city}"
-                                       required />
-                                       <div class="text-danger small mt-1"
-                                       th:if="${#fields.hasErrors('city')}"
-                                       th:errors="*{city}">
-                             </div>
-                            </div>
-                            <!-- Register Button -->
-                            <div class="d-grid">
-                                <button type="submit"
-                                  class="btn btn-primary btn-lg rounded-3 fw-semibold shadow-sm">
-                                   Register Now
-                                </button>
-                            </div>
-                            <!-- Login -->
-                            <div class="text-center mt-4">
-                                <small class="text-muted">
-                                      Already have an account?
-                                      <a href="/login"
-                                       class="text-primary text-decoration-none fw-semibold">Login Here </a>
-                                  </small>
-                            </div>
-                        </form>
-                    </div>
+                    <h1 class="text-2xl font-bold">Create Account</h1>
+                    <p class="text-sm text-gray-400 mt-2">Join us today and get started your journey.</p>
                 </div>
+
+                <!-- Success Message -->
+                <div th:if="${successMsg}" class="mb-6 flex items-center gap-3 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                    <i class="bi bi-check-circle text-green-400"></i>
+                    <span class="text-sm text-green-300" th:text="${successMsg}"></span>
+                </div>
+                
+                <!-- Error Message -->
+                <div th:if="${errorMsg}" class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <i class="bi bi-exclamation-circle text-red-400"></i>
+                    <span class="text-sm text-red-300" th:text="${errorMsg}"></span>
+                </div>
+
+                <!-- Registration Form -->
+                <form th:action="@{/regForm}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()" th:object="${user}" class="space-y-5">
+
+                    <!-- Profile Image Upload -->
+                    <div class="text-center mb-6">
+                        <!-- Preview Image -->
+                        <img id="previewImage" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                             class="rounded-full border border-white/10 shadow-sm mb-4 mx-auto object-cover w-28 h-28 bg-surface-800">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5 cursor-pointer hover:text-brand-400 transition-colors">
+                                Upload Profile Image
+                                <input type="file" class="hidden" name="image" accept="image/*" onchange="previewFile(this)" required>
+                            </label>
+                            <p class="text-xs text-gray-500">JPG, PNG, GIF up to 5MB</p>
+                        </div>
+                    </div>
+
+                    <!-- Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Full Name</label>
+                        <input type="text" name="name" th:field="*{name}" required placeholder="Enter your full name"
+                               class="w-full px-4 py-3 bg-surface-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Email Address</label>
+                        <input type="email" name="email" th:field="*{email}" required placeholder="you@example.com"
+                               class="w-full px-4 py-3 bg-surface-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+                        <input type="password" name="password" th:field="*{password}" required placeholder="Create a strong password"
+                               class="w-full px-4 py-3 bg-surface-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Phone Number</label>
+                        <input type="text" name="phoneno" th:field="*{phoneno}" required placeholder="Enter your phone number"
+                               class="w-full px-4 py-3 bg-surface-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('phoneno')}" th:errors="*{phoneno}"></div>
+                    </div>
+                    
+                    <!-- City -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">City</label>
+                        <input type="text" name="city" th:field="*{city}" required placeholder="Enter your city"
+                               class="w-full px-4 py-3 bg-surface-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all">
+                        <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-3.5 mt-2 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30">
+                        Register Now
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
+                    <div class="relative flex justify-center text-xs"><span class="bg-surface-900 px-4 text-gray-500">or</span></div>
+                </div>
+
+                <!-- Login Link -->
+                <p class="text-center text-sm text-gray-400">
+                    Already have an account?
+                    <a href="/login" class="text-brand-400 hover:text-brand-300 font-semibold transition-colors">Login Here</a>
+                </p>
             </div>
+
         </div>
-    </div>
-</section>
     </main>
-    <!-- main content ends -->
 
-    <!-- footer starts -->
-    <div th:replace="~{fragments/footer :: crm-footer}"></div>
-    <!-- footer ends -->
-    
+    <!-- Footer -->
+    <div th:replace="~{fragments/tw-footer :: tw-footer}"></div>
+
     <script type="text/javascript">
-    	function validateForm()
-    	{
-    		var name = document.forms[0]["name"].value;
-    		var namePattern = /^[a-z,A-Z ]{5,25}$/;
-    		
-    		var email = document.forms[0]["email"].value;
-    		var emailPattern = /^[a-zA-Z0-9._%±]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/;
-    		
-    		var password = document.forms[0]["password"].value;
-    		var passwordPattern = /^[a-z,A-Z,0-9]{5,25}$/;
-    		
-    		var phoneno = document.forms[0]["phoneno"].value;
-    		var phonenoPattern = /^[0-9]{10}$/;
-    		
-    		var city = document.forms[0]["city"].value;
-    		var cityPattern = /^[a-z,A-Z]{3,25}$/;
-    		
-    		if(!namePattern.test(name))
-    		{
-    			alert("Invalid name format");
-    			return false;
-    		}
-    		else if(!emailPattern.test(email))
-    		{
-    			alert("Invalid email format");
-    			return false;
-    		}
-    		else if(!passwordPattern.test(password))
-    		{
-    			alert("Invalid password format");
-    			return false;
-    		}
-    		else if(!phonenoPattern.test(phoneno))
-    		{
-    			alert("Invalid phone number format");
-    			return false;
-    		}
-    		else if(!cityPattern.test(city))
-    		{
-    			alert("Invalid city format");
-    			return false;
-    		}
-    		else
-    		{
-    			return true;
-    		}
-    	}
-    	function previewFile(input) {
+        function validateForm() {
+            var name = document.forms[0]["name"].value;
+            var namePattern = /^[a-z,A-Z ]{5,25}$/;
+            
+            var email = document.forms[0]["email"].value;
+            var emailPattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            
+            var password = document.forms[0]["password"].value;
+            var passwordPattern = /^[a-z,A-Z,0-9]{5,25}$/;
+            
+            var phoneno = document.forms[0]["phoneno"].value;
+            var phonenoPattern = /^[0-9]{10}$/;
+            
+            var city = document.forms[0]["city"].value;
+            var cityPattern = /^[a-z,A-Z ]{3,25}$/;
+            
+            if(!namePattern.test(name)) {
+                alert("Invalid name format");
+                return false;
+            } else if(!emailPattern.test(email)) {
+                alert("Invalid email format");
+                return false;
+            } else if(!passwordPattern.test(password)) {
+                alert("Invalid password format");
+                return false;
+            } else if(!phonenoPattern.test(phoneno)) {
+                alert("Invalid phone number format");
+                return false;
+            } else if(!cityPattern.test(city)) {
+                alert("Invalid city format");
+                return false;
+            }
+            return true;
+        }
 
+        function previewFile(input) {
             const file = input.files[0];
-
             if (file) {
-
                 const reader = new FileReader();
-
                 reader.onload = function(e) {
                     document.getElementById("previewImage").src = e.target.result;
                 }
-
                 reader.readAsDataURL(file);
             }
         }
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
 </body>
-
 </html>

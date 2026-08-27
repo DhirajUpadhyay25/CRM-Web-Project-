@@ -5,28 +5,27 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import in.project.main.entities.Employee;
 import in.project.main.entities.User;
-import in.project.main.repositories.CustomerRepository;
+import in.project.main.repositories.UserRepository;
 
 @Service
 public class CustomerService
 {
 	@Autowired
-	private CustomerRepository customerRepository;
+	private UserRepository userRepository;
 	
 	public Page<User> getAllUserDetailsByPagination(Pageable pageable)
 	{
-		return customerRepository.findAll(pageable);
+		return userRepository.findAll(pageable);
 	}
 	
 	public User getCustomerDetails(String userEmail)
 	{
-		return customerRepository.findByEmail(userEmail);
+		return userRepository.findByEmail(userEmail);
 	}
 	
 	public void updateUserBanStatus(User user)
 	{
-		customerRepository.save(user);
+		userRepository.save(user);
 	}
 }

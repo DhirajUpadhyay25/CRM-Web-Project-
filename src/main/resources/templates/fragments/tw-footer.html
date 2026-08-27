@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- ═══════════════════════════════════════════════════════════════════
+     TAILWIND FOOTER
+     ═══════════════════════════════════════════════════════════════════ -->
+<footer th:fragment="tw-footer" class="bg-surface-950 border-t border-white/5 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+
+            <!-- Brand Column -->
+            <div class="col-span-2 md:col-span-1">
+                <a href="/index" class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">E</span>
+                    </div>
+                    <span class="text-white font-bold text-xl">EduTake</span>
+                </a>
+                <p class="text-sm text-gray-400 leading-relaxed">
+                    Professional education platform offering courses, live classes, workshops, and training programs.
+                </p>
+            </div>
+
+            <!-- Courses -->
+            <div>
+                <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Courses</h4>
+                <ul class="space-y-3">
+                    <li><a href="/index#courses" class="text-sm text-gray-400 hover:text-white transition-colors">Browse All</a></li>
+                    <li><a href="/index#courses" class="text-sm text-gray-400 hover:text-white transition-colors">Programming</a></li>
+                    <li><a href="/index#courses" class="text-sm text-gray-400 hover:text-white transition-colors">Public Speaking</a></li>
+                    <li><a href="/index#courses" class="text-sm text-gray-400 hover:text-white transition-colors">Content Creation</a></li>
+                </ul>
+            </div>
+
+            <!-- Company -->
+            <div>
+                <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Company</h4>
+                <ul class="space-y-3">
+                    <li><a href="/index#about" class="text-sm text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="/index#contact" class="text-sm text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="/index" class="text-sm text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                </ul>
+            </div>
+
+            <!-- Connect -->
+            <div>
+                <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">Connect</h4>
+                <div class="flex gap-3">
+                    <a href="#" class="w-10 h-10 bg-white/5 hover:bg-brand-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                        <i class="bi bi-twitter-x"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-white/5 hover:bg-brand-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-white/5 hover:bg-brand-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 bg-white/5 hover:bg-brand-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all">
+                        <i class="bi bi-youtube"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-white/5 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-gray-500">&copy; 2026 EduTake. All rights reserved.</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">Privacy Policy</a>
+                <a href="#" class="text-xs text-gray-500 hover:text-gray-300 transition-colors">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

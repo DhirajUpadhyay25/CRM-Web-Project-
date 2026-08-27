@@ -1,424 +1,286 @@
-
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <link rel="stylesheet" href="/css/style.css" />
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CRM Project</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-	<link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-</head>
+<head th:replace="~{fragments/base-head :: head('Home')}"></head>
 
-<body>
+<body class="bg-surface-950 text-white antialiased">
 
-	<!-- header starts -->
-    <div th:if="${sessionUser == null OR sessionUser == ''}">
-    	<div th:replace="~{fragments/header :: crm-header}"></div>
-    </div>
-    <div th:unless="${sessionUser == null OR sessionUser == ''}">
-    	<div th:replace="~{fragments/user-header :: u-header}"></div>
-    </div>
-    <!-- header ends -->
-    
-    <!-- main content starts -->
+    <!-- ═══════════════════ NAVBAR ═══════════════════ -->
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
     <main>
-     <section class="hero-section">
-    <div class="container">
 
-        <div class="row align-items-center min-vh-100">
+        <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
+        <section class="relative min-h-[90vh] flex items-center overflow-hidden">
+            <!-- Background gradient -->
+            <div class="absolute inset-0 bg-gradient-to-br from-surface-950 via-surface-900 to-brand-950"></div>
+            <!-- Grid pattern overlay -->
+            <div class="absolute inset-0 opacity-[0.03]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);"></div>
+            <!-- Glow effects -->
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-400/5 rounded-full blur-3xl"></div>
 
-            <!-- Left Content -->
-            <div class="col-lg-6 text-white">
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
 
-                <div class="enroll-badge mb-4">
-                    ● NOW ENROLLING — SUMMER 2026 COHORT
-                </div>
-
-                <h1 class="hero-title">
-                    Learn Without <br>
-                    <span>Limits.</span>
-                </h1>
-
-                <p class="hero-desc mt-4">
-                    Join 250,000+ students mastering in-demand skills through
-                    expert-led courses, live sessions, and real-world projects —
-                    at your own pace.
-                </p>
-
-                <div class="d-flex flex-wrap gap-3 mt-5">
-
-                    <a href="/login" class="btn btn-primary btn-lg px-4 py-3">
-                        Browse Courses
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-
-                    <a href="#" class="btn btn-outline-light btn-lg px-4 py-3">
-                        <i class="bi bi-play-fill"></i>
-                        Watch Demos
-                    </a>
-
-                </div>
-
-                <!-- Stats -->
-                <div class="d-flex align-items-center gap-5 mt-5 flex-wrap">
-
-                    <div class="d-flex align-items-center">
-
-                        <div class="avatar-group">
-                            <img src="https://i.pravatar.cc/50?img=1" alt="">
-                            <img src="https://i.pravatar.cc/50?img=2" alt="">
-                            <img src="https://i.pravatar.cc/50?img=3" alt="">
-                            <span class="plus-avatar">+</span>
+                    <!-- Left Content -->
+                    <div class="animate-fade-in">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8">
+                            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                            <span class="text-xs font-medium text-gray-300 tracking-widest uppercase">Now Enrolling</span>
                         </div>
 
-                    </div>
+                        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight">
+                            Learn Without
+                            <br>
+                            <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Limits.</span>
+                        </h1>
 
-                    <div>
-                        <div class="text-warning">
-                            ★★★★★ <span class="text-white">4.9</span>
+                        <p class="mt-6 text-lg text-gray-400 max-w-lg leading-relaxed">
+                            Master in-demand skills through expert-led courses, live sessions, and real-world projects — at your own pace.
+                        </p>
+
+                        <div class="flex flex-wrap gap-4 mt-10">
+                            <a href="/index#courses"
+                               class="inline-flex items-center gap-2 px-7 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30 hover:-translate-y-0.5">
+                                Browse Courses
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                            <a href="/register"
+                               class="inline-flex items-center gap-2 px-7 py-3.5 border border-white/10 hover:border-white/25 text-white font-semibold rounded-xl transition-all hover:-translate-y-0.5">
+                                <i class="bi bi-person-plus"></i>
+                                Sign Up Free
+                            </a>
                         </div>
-                        <small>from 18,400+ reviews</small>
-                    </div>
 
-                    <div>
-                        <h5 class="mb-0">250K+</h5>
-                        <small>active students</small>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- Right Content -->
-            <div class="col-lg-6 position-relative mt-5 mt-lg-0">
-
-                <div class="course-card">
-
-                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200"
-                        alt="Course">
-
-                    <div class="course-overlay">
-                        <h4>Full-Stack Web Development</h4>
-
-                        <div class="progress mt-3">
-                            <div class="progress-bar"></div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Active Learners -->
-                <div class="floating-card learners-card">
-                    <i class="bi bi-people-fill icon-box"></i>
-                    <div>
-                        <small>Active Learners</small>
-                        <h4>124,893</h4>
-                    </div>
-                </div>
-
-                <!-- Lesson Card -->
-                <div class="floating-card lesson-card">
-                    <i class="bi bi-journal-bookmark"></i>
-                    <div>
-                        <h6>New Lesson</h6>
-                        <small>React Server Components</small><br>
-                        <small>28 min</small>
-                    </div>
-                </div>
-
-                <!-- Certificates -->
-                <div class="floating-card certificate-card">
-                    <i class="bi bi-award-fill text-warning"></i>
-                    <div>
-                        <small>Certificates Issued</small>
-                        <h4>42,100+</h4>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-</section>
-<section class="stats-section mt-4 py-5">
-    <div class="container">
-        <div class="row text-center justify-content-center">
-
-            <!-- Active Students -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-icon purple-bg">
-                    <i class="bi bi-people"></i>
-                </div>
-
-                <h4 class="counter" data-target="250">0</h4>
-                <p>Active Students</p>
-            </div>
-
-            <!-- Courses -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-icon violet-bg">
-                    <i class="bi bi-book"></i>
-                </div>
-
-                <h4 class="counter" data-target="500">0</h4>
-                <p>Expert Courses</p>
-            </div>
-
-            <!-- Certificates -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-icon orange-bg">
-                    <i class="bi bi-award"></i>
-                </div>
-
-                <h4 class="counter" data-target="42">0</h4>
-                <p>Certificates Issued</p>
-            </div>
-
-            <!-- Countries -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-icon green-bg">
-                    <i class="bi bi-globe"></i>
-                </div>
-
-                <h4 class="counter" data-target="80">0</h4>
-                <p>Countries Reached</p>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-<section class="course-catalog py-5">
-    <div class="container">
-
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-8">
-
-                <span class="catalog-badge">
-                    COURSE CATALOG
-                </span>
-
-                <h4 class="catalog-title mt-4">
-                    Find Your Next
-                    <span>Skill</span>
-                </h4>
-
-                <p class="catalog-description mt-3">
-                    Choose from 500+ expert-led courses across development,
-                    design, data science, and more.
-                </p>
-
-            </div>
-        </div>
-
-    </div>
-</section>
-
-        <!-- content  section-->
-        <section class=" container py-4">
-            <h3 class="text-center mb-4 "> Our Courses </h3>
-
-            <!-- courses div start -->
-            <div class=" row g-5">
-            
-                <!-- one course card start -->
-                <div th:each="course : ${coursesList}" class="col-lg-3 col-md-6">
-                    <div class="card shadow p-3 mb-5 bg-body rounded product-card " style=" width: 20rem; background: lightblue; padding: 10px; ">
-                        <img th:src="@{${course.imageUrl}}" style="width:100%; height:200px" class="card-img-top" alt="course1img">
-                        <div class="card-body">
-                            <h5 class="card-title text-bold"><span th:text="${course.name}"></span></h5>
-                            <p class="card-text description-clamp">
-                                <span th:text="${course.description}"></span>
-                            </p>
-                            <p> <strong>Price :</strong> <del>Rs. <span  th:text="${course.originalPrice}"></span></del> <span class="bg-success p-1 text-light fw-bolder">Rs. <span th:text="${course.discountedPrice}"></span></span> </p>
-                            <div th:if="${sessionUser == null OR sessionUser == ''}">
-						    	<a href="login" class="btn btn-outline-primary fw-bold">Login to Buy</a>
-						    </div>
-						    <div th:unless="${sessionUser == null OR sessionUser == ''}">
-						    	<div th:if="${#lists.contains(purchasedCoursesNameList, course.name)}">
-						    		<span class="text-success">Course already purchased</span>
-						    	</div>
-						    	<div th:unless="${#lists.contains(purchasedCoursesNameList, course.name)}">
-						    		<button class="btn btn-primary"
-							    			th:data-cname="${course.name}"
-							    			th:data-camount="${course.discountedPrice}"
-							    			th:data-uname="${sessionUser.name}"
-							    			th:data-uemail="${sessionUser.email}"
-							    			th:data-uphoneno="${sessionUser.phoneno}"
-							    			 onclick="purchaseCourse(this.getAttribute('data-cname'), this.getAttribute('data-camount'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'))">
-							    		Buy course
-							    	</button>
-						    	</div>
-						    </div>
-                        </div>
-                        <div class="card-footer text-body-secondary">
-                            Updated : <span th:text="${course.updatedOn}"></span>
-                        </div>
-                    </div>
-                </div>
-
-                
-            </div>
-            <!-- courses div end -->
-        </section>
-        
-        
-        <section class="testimonial-section py-5">
-    <div class="container">
-
-        <!-- Heading -->
-        <div class="text-center mb-5">
-            <span class="section-tag">STUDENT STORIES</span>
-
-            <h2 class="section-title mt-3">
-                Lives Changed by
-                <span>Learning</span>
-            </h2>
-        </div>
-
-        <div class="row g-4">
-
-            <!-- Featured Testimonial -->
-            <div class="col-lg-6">
-
-                <div class="testimonial-featured">
-
-                    <div class="quote-icon">
-                        <i class="bi bi-quote"></i>
-                    </div>
-
-                    <p class="testimonial-text">
-                        "EduTake completely changed my career. I went from
-                        zero coding knowledge to landing a role at Google in
-                        11 months. The project-based curriculum is unlike
-                        anything else — you build real things, not just watch
-                        videos."
-                    </p>
-
-                    <div class="stars mb-4">
-                        ★★★★★
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-                        <div class="d-flex align-items-center">
-
-                            <img src="https://i.pravatar.cc/60?img=12"
-                                 class="user-img me-3">
-
+                        <!-- Social Proof -->
+                        <div class="flex items-center gap-6 mt-12 flex-wrap">
+                            <div class="flex -space-x-3">
+                                <img src="https://i.pravatar.cc/40?img=1" class="w-10 h-10 rounded-full border-2 border-surface-950" alt="">
+                                <img src="https://i.pravatar.cc/40?img=2" class="w-10 h-10 rounded-full border-2 border-surface-950" alt="">
+                                <img src="https://i.pravatar.cc/40?img=3" class="w-10 h-10 rounded-full border-2 border-surface-950" alt="">
+                                <div class="w-10 h-10 rounded-full border-2 border-surface-950 bg-brand-600 flex items-center justify-center text-xs font-bold text-white">+</div>
+                            </div>
                             <div>
-                                <h5 class="mb-0">Priya Sharma</h5>
-                                <small>Frontend Developer at Google</small>
+                                <div class="flex items-center gap-1 text-amber-400 text-sm">
+                                    ★★★★★ <span class="text-white font-semibold ml-1">4.9</span>
+                                </div>
+                                <p class="text-xs text-gray-500">Trusted by learners</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Content — Feature Card -->
+                    <div class="relative animate-slide-up hidden lg:block">
+                        <div class="relative rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800"
+                                 alt="Learning"
+                                 class="w-full h-[480px] object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6">
+                                <p class="text-sm text-gray-300 mb-1">Featured Course</p>
+                                <h3 class="text-xl font-bold">Full-Stack Web Development</h3>
+                                <div class="mt-3 w-full bg-white/10 rounded-full h-1.5">
+                                    <div class="bg-brand-500 h-1.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating cards -->
+                        <div class="absolute -top-4 -left-4 bg-white rounded-2xl px-5 py-3 shadow-xl flex items-center gap-3">
+                            <div class="w-10 h-10 bg-surface-900 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-people-fill text-brand-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Active Learners</p>
+                                <p class="text-lg font-bold text-surface-900">1,200+</p>
+                            </div>
+                        </div>
+
+                        <div class="absolute -bottom-4 -right-4 bg-white rounded-2xl px-5 py-3 shadow-xl flex items-center gap-3">
+                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-award-fill text-amber-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Certificates</p>
+                                <p class="text-lg font-bold text-surface-900">500+</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════ COURSES SECTION ═══════════════════ -->
+        <section id="courses" class="py-24 bg-surface-950">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <!-- Section Header -->
+                <div class="text-center mb-16">
+                    <span class="text-xs font-semibold tracking-[0.25em] uppercase text-brand-400">Course Catalog</span>
+                    <h2 class="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight">
+                        Find Your Next
+                        <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Skill</span>
+                    </h2>
+                    <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
+                        Choose from our expert-led courses across development, design, data science, and more.
+                    </p>
+                </div>
+
+                <!-- Course Cards Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+                    <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5">
+                        <!-- Course Image -->
+                        <div class="relative overflow-hidden h-48">
+                            <img th:src="@{${course.imageUrl}}"
+                                 alt="course"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-surface-900/60 to-transparent"></div>
+                        </div>
+
+                        <!-- Course Content -->
+                        <div class="p-5">
+                            <h3 class="font-semibold text-white text-lg mb-2 line-clamp-1" th:text="${course.name}">Course Name</h3>
+                            <p class="text-sm text-gray-400 line-clamp-2 mb-4" th:text="${course.description}">Description</p>
+
+                            <!-- Pricing -->
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="text-xl font-bold text-white">₹<span th:text="${course.discountedPrice}">0</span></span>
+                                <span class="text-sm text-gray-500 line-through">₹<span th:text="${course.originalPrice}">0</span></span>
                             </div>
 
+                            <!-- Action -->
+                            <div sec:authorize="!isAuthenticated()">
+                                <a href="/login" class="block w-full text-center py-2.5 text-sm font-semibold border border-brand-500/30 text-brand-400 hover:bg-brand-600 hover:text-white rounded-xl transition-all">
+                                    Login to Buy
+                                </a>
+                            </div>
+                            <div sec:authorize="isAuthenticated()">
+                                <div sec:authorize="hasRole('STUDENT')" th:if="${#lists.contains(purchasedCoursesNameList, course.name)}">
+                                    <div class="flex items-center gap-2 justify-center py-2.5 text-sm text-green-400">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Already Purchased</span>
+                                    </div>
+                                </div>
+                                <div sec:authorize="hasRole('STUDENT')" th:unless="${#lists.contains(purchasedCoursesNameList, course.name)}">
+                                    <button class="w-full py-2.5 text-sm font-semibold bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-all shadow-lg shadow-brand-600/20"
+                                            th:data-cname="${course.name}"
+                                            th:data-camount="${course.discountedPrice}"
+                                            th:data-uname="${sessionUser != null ? sessionUser.name : ''}"
+                                            th:data-uemail="${sessionUser != null ? sessionUser.email : ''}"
+                                            th:data-uphoneno="${sessionUser != null ? sessionUser.phoneno : ''}"
+                                            onclick="purchaseCourse(this.getAttribute('data-cname'), this.getAttribute('data-camount'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'))">
+                                        Buy Course
+                                    </button>
+                                </div>
+                                <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')">
+                                    <p class="text-xs text-center text-gray-500 py-2.5">Students only.</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <span class="course-tag">
-                            Full-Stack Web Development
-                        </span>
-
+                        <!-- Card Footer -->
+                        <div class="px-5 py-3 border-t border-white/5">
+                            <p class="text-xs text-gray-500">
+                                <i class="bi bi-clock mr-1"></i>
+                                Updated: <span th:text="${course.updatedOn}">-</span>
+                            </p>
+                        </div>
                     </div>
 
                 </div>
 
+                <!-- Empty state if no courses -->
+                <div th:if="${#lists.isEmpty(coursesList)}" class="text-center py-20">
+                    <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="bi bi-journal-bookmark text-2xl text-gray-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-300">No courses available yet</h3>
+                    <p class="text-gray-500 mt-2">Check back soon for new courses.</p>
+                </div>
             </div>
+        </section>
 
-            <!-- Testimonial List -->
-            <div class="col-lg-6 ">
 
-                <div class="testimonial-item active-item">
-                    <div class="d-flex align-items-center">
-
-                        <img src="https://i.pravatar.cc/60?img=15"
-                             class="user-img me-3">
-
-                        <div>
-                            <h5>Priya Sharma</h5>
-                            <small>Frontend Developer at Google</small>
-                        </div>
-
-                    </div>
-
-                    <div class="stars">★★★★★</div>
+        <!-- ═══════════════════ ABOUT / WHY EDUTAKE ═══════════════════ -->
+        <section id="about" class="py-24 bg-surface-900/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="text-xs font-semibold tracking-[0.25em] uppercase text-brand-400">Why EduTake</span>
+                    <h2 class="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight">
+                        Built for
+                        <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Real Learning</span>
+                    </h2>
                 </div>
 
-                <div class="testimonial-item">
-                    <div class="d-flex align-items-center">
-
-                        <img src="https://i.pravatar.cc/60?img=20"
-                             class="user-img me-3">
-
-                        <div>
-                            <h5>Marcus Williams</h5>
-                            <small>ML Engineer at Stripe</small>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 hover:border-brand-500/20 transition-all">
+                        <div class="w-14 h-14 bg-brand-600/10 border border-brand-600/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="bi bi-laptop text-2xl text-brand-400"></i>
                         </div>
-
+                        <h3 class="text-xl font-semibold mb-3">Expert-Led Courses</h3>
+                        <p class="text-gray-400 leading-relaxed">Learn from industry professionals who bring real-world experience to every lesson.</p>
                     </div>
 
-                    <div class="stars">★★★★★</div>
-                </div>
-
-                <div class="testimonial-item">
-                    <div class="d-flex align-items-center">
-
-                        <img src="https://i.pravatar.cc/60?img=30"
-                             class="user-img me-3">
-
-                        <div>
-                            <h5>Elena Kovač</h5>
-                            <small>Product Designer at Figma</small>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 hover:border-brand-500/20 transition-all">
+                        <div class="w-14 h-14 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="bi bi-camera-video text-2xl text-green-400"></i>
                         </div>
-
+                        <h3 class="text-xl font-semibold mb-3">Live Classes</h3>
+                        <p class="text-gray-400 leading-relaxed">Interactive live sessions, workshops, and orientation programs for hands-on learning.</p>
                     </div>
 
-                    <div class="stars">★★★★</div>
-                </div>
-
-                <div class="testimonial-item">
-                    <div class="d-flex align-items-center">
-
-                        <img src="https://i.pravatar.cc/60?img=45"
-                             class="user-img me-3">
-
-                        <div>
-                            <h5>Raj Patel</h5>
-                            <small>Senior iOS Developer at Spotify</small>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 hover:border-brand-500/20 transition-all">
+                        <div class="w-14 h-14 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="bi bi-trophy text-2xl text-amber-400"></i>
                         </div>
-
+                        <h3 class="text-xl font-semibold mb-3">Practical Skills</h3>
+                        <p class="text-gray-400 leading-relaxed">Public speaking, content creation, consulting, and skills that make a real career impact.</p>
                     </div>
-
-                    <div class="stars">★★★</div>
                 </div>
-
             </div>
+        </section>
 
-        </div>
-    </div>
-</section>
-        
+
+        <!-- ═══════════════════ CONTACT / CTA SECTION ═══════════════════ -->
+        <section id="contact" class="py-24 bg-surface-950">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <span class="text-xs font-semibold tracking-[0.25em] uppercase text-brand-400">Get Started</span>
+                <h2 class="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight">
+                    Ready to
+                    <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Transform</span>
+                    Your Career?
+                </h2>
+                <p class="mt-6 text-lg text-gray-400 max-w-2xl mx-auto">
+                    Join EduTake today and start your journey toward mastering new skills. Browse our courses, enroll, and begin learning at your own pace.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 mt-10">
+                    <a href="/register"
+                       class="inline-flex items-center gap-2 px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 text-lg">
+                        Create Free Account
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="/index#courses"
+                       class="inline-flex items-center gap-2 px-8 py-4 border border-white/10 hover:border-white/25 text-white font-semibold rounded-xl transition-all text-lg">
+                        Explore Courses
+                    </a>
+                </div>
+            </div>
+        </section>
+
     </main>
-    <!-- main content ends -->
 
-    <!-- footer starts -->
-    <div th:replace="~{fragments/footer :: crm-footer}"></div>
-    <!-- footer ends -->
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <div th:replace="~{fragments/tw-footer :: tw-footer}"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-        
+    <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script>
+    <script th:inline="javascript">
     function purchaseCourse(courseName, courseAmount, uname, uemail, uphoneno) {
 
-        // ✅ STEP 1: CREATE ORDER FROM BACKEND
         $.ajax({
             type: "POST",
             url: "/api/createOrder",
@@ -431,17 +293,16 @@
             success: function (Orders) {
 
                 var options = {
-                    "key": "rzp_test_SlhRBum6q8lRUv",
+                    "key": /*[[${razorpayKeyId}]]*/ "",
                     "amount": Orders.amount,
                     "currency": "INR",
-                    "order_id": Orders.orderId, // ✅ VERY IMPORTANT
+                    "order_id": Orders.orderId,
 
-                    "name": "Smart Programming",
-                    "description": "Course Transaction",
+                    "name": "EduTake",
+                    "description": "Course Purchase",
 
                     "handler": function (response) {
 
-                        // ✅ STEP 2: VERIFY PAYMENT
                         var verifyData = {
                             courseName: courseName,
                             courseAmount: courseAmount,
@@ -476,7 +337,7 @@
                     },
 
                     "theme": {
-                        "color": "#3399cc"
+                        "color": "#4c6ef5"
                     }
                 };
 
@@ -484,7 +345,6 @@
 
                 rzp1.on('payment.failed', function (response) {
                     alert("Payment Failed: " + response.error.description);
-                    console.log(response);
                 });
 
                 rzp1.open();
@@ -495,79 +355,7 @@
                 console.log(err);
             }
         });
-        console.log("Order Response:", Orders);
-        console.log("Amount:", Orders.amount);
-        console.log("Order ID:", Orders.orderId);
     }
-    
     </script>
-  <script>
-const counters = document.querySelectorAll('.counter');
-
-const animateCounter = (counter) => {
-    const target = +counter.dataset.target;
-    let current = 0;
-
-    const speed = target / 120;
-
-    const update = () => {
-        current += speed;
-
-        if (current < target) {
-
-            if(target === 250){
-                counter.innerText = Math.floor(current) ;
-            }
-            else if(target === 42){
-                counter.innerText = Math.floor(current);
-            }
-            else{
-                counter.innerText = Math.floor(current);
-            }
-
-            requestAnimationFrame(update);
-
-        } else {
-
-            if(target === 250){
-                counter.innerText = "250+";
-            }
-            else if(target === 42){
-                counter.innerText = "42+";
-            }
-            else{
-                counter.innerText = target + "+";
-            }
-        }
-    };
-
-    update();
-};
-
-const observer = new IntersectionObserver((entries) => {
-
-    entries.forEach(entry => {
-
-        if(entry.isIntersecting){
-
-            counters.forEach(counter => {
-
-                if(!counter.classList.contains('started')){
-                    counter.classList.add('started');
-                    animateCounter(counter);
-                }
-
-            });
-
-        }
-
-    });
-
-},{ threshold: 0.4 });
-
-observer.observe(document.querySelector('.stats-section'));
-</script>
-        
 </body>
-
 </html>

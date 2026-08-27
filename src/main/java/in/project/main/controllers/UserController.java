@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import in.project.main.security.CustomUserDetails;
+import in.project.main.entities.Role;
 import org.springframework.web.multipart.MultipartFile;
 
 import in.project.main.dto.PurchasedCourse;
@@ -26,8 +27,9 @@ import in.project.main.services.CourseService;
 import in.project.main.services.UserService;
 import jakarta.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Controller
-@SessionAttributes("sessionUser")
 public class UserController
 {
 	private String UPLOAD_DIR = System.getProperty("user.dir") + "/upload/";
@@ -44,15 +46,23 @@ public class UserController
 	@Autowired
 	private OrdersRepository ordersRepository;
 	
+	@Value("${app.razorpay.key-id}")
+	private String razorpayKeyId;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	@GetMapping({"/", "/index"})
-	public String openIndexPage(Model model, @SessionAttribute(name="sessionUser", required=false) User sessionUser)
+	public String openIndexPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails, jakarta.servlet.http.HttpServletRequest request)
 	{
+		request.getSession(true); // Force session creation for CSRF token
 		List<Course> coursesList = courseService.getAllCourseDetails();
 		model.addAttribute("coursesList", coursesList);
+		model.addAttribute("razorpayKeyId", razorpayKeyId);
 		
-		if(sessionUser != null)
+		if(userDetails != null && userDetails.getRole() == Role.STUDENT)
 		{
-			List<Object[]> purchasedCourseList = ordersRepository.findPurchasedCoursesByEmail(sessionUser.getEmail());
+			List<Object[]> purchasedCourseList = ordersRepository.findPurchasedCoursesByEmail(userDetails.getUsername());
 			
 			List<String> purchasedCoursesNameList = new ArrayList<>();
 			for(Object[] course : purchasedCourseList)
@@ -62,6 +72,16 @@ public class UserController
 			}
 			
 			model.addAttribute("purchasedCoursesNameList", purchasedCoursesNameList);
+			
+			// Also provide sessionUser to the template for backwards compatibility
+			// since parts of the template might still use ${sessionUser.name}
+			User sessionUser = userRepository.findByEmail(userDetails.getUsername());
+			model.addAttribute("sessionUser", sessionUser);
+		}
+		// If logged in as Employee or Admin, we can also pass their details if needed,
+		// but the template primarily checks sessionUser.
+		else if (userDetails != null) {
+			model.addAttribute("sessionUser", new User()); // Dummy user to satisfy non-null checks in template if needed
 		}
 		
 		
@@ -70,8 +90,9 @@ public class UserController
 	
 	//-----------register starts---------------------------------
 	@GetMapping("/register")
-	public String openRegisterPage(Model model)
+	public String openRegisterPage(Model model, jakarta.servlet.http.HttpServletRequest request)
 	{
+		request.getSession(true); // Force session creation for CSRF token
 		model.addAttribute("user", new User());
 		return "register";
 	}
@@ -120,6 +141,9 @@ public class UserController
 	            user.setImageName(IMAGE_URL + fileName);
 	        }
 
+	        // ---------- ENCODE PASSWORD ----------
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+
 	        // ---------- SAVE USER ----------
 
 	        userService.registerUserService(user);
@@ -141,43 +165,13 @@ public class UserController
 	
 	//-----------------------login starts---------------------------------
 	@GetMapping("/login")
-	public String openLoginPage(Model model)
+	public String openLoginPage(Model model, jakarta.servlet.http.HttpServletRequest request)
 	{
+		request.getSession(true); // Force session creation for CSRF token
 		model.addAttribute("user", new User());
 		return "login";
 	}
-	@PostMapping("/loginForm")
-	public String handleLoginForm(@ModelAttribute("user") User user, Model model)
-	{
-		boolean isAuthenticated = userService.loginUserService(user.getEmail(), user.getPassword());
-		if(isAuthenticated)
-		{
-			User authenticatedUser = userRepository.findByEmail(user.getEmail());
-			
-			if(authenticatedUser.isBanStatus())
-			{
-				model.addAttribute("errorMsg", "Sorry, your account is banned, please contact admin, thank you...!!");
-				return "login";
-			}
-			model.addAttribute("sessionUser", authenticatedUser);
-			
-			return "user-profile";
-		}
-		else
-		{
-			model.addAttribute("errorMsg", "Incorrect Email id or Password");
-			return "login";
-		}
-	}
-	//-----------------------login finished---------------------------------
-	
-	
-	@GetMapping("/logout")
-	public String logout(SessionStatus sessionStatus)
-	{
-		sessionStatus.setComplete();
-		return "login";
-	}
+
 	
 	@GetMapping("/userProfile")
 	public String openUserProfile()
@@ -186,9 +180,9 @@ public class UserController
 	}
 	
 	@GetMapping("/myCourses")
-	public String myCoursesPage(@SessionAttribute("sessionUser") User sessionUser, Model model)
+	public String myCoursesPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model)
 	{
-		List<Object[]> pcDbList = ordersRepository.findPurchasedCoursesByEmail(sessionUser.getEmail());
+		List<Object[]> pcDbList = ordersRepository.findPurchasedCoursesByEmail(userDetails.getUsername());
 		
 		List<PurchasedCourse> purchasedCoursesList = new ArrayList<>();
 		

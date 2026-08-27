@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/base-head :: head('Access Denied')}"></head>
+
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/tw-navbar :: public-navbar}"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center px-4 py-16">
+        <div class="text-center animate-fade-in max-w-lg">
+            
+            <div class="w-24 h-24 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="bi bi-shield-lock text-4xl text-red-400"></i>
+            </div>
+            
+            <h1 class="text-4xl font-extrabold tracking-tight text-white mb-4">Access Denied</h1>
+            <p class="text-lg text-gray-400 mb-8">
+                You do not have permission to view this page. If you believe this is a mistake, please contact support or try logging in with a different account.
+            </p>
+            
+            <a href="/index" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20">
+                <i class="bi bi-house-door"></i>
+                Return Home
+            </a>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/tw-footer :: tw-footer}"></div>
+
+</body>
+</html>

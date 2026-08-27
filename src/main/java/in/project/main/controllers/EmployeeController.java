@@ -1,8 +1,5 @@
 package in.project.main.controllers;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,23 +13,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import in.project.main.security.CustomUserDetails;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import in.project.main.entities.Employee;
-import in.project.main.entities.EmployeeOrders;
 import in.project.main.entities.Inquiry;
 import in.project.main.entities.Orders;
-import in.project.main.repositories.EmployeeOrdersRepository;
 import in.project.main.repositories.EmployeeRepository;
 import in.project.main.services.CourseService;
 import in.project.main.services.EmployeeService;
 import in.project.main.services.OrderService;
 
 @Controller
-@SessionAttributes("sessionEmp")
 public class EmployeeController
 {
 	@Autowired
@@ -47,33 +42,7 @@ public class EmployeeController
 	@Autowired
 	private EmployeeRepository employeeRepository;
 	
-	@Autowired
-	private EmployeeOrdersRepository employeeOrdersRepository;
-	
-	@GetMapping("/employeeLogin")
-	public String openEmployeeLoginPage()
-	{
-		return "employee-login";
-	}
-	
-	@PostMapping("/empLoginForm")
-	public String employeeLoginForm(@RequestParam("email") String email, @RequestParam("password") String pass, Model model)
-	{
-		boolean isAuthenticated = employeeService.loginEmpService(email, pass);
-		if(isAuthenticated)
-		{
-			Employee authenticatedEmp = employeeRepository.findByEmail(email);
-			model.addAttribute("sessionEmp", authenticatedEmp);
-			
-			return "employee-profile";
-		}
-		else
-		{
-			model.addAttribute("errorMsg", "Incorrect Email id or Password");
-			return "employee-login";
-		}
-	}
-	
+
 	@GetMapping("/employeeProfile")
 	public String openEmployeeProfilePage()
 	{
@@ -185,28 +154,11 @@ public class EmployeeController
 		return "sell-course";
 	}
 	@PostMapping("/sellCourseForm")
-	public String sellCourseForm(@ModelAttribute("orders") Orders orders, @SessionAttribute("sessionEmp") Employee sessionEmp, RedirectAttributes redirectAttributes)
+	public String sellCourseForm(@ModelAttribute("orders") Orders orders, @AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes redirectAttributes)
 	{
-		LocalDate ld = LocalDate.now();
-		String pdate = ld.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		
-		LocalTime lt = LocalTime.now();
-		String ptime = lt.format(DateTimeFormatter.ofPattern("hh:mm:ss a"));
-		
-		String purchased_date_time = pdate+", "+ptime;
-		
-		orders.setDateOfPurchase(purchased_date_time);
-		
 		try
 		{
-			orderService.storeUserOrders(orders);
-			
-			EmployeeOrders employeeOrders = new EmployeeOrders();
-			employeeOrders.setOrderId(orders.getOrderId());
-			employeeOrders.setEmployeeEmail(sessionEmp.getEmail());
-			
-			employeeOrdersRepository.save(employeeOrders);
-			
+			orderService.storeEmployeeSale(orders, userDetails.getUsername());
 			redirectAttributes.addFlashAttribute("successMsg", "Course provided successfully");
 		}
 		catch(Exception e)
@@ -226,11 +178,5 @@ public class EmployeeController
 		return "inquiry-management";
 	}
 	
-	//-------------employee logout------------------------
-	@GetMapping("/employeeLogout")
-	public String employeeLogout(SessionStatus sessionStatus)
-	{
-		sessionStatus.setComplete();
-		return "employee-login";
-	}
+
 }

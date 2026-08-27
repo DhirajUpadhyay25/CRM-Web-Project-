@@ -6,6 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+/**
+ * @deprecated This entity is NOT used anywhere in the application.
+ * Banning is handled by the {@code banStatus} field on the {@link User} entity.
+ * The database table is preserved to avoid destructive changes.
+ * Do NOT add new code referencing this entity.
+ */
+@Deprecated
 @Entity
 public class BannedUsers
 {

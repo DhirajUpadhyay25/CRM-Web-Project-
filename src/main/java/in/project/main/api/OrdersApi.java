@@ -8,6 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,14 +25,17 @@ public class OrdersApi {
     @Autowired
     private OrderService orderService;
 
-    private static final String KEY_ID = "rzp_test_SlhRBum6q8lRUv";
-    private static final String KEY_SECRET = "WNnwAEQhB1YFRBNObkKz94Xj"; // 🔴 put your real secret
+    @Value("${app.razorpay.key-id}")
+    private String keyId;
+
+    @Value("${app.razorpay.key-secret}")
+    private String keySecret;
 
     // ✅ 1. CREATE ORDER (BEFORE PAYMENT)
     @PostMapping("/createOrder")
     public ResponseEntity<?> createOrder(@RequestBody Orders orders) throws Exception {
 
-        RazorpayClient client = new RazorpayClient(KEY_ID, KEY_SECRET);
+        RazorpayClient client = new RazorpayClient(keyId, keySecret);
 
         JSONObject orderRequest = new JSONObject();
         int amount = Integer.parseInt(orders.getCourseAmount());
@@ -60,7 +64,7 @@ public class OrdersApi {
     	
         String generatedSignature = hmacSHA256(
                 orders.getOrderId() + "|" + orders.getPaymentId(),
-                KEY_SECRET
+                keySecret
         );
         
 

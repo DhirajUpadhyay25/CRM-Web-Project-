@@ -1,6 +1,7 @@
 package in.project.main.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,25 +27,13 @@ public class AdminController
 	@Autowired
 	private FeedbackService feedbackService;
 	
-	@GetMapping("/adminLogin")
-	public String openAdminLoginPage()
-	{     
-		return "admin-login";
-	}
+	@Value("${app.admin.email}")
+	private String adminEmail;
 	
-	@PostMapping("/adminLoginForm")
-	public String adminLoginForm(@RequestParam("adminemail") String aemail, @RequestParam("adminpass") String apass, Model model)
-	{
-		if(aemail.equals("admin@gmail.com") && apass.equals("admin123"))
-		{
-			return "admin-profile";
-		}
-		else
-		{
-			model.addAttribute("errorMsg", "Invalid email id or password");
-			return "admin-login";
-		}
-	}
+	@Value("${app.admin.password}")
+	private String adminPassword;
+	
+
 	
 	@GetMapping("/courseManagement")
 	public String openCourseManagementPage(Model model,
@@ -60,13 +49,7 @@ public class AdminController
 		return "course-management";
 	}
 	
-	//-------------admin logout------------------------
-	@GetMapping("/adminLogout")
-	public String adminLogout(SessionStatus sessionStatus)
-	{
-		sessionStatus.setComplete();
-		return "admin-login";
-	}
+
 	//-------------feedback----------------------------
 	@GetMapping("/adminFeedback")
 	public String openFeedbackPage(Model model,
