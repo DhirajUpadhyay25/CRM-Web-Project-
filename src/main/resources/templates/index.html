@@ -41,7 +41,7 @@
                         </p>
 
                         <div class="flex flex-wrap gap-4 mt-10">
-                            <a href="/index#courses"
+                            <a href="/courses"
                                class="inline-flex items-center gap-2 px-7 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30 hover:-translate-y-0.5">
                                 Browse Courses
                                 <i class="bi bi-arrow-right"></i>
@@ -131,62 +131,97 @@
                 <!-- Course Cards Grid -->
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-                    <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5">
+                    <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5 flex flex-col h-full relative">
                         <!-- Course Image -->
-                        <div class="relative overflow-hidden h-48">
-                            <img th:src="@{${course.imageUrl}}"
+                        <div class="relative overflow-hidden h-48 bg-surface-800">
+                            <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}"
                                  alt="course"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            <div class="absolute inset-0 bg-gradient-to-t from-surface-900/60 to-transparent"></div>
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                 onerror="this.src='https://via.placeholder.com/400x250'">
+                            <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
+                                <i class="bi bi-play-btn text-4xl"></i>
+                            </div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-surface-900/80 to-transparent"></div>
+                            
+                            <!-- Badges -->
+                            <div class="absolute top-3 left-3 flex flex-col gap-1">
+                                <span th:if="${course.featured}" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-yellow-400 text-yellow-950 shadow flex items-center gap-1 w-max">
+                                    <i class="bi bi-star-fill text-[9px]"></i> Featured
+                                </span>
+                                <span th:if="${course.category}" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/70 text-white backdrop-blur-md border border-white/10 w-max" th:text="${course.category.name}"></span>
+                            </div>
+
+                            <div th:if="${course.getDiscountPercentage() != null}" class="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white shadow">
+                                <span th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
+                            </div>
                         </div>
 
                         <!-- Course Content -->
-                        <div class="p-5">
-                            <h3 class="font-semibold text-white text-lg mb-2 line-clamp-1" th:text="${course.name}">Course Name</h3>
-                            <p class="text-sm text-gray-400 line-clamp-2 mb-4" th:text="${course.description}">Description</p>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                                <span th:if="${course.level}" th:text="${course.level}">Level</span>
+                                <span th:if="${course.level and course.duration}">•</span>
+                                <span th:if="${course.duration}" th:text="${course.duration}">Duration</span>
+                            </div>
+
+                            <h3 class="font-semibold text-white text-base mb-2 line-clamp-1">
+                                <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="hover:text-brand-400 transition-colors" th:text="${course.name}">Course Name</a>
+                            </h3>
+                            <p class="text-xs text-gray-400 line-clamp-2 mb-4" th:text="${course.shortDescription != null ? course.shortDescription : course.description}">Description</p>
 
                             <!-- Pricing -->
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="text-xl font-bold text-white">₹<span th:text="${course.discountedPrice}">0</span></span>
-                                <span class="text-sm text-gray-500 line-through">₹<span th:text="${course.originalPrice}">0</span></span>
+                            <div class="flex items-baseline gap-2 mb-4 mt-auto">
+                                <div th:if="${course.isFree()}" class="text-xl font-bold text-emerald-400">Free</div>
+                                <div th:unless="${course.isFree()}" class="flex items-baseline gap-2">
+                                    <span class="text-xl font-bold text-white" th:text="${'₹' + course.getEffectivePrice()}"></span>
+                                    <span th:if="${course.discountedPrice != null and course.originalPrice != null and course.discountedPrice < course.originalPrice}" class="text-xs text-gray-500 line-through" th:text="${'₹' + course.originalPrice}"></span>
+                                </div>
                             </div>
 
                             <!-- Action -->
                             <div sec:authorize="!isAuthenticated()">
-                                <a href="/login" class="block w-full text-center py-2.5 text-sm font-semibold border border-brand-500/30 text-brand-400 hover:bg-brand-600 hover:text-white rounded-xl transition-all">
+                                <a href="/login" class="block w-full text-center py-2.5 text-xs font-bold border border-brand-500/30 text-brand-400 hover:bg-brand-600 hover:text-white rounded-xl transition-all">
                                     Login to Buy
                                 </a>
                             </div>
                             <div sec:authorize="isAuthenticated()">
                                 <div sec:authorize="hasRole('STUDENT')" th:if="${#lists.contains(purchasedCoursesNameList, course.name)}">
-                                    <div class="flex items-center gap-2 justify-center py-2.5 text-sm text-green-400">
+                                    <a href="/myCourses" class="flex items-center gap-2 justify-center py-2 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition-colors">
                                         <i class="bi bi-check-circle-fill"></i>
-                                        <span>Already Purchased</span>
-                                    </div>
+                                        <span>Enrolled • View</span>
+                                    </a>
                                 </div>
                                 <div sec:authorize="hasRole('STUDENT')" th:unless="${#lists.contains(purchasedCoursesNameList, course.name)}">
-                                    <button class="w-full py-2.5 text-sm font-semibold bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-all shadow-lg shadow-brand-600/20"
+                                    <form th:if="${course.isFree()}" th:action="@{/courses/free-enroll}" method="post">
+                                        <input type="hidden" name="courseId" th:value="${course.id}">
+                                        <button type="submit" class="w-full py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-all shadow-md shadow-emerald-600/20">
+                                            Enroll Free
+                                        </button>
+                                    </form>
+                                    <button th:unless="${course.isFree()}" class="w-full py-2.5 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-all shadow-md shadow-brand-600/20"
                                             th:data-cname="${course.name}"
-                                            th:data-camount="${course.discountedPrice}"
                                             th:data-uname="${sessionUser != null ? sessionUser.name : ''}"
                                             th:data-uemail="${sessionUser != null ? sessionUser.email : ''}"
                                             th:data-uphoneno="${sessionUser != null ? sessionUser.phoneno : ''}"
-                                            onclick="purchaseCourse(this.getAttribute('data-cname'), this.getAttribute('data-camount'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'))">
+                                            onclick="purchaseCourse(this.getAttribute('data-cname'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'))">
                                         Buy Course
                                     </button>
                                 </div>
                                 <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')">
-                                    <p class="text-xs text-center text-gray-500 py-2.5">Students only.</p>
+                                    <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="block w-full text-center py-2 text-xs font-medium text-gray-400 bg-white/5 hover:bg-white/10 rounded-xl transition-colors">
+                                        View Details
+                                    </a>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Card Footer -->
-                        <div class="px-5 py-3 border-t border-white/5">
-                            <p class="text-xs text-gray-500">
+                        <div class="px-5 py-2.5 border-t border-white/5 bg-surface-950/40 flex items-center justify-between text-[11px] text-gray-500">
+                            <span>
                                 <i class="bi bi-clock mr-1"></i>
-                                Updated: <span th:text="${course.updatedOn}">-</span>
-                            </p>
+                                <span th:text="${course.updatedAt != null ? #temporals.format(course.updatedAt, 'dd MMM yyyy') : 'Recently updated'}">-</span>
+                            </span>
+                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="text-brand-400 hover:underline">Details &rarr;</a>
                         </div>
                     </div>
 
@@ -199,6 +234,14 @@
                     </div>
                     <h3 class="text-xl font-semibold text-gray-300">No courses available yet</h3>
                     <p class="text-gray-500 mt-2">Check back soon for new courses.</p>
+                </div>
+
+                <!-- View All Courses CTA Button -->
+                <div class="text-center mt-12">
+                    <a href="/courses" class="inline-flex items-center gap-2 px-8 py-3.5 bg-surface-900 hover:bg-brand-600 border border-white/10 hover:border-brand-500 text-white font-semibold rounded-2xl transition-all shadow-lg hover:shadow-brand-600/20 text-sm">
+                        <span>Explore All Courses</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </section>
@@ -262,7 +305,7 @@
                         Create Free Account
                         <i class="bi bi-arrow-right"></i>
                     </a>
-                    <a href="/index#courses"
+                    <a href="/courses"
                        class="inline-flex items-center gap-2 px-8 py-4 border border-white/10 hover:border-white/25 text-white font-semibold rounded-xl transition-all text-lg">
                         Explore Courses
                     </a>
@@ -273,21 +316,20 @@
     </main>
 
     <!-- ═══════════════════ FOOTER ═══════════════════ -->
-    <div th:replace="~{fragments/tw-footer :: tw-footer}"></div>
+    <div th:replace="~{fragments/tw-footer :: footer}"></div>
 
     <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script th:inline="javascript">
-    function purchaseCourse(courseName, courseAmount, uname, uemail, uphoneno) {
+    function purchaseCourse(courseName, uname, uemail, uphoneno) {
 
         $.ajax({
             type: "POST",
             url: "/api/createOrder",
             contentType: "application/json",
             data: JSON.stringify({
-                courseName: courseName,
-                courseAmount: courseAmount
+                courseName: courseName
             }),
 
             success: function (Orders) {
@@ -299,13 +341,12 @@
                     "order_id": Orders.orderId,
 
                     "name": "EduTake",
-                    "description": "Course Purchase",
+                    "description": "Course Enrollment: " + courseName,
 
                     "handler": function (response) {
 
                         var verifyData = {
                             courseName: courseName,
-                            courseAmount: courseAmount,
                             userEmail: uemail,
                             paymentId: response.razorpay_payment_id,
                             orderId: response.razorpay_order_id,
@@ -325,7 +366,7 @@
 
                             error: function (err) {
                                 alert("Payment verification failed ❌");
-                                console.log(err);
+                                console.error(err);
                             }
                         });
                     },
@@ -337,7 +378,7 @@
                     },
 
                     "theme": {
-                        "color": "#4c6ef5"
+                        "color": "#6366f1"
                     }
                 };
 
@@ -351,8 +392,12 @@
             },
 
             error: function (err) {
-                alert("Order creation failed ❌");
-                console.log(err);
+                var msg = "Order creation failed";
+                if (err.responseJSON && err.responseJSON.error) {
+                    msg = err.responseJSON.error;
+                }
+                alert("❌ " + msg);
+                console.error(err);
             }
         });
     }

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Dashboard', ~{::div})}">
+<body>
+    <div>
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-surface-900 mb-1">Admin Dashboard</h1>
+            <p class="text-gray-500 text-sm">Welcome back! Here's an overview of your platform.</p>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            
+            <!-- Total Students -->
+            <div class="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">+12%</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Total Users</h3>
+                    <p class="text-3xl font-bold text-surface-900" th:text="${totalUsers}">0</p>
+                </div>
+            </div>
+
+            <!-- Published Courses -->
+            <div class="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                        <i class="bi bi-play-btn-fill"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">+3</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Published Courses</h3>
+                    <p class="text-3xl font-bold text-surface-900" th:text="${publishedCourses}">0</p>
+                </div>
+            </div>
+
+            <!-- Total Orders -->
+            <div class="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl">
+                        <i class="bi bi-bag-check-fill"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full">All Time</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Total Orders</h3>
+                    <p class="text-3xl font-bold text-surface-900" th:text="${totalOrders}">0</p>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="bg-white rounded-2xl p-6 border border-surface-200 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full">All Time</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 mb-1">Total Revenue</h3>
+                    <p class="text-3xl font-bold text-surface-900" th:text="'₹' + ${totalRevenue}">₹0</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Quick Actions & Recent -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Quick Actions -->
+            <div class="lg:col-span-1 bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
+                    <h2 class="font-semibold text-surface-900">Quick Actions</h2>
+                </div>
+                <div class="p-6 space-y-3">
+                    <a href="/admin/courses/new" class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-surface-100 flex items-center justify-center text-gray-500 group-hover:bg-brand-100 group-hover:text-brand-600">
+                            <i class="bi bi-plus-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-sm text-surface-900">Add New Course</p>
+                            <p class="text-xs text-gray-500">Create a new course in the catalog</p>
+                        </div>
+                    </a>
+                    <a href="/admin/users/new" class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-surface-100 flex items-center justify-center text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-sm text-surface-900">Add User / Staff</p>
+                            <p class="text-xs text-gray-500">Create a new platform user</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Placeholder for recent activity -->
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50 flex justify-between items-center">
+                    <h2 class="font-semibold text-surface-900">Recent Activity</h2>
+                    <a href="#" class="text-xs font-semibold text-brand-600 hover:text-brand-700">View All</a>
+                </div>
+                <div class="p-12 flex-1 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mb-4">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <h3 class="font-semibold text-surface-900 mb-1">No Recent Activity</h3>
+                    <p class="text-sm text-gray-500 max-w-xs">There hasn't been any recent activity on the platform yet. New orders and enrollments will appear here.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

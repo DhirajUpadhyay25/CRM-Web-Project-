@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout(${course.name + ' - Course Details'}, ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/admin/courses" class="hover:text-brand-600 transition-colors">Courses</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold" th:text="${course.name}">Course Title</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-surface-200">
+            <div class="flex items-center gap-3">
+                <a href="/admin/courses" class="w-9 h-9 rounded-xl bg-white border border-surface-200 shadow-sm flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-surface-100 transition-colors">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-2xl font-bold text-surface-900 tracking-tight" th:text="${course.name}">Course Title</h1>
+                        <!-- Status Badge -->
+                        <span th:if="${course.status.name() == 'PUBLISHED'}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Published
+                        </span>
+                        <span th:if="${course.status.name() == 'DRAFT'}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Draft
+                        </span>
+                        <span th:if="${course.status.name() == 'ARCHIVED'}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                            <i class="bi bi-archive text-slate-500"></i> Archived
+                        </span>
+                    </div>
+                    <p class="text-xs font-mono text-gray-400 mt-0.5" th:text="${'/courses/' + course.slug}">/courses/slug</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2">
+                <a th:href="@{/courses/{slug}(slug=${course.slug}, preview=true)}" target="_blank" 
+                   class="px-3.5 py-2 bg-white text-surface-700 font-medium rounded-xl border border-surface-200 shadow-sm hover:bg-surface-100 transition-all flex items-center gap-1.5 text-xs">
+                    <i class="bi bi-box-arrow-up-right text-gray-500"></i>
+                    <span>Preview Storefront</span>
+                </a>
+
+                <a th:href="@{/admin/courses/{id}/edit(id=${course.id})}" 
+                   class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-1.5 text-xs">
+                    <i class="bi bi-pencil"></i>
+                    <span>Edit Course</span>
+                </a>
+
+                <!-- Quick Status Actions -->
+                <form th:if="${course.status.name() == 'DRAFT'}" th:action="@{/admin/courses/{id}/publish(id=${course.id})}" method="post" class="inline">
+                    <button type="submit" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                        <i class="bi bi-upload"></i>
+                        <span>Publish</span>
+                    </button>
+                </form>
+
+                <form th:if="${course.status.name() == 'PUBLISHED'}" th:action="@{/admin/courses/{id}/archive(id=${course.id})}" method="post" class="inline">
+                    <button type="submit" class="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs" onclick="return confirm('Archive this course?')">
+                        <i class="bi bi-archive"></i>
+                        <span>Archive</span>
+                    </button>
+                </form>
+
+                <form th:if="${course.status.name() == 'ARCHIVED'}" th:action="@{/admin/courses/{id}/restore(id=${course.id})}" method="post" class="inline">
+                    <button type="submit" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span>Restore</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Detail Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left 2 Columns -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Overview Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Effective Price</span>
+                        <div class="text-xl font-bold text-surface-900 mt-1">
+                            <span th:if="${course.isFree()}" class="text-emerald-600">Free</span>
+                            <span th:unless="${course.isFree()}" th:text="${'₹' + course.getEffectivePrice()}">₹999</span>
+                        </div>
+                        <div th:if="${course.discountedPrice != null and course.originalPrice != null and course.discountedPrice < course.originalPrice}" class="text-xs text-gray-400 line-through" th:text="${'Reg: ₹' + course.originalPrice}"></div>
+                    </div>
+
+                    <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Category</span>
+                        <div class="text-base font-bold text-surface-900 mt-1 truncate" th:text="${course.category != null ? course.category.name : 'Uncategorized'}">Category</div>
+                        <div class="text-xs text-gray-400">Taxonomy</div>
+                    </div>
+
+                    <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Level</span>
+                        <div class="text-base font-bold text-surface-900 mt-1 truncate" th:text="${course.level != null ? course.level : 'All Levels'}">Level</div>
+                        <div class="text-xs text-gray-400">Audience</div>
+                    </div>
+
+                    <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Duration</span>
+                        <div class="text-base font-bold text-surface-900 mt-1 truncate" th:text="${course.duration != null ? course.duration : 'Self-paced'}">Duration</div>
+                        <div class="text-xs text-gray-400">Estimated</div>
+                    </div>
+                </div>
+
+                <!-- Description & Syllabus Card -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-3 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-file-text text-brand-600"></i> Course Description & Syllabus
+                    </h2>
+
+                    <!-- Short Pitch -->
+                    <div class="p-3.5 bg-surface-50 border border-surface-200 rounded-xl mb-4 text-xs text-surface-700 font-medium">
+                        <span class="font-bold text-surface-900">Card Pitch:</span>
+                        <span th:text="${course.shortDescription != null ? course.shortDescription : 'No short summary provided.'}">Short summary</span>
+                    </div>
+
+                    <!-- Full Body -->
+                    <div class="text-sm text-surface-800 leading-relaxed whitespace-pre-line" th:text="${course.description != null ? course.description : 'No comprehensive description provided yet.'}">
+                        Full course syllabus and description content.
+                    </div>
+                </div>
+
+                <!-- SEO Card -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-3 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-search text-brand-600"></i> SEO Configuration
+                    </h2>
+                    
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <span class="text-gray-500 font-medium">Search Title:</span>
+                            <p class="font-semibold text-surface-900 text-sm mt-0.5" th:text="${course.getSeoTitle()}">Course Title | EduTake</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 font-medium">Meta Description:</span>
+                            <p class="text-surface-700 mt-0.5" th:text="${course.getSeoDescription()}">Description snippet</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 font-medium">Canonical Slug:</span>
+                            <p class="font-mono text-brand-600 mt-0.5" th:text="${course.slug}">course-slug</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Thumbnail & Metadata -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Media Card -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-3 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-image text-brand-600"></i> Media Preview
+                    </h2>
+                    
+                    <div class="rounded-xl overflow-hidden border border-surface-200 bg-surface-50 h-44 relative">
+                        <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover" alt="Course Thumbnail" onerror="this.src='https://via.placeholder.com/400x250'">
+                        <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <i class="bi bi-play-btn text-4xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attributes & Metadata -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-3 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-info-circle text-brand-600"></i> Metadata & Timestamps
+                    </h2>
+                    
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between py-1 border-b border-surface-100">
+                            <span class="text-gray-500">Instructor:</span>
+                            <span class="font-semibold text-surface-900" th:text="${course.instructor != null ? course.instructor : 'None assigned'}">Instructor</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-surface-100">
+                            <span class="text-gray-500">Language:</span>
+                            <span class="font-semibold text-surface-900" th:text="${course.language != null ? course.language : 'English'}">Language</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-surface-100">
+                            <span class="text-gray-500">Featured on Home:</span>
+                            <span class="font-semibold" th:classappend="${course.featured ? 'text-yellow-600 font-bold' : 'text-gray-400'}" th:text="${course.featured ? 'Yes' : 'No'}">Yes</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-surface-100">
+                            <span class="text-gray-500">Created Date:</span>
+                            <span class="font-medium text-surface-700" th:text="${#temporals.format(course.createdAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-surface-100">
+                            <span class="text-gray-500">Last Updated:</span>
+                            <span class="font-medium text-surface-700" th:text="${#temporals.format(course.updatedAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-gray-500">Published Date:</span>
+                            <span class="font-medium text-surface-700" th:text="${course.publishedAt != null ? #temporals.format(course.publishedAt, 'dd MMM yyyy, hh:mm a') : 'Not yet published'}">Date</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone Card: Safe Delete / Archive -->
+                <div class="bg-white border border-red-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-red-600 mb-2 flex items-center gap-2">
+                        <i class="bi bi-shield-exclamation"></i> Course Lifecycle & Deletion
+                    </h2>
+                    
+                    <div th:if="${canDelete}">
+                        <p class="text-xs text-gray-500 mb-4">This course has no purchase or enrollment history and can be permanently deleted if necessary.</p>
+                        <form th:action="@{/admin/courses/{id}/delete(id=${course.id})}" method="post">
+                            <button type="submit" class="w-full py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold rounded-xl text-xs transition-colors" onclick="return confirm('Are you sure you want to permanently delete this course? This action cannot be undone.')">
+                                <i class="bi bi-trash3 mr-1"></i> Delete Course Permanently
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:unless="${canDelete}">
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl mb-3 text-xs text-amber-800">
+                            <i class="bi bi-lock-fill mr-1"></i> Permanent deletion is disabled because this course has student purchase/order records. Please use <strong>Archive</strong> to remove it from public storefront while protecting business records.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

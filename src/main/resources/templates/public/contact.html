@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/base-head :: head('Contact Us | EduTake')}"></head>
+
+<body class="bg-surface-950 text-white antialiased">
+
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
+    <main class="py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid lg:grid-cols-2 gap-16">
+                
+                <!-- Left: Contact Info -->
+                <div>
+                    <span class="text-xs font-semibold tracking-[0.25em] uppercase text-brand-400">Get in touch</span>
+                    <h1 class="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight mb-6">
+                        Let's Talk
+                    </h1>
+                    <p class="text-lg text-gray-400 mb-12">
+                        Have a question about a course? Interested in our corporate training services? Drop us a message and our team will get back to you shortly.
+                    </p>
+
+                    <div class="space-y-8">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center shrink-0">
+                                <i class="bi bi-envelope text-xl text-brand-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-1">Email Support</h4>
+                                <p class="text-gray-400 text-sm">contact@edutake.com</p>
+                                <p class="text-gray-500 text-xs mt-1">We aim to reply within 24 hours.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center shrink-0">
+                                <i class="bi bi-geo-alt text-xl text-brand-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-1">Office Location</h4>
+                                <p class="text-gray-400 text-sm">Tech Park, Sector 62<br>Noida, India</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Contact Form -->
+                <div class="bg-surface-900 border border-white/5 p-8 rounded-3xl shadow-2xl">
+                    <form action="#" method="POST" class="space-y-6">
+                        
+                        <div class="grid sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="firstName" class="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                                <input type="text" id="firstName" name="firstName" required class="w-full bg-surface-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder:text-gray-600" placeholder="John">
+                            </div>
+                            <div>
+                                <label for="lastName" class="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" required class="w-full bg-surface-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder:text-gray-600" placeholder="Doe">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <input type="email" id="email" name="email" required class="w-full bg-surface-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder:text-gray-600" placeholder="john@example.com">
+                        </div>
+
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                            <select id="subject" name="subject" class="w-full bg-surface-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                                <option value="course">Course Inquiry</option>
+                                <option value="corporate">Corporate Training</option>
+                                <option value="support">Technical Support</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                            <textarea id="message" name="message" rows="4" required class="w-full bg-surface-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder:text-gray-600" placeholder="How can we help you?"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 text-lg">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+
+</body>
+</html>

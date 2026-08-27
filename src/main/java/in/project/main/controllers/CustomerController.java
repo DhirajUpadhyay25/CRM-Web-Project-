@@ -25,7 +25,7 @@ public class CustomerController
 	@Autowired
 	private OrdersRepository ordersRepository;
 	
-	@GetMapping("/customerManagement")
+	@GetMapping("/admin/students")
 	public String openCustomerManagementPage(Model model,
 			@RequestParam(name="page", defaultValue = "0") int page,
 			@RequestParam(name="size", defaultValue = "5") int size)
@@ -36,11 +36,11 @@ public class CustomerController
 		
 		model.addAttribute("userPage", userPage);
 		
-		return "customer-management";
+		return "admin/students/list";
 	}
 	
 	
-	@GetMapping("/banUserDetails")
+	@GetMapping("/admin/students/ban")
 	public String banUserDetails(@RequestParam("userEmail") String userEmail, @RequestParam("banStatus") boolean banStatus, RedirectAttributes redirectAttributes)
 	{
 		try
@@ -64,10 +64,10 @@ public class CustomerController
 			redirectAttributes.addFlashAttribute("errorMsg", "User not banned due to some error");
 			e.printStackTrace();
 		}
-		return "redirect:/customerManagement";
+		return "redirect:/admin/students";
 	}
 	
-	@GetMapping("/userCoursesDetails")
+	@GetMapping("/admin/students/courses")
 	public String getAllCustomerCourses(@RequestParam("userEmail") String email,
 			@RequestParam("userName") String custName, Model model)
 	{
@@ -76,6 +76,6 @@ public class CustomerController
 		model.addAttribute("custCoursesList", coursesList);
 		model.addAttribute("custName", custName);
 		
-		return "user-courses";
+		return "admin/students/courses";
 	}
 }

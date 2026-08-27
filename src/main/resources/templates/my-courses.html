@@ -1,115 +1,94 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Courses</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet"
-	integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-	crossorigin="anonymous">
+<head th:replace="~{fragments/base-head :: head('My Courses | EduTake')}"></head>
 
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-	<style>
-	
-.card {
-    width: 15rem;
-     /* Smooth animation */
-}
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
 
+	<!-- Navbar -->
+	<div th:replace="~{fragments/tw-navbar :: navbar}"></div>
 
-  .card {
-  transition: all 0.3s ease;
-  border: 1px solid #eee;
-  overflow: hidden;
-}
+	<!-- Main Content -->
+	<main class="flex-1 flex flex-col mt-16 pt-12 pb-24 relative overflow-hidden">
+		<!-- Background Glow -->
+		<div class="absolute inset-0 pointer-events-none">
+			<div class="absolute top-0 right-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-[120px]"></div>
+			<div class="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px]"></div>
+		</div>
 
-.card img {
-  transition: transform 0.4s ease;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-  border-color: #0d6efd;
-}
-
-  .card-container {
-  display: flex;
-  gap: 20px;
-
-}
-.description-clamp {
-  display: -webkit-box;
-  -webkit-line-clamp:3;  
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 60px; /* keeps cards equal */
-}
-
-</style>
-</head>
-
-<body>
-
-	<!-- header starts -->
-	<div th:replace="~{fragments/user-header :: u-header}"></div>
-	<!-- header ends -->
-
-	<!-- main content starts -->
-	<main class="container-fluid" style="min-height: 550px;">
-		<section class="container py-5">
-			<h3 class="text-center mb-4">My Purchased Courses</h3>
-			
-			<div th:if="${#lists.isEmpty(purchasedCoursesList)}" class="text-center">
-				<h3 class="text-danger"> Sorry, you have not purchased any course yet...!! </h3>
+		<div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+			<!-- Header Section -->
+			<div class="mb-12 border-b border-white/10 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-fade-in">
+				<div>
+					<h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-2">My Learning Journey</h1>
+					<p class="text-gray-400">Continue where you left off and track your progress.</p>
+				</div>
 			</div>
 
-			<!-- courses div start -->
-			<div class="row g-4">
+			<!-- Empty State -->
+			<div th:if="${#lists.isEmpty(purchasedCoursesList)}" class="bg-surface-900 border border-white/5 rounded-3xl p-12 text-center animate-fade-in shadow-2xl">
+				<div class="w-24 h-24 bg-brand-600/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand-500/20">
+					<i class="bi bi-journal-x text-4xl text-brand-400"></i>
+				</div>
+				<h3 class="text-2xl font-bold mb-3">No Courses Yet</h3>
+				<p class="text-gray-400 max-w-md mx-auto mb-8">You haven't enrolled in any courses yet. Browse our catalog to start learning today.</p>
+				<a href="/courses" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg shadow-brand-600/20">
+					Explore Courses
+					<i class="bi bi-arrow-right"></i>
+				</a>
+			</div>
 
-				<!-- one course card start -->
-				<div th:each="purchasedCourse : ${purchasedCoursesList}" class="col-lg-3 col-md-6">
-					<div class="card" style="width: 18rem;">
-						<img th:src="@{${purchasedCourse.imageUrl}}" style="width:100%; height:200px"  alt="course Image ">
-						<div class="card-body">
-							<h5 class="card-title">
-								<span th:text="${purchasedCourse.courseName}"></span>
-							</h5>
-							<p class="card-text description-clamp">
-								<span th:text="${purchasedCourse.description}"></span>
-							</p>
-							<div>
-								<button class="btn btn-outline-success">Start Course</button>
+			<!-- Courses Grid -->
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in" style="animation-delay: 0.1s;">
+				
+				<div th:each="purchasedCourse : ${purchasedCoursesList}" class="group bg-surface-900 border border-white/10 rounded-2xl overflow-hidden hover:border-brand-500/50 transition-all duration-300 shadow-lg hover:shadow-brand-500/20 hover:-translate-y-1 flex flex-col h-full">
+					
+					<!-- Course Image -->
+					<div class="relative h-48 overflow-hidden bg-surface-800">
+						<img th:src="@{${purchasedCourse.imageUrl}}" alt="Course Image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+						<!-- Overlay -->
+						<div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-transparent to-transparent opacity-80"></div>
+						<!-- Play Button Overlay on Hover -->
+						<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
+							<div class="w-14 h-14 bg-brand-600 rounded-full flex items-center justify-center shadow-lg shadow-brand-600/50">
+								<i class="bi bi-play-fill text-2xl text-white ml-1"></i>
 							</div>
 						</div>
-						<div class="card-footer text-body-secondary">
-							Updated : <span th:text="${purchasedCourse.updatedOn}"></span>
+					</div>
+
+					<!-- Content -->
+					<div class="p-6 flex-1 flex flex-col">
+						<div class="flex items-center gap-2 text-xs font-medium text-brand-400 mb-3">
+							<i class="bi bi-calendar-check"></i>
+							<span th:text="${'Purchased: ' + purchasedCourse.purchasedOn}"></span>
 						</div>
-						<div class="card-footer text-body-secondary">
-							<small> Purchased On :<strong><span th:text="${purchasedCourse.purchasedOn}"></span></strong> </small>
+						
+						<h3 class="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-brand-400 transition-colors" th:text="${purchasedCourse.courseName}"></h3>
+						
+						<p class="text-sm text-gray-400 mb-6 line-clamp-2" th:text="${purchasedCourse.description}"></p>
+						
+						<div class="mt-auto">
+							<div class="flex items-center justify-between text-xs text-gray-500 mb-4 pt-4 border-t border-white/5">
+								<div class="flex items-center gap-1.5">
+									<i class="bi bi-clock-history"></i>
+									<span>Updated <span th:text="${purchasedCourse.updatedOn}"></span></span>
+								</div>
+							</div>
+							
+							<button class="w-full py-2.5 bg-surface-800 hover:bg-brand-600 text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 group-hover:bg-brand-600 group-hover:shadow-lg group-hover:shadow-brand-600/20">
+								<span>Resume Learning</span>
+								<i class="bi bi-arrow-right text-sm"></i>
+							</button>
 						</div>
 					</div>
 				</div>
-				<!-- one course card ends -->
 
 			</div>
-
-		</section>
+		</div>
 	</main>
-	<!-- main content ends -->
 
-	<!-- footer starts -->
-	<div th:replace="~{fragments/footer :: crm-footer}"></div>
-	<!-- footer ends -->
+	<!-- Footer -->
+	<div th:replace="~{fragments/tw-footer :: footer}"></div>
 
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-		crossorigin="anonymous"></script>
 </body>
-
 </html>

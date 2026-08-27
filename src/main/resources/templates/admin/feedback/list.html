@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Feedback', ~{::div})}">
+<body>
+    <div>
+        <div class="mb-6 flex items-center justify-between border-b border-surface-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 mb-1">Customer Feedback</h1>
+                <p class="text-gray-500 text-sm">Review and manage feedback submitted by users.</p>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}"></span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+        </div>
+
+        <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-surface-200 bg-surface-50">
+                <h2 class="font-bold text-surface-900">Feedback List</h2>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(feedbackPage.content)}" class="p-12 text-center">
+                <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                    <i class="bi bi-chat-quote"></i>
+                </div>
+                <h3 class="font-semibold text-surface-900 mb-1">No Feedback Yet</h3>
+                <p class="text-sm text-gray-500">Customers haven't submitted any feedback yet.</p>
+            </div>
+            
+            <div th:if="${!#lists.isEmpty(feedbackPage.content)}" class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-gray-500">
+                        <tr>
+                            <th class="px-6 py-4 font-semibold">Name</th>
+                            <th class="px-6 py-4 font-semibold">Email</th>
+                            <th class="px-6 py-4 font-semibold">Preview</th>
+                            <th class="px-6 py-4 font-semibold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-200">
+                        <tr th:each="feedback : ${feedbackPage.content}" class="hover:bg-surface-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-surface-900" th:text="${feedback.userName}"></td>
+                            <td class="px-6 py-4 text-gray-500" th:text="${feedback.userEmail}"></td>
+                            <td class="px-6 py-4 text-gray-500">
+                                <span th:text="${feedback.userFeedback.length() > 30 ? #strings.substring(feedback.userFeedback, 0, 30) + '...' : feedback.userFeedback}"></span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button type="button" 
+                                        class="inline-flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
+                                        th:classappend="${feedback.readStatus == 'unread'} ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100'"
+                                        title="Read Feedback"
+                                        th:onclick="openFeedbackModal([[${feedback.id}]], [[${feedback.userName}]], [[${feedback.userEmail}]], [[${feedback.userFeedback}]], [[${feedback.dateOfFeedback}]], [[${feedback.timeOfFeedback}]], [[${feedback.readStatus}]])">
+                                    <i th:if="${feedback.readStatus == 'unread'}" class="bi bi-envelope-fill text-lg"></i>
+                                    <i th:if="${feedback.readStatus == 'read'}" class="bi bi-envelope-check text-lg"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div th:if="${feedbackPage.totalPages > 1}" class="px-6 py-4 border-t border-surface-200 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4">
+                <div class="text-sm text-gray-500">
+                    Showing <span class="font-medium text-surface-900" th:text="${feedbackPage.number * feedbackPage.size + 1}"></span> to 
+                    <span class="font-medium text-surface-900" th:text="${feedbackPage.isLast() ? feedbackPage.totalElements : (feedbackPage.number + 1) * feedbackPage.size}"></span> of 
+                    <span class="font-medium text-surface-900" th:text="${feedbackPage.totalElements}"></span> results
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${feedbackPage.hasPrevious()}" 
+                       th:href="@{/admin/feedback(page=${feedbackPage.number - 1}, size=${feedbackPage.size})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Previous
+                    </a>
+                    <a th:if="${feedbackPage.hasNext()}" 
+                       th:href="@{/admin/feedback(page=${feedbackPage.number + 1}, size=${feedbackPage.size})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Modal (Tailwind CSS) -->
+        <div id="feedbackModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-surface-900/40 backdrop-blur-sm transition-opacity" onclick="closeFeedbackModal()"></div>
+            
+            <!-- Modal Content -->
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+                <div class="px-6 py-4 border-b border-surface-200 flex items-center justify-between bg-surface-50">
+                    <h3 class="font-bold text-surface-900 text-lg">Feedback Details</h3>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors text-xl" onclick="closeFeedbackModal()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto flex-1">
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Customer</p>
+                            <p class="text-surface-900 font-medium" id="modalName"></p>
+                            <p class="text-gray-500 text-sm" id="modalEmail"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date & Time</p>
+                            <p class="text-surface-900 text-sm">
+                                <span id="modalDate"></span> at <span id="modalTime"></span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Message</p>
+                            <div class="bg-surface-50 p-4 rounded-xl border border-surface-200 text-surface-900 text-sm whitespace-pre-wrap" id="modalMessage"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between gap-3">
+                    <button type="button" class="px-4 py-2 bg-white border border-surface-300 rounded-lg text-gray-700 font-medium hover:bg-surface-50 transition-colors" onclick="closeFeedbackModal()">Close</button>
+                    <div class="flex gap-2">
+                        <form id="markReadForm" method="post" action="/admin/feedback/updateStatus" class="hidden">
+                            <input type="hidden" name="id" id="readFeedbackId">
+                            <input type="hidden" name="status" value="read">
+                            <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">Mark Read</button>
+                        </form>
+                        <form id="markUnreadForm" method="post" action="/admin/feedback/updateStatus" class="hidden">
+                            <input type="hidden" name="id" id="unreadFeedbackId">
+                            <input type="hidden" name="status" value="unread">
+                            <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">Mark Unread</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function openFeedbackModal(id, name, email, message, date, time, status) {
+                document.getElementById('modalName').textContent = name;
+                document.getElementById('modalEmail').textContent = email;
+                document.getElementById('modalMessage').textContent = message;
+                document.getElementById('modalDate').textContent = date;
+                document.getElementById('modalTime').textContent = time;
+                
+                document.getElementById('readFeedbackId').value = id;
+                document.getElementById('unreadFeedbackId').value = id;
+                
+                if (status === 'unread') {
+                    document.getElementById('markReadForm').classList.remove('hidden');
+                    document.getElementById('markUnreadForm').classList.add('hidden');
+                } else {
+                    document.getElementById('markReadForm').classList.add('hidden');
+                    document.getElementById('markUnreadForm').classList.remove('hidden');
+                }
+                
+                document.getElementById('feedbackModal').classList.remove('hidden');
+            }
+            
+            function closeFeedbackModal() {
+                document.getElementById('feedbackModal').classList.add('hidden');
+            }
+        </script>
+    </div>
+</body>
+</html>

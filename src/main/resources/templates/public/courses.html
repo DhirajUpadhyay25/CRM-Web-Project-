@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/base-head :: head('Course Catalog | EduTake')}"></head>
+
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col mt-16 pt-12 pb-24 relative overflow-hidden">
+        
+        <!-- Background Glow -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-0 right-1/4 w-[600px] h-[600px] bg-brand-600/10 rounded-full blur-[150px]"></div>
+            <div class="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]"></div>
+        </div>
+
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+            
+            <!-- Breadcrumbs -->
+            <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium">
+                <a href="/" class="hover:text-brand-400 transition-colors">Home</a>
+                <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                <span class="text-white font-semibold">Courses</span>
+            </nav>
+
+            <!-- Header Section -->
+            <div class="text-center mb-12 animate-fade-in">
+                <span class="text-brand-400 font-bold tracking-wider uppercase text-xs mb-2 block">Comprehensive Catalog</span>
+                <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-3">
+                    Explore Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-purple-400">Programs</span>
+                </h1>
+                <p class="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg">
+                    Level up your skills with our industry-leading courses designed and taught by experienced professionals.
+                </p>
+            </div>
+
+            <!-- Search & Filters Bar -->
+            <div class="bg-surface-900/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-5 mb-10 shadow-xl">
+                <form action="/courses" method="get" class="flex flex-col lg:flex-row gap-3 items-center">
+                    
+                    <!-- Search Input -->
+                    <div class="relative flex-1 w-full">
+                        <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search courses by topic, keyword, or instructor..." 
+                               class="w-full pl-11 pr-4 py-2.5 bg-surface-950/70 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm transition-all">
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="w-full sm:w-44">
+                        <select name="categoryId" class="w-full px-3.5 py-2.5 bg-surface-950/70 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm">
+                            <option value="">All Categories</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${categoryId == cat.id}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Level Filter -->
+                    <div class="w-full sm:w-36">
+                        <select name="level" class="w-full px-3.5 py-2.5 bg-surface-950/70 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm">
+                            <option value="">All Levels</option>
+                            <option th:each="lvl : ${levels}" th:value="${lvl}" th:text="${lvl}" th:selected="${level == lvl}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Pricing Filter -->
+                    <div class="w-full sm:w-32">
+                        <select name="pricingType" class="w-full px-3.5 py-2.5 bg-surface-950/70 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm">
+                            <option value="">All Pricing</option>
+                            <option value="FREE" th:selected="${pricingType == 'FREE'}">Free (₹0)</option>
+                            <option value="PAID" th:selected="${pricingType == 'PAID'}">Paid</option>
+                        </select>
+                    </div>
+
+                    <!-- Sorting -->
+                    <div class="w-full sm:w-36">
+                        <select name="sort" class="w-full px-3.5 py-2.5 bg-surface-950/70 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm">
+                            <option value="newest" th:selected="${sort == 'newest'}">Newest</option>
+                            <option value="price_asc" th:selected="${sort == 'price_asc'}">Price: Low to High</option>
+                            <option value="price_desc" th:selected="${sort == 'price_desc'}">Price: High to Low</option>
+                            <option value="title_asc" th:selected="${sort == 'title_asc'}">Title (A-Z)</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2 w-full lg:w-auto">
+                        <button type="submit" class="flex-1 lg:flex-none px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-md shadow-brand-600/20 text-sm">
+                            Filter
+                        </button>
+                        
+                        <a th:if="${keyword != null or categoryId != null or level != null or pricingType != null or sort != 'newest'}" 
+                           href="/courses" class="px-3 py-2.5 text-gray-400 hover:text-white transition-colors text-xs font-semibold" title="Clear Filters">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(coursesPage.content)}" class="bg-surface-900 border border-white/5 rounded-3xl p-16 text-center shadow-2xl max-w-2xl mx-auto animate-fade-in my-8">
+                <div class="w-20 h-20 bg-brand-600/10 rounded-full flex items-center justify-center mx-auto mb-5 border border-brand-500/20 text-brand-400 text-3xl">
+                    <i class="bi bi-journal-x"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">No Courses Found</h3>
+                <p class="text-gray-400 text-sm mb-6">No courses matched your current filter criteria. Try resetting your search filters.</p>
+                <a href="/courses" class="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 text-sm">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                </a>
+            </div>
+
+            <!-- Course Cards Grid -->
+            <div th:unless="${#lists.isEmpty(coursesPage.content)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                
+                <div th:each="course : ${coursesPage.content}" class="group bg-surface-900 border border-white/10 rounded-3xl overflow-hidden hover:border-brand-500/50 transition-all duration-300 shadow-xl hover:shadow-brand-500/10 hover:-translate-y-1.5 flex flex-col h-full animate-fade-in relative">
+                    
+                    <!-- Thumbnail -->
+                    <div class="relative h-48 overflow-hidden bg-surface-800">
+                        <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" alt="Course Image" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.src='https://via.placeholder.com/400x250'">
+                        <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-600">
+                            <i class="bi bi-play-btn text-4xl"></i>
+                        </div>
+                        
+                        <!-- Badges Overlay -->
+                        <div class="absolute top-3.5 left-3.5 flex flex-col gap-1.5">
+                            <span th:if="${course.featured}" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-yellow-400 text-yellow-950 shadow-md flex items-center gap-1 w-max">
+                                <i class="bi bi-star-fill text-[10px]"></i> Featured
+                            </span>
+                            <span th:if="${course.category}" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-black/70 text-white backdrop-blur-md border border-white/10 w-max" th:text="${course.category.name}"></span>
+                        </div>
+
+                        <!-- Discount Tag -->
+                        <div th:if="${course.getDiscountPercentage() != null}" class="absolute top-3.5 right-3.5 px-2 py-0.5 rounded-full text-[11px] font-black bg-red-500 text-white shadow-md">
+                            <span th:text="${course.getDiscountPercentage() + '% OFF'}">20% OFF</span>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-5 flex-1 flex flex-col">
+                        <!-- Metadata Badges -->
+                        <div class="flex items-center gap-3 text-xs font-medium text-gray-400 mb-2.5">
+                            <div class="flex items-center gap-1" th:if="${course.level}">
+                                <i class="bi bi-bar-chart-fill text-brand-400 text-[11px]"></i>
+                                <span th:text="${course.level}"></span>
+                            </div>
+                            <div class="flex items-center gap-1" th:if="${course.duration}">
+                                <i class="bi bi-clock text-brand-400 text-[11px]"></i>
+                                <span th:text="${course.duration}"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Title -->
+                        <h3 class="text-base font-bold text-white mb-2 line-clamp-2 group-hover:text-brand-400 transition-colors leading-snug">
+                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" th:text="${course.name}">
+                                Course Title
+                            </a>
+                        </h3>
+                        
+                        <!-- Short Description -->
+                        <p class="text-xs text-gray-400 mb-5 line-clamp-2 leading-relaxed" th:text="${course.shortDescription != null ? course.shortDescription : course.description}">
+                            Description snippet
+                        </p>
+                        
+                        <!-- Instructor -->
+                        <div th:if="${course.instructor}" class="flex items-center gap-2 text-xs text-gray-400 mb-4">
+                            <div class="w-5 h-5 rounded-full bg-surface-800 flex items-center justify-center text-[10px] text-brand-300 font-bold border border-white/10">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <span class="truncate" th:text="${course.instructor}">Instructor Name</span>
+                        </div>
+
+                        <!-- Pricing & CTA Button -->
+                        <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+                            <div class="flex flex-col">
+                                <div th:if="${course.isFree()}" class="text-lg font-extrabold text-emerald-400">
+                                    Free
+                                </div>
+                                <div th:unless="${course.isFree()}">
+                                    <div th:if="${course.discountedPrice != null and course.originalPrice != null and course.discountedPrice < course.originalPrice}" class="text-[11px] text-gray-500 line-through mb-0.5" th:text="${'₹' + course.originalPrice}"></div>
+                                    <div class="text-lg font-extrabold text-white" th:text="${'₹' + course.getEffectivePrice()}"></div>
+                                </div>
+                            </div>
+                            
+                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-800 hover:bg-brand-600 text-white font-semibold text-xs transition-all border border-white/10 hover:border-brand-500 shadow-sm">
+                                <span>View Course</span>
+                                <i class="bi bi-arrow-right text-[11px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Pagination -->
+            <div th:if="${coursesPage.totalPages > 1}" class="mt-14 flex justify-center">
+                <nav class="flex items-center gap-2 bg-surface-900/80 p-2 rounded-2xl border border-white/10 shadow-lg">
+                    <a th:if="${coursesPage.hasPrevious()}" 
+                       th:href="@{/courses(page=${coursesPage.number - 1}, size=${coursesPage.size}, keyword=${keyword}, categoryId=${categoryId}, level=${level}, pricingType=${pricingType}, sort=${sort})}" 
+                       class="px-3.5 py-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-white text-xs font-semibold transition-colors flex items-center gap-1">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                    
+                    <span class="px-4 py-2 text-xs text-gray-400 font-medium">
+                        Page <span class="text-white font-bold" th:text="${coursesPage.number + 1}"></span> of <span th:text="${coursesPage.totalPages}"></span>
+                    </span>
+                    
+                    <a th:if="${coursesPage.hasNext()}" 
+                       th:href="@{/courses(page=${coursesPage.number + 1}, size=${coursesPage.size}, keyword=${keyword}, categoryId=${categoryId}, level=${level}, pricingType=${pricingType}, sort=${sort})}" 
+                       class="px-3.5 py-2 rounded-xl bg-surface-800 hover:bg-surface-700 text-white text-xs font-semibold transition-colors flex items-center gap-1">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </nav>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+
+</body>
+</html>

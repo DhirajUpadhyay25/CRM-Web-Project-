@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/base-head :: head(${course.getSeoTitle()} + ' | EduTake')}"></head>
+
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
+    <!-- Admin Preview Banner -->
+    <div th:if="${isPreviewMode}" class="mt-16 bg-amber-500/20 border-b border-amber-500/30 text-amber-300 py-3 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span>Admin Preview Mode: This course is currently <strong th:text="${course.status}">DRAFT</strong> and is hidden from public discovery.</span>
+        <a th:href="@{/admin/courses/{id}/edit(id=${course.id})}" class="underline ml-2 hover:text-white">Edit in Admin Panel</a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col" th:classappend="${isPreviewMode} ? 'pt-6' : 'mt-16 pt-8'" pb-24 relative>
+        
+        <!-- Hero Section -->
+        <div class="relative bg-surface-900/90 border-b border-white/10 pt-8 pb-16 overflow-hidden">
+            <!-- Background Elements -->
+            <div class="absolute inset-0 pointer-events-none">
+                <div th:if="${course.imageUrl}" class="absolute inset-0 opacity-15 blur-2xl transform scale-110">
+                    <img th:src="@{${course.imageUrl}}" class="w-full h-full object-cover" alt="Background Blur">
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-b from-surface-950/60 to-surface-900"></div>
+            </div>
+
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+                
+                <!-- Breadcrumbs -->
+                <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium">
+                    <a href="/" class="hover:text-brand-400 transition-colors">Home</a>
+                    <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                    <a href="/courses" class="hover:text-brand-400 transition-colors">Courses</a>
+                    <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                    <span th:if="${course.category}" th:text="${course.category.name}" class="text-gray-400">Category</span>
+                    <i th:if="${course.category}" class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                    <span class="text-white font-semibold truncate max-w-[200px] sm:max-w-none" th:text="${course.name}">Course Title</span>
+                </nav>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    
+                    <!-- Left Hero Content (7 Cols) -->
+                    <div class="lg:col-span-7 animate-fade-in-up">
+                        <div class="flex flex-wrap items-center gap-2.5 mb-4">
+                            <span th:if="${course.category}" class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30" th:text="${course.category.name}"></span>
+                            <span th:if="${course.featured}" class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 flex items-center gap-1">
+                                <i class="bi bi-star-fill text-[10px]"></i> Featured
+                            </span>
+                            <span th:if="${course.getDiscountPercentage() != null}" class="px-3 py-1 rounded-full text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30" th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
+                        </div>
+                        
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-5 leading-tight" th:text="${course.name}">
+                            Course Name
+                        </h1>
+                        
+                        <p class="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed" th:text="${course.shortDescription != null ? course.shortDescription : course.description}">
+                            Short pitch description.
+                        </p>
+                        
+                        <!-- Metadata Badges -->
+                        <div class="flex flex-wrap items-center gap-5 text-xs sm:text-sm font-medium text-gray-400 mb-8 pb-6 border-b border-white/10">
+                            <div th:if="${course.instructor}" class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-300 font-bold text-xs">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <span>Instructor: <strong class="text-white" th:text="${course.instructor}">Instructor</strong></span>
+                            </div>
+                            <div th:if="${course.level}" class="flex items-center gap-1.5">
+                                <i class="bi bi-bar-chart-fill text-brand-400"></i>
+                                <span class="text-white" th:text="${course.level}">Level</span>
+                            </div>
+                            <div th:if="${course.duration}" class="flex items-center gap-1.5">
+                                <i class="bi bi-clock text-brand-400"></i>
+                                <span class="text-white" th:text="${course.duration}">Duration</span>
+                            </div>
+                            <div th:if="${course.language}" class="flex items-center gap-1.5">
+                                <i class="bi bi-translate text-brand-400"></i>
+                                <span class="text-white" th:text="${course.language}">Language</span>
+                            </div>
+                        </div>
+
+                        <!-- Highlights -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-gray-300">
+                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
+                                <span>Full Lifetime Access</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                <i class="bi bi-device-ssd text-brand-400"></i>
+                                <span>Self-Paced Format</span>
+                            </div>
+                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5 col-span-2 sm:col-span-1">
+                                <i class="bi bi-patch-check-fill text-purple-400"></i>
+                                <span>Verified Certificate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sticky CTA / Pricing Card (5 Cols) -->
+                    <div class="lg:col-span-5 relative animate-fade-in-up">
+                        <div class="bg-surface-900 border border-white/15 rounded-3xl overflow-hidden shadow-2xl sticky top-24">
+                            
+                            <!-- Thumbnail Preview -->
+                            <div class="relative h-56 bg-surface-800 overflow-hidden">
+                                <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover" alt="Course Image" onerror="this.src='https://via.placeholder.com/600x400'">
+                                <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
+                                    <i class="bi bi-play-btn text-5xl"></i>
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-surface-900 to-transparent"></div>
+                            </div>
+
+                            <!-- Pricing & Checkout Actions -->
+                            <div class="p-6 sm:p-8">
+                                <!-- Price Display -->
+                                <div class="flex items-baseline gap-3 mb-6">
+                                    <div th:if="${course.isFree()}" class="text-4xl font-extrabold text-emerald-400">
+                                        Free
+                                    </div>
+                                    <div th:unless="${course.isFree()}" class="flex items-baseline gap-3">
+                                        <span class="text-4xl font-extrabold text-white" th:text="${'₹' + course.getEffectivePrice()}">₹999</span>
+                                        <span th:if="${course.discountedPrice != null and course.originalPrice != null and course.discountedPrice < course.originalPrice}" 
+                                              class="text-lg text-gray-500 line-through font-medium" th:text="${'₹' + course.originalPrice}">₹1499</span>
+                                        <span th:if="${course.getDiscountPercentage() != null}" class="text-xs font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20" th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
+                                    </div>
+                                </div>
+
+                                <!-- ======================================================== -->
+                                <!-- AUTHENTICATION-AWARE CTA -->
+                                <!-- ======================================================== -->
+
+                                <!-- 1. ANONYMOUS USER -->
+                                <div sec:authorize="!isAuthenticated()" class="space-y-3">
+                                    <a href="/login" class="w-full block text-center py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2">
+                                        <i class="bi bi-box-arrow-in-right"></i>
+                                        <span th:text="${course.isFree() ? 'Login to Enroll for Free' : 'Login to Buy Course'}">Login to Buy</span>
+                                    </a>
+                                    <p class="text-center text-xs text-gray-500">
+                                        Don't have an account? <a href="/register" class="text-brand-400 hover:underline">Register free</a>
+                                    </p>
+                                </div>
+
+                                <!-- 2. AUTHENTICATED USER -->
+                                <div sec:authorize="isAuthenticated()">
+                                    
+                                    <!-- A. STUDENT ROLE -->
+                                    <div sec:authorize="hasRole('STUDENT')">
+                                        <!-- Already Purchased / Enrolled -->
+                                        <div th:if="${isPurchased}" class="space-y-3">
+                                            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center gap-2 text-emerald-400 text-sm font-semibold">
+                                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
+                                                <span>You are already enrolled in this course!</span>
+                                            </div>
+                                            <a href="/myCourses" class="w-full block text-center py-3.5 bg-surface-800 hover:bg-surface-700 text-white font-bold rounded-2xl transition-all border border-white/10 text-sm flex items-center justify-center gap-2">
+                                                <i class="bi bi-play-circle-fill text-brand-400"></i>
+                                                <span>Go to My Learning Area</span>
+                                            </a>
+                                        </div>
+
+                                        <!-- Not Yet Purchased -->
+                                        <div th:unless="${isPurchased}" class="space-y-3">
+                                            <!-- Free Course Flow -->
+                                            <form th:if="${course.isFree()}" th:action="@{/courses/free-enroll}" method="post">
+                                                <input type="hidden" name="courseId" th:value="${course.id}">
+                                                <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-600/30 text-base flex items-center justify-center gap-2">
+                                                    <i class="bi bi-stars"></i>
+                                                    <span>Enroll for Free Now</span>
+                                                </button>
+                                            </form>
+
+                                            <!-- Paid Course Flow (Razorpay) -->
+                                            <button th:unless="${course.isFree()}" id="buyCourseBtn"
+                                                    th:data-cname="${course.name}"
+                                                    th:data-uname="${sessionUser != null ? sessionUser.name : ''}"
+                                                    th:data-uemail="${sessionUser != null ? sessionUser.email : ''}"
+                                                    th:data-uphoneno="${sessionUser != null ? sessionUser.phoneno : ''}"
+                                                    onclick="purchaseCourseDirect(this.getAttribute('data-cname'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'))"
+                                                    class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2">
+                                                <i class="bi bi-credit-card"></i>
+                                                <span>Buy Course Now</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- B. ADMIN OR EMPLOYEE ROLE -->
+                                    <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')" class="space-y-2">
+                                        <div class="p-3 bg-surface-800 border border-white/10 rounded-xl text-center text-xs text-gray-400">
+                                            <span sec:authorize="hasRole('ADMIN')">👑 Logged in as Administrator</span>
+                                            <span sec:authorize="hasRole('EMPLOYEE')">👔 Logged in as Staff Member</span>
+                                        </div>
+                                        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/courses/{id}/edit(id=${course.id})}" class="w-full block text-center py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-xs transition-colors">
+                                            <i class="bi bi-pencil mr-1"></i> Edit in Admin Control Panel
+                                        </a>
+                                    </div>
+
+                                </div>
+
+                                <!-- Trust Guarantee -->
+                                <p class="text-center text-xs text-gray-500 mt-4 flex items-center justify-center gap-1.5">
+                                    <i class="bi bi-shield-check text-brand-400"></i>
+                                    <span>30-Day Money-Back Guarantee & Secure Checkout</span>
+                                </p>
+                                
+                                <!-- Included Features List -->
+                                <div class="mt-6 pt-6 border-t border-white/10 space-y-3">
+                                    <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400 mb-3">This course includes:</h4>
+                                    <ul class="text-xs text-gray-300 space-y-2.5">
+                                        <li class="flex items-center gap-2.5">
+                                            <i class="bi bi-play-circle text-brand-400 text-sm"></i>
+                                            <span th:text="${course.duration != null ? course.duration + ' of structured video learning' : 'Comprehensive video lessons'}"></span>
+                                        </li>
+                                        <li class="flex items-center gap-2.5">
+                                            <i class="bi bi-file-earmark-arrow-down text-brand-400 text-sm"></i>
+                                            <span>Downloadable source codes & project files</span>
+                                        </li>
+                                        <li class="flex items-center gap-2.5">
+                                            <i class="bi bi-phone text-brand-400 text-sm"></i>
+                                            <span>Access on mobile, tablet and desktop</span>
+                                        </li>
+                                        <li class="flex items-center gap-2.5">
+                                            <i class="bi bi-infinity text-brand-400 text-sm"></i>
+                                            <span>Full lifetime access with future updates</span>
+                                        </li>
+                                        <li class="flex items-center gap-2.5">
+                                            <i class="bi bi-trophy text-brand-400 text-sm"></i>
+                                            <span>Certificate of completion</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Details Body -->
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl mt-16">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                
+                <!-- Left 7 Columns: Syllabus & Detailed Sections -->
+                <div class="lg:col-span-7 space-y-12 animate-fade-in-up">
+                    
+                    <!-- 1. What You'll Learn -->
+                    <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="bi bi-check2-circle text-emerald-400"></i>
+                            <span>What You'll Learn</span>
+                        </h2>
+                        
+                        <div class="grid sm:grid-cols-2 gap-4 text-sm text-gray-300">
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
+                                <span>Master modern architecture and industry best practices</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
+                                <span>Build real-world production-ready portfolio projects</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
+                                <span>Understand key design patterns and core domain principles</span>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
+                                <span>Gain job-ready confidence and interview preparation</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Course Description & Syllabus -->
+                    <div>
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="bi bi-file-earmark-text text-brand-400"></i>
+                            <span>Course Overview</span>
+                        </h2>
+                        
+                        <div class="prose prose-invert prose-brand max-w-none text-gray-300 leading-relaxed text-sm sm:text-base whitespace-pre-line bg-surface-900/50 border border-white/5 p-6 sm:p-8 rounded-3xl" th:text="${course.description != null ? course.description : course.shortDescription}">
+                            Detailed description of the course.
+                        </div>
+                    </div>
+
+                    <!-- 3. Course Curriculum Foundation (Accordion structure ready for future LMS) -->
+                    <div>
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="bi bi-list-nested text-brand-400"></i>
+                            <span>Curriculum Outline</span>
+                        </h2>
+                        
+                        <div class="space-y-3">
+                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs">01</span>
+                                    <div>
+                                        <h4 class="font-bold text-white text-sm">Module 1: Foundations & Architecture Setup</h4>
+                                        <p class="text-xs text-gray-400">Core concepts, workspace setup, and project configuration</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-500 font-medium">4 Lessons</span>
+                            </div>
+
+                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs">02</span>
+                                    <div>
+                                        <h4 class="font-bold text-white text-sm">Module 2: Practical Implementation & Deep Dive</h4>
+                                        <p class="text-xs text-gray-400">Step-by-step development of core business modules</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-500 font-medium">6 Lessons</span>
+                            </div>
+
+                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs">03</span>
+                                    <div>
+                                        <h4 class="font-bold text-white text-sm">Module 3: Capstone Project & Certification</h4>
+                                        <p class="text-xs text-gray-400">End-to-end testing, deployment, and completion verification</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-500 font-medium">2 Lessons</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Requirements & Prerequisites -->
+                    <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8">
+                        <h2 class="text-2xl font-bold mb-4 flex items-center gap-3">
+                            <i class="bi bi-info-circle text-purple-400"></i>
+                            <span>Requirements</span>
+                        </h2>
+                        <ul class="text-sm text-gray-300 space-y-2 list-disc list-inside">
+                            <li>Basic understanding of computer systems and internet browsing</li>
+                            <li>A laptop or desktop with internet connection to access course materials</li>
+                            <li>Enthusiasm and dedication to complete hands-on assignments</li>
+                        </ul>
+                    </div>
+
+                    <!-- 5. FAQ Section -->
+                    <div>
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="bi bi-question-circle text-brand-400"></i>
+                            <span>Frequently Asked Questions</span>
+                        </h2>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-bold text-white mb-1">When does the course begin and end?</h4>
+                                <p class="text-gray-400 text-xs sm:text-sm">This course is self-paced. You start immediately upon enrolling and can progress at your own convenient schedule.</p>
+                            </div>
+                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-bold text-white mb-1">Do I receive a certificate upon completion?</h4>
+                                <p class="text-gray-400 text-xs sm:text-sm">Yes, once all course modules are finished, a verifiable certificate of completion will be generated for your portfolio.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right 5 Columns (Related Courses) -->
+                <div class="lg:col-span-5 space-y-8">
+                    
+                    <!-- Related Courses in Category -->
+                    <div th:if="${not #lists.isEmpty(relatedCourses)}" class="bg-surface-900/60 border border-white/10 rounded-3xl p-6">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="bi bi-collection text-brand-400"></i>
+                            <span>Related Courses</span>
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div th:each="rel : ${relatedCourses}" class="flex items-center gap-3.5 p-3 rounded-2xl bg-surface-950/60 border border-white/5 hover:border-brand-500/30 transition-all group">
+                                <div class="w-16 h-16 rounded-xl overflow-hidden bg-surface-800 flex-shrink-0">
+                                    <img th:if="${rel.imageUrl}" th:src="@{${rel.imageUrl}}" alt="Rel Course" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.src='https://via.placeholder.com/150'">
+                                    <div th:unless="${rel.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500"><i class="bi bi-play-btn text-xl"></i></div>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="text-xs font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-1">
+                                        <a th:href="@{/courses/{slug}(slug=${rel.slug})}" th:text="${rel.name}">Course Name</a>
+                                    </h4>
+                                    <div class="text-[11px] text-gray-400 mt-0.5" th:text="${rel.instructor != null ? rel.instructor : 'Expert Instructor'}">Instructor</div>
+                                    <div class="mt-1 font-bold text-xs text-white">
+                                        <span th:if="${rel.isFree()}" class="text-emerald-400">Free</span>
+                                        <span th:unless="${rel.isFree()}" th:text="${'₹' + rel.getEffectivePrice()}">₹999</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+
+    <!-- Razorpay Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script th:inline="javascript">
+    function purchaseCourseDirect(courseName, uname, uemail, uphoneno) {
+        var btn = document.getElementById('buyCourseBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Initializing Secure Checkout...';
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/api/createOrder",
+            contentType: "application/json",
+            data: JSON.stringify({
+                courseName: courseName
+            }),
+
+            success: function (orderData) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-credit-card"></i> <span>Buy Course Now</span>';
+                }
+
+                var options = {
+                    "key": /*[[${razorpayKeyId}]]*/ "",
+                    "amount": orderData.amount,
+                    "currency": "INR",
+                    "order_id": orderData.orderId,
+                    "name": "EduTake Platform",
+                    "description": "Enrollment: " + courseName,
+
+                    "handler": function (response) {
+                        var verifyData = {
+                            courseName: courseName,
+                            userEmail: uemail,
+                            paymentId: response.razorpay_payment_id,
+                            orderId: response.razorpay_order_id,
+                            signature: response.razorpay_signature
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/api/verifyPayment",
+                            contentType: "application/json",
+                            data: JSON.stringify(verifyData),
+
+                            success: function () {
+                                alert("🎉 Payment Successful! Welcome to " + courseName);
+                                window.location.href = '/myCourses';
+                            },
+
+                            error: function (err) {
+                                alert("❌ Payment verification failed. Please contact support.");
+                                console.error(err);
+                            }
+                        });
+                    },
+
+                    "prefill": {
+                        "name": uname,
+                        "email": uemail,
+                        "contact": uphoneno
+                    },
+
+                    "theme": {
+                        "color": "#6366f1"
+                    }
+                };
+
+                var rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (resp) {
+                    alert("Payment Cancelled / Failed: " + resp.error.description);
+                });
+                rzp.open();
+            },
+
+            error: function (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-credit-card"></i> <span>Buy Course Now</span>';
+                }
+                var msg = "Order creation failed";
+                if (err.responseJSON && err.responseJSON.error) {
+                    msg = err.responseJSON.error;
+                }
+                alert("❌ " + msg);
+                console.error(err);
+            }
+        });
+    }
+    </script>
+</body>
+</html>

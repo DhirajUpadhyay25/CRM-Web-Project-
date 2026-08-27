@@ -39,19 +39,24 @@ public class SecurityConfig {
         
         http
             .authorizeHttpRequests(authz -> authz
+                // Student-specific Enrollment Routes (must come before generic /courses/** permitAll)
+                .requestMatchers("/courses/free-enroll").hasRole("STUDENT")
+                
                 // Public Routes
                 .requestMatchers(
                     "/", "/index", "/login", "/register", "/regForm", 
+                    "/courses", "/courses/**", "/services", "/about", "/contact", "/faq",
                     "/api/createOrder", "/api/verifyPayment", 
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/uploads/**",
-                    "/error"
+                    "/error", "/error/**"
                 ).permitAll()
                 
                 // Admin Routes
                 .requestMatchers(
                     "/adminProfile", "/courseManagement", "/employeeManagement", 
                     "/customerManagement", "/sales", "/adminFeedback", 
-                    "/addCourseForm", "/updateCourse", "/deleteCourse"
+                    "/addCourseForm", "/updateCourse", "/deleteCourse",
+                    "/admin/**"
                 ).hasRole("ADMIN")
                 
                 // Employee Routes
@@ -86,8 +91,6 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception
                 .accessDeniedPage("/403")
             )
-            // Note: CSRF is enabled by default. Thymeleaf forms will automatically include the token.
-            // If the Razorpay AJAX requests fail due to CSRF, we can ignore them, but let's test first.
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/api/createOrder", "/api/verifyPayment")
             );

@@ -21,14 +21,16 @@
                 <!-- Desktop Nav -->
                 <div class="hidden md:flex items-center gap-1">
                     <a href="/index" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">Home</a>
-                    <a href="/index#courses" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">Courses</a>
-                    
+                    <a href="/courses" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">Courses</a>
+                    <a href="/services" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">Services</a>
+                    <a href="/about" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">About</a>
+                    <a href="/contact" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">Contact</a>
                     <!-- Student specific -->
                     <a sec:authorize="hasRole('STUDENT')" href="/myCourses" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">My Courses</a>
                     <a sec:authorize="hasRole('STUDENT')" href="/provideFeedback" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all">Feedback</a>
 
                     <!-- Admin specific -->
-                    <a sec:authorize="hasRole('ADMIN')" href="/adminProfile" class="px-4 py-2 text-sm font-medium text-amber-400 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-all">Admin Dashboard</a>
+                    <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="px-4 py-2 text-sm font-medium text-amber-400 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-all">Admin Dashboard</a>
                     
                     <!-- Employee specific -->
                     <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile" class="px-4 py-2 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-white/5 rounded-lg transition-all">Employee Portal</a>
@@ -54,7 +56,7 @@
                             <div class="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center">
                                 <i class="bi bi-person-fill text-white text-sm"></i>
                             </div>
-                            <span class="text-sm font-medium text-gray-200" sec:authentication="principal.name">User</span>
+                            <span class="text-sm font-medium text-gray-200" sec:authentication="name">User</span>
                         </div>
                         <a href="/logout"
                            class="px-4 py-2 text-sm font-semibold text-red-400 border border-red-400/20 hover:bg-red-400/10 rounded-lg transition-all">
@@ -73,12 +75,14 @@
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-white/5 mt-2 pt-4 space-y-2">
                 <a href="/index" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">Home</a>
-                <a href="/index#courses" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">Courses</a>
-                
+                <a href="/courses" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">Courses</a>
+                <a href="/services" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">Services</a>
+                <a href="/about" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">About</a>
+                <a href="/contact" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">Contact</a>
                 <a sec:authorize="hasRole('STUDENT')" href="/myCourses" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">My Courses</a>
                 <a sec:authorize="hasRole('STUDENT')" href="/provideFeedback" class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 rounded-lg">Feedback</a>
 
-                <a sec:authorize="hasRole('ADMIN')" href="/adminProfile" class="block px-4 py-2 text-sm text-amber-400 hover:bg-white/5 rounded-lg">Admin Dashboard</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="block px-4 py-2 text-sm text-amber-400 hover:bg-white/5 rounded-lg">Admin Dashboard</a>
                 <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile" class="block px-4 py-2 text-sm text-blue-400 hover:bg-white/5 rounded-lg">Employee Portal</a>
 
                 <!-- Unauthenticated Mobile -->
@@ -91,7 +95,7 @@
                 <div sec:authorize="isAuthenticated()" class="pt-2 space-y-2 border-t border-white/5">
                     <div class="block px-4 py-2 text-sm text-gray-300">
                         <i class="bi bi-person-fill mr-2"></i>
-                        <span sec:authentication="principal.name">Profile</span>
+                        <span sec:authentication="name">Profile</span>
                     </div>
                     <a href="/logout" class="block px-4 py-2 text-sm text-center text-red-400 border border-red-400/20 rounded-lg">Logout</a>
                 </div>

@@ -49,7 +49,7 @@ public class EmployeeController
 		return "employee-profile";
 	}
 	
-	@GetMapping("/employeeManagement")
+	@GetMapping("/admin/users")
 	public String openEmployeeManagementPage(Model model,
 					@RequestParam(name="page", defaultValue = "0") int page,
 					@RequestParam(name="size", defaultValue = "5") int size)
@@ -60,18 +60,18 @@ public class EmployeeController
 		
 		model.addAttribute("employeePage", employeePage);
 		
-		return "employee-management";
+		return "admin/users/list";
 	}
 	
 	//---------------add employee starts-----------------------------
-	@GetMapping("/addEmployee")
+	@GetMapping("/admin/users/new")
 	public String openAddCoursePage(Model model)
 	{
 		model.addAttribute("employee", new Employee());
-		return "add-employee";
+		return "admin/users/add";
 	}
 	
-	@PostMapping("/addEmployeeForm")
+	@PostMapping("/admin/users/new")
 	public String addEmployeeForm(@ModelAttribute("employee") Employee employee, Model model)
 	{
 		try
@@ -84,13 +84,13 @@ public class EmployeeController
 			e.printStackTrace();
 			model.addAttribute("errorMsg", "Employee not added due to some error");
 		}
-		return "add-employee";
+		return "admin/users/add";
 	}
 	//---------------add employee ends-----------------------------
 	
 	
 	//---------------edit employee starts-----------------------------
-	@GetMapping("/editEmployee")
+	@GetMapping("/admin/users/edit")
 	public String openEditEmployeePage(@RequestParam("employeeEmail") String employeeEmail, Model model)
 	{
 		Employee employee = employeeService.getEmployeeDetails(employeeEmail);
@@ -98,10 +98,10 @@ public class EmployeeController
 		model.addAttribute("employee", employee);
 		model.addAttribute("newEmployeeObj", new Employee());
 		
-		return "edit-employee";
+		return "admin/users/edit";
 	}
 	
-	@PostMapping("/updateEmployeeDetailsForm")
+	@PostMapping("/admin/users/edit")
 	public String updateEmployeeDetailsForm(@ModelAttribute("newEmployeeObj") Employee newEmployeeObj, RedirectAttributes redirectAttributes)
 	{
 		try
@@ -119,11 +119,11 @@ public class EmployeeController
 			e.printStackTrace();
 		}
 		
-		return "redirect:/employeeManagement";
+		return "redirect:/admin/users";
 	}
 	//---------------edit employee ends-----------------------------
 	
-	@GetMapping("/deleteEmployeeDetails")
+	@GetMapping("/admin/users/delete")
 	public String deleteEmployeeDetails(@RequestParam("employeeEmail") String employeeEmail, RedirectAttributes redirectAttributes)
 	{
 		try
@@ -136,7 +136,7 @@ public class EmployeeController
 			redirectAttributes.addFlashAttribute("errorMsg", "Employee not deleted due to some error");
 			e.printStackTrace();
 		}
-		return "redirect:/employeeManagement";
+		return "redirect:/admin/users";
 	}
 	
 	//-------------open sell course page------------------------

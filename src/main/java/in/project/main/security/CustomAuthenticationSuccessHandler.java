@@ -24,7 +24,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String redirectUrl = request.getContextPath();
         
         if (role == Role.ADMIN) {
-            redirectUrl = "/adminProfile";
+            redirectUrl = "/admin/dashboard";
         } else if (role == Role.EMPLOYEE) {
             redirectUrl = "/employeeProfile";
         } else if (role == Role.STUDENT) {

@@ -15,15 +15,14 @@ public class User
 	private Long id;
 	
 	@Column
-	@Pattern(regexp = "^[a-z,A-Z ]{5,25}$", message = "Invalid name format")
+	@Pattern(regexp = "^[a-zA-Z ]{3,50}$", message = "Invalid name format")
 	private String name;
 	
 	@Column
-	@Pattern(regexp = "^[a-zA-Z0-9._%±]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$", message = "Invalid email format")
+	@jakarta.validation.constraints.Email(message = "Invalid email format")
 	private String email;
 	
 	@Column
-	@Pattern(regexp = "^[a-z,A-Z,0-9]{5,25}$", message = "Invalid password format")
 	private String password;
 	
 	@Column
@@ -31,7 +30,7 @@ public class User
 	private String phoneno;
 	
 	@Column
-	@Pattern(regexp = "^[a-z,A-Z]{3,25}$", message = "Invalid city format")
+	@Pattern(regexp = "^[a-zA-Z ]{2,50}$", message = "Invalid city format")
 	private String city;
 	
 	@Column

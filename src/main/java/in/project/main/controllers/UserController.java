@@ -3,6 +3,7 @@ package in.project.main.controllers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,7 +57,18 @@ public class UserController
 	public String openIndexPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails, jakarta.servlet.http.HttpServletRequest request)
 	{
 		request.getSession(true); // Force session creation for CSRF token
-		List<Course> coursesList = courseService.getAllCourseDetails();
+		
+		// Query featured & published courses directly from database
+		org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 8);
+		org.springframework.data.domain.Page<Course> featuredPage = courseService.getFeaturedCourses(pageable);
+		
+		List<Course> coursesList;
+		if (featuredPage.hasContent()) {
+			coursesList = featuredPage.getContent();
+		} else {
+			coursesList = courseService.getPublishedCourses(pageable).getContent();
+		}
+		
 		model.addAttribute("coursesList", coursesList);
 		model.addAttribute("razorpayKeyId", razorpayKeyId);
 		
@@ -73,17 +85,12 @@ public class UserController
 			
 			model.addAttribute("purchasedCoursesNameList", purchasedCoursesNameList);
 			
-			// Also provide sessionUser to the template for backwards compatibility
-			// since parts of the template might still use ${sessionUser.name}
 			User sessionUser = userRepository.findByEmail(userDetails.getUsername());
 			model.addAttribute("sessionUser", sessionUser);
 		}
-		// If logged in as Employee or Admin, we can also pass their details if needed,
-		// but the template primarily checks sessionUser.
 		else if (userDetails != null) {
-			model.addAttribute("sessionUser", new User()); // Dummy user to satisfy non-null checks in template if needed
+			model.addAttribute("sessionUser", new User());
 		}
-		
 		
 		return "index";
 	}
@@ -174,9 +181,64 @@ public class UserController
 
 	
 	@GetMapping("/userProfile")
-	public String openUserProfile()
+	public String openUserProfile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model)
 	{
+		User sessionUser = userRepository.findByEmail(userDetails.getUsername());
+		model.addAttribute("sessionUser", sessionUser);
+		
+		// Let's also fetch recent purchases to show on dashboard
+		List<Object[]> pcDbList = ordersRepository.findPurchasedCoursesByEmail(userDetails.getUsername());
+		List<PurchasedCourse> purchasedCoursesList = new ArrayList<>();
+		for(Object[] course : pcDbList) {
+			PurchasedCourse pc = new PurchasedCourse();
+			pc.setPurchasedOn((String)course[0]);
+			pc.setCourseName((String)course[3]);
+			purchasedCoursesList.add(pc);
+		}
+		model.addAttribute("recentPurchases", purchasedCoursesList);
+		
 		return "user-profile";
+	}
+	
+	@PostMapping("/updateUserProfile")
+	public String updateUserProfile(
+			@ModelAttribute("sessionUser") User updatedUser,
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile file,
+			Model model) 
+	{
+		try {
+			User existingUser = userRepository.findByEmail(userDetails.getUsername());
+			
+			// Update basic details
+			existingUser.setName(updatedUser.getName());
+			existingUser.setPhoneno(updatedUser.getPhoneno());
+			existingUser.setCity(updatedUser.getCity());
+			
+			// Update image if provided
+			if (file != null && !file.isEmpty()) {
+				String originalFileName = file.getOriginalFilename();
+				String fileName = System.currentTimeMillis() + "_" + originalFileName;
+				java.io.File uploadPath = new java.io.File(UPLOAD_DIR);
+				if (!uploadPath.exists()) {
+					uploadPath.mkdirs();
+				}
+				java.io.File saveFile = new java.io.File(UPLOAD_DIR + fileName);
+				file.transferTo(saveFile);
+				existingUser.setImageName(IMAGE_URL + fileName);
+			}
+			
+			// Save updated user (using repository directly since service might hash password blindly)
+			userRepository.save(existingUser);
+			
+			model.addAttribute("successMsg", "Profile updated successfully!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			model.addAttribute("errorMsg", "Failed to update profile.");
+		}
+		
+		// Reload dashboard
+		return openUserProfile(userDetails, model);
 	}
 	
 	@GetMapping("/myCourses")

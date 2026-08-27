@@ -8,21 +8,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import in.project.main.entities.Course;
+import in.project.main.dto.CategoryDTO;
 import in.project.main.entities.Feedback;
-import in.project.main.services.CourseService;
+import in.project.main.services.CategoryService;
 import in.project.main.services.FeedbackService;
 
 @Controller
 public class AdminController 
 {
 	@Autowired
-	private CourseService courseService;
+	private CategoryService categoryService;
 	
 	@Autowired
 	private FeedbackService feedbackService;
@@ -33,25 +33,29 @@ public class AdminController
 	@Value("${app.admin.password}")
 	private String adminPassword;
 	
-
-	
-	@GetMapping("/courseManagement")
-	public String openCourseManagementPage(Model model,
-					@RequestParam(name="page", defaultValue = "0") int page,
-					@RequestParam(name="size", defaultValue = "4") int size)
+	//-------------Category Management----------------------------
+	@GetMapping("/admin/categories")
+	public String openCategoryManagementPage(Model model)
 	{
-		Pageable pageable = PageRequest.of(page, size);
-		
-		Page<Course> coursesPage = courseService.getAllCourseDetailsByPagination(pageable);
-		
-		model.addAttribute("coursesPage", coursesPage);
-		
-		return "course-management";
+		model.addAttribute("categories", categoryService.getAllCategories());
+		model.addAttribute("categoryDTO", new CategoryDTO());
+		return "admin/categories/list";
 	}
 	
-
-	//-------------feedback----------------------------
-	@GetMapping("/adminFeedback")
+	@PostMapping("/admin/categories/add")
+	public String addCategory(@ModelAttribute("categoryDTO") CategoryDTO categoryDTO, RedirectAttributes redirectAttributes)
+	{
+		try {
+			categoryService.createCategory(categoryDTO);
+			redirectAttributes.addFlashAttribute("successMsg", "Category created successfully!");
+		} catch (Exception e) {
+			redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
+		}
+		return "redirect:/admin/categories";
+	}
+	
+	//-------------Feedback Management----------------------------
+	@GetMapping("/admin/feedback")
 	public String openFeedbackPage(Model model,
 			@RequestParam(name="page", defaultValue = "0") int page,
 			@RequestParam(name="size", defaultValue = "4") int size)
@@ -62,9 +66,10 @@ public class AdminController
 		
 		model.addAttribute("feedbackPage", feedbackPage);
 		
-		return "view-feedbacks";
+		return "admin/feedback/list";
 	}
-    @PostMapping("/updateFeedbackStatus")
+
+    @PostMapping("/admin/feedback/updateStatus")
     public String updateFeedbackStatus(@RequestParam("id") Long id, @RequestParam("status") String status, RedirectAttributes redirectAttributes)
     {
         boolean success = feedbackService.updateFeedbackStatus(id, status);
@@ -74,6 +79,6 @@ public class AdminController
         {
             redirectAttributes.addFlashAttribute("errorMsg", "Failed to update feedback status.");
         }
-        return "redirect:/adminFeedback"; // Redirect to the page where feedbacks are listed
+        return "redirect:/admin/feedback";
     }
 }
