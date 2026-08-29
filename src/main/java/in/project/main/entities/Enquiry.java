@@ -103,4 +103,8 @@ public class Enquiry {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     public LocalDateTime getRespondedAt() { return respondedAt; }
     public void setRespondedAt(LocalDateTime respondedAt) { this.respondedAt = respondedAt; }
+    public EnquiryType getType() { return type; }
+    public void setType(EnquiryType type) { this.type = type; }
+    public EnquiryStatus getStatus() { return status; }
+    public void setStatus(EnquiryStatus status) { this.status = status; }
 }

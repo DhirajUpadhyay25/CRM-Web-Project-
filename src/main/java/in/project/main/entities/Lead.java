@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
-@Table(indexes = {
+@Table(name = "leads", indexes = {
     @Index(name = "idx_lead_status", columnList = "status"),
     @Index(name = "idx_lead_email", columnList = "email"),
     @Index(name = "idx_lead_created", columnList = "createdAt")
@@ -93,4 +93,6 @@ public class Lead {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LeadStatus getStatus() { return status; }
+    public void setStatus(LeadStatus status) { this.status = status; }
 }

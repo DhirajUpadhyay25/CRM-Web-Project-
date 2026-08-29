@@ -72,4 +72,6 @@ public class Enrollment {
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
     public String getPaymentStatus() { return paymentStatus; }
     public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+    public EnrollmentStatus getStatus() { return status; }
+    public void setStatus(EnrollmentStatus status) { this.status = status; }
 }
