@@ -18,7 +18,8 @@
 [INFO] skip non existing resourceDirectory D:\CRM Project\EducationCrmProject2\src\test\resources
 [INFO] 
 [INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ EducationCrmProject ---
-[INFO] Nothing to compile - all classes are up to date.
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 4 source files with javac [debug parameters release 17] to target\test-classes
 [INFO] 
 [INFO] <<< spring-boot:3.3.1:run (default-cli) < test-compile @ EducationCrmProject <<<
 [INFO] 
@@ -35,63 +36,65 @@
 
  :: Spring Boot ::                (v3.3.1)
 
-2026-08-29T23:54:16.284+05:30  INFO 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Starting EducationApplication using Java 25.0.3 with PID 17256 (D:\CRM Project\EducationCrmProject2\target\classes started by dhira in D:\CRM Project\EducationCrmProject2)
-2026-08-29T23:54:16.287+05:30 DEBUG 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Running with Spring Boot v3.3.1, Spring v6.1.10
-2026-08-29T23:54:16.288+05:30  INFO 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : The following 1 profile is active: "dev"
-2026-08-29T23:54:16.394+05:30  INFO 17256 --- [EduTake] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-08-29T23:54:16.394+05:30  INFO 17256 --- [EduTake] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-08-29T23:54:17.532+05:30  INFO 17256 --- [EduTake] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-29T23:54:17.689+05:30  INFO 17256 --- [EduTake] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 143 ms. Found 33 JPA repository interfaces.
+2026-08-30T00:02:20.566+05:30  INFO 17340 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Starting EducationApplication using Java 25.0.3 with PID 17340 (D:\CRM Project\EducationCrmProject2\target\classes started by dhira in D:\CRM Project\EducationCrmProject2)
+2026-08-30T00:02:20.568+05:30 DEBUG 17340 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Running with Spring Boot v3.3.1, Spring v6.1.10
+2026-08-30T00:02:20.568+05:30  INFO 17340 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : The following 1 profile is active: "dev"
+2026-08-30T00:02:20.640+05:30  INFO 17340 --- [EduTake] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-30T00:02:20.640+05:30  INFO 17340 --- [EduTake] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-30T00:02:21.492+05:30  INFO 17340 --- [EduTake] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-30T00:02:21.606+05:30  INFO 17340 --- [EduTake] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 105 ms. Found 33 JPA repository interfaces.
 WARNING: A restricted method in java.lang.System has been called
 WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/dhira/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.25/tomcat-embed-core-10.1.25.jar)
 WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
 WARNING: Restricted methods will be blocked in a future release unless native access is enabled
 
-2026-08-29T23:54:19.231+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2026-08-29T23:54:19.255+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-29T23:54:19.256+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.25]
-2026-08-29T23:54:19.341+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-08-29T23:54:19.343+05:30  INFO 17256 --- [EduTake] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2947 ms
-2026-08-29T23:54:19.764+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-29T23:54:19.939+05:30  INFO 17256 --- [EduTake] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-08-29T23:54:20.016+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-08-29T23:54:20.660+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-29T23:54:20.745+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-29T23:54:21.938+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6ead71e6
-2026-08-29T23:54:21.942+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-29T23:54:22.041+05:30  WARN 17256 --- [EduTake] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-08-29T23:54:24.837+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-30T00:02:22.296+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-30T00:02:22.311+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-30T00:02:22.311+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.25]
+2026-08-30T00:02:22.358+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-30T00:02:22.359+05:30  INFO 17340 --- [EduTake] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1718 ms
+2026-08-30T00:02:22.568+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-30T00:02:22.640+05:30  INFO 17340 --- [EduTake] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-08-30T00:02:22.677+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-30T00:02:23.010+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-30T00:02:23.045+05:30  INFO 17340 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-30T00:02:23.742+05:30  INFO 17340 --- [EduTake] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@201aa55c
+2026-08-30T00:02:23.743+05:30  INFO 17340 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-30T00:02:23.810+05:30  WARN 17340 --- [EduTake] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-30T00:02:25.346+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
 Hibernate: alter table admin_follow_up modify column notes TEXT
 Hibernate: alter table audit_log modify column details TEXT
 Hibernate: alter table category modify column description TEXT
 Hibernate: alter table enquiry modify column admin_notes TEXT
 Hibernate: alter table enquiry modify column message TEXT not null
 Hibernate: alter table leads modify column notes TEXT
-2026-08-29T23:54:25.096+05:30  INFO 17256 --- [EduTake] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-29T23:54:25.501+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-29T23:54:28.861+05:30  WARN 17256 --- [EduTake] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-08-29T23:54:28.895+05:30  INFO 17256 --- [EduTake] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
-2026-08-29T23:54:28.895+05:30  WARN 17256 --- [EduTake] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
-2026-08-29T23:54:29.015+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
-2026-08-29T23:54:30.057+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2026-08-29T23:54:30.149+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2026-08-29T23:54:30.179+05:30  INFO 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Started EducationApplication in 14.775 seconds (process running for 15.422)
-2026-08-29T23:59:30.865+05:30  INFO 17256 --- [EduTake] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-29T23:59:30.870+05:30  INFO 17256 --- [EduTake] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-29T23:59:30.943+05:30  INFO 17256 --- [EduTake] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 72 ms
+2026-08-30T00:02:25.562+05:30  INFO 17340 --- [EduTake] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-30T00:02:25.875+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-30T00:02:27.539+05:30  WARN 17340 --- [EduTake] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-30T00:02:27.569+05:30  INFO 17340 --- [EduTake] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-08-30T00:02:27.570+05:30  WARN 17340 --- [EduTake] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-08-30T00:02:27.671+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-08-30T00:02:28.175+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-30T00:02:28.219+05:30  INFO 17340 --- [EduTake] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-30T00:02:28.229+05:30  INFO 17340 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Started EducationApplication in 8.105 seconds (process running for 8.575)
 Hibernate: select e1_0.id,e1_0.city,e1_0.email,e1_0.name,e1_0.password,e1_0.phoneno,e1_0.role from employee e1_0 where e1_0.email=?
-Hibernate: select u1_0.id,u1_0.ban_status,u1_0.city,u1_0.email,u1_0.image_name,u1_0.name,u1_0.password,u1_0.phoneno from user u1_0 where u1_0.email=?
-Hibernate: select c1_0.id,c1_0.category_id,c1_0.created_at,c1_0.description,c1_0.discounted_price,c1_0.duration,c1_0.featured,c1_0.image_url,c1_0.instructor,c1_0.language,c1_0.level,c1_0.name,c1_0.original_price,c1_0.published_at,c1_0.seo_description,c1_0.seo_title,c1_0.short_description,c1_0.slug,c1_0.status,c1_0.updated_at from course c1_0 where c1_0.featured and c1_0.status=? limit ?,?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.category_id,c1_0.created_at,c1_0.description,c1_0.discounted_price,c1_0.duration,c1_0.featured,c1_0.image_url,c1_0.instructor,c1_0.language,c1_0.level,c1_0.name,c1_0.original_price,c1_0.published_at,c1_0.seo_description,c1_0.seo_title,c1_0.short_description,c1_0.slug,c1_0.status,c1_0.updated_at from course c1_0 where c1_0.featured and c1_0.status=? limit ?,?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
-Hibernate: select c1_0.id,c1_0.category_id,c1_0.created_at,c1_0.description,c1_0.discounted_price,c1_0.duration,c1_0.featured,c1_0.image_url,c1_0.instructor,c1_0.language,c1_0.level,c1_0.name,c1_0.original_price,c1_0.published_at,c1_0.seo_description,c1_0.seo_title,c1_0.short_description,c1_0.slug,c1_0.status,c1_0.updated_at from course c1_0 join category c2_0 on c2_0.id=c1_0.category_id where c1_0.status='PUBLISHED' and (? is null or ?='' or lower(c1_0.name) like lower(concat('%',?,'%')) escape '' or lower(c1_0.short_description) like lower(concat('%',?,'%')) escape '' or lower(c1_0.instructor) like lower(concat('%',?,'%')) escape '' or (c1_0.category_id is not null and lower(c2_0.name) like lower(concat('%',?,'%')) escape '')) and (? is null or c1_0.category_id=?) and (? is null or c1_0.level=?) and (? is null or ?='' or (?='FREE' and ((c1_0.discounted_price is not null and c1_0.discounted_price=0) or (c1_0.discounted_price is null and c1_0.original_price=0))) or (?='PAID' and ((c1_0.discounted_price is not null and c1_0.discounted_price>0) or (c1_0.discounted_price is null and c1_0.original_price>0)))) order by c1_0.created_at desc limit ?,?
-Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.active
-Hibernate: select e1_0.id,e1_0.city,e1_0.email,e1_0.name,e1_0.password,e1_0.phoneno,e1_0.role from employee e1_0 where e1_0.email=?
-Hibernate: select u1_0.id,u1_0.ban_status,u1_0.city,u1_0.email,u1_0.image_name,u1_0.name,u1_0.password,u1_0.phoneno from user u1_0 where u1_0.email=?
+Hibernate: select count(*) from instructor i1_0
+Hibernate: select count(*) from batch b1_0
+Hibernate: select count(*) from lesson l1_0
+Hibernate: select count(*) from certificate c1_0
+Hibernate: select count(*) from payment p1_0
+Hibernate: select count(*) from coupon c1_0
+Hibernate: select count(*) from refund r1_0
+Hibernate: select count(*) from announcement a1_0
+Hibernate: select count(*) from message m1_0
+Hibernate: select count(*) from page p1_0
+Hibernate: select count(*) from blog b1_0
+Hibernate: select count(*) from faq f1_0
+Hibernate: select count(*) from testimonial t1_0
+Hibernate: select count(*) from media m1_0
+Hibernate: select count(*) from system_role sr1_0
+Hibernate: select count(*) from leads l1_0
+Hibernate: select count(*) from enquiry e1_0
+Hibernate: select e1_0.id,e1_0.city,e1_0.email,e1_0.name,e1_0.password,e1_0.phoneno,e1_0.role from employee e1_0
+Hibernate: select u1_0.id,u1_0.ban_status,u1_0.city,u1_0.email,u1_0.image_name,u1_0.name,u1_0.password,u1_0.phoneno from user u1_0
+=== Data seeding completed ===
