@@ -57,3 +57,39 @@ WARNING: Restricted methods will be blocked in a future release unless native ac
 2026-08-29T23:54:20.016+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
 2026-08-29T23:54:20.660+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
 2026-08-29T23:54:20.745+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-29T23:54:21.938+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6ead71e6
+2026-08-29T23:54:21.942+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-29T23:54:22.041+05:30  WARN 17256 --- [EduTake] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-29T23:54:24.837+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: alter table admin_follow_up modify column notes TEXT
+Hibernate: alter table audit_log modify column details TEXT
+Hibernate: alter table category modify column description TEXT
+Hibernate: alter table enquiry modify column admin_notes TEXT
+Hibernate: alter table enquiry modify column message TEXT not null
+Hibernate: alter table leads modify column notes TEXT
+2026-08-29T23:54:25.096+05:30  INFO 17256 --- [EduTake] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-29T23:54:25.501+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-29T23:54:28.861+05:30  WARN 17256 --- [EduTake] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-29T23:54:28.895+05:30  INFO 17256 --- [EduTake] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-08-29T23:54:28.895+05:30  WARN 17256 --- [EduTake] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-08-29T23:54:29.015+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page template: index
+2026-08-29T23:54:30.057+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-29T23:54:30.149+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-29T23:54:30.179+05:30  INFO 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Started EducationApplication in 14.775 seconds (process running for 15.422)
+2026-08-29T23:59:30.865+05:30  INFO 17256 --- [EduTake] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-29T23:59:30.870+05:30  INFO 17256 --- [EduTake] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-29T23:59:30.943+05:30  INFO 17256 --- [EduTake] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 72 ms
+Hibernate: select e1_0.id,e1_0.city,e1_0.email,e1_0.name,e1_0.password,e1_0.phoneno,e1_0.role from employee e1_0 where e1_0.email=?
+Hibernate: select u1_0.id,u1_0.ban_status,u1_0.city,u1_0.email,u1_0.image_name,u1_0.name,u1_0.password,u1_0.phoneno from user u1_0 where u1_0.email=?
+Hibernate: select c1_0.id,c1_0.category_id,c1_0.created_at,c1_0.description,c1_0.discounted_price,c1_0.duration,c1_0.featured,c1_0.image_url,c1_0.instructor,c1_0.language,c1_0.level,c1_0.name,c1_0.original_price,c1_0.published_at,c1_0.seo_description,c1_0.seo_title,c1_0.short_description,c1_0.slug,c1_0.status,c1_0.updated_at from course c1_0 where c1_0.featured and c1_0.status=? limit ?,?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.category_id,c1_0.created_at,c1_0.description,c1_0.discounted_price,c1_0.duration,c1_0.featured,c1_0.image_url,c1_0.instructor,c1_0.language,c1_0.level,c1_0.name,c1_0.original_price,c1_0.published_at,c1_0.seo_description,c1_0.seo_title,c1_0.short_description,c1_0.slug,c1_0.status,c1_0.updated_at from course c1_0 where c1_0.featured and c1_0.status=? limit ?,?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.id=?
+Hibernate: select c1_0.id,c1_0.category_id,c1_0.created_at,c1_0.description,c1_0.discounted_price,c1_0.duration,c1_0.featured,c1_0.image_url,c1_0.instructor,c1_0.language,c1_0.level,c1_0.name,c1_0.original_price,c1_0.published_at,c1_0.seo_description,c1_0.seo_title,c1_0.short_description,c1_0.slug,c1_0.status,c1_0.updated_at from course c1_0 join category c2_0 on c2_0.id=c1_0.category_id where c1_0.status='PUBLISHED' and (? is null or ?='' or lower(c1_0.name) like lower(concat('%',?,'%')) escape '' or lower(c1_0.short_description) like lower(concat('%',?,'%')) escape '' or lower(c1_0.instructor) like lower(concat('%',?,'%')) escape '' or (c1_0.category_id is not null and lower(c2_0.name) like lower(concat('%',?,'%')) escape '')) and (? is null or c1_0.category_id=?) and (? is null or c1_0.level=?) and (? is null or ?='' or (?='FREE' and ((c1_0.discounted_price is not null and c1_0.discounted_price=0) or (c1_0.discounted_price is null and c1_0.original_price=0))) or (?='PAID' and ((c1_0.discounted_price is not null and c1_0.discounted_price>0) or (c1_0.discounted_price is null and c1_0.original_price>0)))) order by c1_0.created_at desc limit ?,?
+Hibernate: select c1_0.id,c1_0.active,c1_0.created_at,c1_0.description,c1_0.name,c1_0.slug,c1_0.updated_at from category c1_0 where c1_0.active
