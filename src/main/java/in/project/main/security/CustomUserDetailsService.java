@@ -1,7 +1,6 @@
 package in.project.main.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,39 +21,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    @Value("${app.admin.email}")
-    private String adminEmail;
-
-    @Value("${app.admin.password}")
-    private String adminPassword;
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        
-        // 1. Check if it's the Admin
-        if (email.equals(adminEmail)) {
-            return new CustomUserDetails(
-                adminEmail,
-                adminPassword,
-                Role.ADMIN,
-                "Administrator",
-                true
-            );
-        }
 
-        // 2. Check if it's an Employee
+        // 1. Check Employee table (includes ADMIN and EMPLOYEE roles)
         Employee employee = employeeRepository.findByEmail(email);
         if (employee != null) {
             return new CustomUserDetails(
                 employee.getEmail(),
                 employee.getPassword(),
-                Role.EMPLOYEE,
+                employee.getRole(),
                 employee.getName(),
                 true
             );
         }
 
-        // 3. Check if it's a Student (User)
+        // 2. Check Student (User) table
         User user = userRepository.findByEmail(email);
         if (user != null) {
             return new CustomUserDetails(
@@ -62,7 +44,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getPassword(),
                 Role.STUDENT,
                 user.getName(),
-                !user.isBanStatus() // If banStatus is true, enabled should be false
+                !user.isBanStatus()
             );
         }
 

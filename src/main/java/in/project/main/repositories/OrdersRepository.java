@@ -37,4 +37,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>
 	       " LOWER(o.courseName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
 	       " LOWER(o.orderId) LIKE LOWER(CONCAT('%', :keyword, '%')))")
 	Page<Orders> searchOrders(@Param("keyword") String keyword, Pageable pageable);
+
+	Page<Orders> findByUserEmailOrderByDateOfPurchaseDesc(String userEmail, Pageable pageable);
 }

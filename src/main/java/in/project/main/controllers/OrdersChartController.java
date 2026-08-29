@@ -16,9 +16,9 @@ public class OrdersChartController
 	@Autowired
 	private OrdersChartService ordersChartService;
 	
-	@GetMapping("/adminProfile")
-	public String openAdminProfilePage(Model model)
+	@GetMapping("/admin/orders-chart")
+	public String openOrdersChartPage(Model model)
 	{
-		return "redirect:/admin/dashboard";
+		return "admin/dashboard";
 	}
 }

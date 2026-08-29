@@ -159,9 +159,9 @@
                         <!-- Course Content -->
                         <div class="p-5 flex-1 flex flex-col">
                             <div class="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                                <span th:if="${course.level}" th:text="${course.level}">Level</span>
-                                <span th:if="${course.level and course.duration}">•</span>
-                                <span th:if="${course.duration}" th:text="${course.duration}">Duration</span>
+                                <span th:if="${course.level != null}" th:text="${course.level}">Level</span>
+                                <span th:if="${course.level != null and course.duration != null}">•</span>
+                                <span th:if="${course.duration != null}" th:text="${course.duration}">Duration</span>
                             </div>
 
                             <h3 class="font-semibold text-white text-base mb-2 line-clamp-1">

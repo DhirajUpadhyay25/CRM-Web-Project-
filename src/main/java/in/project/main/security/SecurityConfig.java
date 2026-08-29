@@ -52,23 +52,19 @@ public class SecurityConfig {
                 ).permitAll()
                 
                 // Admin Routes
-                .requestMatchers(
-                    "/adminProfile", "/courseManagement", "/employeeManagement", 
-                    "/customerManagement", "/sales", "/adminFeedback", 
-                    "/addCourseForm", "/updateCourse", "/deleteCourse",
-                    "/admin/**"
-                ).hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 
                 // Employee Routes
                 .requestMatchers(
-                    "/employeeProfile", "/sellCourse", "/inquiryManagement", 
-                    "/followUps", "/sellCourseForm", "/addInquiryForm"
-                ).hasRole("EMPLOYEE")
+                    "/employeeProfile", "/sellCourse", "/sellCourseForm",
+                    "/inquiryManagement", "/newInquiry", "/submitInquiryForm", "/followUps"
+                ).hasAnyRole("EMPLOYEE", "ADMIN")
                 
                 // Student Routes
                 .requestMatchers(
-                    "/userProfile", "/myCourses", "/provideFeedback", "/feedbackForm"
-                ).hasRole("STUDENT")
+                    "/userProfile", "/updateUserProfile", "/myCourses", "/provideFeedback", "/feedbackForm"
+                ).hasAnyRole("STUDENT", "ADMIN")
+                .requestMatchers("/student/**").hasRole("STUDENT")
                 
                 // All other requests require authentication
                 .anyRequest().authenticated()
@@ -92,7 +88,7 @@ public class SecurityConfig {
                 .accessDeniedPage("/403")
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/createOrder", "/api/verifyPayment", "/admin/api/**")
+                .ignoringRequestMatchers("/api/createOrder", "/api/verifyPayment")
             );
 
         return http.build();

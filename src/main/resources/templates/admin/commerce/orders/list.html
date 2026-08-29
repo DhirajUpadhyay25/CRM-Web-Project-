@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Orders', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Header -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 mb-1">Orders</h1>
+                <p class="text-gray-500 text-sm">Manage and track all customer orders.</p>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}"></span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Total Orders</p>
+                <p class="text-xl font-bold text-surface-900" th:text="${totalOrders ?: 0}">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Total Revenue</p>
+                <p class="text-xl font-bold text-green-600" th:text="'₹' + ${#numbers.formatDecimal(totalRevenue ?: 0, 1, 2)}">₹0</p>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-surface-200 bg-surface-50">
+                <form method="get" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" name="search" th:value="${search}" placeholder="Search by email, course name, order ID..." class="w-full pl-9 pr-4 py-2 bg-white border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-medium transition-colors">Search</button>
+                </form>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(orderPage.content)}" class="p-12 text-center">
+                <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                    <i class="bi bi-bag"></i>
+                </div>
+                <h3 class="font-semibold text-surface-900 mb-1">No Orders Found</h3>
+                <p class="text-sm text-gray-500" th:if="${search}">Try adjusting your search criteria.</p>
+                <p class="text-sm text-gray-500" th:unless="${search}">No orders have been placed yet.</p>
+            </div>
+
+            <!-- Table -->
+            <div th:if="${!#lists.isEmpty(orderPage.content)}" class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-gray-500">
+                        <tr>
+                            <th class="px-6 py-3 font-semibold">Order ID</th>
+                            <th class="px-6 py-3 font-semibold">Course</th>
+                            <th class="px-6 py-3 font-semibold">Customer Email</th>
+                            <th class="px-6 py-3 font-semibold">Amount</th>
+                            <th class="px-6 py-3 font-semibold">Payment ID</th>
+                            <th class="px-6 py-3 font-semibold">Date</th>
+                            <th class="px-6 py-3 font-semibold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-200">
+                        <tr th:each="order : ${orderPage.content}" class="hover:bg-surface-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-surface-900" th:text="${order.id}"></td>
+                            <td class="px-6 py-4 text-gray-500 max-w-[180px] truncate" th:text="${order.courseName}"></td>
+                            <td class="px-6 py-4 text-gray-500" th:text="${order.userEmail}"></td>
+                            <td class="px-6 py-4 font-semibold text-surface-800" th:text="'₹' + ${order.amount}"></td>
+                            <td class="px-6 py-4 text-gray-400 text-xs font-mono" th:text="${order.razorpayPaymentId ?: '-'}"></td>
+                            <td class="px-6 py-4 text-gray-400 text-xs" th:text="${order.createdAt}"></td>
+                            <td class="px-6 py-4 text-right">
+                                <a th:href="@{/admin/orders/detail(id=${order.id})}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-brand-600 hover:bg-brand-50 hover:text-brand-700 transition-colors" title="View Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${orderPage.totalPages > 1}" class="px-6 py-4 border-t border-surface-200 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4">
+                <div class="text-sm text-gray-500">
+                    Showing <span class="font-medium text-surface-900" th:text="${orderPage.number * orderPage.size + 1}"></span> to
+                    <span class="font-medium text-surface-900" th:text="${orderPage.isLast() ? orderPage.totalElements : (orderPage.number + 1) * orderPage.size}"></span> of
+                    <span class="font-medium text-surface-900" th:text="${orderPage.totalElements}"></span> results
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${orderPage.hasPrevious()}"
+                       th:href="@{/admin/orders(page=${orderPage.number - 1}, size=${orderPage.size}, search=${search})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Previous
+                    </a>
+                    <a th:if="${orderPage.hasNext()}"
+                       th:href="@{/admin/orders(page=${orderPage.number + 1}, size=${orderPage.size}, search=${search})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

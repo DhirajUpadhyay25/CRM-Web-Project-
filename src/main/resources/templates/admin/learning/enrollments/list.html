@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Enrollments', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Header -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 mb-1">Enrollments</h1>
+                <p class="text-gray-500 text-sm">Track student enrollments across courses.</p>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}"></span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Total</p>
+                <p class="text-xl font-bold text-surface-900" th:text="${totalEnrollments ?: 0}">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Active</p>
+                <p class="text-xl font-bold text-green-600" th:text="${activeCount ?: 0}">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Completed</p>
+                <p class="text-xl font-bold text-blue-600" th:text="${completedCount ?: 0}">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Cancelled</p>
+                <p class="text-xl font-bold text-red-600" th:text="${cancelledCount ?: 0}">0</p>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-surface-200 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 mb-1">Expired</p>
+                <p class="text-xl font-bold text-orange-600" th:text="${expiredCount ?: 0}">0</p>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-surface-200 bg-surface-50">
+                <form method="get" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" name="search" th:value="${search}" placeholder="Search by student name, email, course..." class="w-full pl-9 pr-4 py-2 bg-white border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    </div>
+                    <select name="status" class="px-3 py-2 bg-white border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                        <option value="">All Statuses</option>
+                        <option value="ACTIVE" th:selected="${statusFilter == 'ACTIVE'}">Active</option>
+                        <option value="COMPLETED" th:selected="${statusFilter == 'COMPLETED'}">Completed</option>
+                        <option value="CANCELLED" th:selected="${statusFilter == 'CANCELLED'}">Cancelled</option>
+                        <option value="EXPIRED" th:selected="${statusFilter == 'EXPIRED'}">Expired</option>
+                    </select>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-medium transition-colors">Filter</button>
+                </form>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(enrollmentPage.content)}" class="p-12 text-center">
+                <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                    <i class="bi bi-journal-check"></i>
+                </div>
+                <h3 class="font-semibold text-surface-900 mb-1">No Enrollments Found</h3>
+                <p class="text-sm text-gray-500" th:if="${search or statusFilter}">Try adjusting your search or filter criteria.</p>
+                <p class="text-sm text-gray-500" th:unless="${search or statusFilter}">No enrollments have been recorded yet.</p>
+            </div>
+
+            <!-- Table -->
+            <div th:if="${!#lists.isEmpty(enrollmentPage.content)}" class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-gray-500">
+                        <tr>
+                            <th class="px-6 py-3 font-semibold">Student Name</th>
+                            <th class="px-6 py-3 font-semibold">Student Email</th>
+                            <th class="px-6 py-3 font-semibold">Course Name</th>
+                            <th class="px-6 py-3 font-semibold">Status</th>
+                            <th class="px-6 py-3 font-semibold">Enrolled At</th>
+                            <th class="px-6 py-3 font-semibold">Completed At</th>
+                            <th class="px-6 py-3 font-semibold">Payment Status</th>
+                            <th class="px-6 py-3 font-semibold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-200">
+                        <tr th:each="enrollment : ${enrollmentPage.content}" class="hover:bg-surface-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-surface-900" th:text="${enrollment.studentName ?: '-'}"></td>
+                            <td class="px-6 py-4 text-gray-500" th:text="${enrollment.studentEmail ?: '-'}"></td>
+                            <td class="px-6 py-4 text-gray-500 max-w-[180px] truncate" th:text="${enrollment.courseName ?: '-'}"></td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                      th:classappend="${enrollment.status == 'ACTIVE' ? 'bg-green-50 text-green-600' : (enrollment.status == 'COMPLETED' ? 'bg-blue-50 text-blue-600' : (enrollment.status == 'CANCELLED' ? 'bg-red-50 text-red-600' : (enrollment.status == 'EXPIRED' ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-600')))}"
+                                      th:text="${enrollment.status}">—</span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-400 text-xs" th:text="${enrollment.enrolledAt}">—</td>
+                            <td class="px-6 py-4 text-gray-400 text-xs" th:text="${enrollment.completedAt ?: '-'}">—</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                      th:classappend="${enrollment.paymentStatus == 'PAID' ? 'bg-green-50 text-green-600' : (enrollment.paymentStatus == 'PENDING' ? 'bg-yellow-50 text-yellow-600' : (enrollment.paymentStatus == 'REFUNDED' ? 'bg-purple-50 text-purple-600' : 'bg-gray-50 text-gray-600'))}"
+                                      th:text="${enrollment.paymentStatus ?: '-'}">—</span>
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <a th:href="@{/admin/enrollments/detail(id=${enrollment.id})}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-brand-600 hover:bg-brand-50 hover:text-brand-700 transition-colors" title="View Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${enrollmentPage.totalPages > 1}" class="px-6 py-4 border-t border-surface-200 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4">
+                <div class="text-sm text-gray-500">
+                    Showing <span class="font-medium text-surface-900" th:text="${enrollmentPage.number * enrollmentPage.size + 1}"></span> to
+                    <span class="font-medium text-surface-900" th:text="${enrollmentPage.isLast() ? enrollmentPage.totalElements : (enrollmentPage.number + 1) * enrollmentPage.size}"></span> of
+                    <span class="font-medium text-surface-900" th:text="${enrollmentPage.totalElements}"></span> results
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${enrollmentPage.hasPrevious()}"
+                       th:href="@{/admin/enrollments(page=${enrollmentPage.number - 1}, size=${enrollmentPage.size}, search=${search}, status=${statusFilter})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Previous
+                    </a>
+                    <a th:if="${enrollmentPage.hasNext()}"
+                       th:href="@{/admin/enrollments(page=${enrollmentPage.number + 1}, size=${enrollmentPage.size}, search=${search}, status=${statusFilter})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

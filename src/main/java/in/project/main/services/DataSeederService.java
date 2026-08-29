@@ -3,7 +3,9 @@ package in.project.main.services;
 import in.project.main.entities.*;
 import in.project.main.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,8 +29,15 @@ public class DataSeederService {
     @Autowired private TestimonialRepository testimonialRepo;
     @Autowired private MediaRepository mediaRepo;
     @Autowired private SystemRoleRepository roleRepo;
+    @Autowired private EmployeeRepository employeeRepo;
+    @Autowired private UserRepository userRepo;
+    @Autowired private LeadRepository leadRepo;
+    @Autowired private EnquiryRepository enquiryRepo;
+    @Autowired private PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void seedAll() {
+        seedAdmin();
         seedInstructors();
         seedBatches();
         seedLessons();
@@ -44,6 +53,21 @@ public class DataSeederService {
         seedTestimonials();
         seedMedia();
         seedRoles();
+        seedLeads();
+        seedEnquiries();
+        migratePlaintextPasswords();
+    }
+
+    private void seedAdmin() {
+        if (employeeRepo.findByEmail("admin@edutake.com") != null) return;
+        Employee admin = new Employee();
+        admin.setName("Administrator");
+        admin.setEmail("admin@edutake.com");
+        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setPhoneno("9999999999");
+        admin.setCity("System");
+        admin.setRole(Role.ADMIN);
+        employeeRepo.save(admin);
     }
 
     private void seedInstructors() {
@@ -204,5 +228,36 @@ public class DataSeederService {
         SystemRole r1 = new SystemRole(); r1.setRoleName("INSTRUCTOR_MANAGER"); r1.setDescription("Manage instructors and batches");
         SystemRole r2 = new SystemRole(); r2.setRoleName("SUPPORT_AGENT"); r2.setDescription("Manage enquiries and messages");
         roleRepo.saveAll(Arrays.asList(r1, r2));
+    }
+
+    private void seedLeads() {
+        if (leadRepo.count() > 0) return;
+        Lead l1 = new Lead(); l1.setName("Rahul Sharma"); l1.setEmail("rahul@example.com"); l1.setPhone("9876543210"); l1.setSource("Website"); l1.setInterestedIn("Java Development"); l1.setStatus(in.project.main.entities.enums.LeadStatus.NEW);
+        Lead l2 = new Lead(); l2.setName("Priya Patel"); l2.setEmail("priya@example.com"); l2.setPhone("9876543211"); l2.setSource("Referral"); l2.setInterestedIn("Data Science"); l2.setStatus(in.project.main.entities.enums.LeadStatus.CONTACTED);
+        leadRepo.saveAll(Arrays.asList(l1, l2));
+    }
+
+    private void seedEnquiries() {
+        if (enquiryRepo.count() > 0) return;
+        Enquiry e1 = new Enquiry(); e1.setName("Amit Kumar"); e1.setEmail("amit@example.com"); e1.setPhone("9876543212"); e1.setSubject("Course duration"); e1.setMessage("How long is the Java course?"); e1.setType(in.project.main.entities.enums.EnquiryType.COURSE_ENQUIRY);
+        enquiryRepo.save(e1);
+    }
+
+    @Transactional
+    public void migratePlaintextPasswords() {
+        // Migrate Employee passwords
+        for (Employee emp : employeeRepo.findAll()) {
+            if (emp.getPassword() != null && !emp.getPassword().startsWith("$2a$")) {
+                emp.setPassword(passwordEncoder.encode(emp.getPassword()));
+                employeeRepo.save(emp);
+            }
+        }
+        // Migrate User passwords
+        for (User user : userRepo.findAll()) {
+            if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                userRepo.save(user);
+            }
+        }
     }
 }

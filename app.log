@@ -1,0 +1,59 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< Dhiraj:EducationCrmProject >---------------------
+[INFO] Building EducationCrmProject 1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.3.1:run (default-cli) > test-compile @ EducationCrmProject >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ EducationCrmProject ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 139 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ EducationCrmProject ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ EducationCrmProject ---
+[INFO] skip non existing resourceDirectory D:\CRM Project\EducationCrmProject2\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ EducationCrmProject ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.3.1:run (default-cli) < test-compile @ EducationCrmProject <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.3.1:run (default-cli) @ EducationCrmProject ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.1)
+
+2026-08-29T23:54:16.284+05:30  INFO 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Starting EducationApplication using Java 25.0.3 with PID 17256 (D:\CRM Project\EducationCrmProject2\target\classes started by dhira in D:\CRM Project\EducationCrmProject2)
+2026-08-29T23:54:16.287+05:30 DEBUG 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : Running with Spring Boot v3.3.1, Spring v6.1.10
+2026-08-29T23:54:16.288+05:30  INFO 17256 --- [EduTake] [  restartedMain] in.project.main.EducationApplication     : The following 1 profile is active: "dev"
+2026-08-29T23:54:16.394+05:30  INFO 17256 --- [EduTake] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-29T23:54:16.394+05:30  INFO 17256 --- [EduTake] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-29T23:54:17.532+05:30  INFO 17256 --- [EduTake] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-29T23:54:17.689+05:30  INFO 17256 --- [EduTake] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 143 ms. Found 33 JPA repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/dhira/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.25/tomcat-embed-core-10.1.25.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-08-29T23:54:19.231+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-29T23:54:19.255+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-29T23:54:19.256+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.25]
+2026-08-29T23:54:19.341+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-29T23:54:19.343+05:30  INFO 17256 --- [EduTake] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2947 ms
+2026-08-29T23:54:19.764+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-29T23:54:19.939+05:30  INFO 17256 --- [EduTake] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-08-29T23:54:20.016+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-29T23:54:20.660+05:30  INFO 17256 --- [EduTake] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-29T23:54:20.745+05:30  INFO 17256 --- [EduTake] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...

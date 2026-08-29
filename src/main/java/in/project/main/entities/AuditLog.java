@@ -1,4 +1,4 @@
-﻿package in.project.main.entities;
+package in.project.main.entities;
 
 import java.time.LocalDateTime;
 
@@ -11,10 +11,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
-/**
- * Records important admin operations for accountability and traceability.
- * Never stores passwords, tokens, secret keys, or sensitive payment credentials.
- */
 @Entity
 @Table(indexes = {
     @Index(name = "idx_audit_created", columnList = "createdAt"),
@@ -51,9 +47,8 @@ public class AuditLog {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-
     }
-    // Getters and Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getAdminEmail() { return adminEmail; }

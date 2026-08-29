@@ -1,5 +1,7 @@
 package in.project.main.repositories;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +29,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             Pageable pageable);
 
     boolean existsByUserIdAndCourseId(Long userId, Long courseId);
+
+    @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.user.email = :email AND e.status = :status")
+    long countByUserEmailAndStatus(@Param("email") String email, @Param("status") EnrollmentStatus status);
+
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.course WHERE e.user.email = :email ORDER BY e.enrolledAt DESC")
+    List<Enrollment> findByUserEmailOrderByEnrolledAtDesc(@Param("email") String email);
 }

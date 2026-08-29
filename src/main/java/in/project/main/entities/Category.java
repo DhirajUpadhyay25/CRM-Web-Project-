@@ -32,7 +32,7 @@ public class Category {
     @Column(nullable = false)
     private boolean active = true;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category")
     private List<Course> courses;
 
     @Column(updatable = false)

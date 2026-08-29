@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,10 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import in.project.main.entities.Notification;
 import in.project.main.services.NotificationService;
 
-/**
- * REST controller for admin notification actions.
- * Provides JSON endpoints for the notification dropdown and badge.
- */
 @RestController
 @RequestMapping("/admin/api/notifications")
 public class AdminNotificationApiController {
@@ -29,20 +26,21 @@ public class AdminNotificationApiController {
     @Autowired
     private NotificationService notificationService;
 
-    @Value("${app.admin.email}")
-    private String adminEmail;
+    private String getEmail(Principal principal) {
+        return principal != null ? principal.getName() : "admin@edutake.com";
+    }
 
     @GetMapping("/unread-count")
-    public ResponseEntity<Map<String, Long>> getUnreadCount() {
-        long count = notificationService.getUnreadCount(adminEmail);
+    public ResponseEntity<Map<String, Long>> getUnreadCount(Principal principal) {
+        long count = notificationService.getUnreadCount(getEmail(principal));
         Map<String, Long> result = new HashMap<>();
         result.put("count", count);
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<List<Map<String, Object>>> getRecentNotifications() {
-        List<Notification> notifications = notificationService.getRecentNotifications(adminEmail, 10);
+    public ResponseEntity<List<Map<String, Object>>> getRecentNotifications(Principal principal) {
+        List<Notification> notifications = notificationService.getRecentNotifications(getEmail(principal), 10);
         List<Map<String, Object>> result = notifications.stream().map(n -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", n.getId());
@@ -66,8 +64,8 @@ public class AdminNotificationApiController {
     }
 
     @PostMapping("/mark-all-read")
-    public ResponseEntity<Map<String, String>> markAllAsRead() {
-        notificationService.markAllAsRead(adminEmail);
+    public ResponseEntity<Map<String, String>> markAllAsRead(Principal principal) {
+        notificationService.markAllAsRead(getEmail(principal));
         Map<String, String> result = new HashMap<>();
         result.put("status", "success");
         return ResponseEntity.ok(result);

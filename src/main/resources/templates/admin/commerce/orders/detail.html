@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Order Detail', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Header -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 mb-1">Order Detail</h1>
+                <p class="text-gray-500 text-sm">View complete order information.</p>
+            </div>
+            <a href="/admin/orders" class="px-4 py-2 border border-surface-200 text-surface-700 font-medium rounded-lg shadow-sm transition-all flex items-center gap-2 text-sm hover:bg-surface-50">
+                <i class="bi bi-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden" th:if="${order != null}">
+            <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
+                <h2 class="font-bold text-surface-900">Order #<span th:text="${order.id}">—</span></h2>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Order ID</dt>
+                        <dd class="text-sm font-medium text-surface-900" th:text="${order.id}">—</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Course</dt>
+                        <dd class="text-sm font-medium text-surface-900" th:text="${order.courseName}">—</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Customer Email</dt>
+                        <dd class="text-sm text-surface-900" th:text="${order.userEmail}">—</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Amount</dt>
+                        <dd class="text-sm font-bold text-surface-900" th:text="'₹' + ${order.amount}">—</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Razorpay Payment ID</dt>
+                        <dd class="text-sm text-surface-900 font-mono" th:text="${order.razorpayPaymentId ?: 'N/A'}">—</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Razorpay Order ID</dt>
+                        <dd class="text-sm text-surface-900 font-mono" th:text="${order.razorpayOrderId ?: 'N/A'}">—</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Status</dt>
+                        <dd>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                  th:classappend="${order.status == 'SUCCESS' ? 'bg-green-50 text-green-600' : (order.status == 'FAILED' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600')}"
+                                  th:text="${order.status}">—</span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 uppercase mb-1">Created</dt>
+                        <dd class="text-sm text-surface-900" th:text="${order.createdAt}">—</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <div th:if="${order == null}" class="p-12 text-center">
+            <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                <i class="bi bi-bag-x"></i>
+            </div>
+            <h3 class="font-semibold text-surface-900 mb-1">Order Not Found</h3>
+            <p class="text-sm text-gray-500">The requested order could not be found.</p>
+        </div>
+
+    </div>
+</body>
+</html>
