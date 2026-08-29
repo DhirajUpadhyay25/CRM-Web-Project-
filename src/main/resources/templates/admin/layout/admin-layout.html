@@ -17,8 +17,8 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81', 950: '#1e1b4b' },
-                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81', 950: '#1e1b4b' },
+                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
                     }
                 }
             }
@@ -26,111 +26,348 @@
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .sidebar-section-items { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .sidebar-section-items.expanded { max-height: 500px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-down { animation: slideDown 0.15s ease-out; }
     </style>
 </head>
 <body class="bg-surface-50 text-surface-900 antialiased flex h-screen overflow-hidden">
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="bg-surface-950 text-white w-64 flex-shrink-0 flex flex-col h-full transition-transform duration-300 transform -translate-x-full md:translate-x-0 absolute md:relative z-20">
-        <!-- Logo Area -->
-        <div class="h-16 flex items-center px-6 border-b border-white/10">
-            <a href="/admin/dashboard" class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-lg shadow-lg">E</div>
+    <!-- ============================================ -->
+    <!-- SIDEBAR -->
+    <!-- ============================================ -->
+    <aside id="sidebar" class="bg-surface-950 text-white w-64 flex-shrink-0 flex flex-col h-full transition-transform duration-300 transform -translate-x-full md:translate-x-0 fixed md:relative z-30">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-5 border-b border-white/10 shrink-0">
+            <a href="/admin/dashboard" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-lg shadow-lg shadow-brand-500/20">E</div>
                 <span class="font-bold text-xl tracking-tight">EduTake<span class="text-brand-400">.</span></span>
             </a>
         </div>
         
         <!-- Navigation -->
-        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-4 px-3">Main</div>
+        <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 custom-scrollbar">
+            
+            <!-- Dashboard -->
             <a href="/admin/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/dashboard">
-                <i class="bi bi-grid-1x2-fill"></i>
+                <i class="bi bi-grid-1x2-fill text-base"></i>
                 <span class="font-medium text-sm">Dashboard</span>
             </a>
             
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6 px-3">Learning</div>
-            <a href="/admin/courses" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/courses">
-                <i class="bi bi-play-btn-fill"></i>
-                <span class="font-medium text-sm">Courses</span>
-            </a>
-            <a href="/admin/categories" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/categories">
-                <i class="bi bi-collection-fill"></i>
-                <span class="font-medium text-sm">Categories</span>
-            </a>
-            
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6 px-3">CRM & Users</div>
-            <a href="/admin/students" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/students">
-                <i class="bi bi-mortarboard-fill"></i>
-                <span class="font-medium text-sm">Students</span>
-            </a>
-            <a href="/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/users">
-                <i class="bi bi-people-fill"></i>
-                <span class="font-medium text-sm">Platform Users</span>
-            </a>
-            
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6 px-3">Communication</div>
-            <a href="/admin/feedback" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/feedback">
-                <i class="bi bi-chat-quote-fill"></i>
-                <span class="font-medium text-sm">Feedback</span>
-            </a>
-            
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 mt-6 px-3">System</div>
-            <a href="/adminProfile" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/adminProfile">
-                <i class="bi bi-person-badge-fill"></i>
-                <span class="font-medium text-sm">Legacy Profile</span>
-            </a>
+            <!-- LEARNING Section -->
+            <div class="mt-5">
+                <button onclick="toggleSection('learning')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Learning</span>
+                    <i id="learning-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="learning-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/courses" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/courses">
+                        <i class="bi bi-play-btn-fill text-base"></i>
+                        <span class="text-sm">Courses</span>
+                    </a>
+                    <a href="/admin/categories" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/categories">
+                        <i class="bi bi-collection-fill text-base"></i>
+                        <span class="text-sm">Categories</span>
+                    </a>
+                    <a href="/admin/batches" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/batches">
+                        <i class="bi bi-calendar3 text-base"></i>
+                        <span class="text-sm">Classes / Batches</span>
+                    </a>
+                    <a href="/admin/students" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/students">
+                        <i class="bi bi-mortarboard-fill text-base"></i>
+                        <span class="text-sm">Students</span>
+                    </a>
+                    <a href="/admin/instructors" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/instructors">
+                        <i class="bi bi-person-workspace text-base"></i>
+                        <span class="text-sm">Instructors</span>
+                    </a>
+                    <a href="/admin/enrollments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enrollments">
+                        <i class="bi bi-journal-check text-base"></i>
+                        <span class="text-sm">Enrollments</span>
+                    </a>
+                    <a href="/admin/lessons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/lessons">
+                        <i class="bi bi-book-half text-base"></i>
+                        <span class="text-sm">Curriculum</span>
+                    </a>
+                    <a href="/admin/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/certificates">
+                        <i class="bi bi-award-fill text-base"></i>
+                        <span class="text-sm">Certificates</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- COMMERCE Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('commerce')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Commerce</span>
+                    <i id="commerce-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="commerce-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/orders" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/orders">
+                        <i class="bi bi-bag-check-fill text-base"></i>
+                        <span class="text-sm">Orders</span>
+                    </a>
+                    <a href="/admin/payments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/payments">
+                        <i class="bi bi-credit-card-fill text-base"></i>
+                        <span class="text-sm">Payments</span>
+                    </a>
+                    <a href="/admin/coupons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/coupons">
+                        <i class="bi bi-tag-fill text-base"></i>
+                        <span class="text-sm">Coupons / Discounts</span>
+                    </a>
+                    <a href="/admin/refunds" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/refunds">
+                        <i class="bi bi-arrow-return-left text-base"></i>
+                        <span class="text-sm">Refunds</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
+                        <i class="bi bi-receipt text-base"></i>
+                        <span class="text-sm">Invoices</span>
+                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CRM Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('crm')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>CRM</span>
+                    <i id="crm-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="crm-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/leads" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/leads">
+                        <i class="bi bi-funnel-fill text-base"></i>
+                        <span class="text-sm">Leads</span>
+                    </a>
+                    <a href="/admin/enquiries" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enquiries">
+                        <i class="bi bi-question-circle-fill text-base"></i>
+                        <span class="text-sm">Enquiries</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
+                        <i class="bi bi-person-heart text-base"></i>
+                        <span class="text-sm">Customers</span>
+                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
+                    </a>
+                    <a href="/admin/follow-ups" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/follow-ups">
+                        <i class="bi bi-telephone-outbound-fill text-base"></i>
+                        <span class="text-sm">Follow-ups</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- COMMUNICATION Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('comm')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Communication</span>
+                    <i id="comm-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="comm-items" class="sidebar-section-items space-y-0.5 mt-1">
+                    <a href="/admin/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/notifications">
+                        <i class="bi bi-bell-fill text-base"></i>
+                        <span class="text-sm">Notifications</span>
+                    </a>
+                    <a href="/admin/announcements" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/announcements">
+                        <i class="bi bi-megaphone-fill text-base"></i>
+                        <span class="text-sm">Announcements</span>
+                    </a>
+                    <a href="/admin/messages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/messages">
+                        <i class="bi bi-envelope-fill text-base"></i>
+                        <span class="text-sm">Email / Messages</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CONTENT Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('content')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Content</span>
+                    <i id="content-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="content-items" class="sidebar-section-items space-y-0.5 mt-1">
+                    <a href="/admin/feedback" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/feedback">
+                        <i class="bi bi-chat-quote-fill text-base"></i>
+                        <span class="text-sm">Feedback</span>
+                    </a>
+                    <a href="/admin/pages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/pages">
+                        <i class="bi bi-file-earmark-text-fill text-base"></i>
+                        <span class="text-sm">Pages</span>
+                    </a>
+                    <a href="/admin/blogs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/blogs">
+                        <i class="bi bi-journal-richtext text-base"></i>
+                        <span class="text-sm">Blog / Articles</span>
+                    </a>
+                    <a href="/admin/faqs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/faqs">
+                        <i class="bi bi-patch-question-fill text-base"></i>
+                        <span class="text-sm">FAQs</span>
+                    </a>
+                    <a href="/admin/testimonials" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/testimonials">
+                        <i class="bi bi-star-fill text-base"></i>
+                        <span class="text-sm">Testimonials</span>
+                    </a>
+                    <a href="/admin/media" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/media">
+                        <i class="bi bi-images text-base"></i>
+                        <span class="text-sm">Media Library</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ANALYTICS Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('analytics')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Analytics</span>
+                    <i id="analytics-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="analytics-items" class="sidebar-section-items space-y-0.5 mt-1">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
+                        <i class="bi bi-graph-up-arrow text-base"></i>
+                        <span class="text-sm">Overview</span>
+                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
+                        <i class="bi bi-currency-rupee text-base"></i>
+                        <span class="text-sm">Revenue</span>
+                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
+                        <i class="bi bi-bar-chart-fill text-base"></i>
+                        <span class="text-sm">Course Analytics</span>
+                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SYSTEM Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('system')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>System</span>
+                    <i id="system-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="system-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/users">
+                        <i class="bi bi-people-fill text-base"></i>
+                        <span class="text-sm">Users</span>
+                    </a>
+                    <a href="/admin/roles" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/roles">
+                        <i class="bi bi-shield-lock-fill text-base"></i>
+                        <span class="text-sm">Roles &amp; Permissions</span>
+                    </a>
+                    <a href="/admin/audit-logs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/audit-logs">
+                        <i class="bi bi-clock-history text-base"></i>
+                        <span class="text-sm">Audit Logs</span>
+                    </a>
+                    <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/settings">
+                        <i class="bi bi-gear-fill text-base"></i>
+                        <span class="text-sm">Settings</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="pb-2"></div>
         </nav>
         
         <!-- Bottom User Area -->
-        <div class="p-4 border-t border-white/10">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center font-bold">A</div>
-                <div>
-                    <p class="text-sm font-semibold text-white">Administrator</p>
-                    <p class="text-xs text-brand-400">Admin Control</p>
+        <div class="p-4 border-t border-white/10 shrink-0">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-sm shadow-lg shadow-brand-500/20">A</div>
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-white truncate">Administrator</p>
+                    <p class="text-xs text-gray-500 truncate">Admin Control</p>
                 </div>
             </div>
-            <a href="/logout" class="flex items-center justify-center gap-2 w-full py-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors font-medium text-sm">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </a>
+            <div class="flex gap-2">
+                <a href="/admin/profile" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white/5 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-colors text-xs font-medium">
+                    <i class="bi bi-person text-sm"></i> Profile
+                </a>
+                <a href="/logout" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors text-xs font-medium">
+                    <i class="bi bi-box-arrow-right text-sm"></i> Logout
+                </a>
+            </div>
         </div>
     </aside>
 
-    <!-- Main Content Wrapper -->
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT WRAPPER -->
+    <!-- ============================================ -->
     <div class="flex-1 flex flex-col h-full overflow-hidden bg-surface-50">
         
-        <!-- Navbar -->
-        <header class="h-16 bg-white border-b border-surface-200 flex items-center justify-between px-6 z-10 shadow-sm shrink-0">
-            <div class="flex items-center gap-4 flex-1">
-                <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-brand-600 transition-colors text-xl">
+        <!-- ============================================ -->
+        <!-- NAVBAR -->
+        <!-- ============================================ -->
+        <header class="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-4 lg:px-6 z-20 shadow-sm shrink-0">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <!-- Sidebar Toggle -->
+                <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-brand-600 transition-colors text-xl flex-shrink-0">
                     <i class="bi bi-list"></i>
                 </button>
-                <div class="hidden sm:flex items-center text-sm font-medium text-gray-500 gap-2">
-                    <span class="text-brand-600">Admin Control Center</span>
+                
+                <!-- Breadcrumb -->
+                <div class="hidden sm:flex items-center text-sm text-gray-500 gap-1.5 min-w-0">
+                    <a href="/admin/dashboard" class="text-gray-400 hover:text-brand-600 transition-colors"><i class="bi bi-house-fill"></i></a>
+                    <i class="bi bi-chevron-right text-[10px] text-gray-300"></i>
+                    <span id="breadcrumbText" class="font-medium text-surface-800 truncate">Dashboard</span>
                 </div>
                 
-                <!-- Search Bar -->
-                <div class="hidden md:flex ml-6 relative max-w-md w-full">
-                    <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" placeholder="Search across platform..." class="w-full bg-surface-100 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-500/50 outline-none transition-all placeholder-gray-500 text-surface-900">
-                </div>
+                <!-- Global Search Button -->
+                <button id="searchBtn" class="hidden md:flex ml-4 items-center gap-2 bg-surface-100 hover:bg-surface-200 border border-surface-200 rounded-xl py-1.5 px-3 text-sm text-gray-500 transition-all cursor-pointer max-w-xs" onclick="openSearch()">
+                    <i class="bi bi-search text-xs"></i>
+                    <span>Search...</span>
+                    <kbd class="hidden lg:inline-flex ml-auto text-[10px] bg-white border border-surface-200 rounded px-1.5 py-0.5 text-gray-400 font-mono">Ctrl+K</kbd>
+                </button>
             </div>
             
-            <div class="flex items-center gap-4">
-                <!-- Notifications -->
-                <button class="relative w-10 h-10 rounded-full bg-surface-100 flex items-center justify-center text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors">
-                    <i class="bi bi-bell"></i>
-                    <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            <div class="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+                <!-- Mobile Search -->
+                <button class="md:hidden w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors" onclick="openSearch()">
+                    <i class="bi bi-search"></i>
                 </button>
+
+                <!-- Current Time -->
+                <div class="hidden lg:flex flex-col items-end text-right">
+                    <span id="navTime" class="text-xs font-semibold text-surface-800 tabular-nums">--:--</span>
+                    <span id="navDate" class="text-[10px] text-gray-400">---</span>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="relative" id="notifContainer">
+                    <button id="notifBtn" class="relative w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors" onclick="toggleNotifications()">
+                        <i class="bi bi-bell"></i>
+                        <span id="notifBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">0</span>
+                    </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="notifDropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-surface-200 overflow-hidden z-50 animate-slide-down">
+                        <div class="px-4 py-3 border-b border-surface-100 flex items-center justify-between bg-surface-50">
+                            <h3 class="font-semibold text-sm text-surface-900">Notifications</h3>
+                            <button onclick="markAllNotificationsRead()" class="text-xs text-brand-600 hover:text-brand-700 font-medium">Mark all as read</button>
+                        </div>
+                        <div id="notifList" class="max-h-80 overflow-y-auto">
+                            <div class="p-6 text-center text-gray-400 text-sm">
+                                <i class="bi bi-bell-slash text-2xl mb-2 block"></i>
+                                No notifications
+                            </div>
+                        </div>
+                        <div class="px-4 py-2.5 border-t border-surface-100 bg-surface-50 text-center">
+                            <a href="/admin/notifications" class="text-xs text-brand-600 hover:text-brand-700 font-semibold">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Profile -->
-                <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200 cursor-pointer shadow-sm">
+                <a href="/admin/profile" class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-sm shadow-sm hover:shadow-md transition-shadow">
                     A
-                </div>
+                </a>
             </div>
         </header>
 
-        <!-- Main Scrolling Content -->
+        <!-- ============================================ -->
+        <!-- MAIN SCROLLING CONTENT -->
+        <!-- ============================================ -->
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <!-- Flash Messages -->
             <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-start gap-3 shadow-sm animate-fade-in">
@@ -148,11 +385,33 @@
         </main>
         
         <!-- Mobile Sidebar Overlay -->
-        <div id="sidebarOverlay" class="fixed inset-0 bg-surface-900/50 backdrop-blur-sm z-10 hidden md:hidden"></div>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-surface-900/50 backdrop-blur-sm z-20 hidden md:hidden"></div>
     </div>
 
-    <!-- Scripts -->
+    <!-- ============================================ -->
+    <!-- GLOBAL SEARCH MODAL -->
+    <!-- ============================================ -->
+    <div id="searchModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-sm z-50 hidden flex items-start justify-center pt-[15vh]" onclick="closeSearch(event)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-surface-200" onclick="event.stopPropagation()">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-surface-100">
+                <i class="bi bi-search text-gray-400"></i>
+                <input id="searchInput" type="text" placeholder="Search courses, students, orders, leads..." class="flex-1 bg-transparent outline-none text-sm text-surface-900 placeholder-gray-400" oninput="handleSearchInput(this.value)">
+                <kbd class="text-[10px] bg-surface-100 border border-surface-200 rounded px-1.5 py-0.5 text-gray-400 font-mono cursor-pointer" onclick="closeSearch()">ESC</kbd>
+            </div>
+            <div id="searchResults" class="max-h-80 overflow-y-auto">
+                <div class="p-8 text-center text-gray-400 text-sm">
+                    <i class="bi bi-search text-3xl mb-3 block opacity-30"></i>
+                    Type to search across the platform
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================ -->
     <script>
+        // ====== SIDEBAR TOGGLE ======
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -171,16 +430,259 @@
         sidebarToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // Active link highlighting
+        // ====== SIDEBAR SECTION TOGGLE ======
+        function toggleSection(sectionId) {
+            const items = document.getElementById(sectionId + '-items');
+            const chevron = document.getElementById(sectionId + '-chevron');
+            if (items.classList.contains('expanded')) {
+                items.classList.remove('expanded');
+                chevron.style.transform = 'rotate(-90deg)';
+            } else {
+                items.classList.add('expanded');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // ====== ACTIVE LINK HIGHLIGHTING ======
         const currentPath = window.location.pathname;
         const links = document.querySelectorAll('.sidebar-link');
+        const breadcrumbText = document.getElementById('breadcrumbText');
+
         links.forEach(link => {
             const path = link.getAttribute('data-path');
-            if (currentPath === path || (currentPath.startsWith(path) && path !== '/admin/dashboard')) {
+            if (path && (currentPath === path || (currentPath.startsWith(path) && path !== '/admin/dashboard'))) {
                 link.classList.add('bg-brand-600/20', 'text-brand-400');
                 link.classList.remove('text-gray-300');
+                // Set breadcrumb
+                const label = link.querySelector('span');
+                if (label && breadcrumbText) {
+                    breadcrumbText.textContent = label.textContent;
+                }
+                // Expand parent section
+                const section = link.closest('.sidebar-section-items');
+                if (section && !section.classList.contains('expanded')) {
+                    section.classList.add('expanded');
+                    const chevron = document.getElementById(section.id.replace('-items', '-chevron'));
+                    if (chevron) chevron.style.transform = 'rotate(0deg)';
+                }
             }
         });
+
+        // ====== LIVE CLOCK ======
+        let clockInterval = null;
+        function updateClock() {
+            const now = new Date();
+            const timeEl = document.getElementById('navTime');
+            const dateEl = document.getElementById('navDate');
+            if (timeEl) {
+                timeEl.textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            }
+            if (dateEl) {
+                dateEl.textContent = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+        }
+        updateClock();
+        clockInterval = setInterval(updateClock, 30000); // Update every 30 seconds
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (clockInterval) clearInterval(clockInterval);
+        });
+
+        // ====== NOTIFICATIONS ======
+        let notifOpen = false;
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifDropdown');
+            notifOpen = !notifOpen;
+            dropdown.classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotifications();
+        }
+
+        // Close notification dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('notifContainer');
+            if (notifOpen && container && !container.contains(e.target)) {
+                document.getElementById('notifDropdown').classList.add('hidden');
+                notifOpen = false;
+            }
+        });
+
+        function loadNotifications() {
+            fetch('/admin/api/notifications/recent')
+                .then(r => r.json())
+                .then(notifications => {
+                    const list = document.getElementById('notifList');
+                    if (!notifications || notifications.length === 0) {
+                        list.innerHTML = '<div class="p-6 text-center text-gray-400 text-sm"><i class="bi bi-bell-slash text-2xl mb-2 block"></i>No notifications yet</div>';
+                        return;
+                    }
+                    list.innerHTML = notifications.map(n => {
+                        const icon = getNotifIcon(n.type);
+                        const timeAgo = getTimeAgo(n.createdAt);
+                        const readClass = n.read ? 'bg-white' : 'bg-brand-50/50';
+                        return `<a href="${n.targetUrl || '#'}" onclick="markNotifRead(${n.id})" class="block px-4 py-3 hover:bg-surface-50 transition-colors border-b border-surface-100 last:border-0 ${readClass}">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full ${icon.bg} flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="bi ${icon.icon} ${icon.color} text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-surface-900 truncate">${n.title}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">${n.message || ''}</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">${timeAgo}</p>
+                                </div>
+                                ${!n.read ? '<div class="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0 mt-2"></div>' : ''}
+                            </div>
+                        </a>`;
+                    }).join('');
+                })
+                .catch(() => {});
+        }
+
+        function getNotifIcon(type) {
+            const icons = {
+                'NEW_STUDENT': { icon: 'bi-person-plus-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'NEW_ORDER': { icon: 'bi-bag-check-fill', bg: 'bg-green-50', color: 'text-green-500' },
+                'PAYMENT_RECEIVED': { icon: 'bi-currency-rupee', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'NEW_ENQUIRY': { icon: 'bi-question-circle-fill', bg: 'bg-orange-50', color: 'text-orange-500' },
+                'NEW_LEAD': { icon: 'bi-funnel-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'NEW_FEEDBACK': { icon: 'bi-chat-quote-fill', bg: 'bg-cyan-50', color: 'text-cyan-500' },
+                'COURSE_ATTENTION': { icon: 'bi-exclamation-triangle-fill', bg: 'bg-amber-50', color: 'text-amber-500' },
+                'SYSTEM_WARNING': { icon: 'bi-shield-exclamation', bg: 'bg-red-50', color: 'text-red-500' }
+            };
+            return icons[type] || { icon: 'bi-bell-fill', bg: 'bg-gray-50', color: 'text-gray-500' };
+        }
+
+        function getTimeAgo(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' day(s) ago';
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        }
+
+        function markNotifRead(id) {
+            fetch('/admin/api/notifications/' + id + '/read', { method: 'POST' }).catch(() => {});
+        }
+
+        function markAllNotificationsRead() {
+            fetch('/admin/api/notifications/mark-all-read', { method: 'POST' })
+                .then(() => {
+                    loadNotifications();
+                    updateNotifBadge();
+                }).catch(() => {});
+        }
+
+        function updateNotifBadge() {
+            fetch('/admin/api/notifications/unread-count')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('notifBadge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }).catch(() => {});
+        }
+        // Initial badge load
+        updateNotifBadge();
+
+        // ====== GLOBAL SEARCH ======
+        let searchDebounce = null;
+
+        function openSearch() {
+            document.getElementById('searchModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('searchInput').focus(), 100);
+        }
+
+        function closeSearch(e) {
+            if (e && e.target !== document.getElementById('searchModal')) return;
+            document.getElementById('searchModal').classList.add('hidden');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="bi bi-search text-3xl mb-3 block opacity-30"></i>Type to search across the platform</div>';
+        }
+
+        function handleSearchInput(query) {
+            clearTimeout(searchDebounce);
+            const resultsEl = document.getElementById('searchResults');
+
+            if (!query || query.trim().length < 2) {
+                resultsEl.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="bi bi-search text-3xl mb-3 block opacity-30"></i>Type at least 2 characters</div>';
+                return;
+            }
+
+            resultsEl.innerHTML = '<div class="p-6 text-center text-gray-400 text-sm"><div class="inline-block w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2"></div><br>Searching...</div>';
+
+            searchDebounce = setTimeout(() => {
+                fetch('/admin/api/search?q=' + encodeURIComponent(query.trim()))
+                    .then(r => r.json())
+                    .then(data => {
+                        const categories = Object.keys(data);
+                        if (categories.length === 0) {
+                            resultsEl.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="bi bi-inbox text-3xl mb-3 block opacity-30"></i>No results found for "' + query + '"</div>';
+                            return;
+                        }
+                        let html = '';
+                        categories.forEach(cat => {
+                            html += '<div class="px-4 pt-3 pb-1"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">' + cat + '</p></div>';
+                            data[cat].forEach(item => {
+                                html += `<a href="${item.url}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-50 transition-colors cursor-pointer" onclick="document.getElementById('searchModal').classList.add('hidden')">
+                                    <div class="w-8 h-8 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 flex-shrink-0">
+                                        <i class="bi ${getSearchIcon(item.type)}"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-surface-900 truncate">${item.title}</p>
+                                        <p class="text-xs text-gray-400 truncate">${item.subtitle || ''}</p>
+                                    </div>
+                                </a>`;
+                            });
+                        });
+                        resultsEl.innerHTML = html;
+                    })
+                    .catch(() => {
+                        resultsEl.innerHTML = '<div class="p-6 text-center text-red-400 text-sm">Search failed. Please try again.</div>';
+                    });
+            }, 300);
+        }
+
+        function getSearchIcon(type) {
+            const icons = { 'COURSE': 'bi-play-btn-fill', 'STUDENT': 'bi-mortarboard-fill', 'ORDER': 'bi-bag-check-fill', 'LEAD': 'bi-funnel-fill' };
+            return icons[type] || 'bi-search';
+        }
+
+        // Ctrl+K shortcut
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const modal = document.getElementById('searchModal');
+                if (modal.classList.contains('hidden')) {
+                    openSearch();
+                } else {
+                    modal.classList.add('hidden');
+                }
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('searchModal').classList.add('hidden');
+                document.getElementById('notifDropdown').classList.add('hidden');
+                notifOpen = false;
+            }
+        });
+
+        // Close sidebar on mobile after navigation (listen for link clicks)
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('#sidebar a[href]').forEach(link => {
+                if (link.getAttribute('href') !== '#') {
+                    link.addEventListener('click', () => {
+                        sidebar.classList.add('-translate-x-full');
+                        sidebarOverlay.classList.add('hidden');
+                    });
+                }
+            });
+        }
     </script>
 </body>
 </html>

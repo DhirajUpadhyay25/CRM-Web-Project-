@@ -2,6 +2,8 @@ package in.project.main.repositories;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +28,13 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>
 	boolean existsByUserEmailAndCourseName(String userEmail, String courseName);
 
 	boolean existsByCourseName(String courseName);
+
+	List<Orders> findTop10ByOrderByIdDesc();
+
+	@Query("SELECT o FROM Orders o WHERE " +
+	       "(:keyword IS NULL OR :keyword = '' OR " +
+	       " LOWER(o.userEmail) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+	       " LOWER(o.courseName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+	       " LOWER(o.orderId) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+	Page<Orders> searchOrders(@Param("keyword") String keyword, Pageable pageable);
 }

@@ -1,0 +1,30 @@
+package in.project.main.repositories;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import in.project.main.entities.Enrollment;
+import in.project.main.entities.enums.EnrollmentStatus;
+
+@Repository
+public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
+
+    long countByStatus(EnrollmentStatus status);
+
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.user JOIN FETCH e.course WHERE " +
+           "(:keyword IS NULL OR :keyword = '' OR " +
+           " LOWER(e.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           " LOWER(e.user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           " LOWER(e.course.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:status IS NULL OR e.status = :status)")
+    Page<Enrollment> searchAndFilter(
+            @Param("keyword") String keyword,
+            @Param("status") EnrollmentStatus status,
+            Pageable pageable);
+
+    boolean existsByUserIdAndCourseId(Long userId, Long courseId);
+}

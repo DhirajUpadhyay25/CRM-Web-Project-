@@ -1,107 +1,412 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Categories', ~{::div})}">
 <body>
-    <div>
-        <div class="mb-6 flex items-center justify-between border-b border-surface-200 pb-4">
+    <div class="space-y-6">
+        
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Categories</h1>
-                <p class="text-gray-500 text-sm">Manage course categories and groupings.</p>
+                <nav class="flex items-center text-sm text-gray-500 mb-2 gap-2">
+                    <span class="font-medium text-gray-400">Admin</span>
+                    <i class="bi bi-chevron-right text-[10px]"></i>
+                    <span class="font-medium text-gray-400">Learning</span>
+                    <i class="bi bi-chevron-right text-[10px]"></i>
+                    <span class="font-semibold text-brand-600">Categories</span>
+                </nav>
+                <h1 class="text-2xl font-bold text-surface-900">Categories</h1>
+                <p class="text-sm text-gray-500 mt-1">Create, organize and manage course categories.</p>
             </div>
-            <a href="/admin/courses" class="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-2 text-sm bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">
-                <i class="bi bi-arrow-left"></i> Back to Courses
-            </a>
+            
+            <button onclick="openCategoryModal()" class="flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm">
+                <i class="bi bi-plus-lg"></i>
+                Add Category
+            </button>
         </div>
 
-            <!-- Alerts -->
-            <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center gap-3">
-                <i class="bi bi-check-circle-fill"></i>
-                <span th:text="${successMsg}"></span>
+        <!-- Alerts -->
+        <div th:if="${successMsg}" class="p-4 rounded-xl bg-green-50 text-green-700 border border-green-200 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill text-lg"></i>
+            <span th:text="${successMsg}" class="font-medium"></span>
+        </div>
+        <div th:if="${errorMsg}" class="p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 flex items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill text-lg"></i>
+            <span th:text="${errorMsg}" class="font-medium"></span>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-collection"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Categories</p>
+                    <h3 class="text-2xl font-bold text-surface-900" th:text="${totalCategories}">0</h3>
+                </div>
             </div>
-            <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3">
-                <i class="bi bi-exclamation-circle-fill"></i>
-                <span th:text="${errorMsg}"></span>
+            
+            <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Active</p>
+                    <h3 class="text-2xl font-bold text-surface-900" th:text="${activeCategories}">0</h3>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gray-50 text-gray-500 flex items-center justify-center text-xl">
+                    <i class="bi bi-dash-circle"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Inactive</p>
+                    <h3 class="text-2xl font-bold text-surface-900" th:text="${inactiveCategories}">0</h3>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-book"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">With Courses</p>
+                    <h3 class="text-2xl font-bold text-surface-900" th:text="${categoriesWithCourses}">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Card (Search, Filter & Table) -->
+        <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+            
+            <!-- Search & Filter Bar -->
+            <div class="p-5 border-b border-surface-200 bg-surface-50 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <form th:action="@{/admin/categories}" method="get" class="w-full md:w-auto flex flex-col sm:flex-row gap-3 flex-grow max-w-2xl">
+                    <!-- Search Input -->
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <input type="text" name="search" th:value="${search}" placeholder="Search categories..."
+                               class="w-full pl-10 pr-4 py-2 border border-surface-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-colors">
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div class="w-full sm:w-48">
+                        <select name="status" onchange="this.form.submit()" 
+                                class="w-full px-3 py-2 border border-surface-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none appearance-none bg-white">
+                            <option value="all" th:selected="${status == 'all' || status == null}">Filter Status: All</option>
+                            <option value="active" th:selected="${status == 'active'}">Status: Active</option>
+                            <option value="inactive" th:selected="${status == 'inactive'}">Status: Inactive</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="hidden sm:block px-4 py-2 bg-white border border-surface-300 rounded-lg text-sm font-medium hover:bg-surface-50 transition-colors">
+                        Filter
+                    </button>
+                    
+                    <a th:if="${search != null || (status != null && status != 'all')}" th:href="@{/admin/categories}" class="flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors whitespace-nowrap">
+                        Clear Filters
+                    </a>
+                </form>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <!-- Add Category Form -->
-                <div class="lg:col-span-1">
-                    <div class="bg-surface-900 border border-white/10 rounded-2xl p-6 shadow-xl sticky top-24">
-                        <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
-                            <i class="bi bi-plus-circle text-brand-400"></i> New Category
-                        </h2>
+            <!-- Data Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50/50 text-gray-500 uppercase tracking-wider text-xs font-semibold border-b border-surface-200">
+                        <tr>
+                            <th class="px-6 py-4">Category</th>
+                            <th class="px-6 py-4">Slug</th>
+                            <th class="px-6 py-4 text-center">Courses</th>
+                            <th class="px-6 py-4 text-center">Status</th>
+                            <th class="px-6 py-4">Updated</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-200 text-surface-900">
                         
-                        <form th:action="@{/admin/categories/add}" method="post" th:object="${categoryDTO}" class="space-y-4">
+                        <!-- Empty State: No results -->
+                        <tr th:if="${#lists.isEmpty(categories)}">
+                            <td colspan="6" class="px-6 py-16 text-center">
+                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-100 text-gray-400 mb-4 text-2xl">
+                                    <i class="bi bi-search"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-surface-900 mb-1">No categories found</h3>
+                                <p class="text-gray-500 text-sm mb-4">Try adjusting your search or filter to find what you're looking for.</p>
+                                <a th:href="@{/admin/categories}" class="text-brand-600 hover:text-brand-700 font-medium text-sm">Clear all filters</a>
+                            </td>
+                        </tr>
+
+                        <!-- Table Rows -->
+                        <tr th:each="cat : ${categories}" class="hover:bg-surface-50 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="font-semibold text-surface-900" th:text="${cat.name}">Category Name</div>
+                                <div class="text-xs text-gray-500 truncate max-w-[200px]" th:text="${cat.description} ?: 'No description'">Description</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 bg-surface-100 text-gray-600 rounded text-xs font-mono" th:text="${cat.slug}">slug</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a th:href="@{/admin/courses(category=${cat.id})}" class="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg bg-blue-50 text-blue-700 font-semibold text-xs hover:bg-blue-100 transition-colors">
+                                    <span th:text="${cat.courses != null ? cat.courses.size() : 0}">0</span>
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span th:if="${cat.active}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Active
+                                </span>
+                                <span th:unless="${cat.active}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Inactive
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 text-xs">
+                                <span th:text="${#temporals.format(cat.updatedAt, 'MMM dd, yyyy')}">Oct 24, 2024</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <!-- Action Dropdown Wrapper -->
+                                <div class="relative inline-block text-left dropdown-wrapper">
+                                    <button type="button" class="w-8 h-8 rounded-lg text-gray-400 hover:text-surface-900 hover:bg-surface-100 flex items-center justify-center transition-colors" onclick="toggleDropdown(this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg border border-surface-200 overflow-hidden z-10 dropdown-menu">
+                                        <div class="py-1">
+                                            <!-- Edit -->
+                                            <button type="button" th:attr="onclick='openEditModal(' + ${cat.id} + ', \'' + ${cat.name} + '\', \'' + ${cat.description} + '\', ' + ${cat.active} + ')'"
+                                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-surface-50 flex items-center gap-2">
+                                                <i class="bi bi-pencil w-4"></i> Edit
+                                            </button>
+                                            
+                                            <!-- Toggle Status -->
+                                            <form th:action="@{/admin/categories/{id}/toggle-status(id=${cat.id})}" method="post">
+                                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-surface-50 flex items-center gap-2">
+                                                    <i th:class="${cat.active ? 'bi bi-dash-circle w-4' : 'bi bi-check-circle w-4'}"></i>
+                                                    <span th:text="${cat.active ? 'Deactivate' : 'Activate'}">Toggle</span>
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Delete -->
+                                            <div class="border-t border-surface-100 my-1"></div>
+                                            <button type="button" th:attr="onclick='confirmDelete(' + ${cat.id} + ', \'' + ${cat.name} + '\', ' + (${cat.courses != null ? cat.courses.size() : 0}) + ')'"
+                                                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium">
+                                                <i class="bi bi-trash w-4"></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Simple Pagination Footer (Static for now) -->
+            <div th:unless="${#lists.isEmpty(categories)}" class="px-6 py-4 border-t border-surface-200 bg-surface-50 text-xs text-gray-500 flex justify-between items-center">
+                <span th:text="'Showing ' + ${categories.size()} + ' categories'">Showing N categories</span>
+            </div>
+            
+        </div>
+
+        <!-- Add/Edit Category Modal -->
+        <div id="categoryModal" class="fixed inset-0 z-50 hidden">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onclick="closeCategoryModal()"></div>
+            
+            <!-- Modal Content -->
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                <div class="relative bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg w-full border border-surface-200">
+                    
+                    <form id="categoryForm" action="/admin/categories/add" method="post" class="flex flex-col">
+                        <!-- Hidden ID for editing -->
+                        <input type="hidden" id="categoryId" name="id">
+                        
+                        <div class="px-6 py-5 border-b border-surface-100 flex justify-between items-center bg-surface-50/50">
+                            <h3 class="text-lg font-bold text-surface-900" id="modalTitle">Add Category</h3>
+                            <button type="button" onclick="closeCategoryModal()" class="text-gray-400 hover:text-gray-600 transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-200">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="px-6 py-6 space-y-5">
                             <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1.5">Category Name *</label>
-                                <input type="text" th:field="*{name}" required
-                                       class="w-full px-4 py-2.5 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500">
-                                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-red-400 text-xs mt-1"></p>
+                                <label class="block text-sm font-semibold text-surface-900 mb-1.5">Category Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="categoryName" name="name" required
+                                       class="w-full px-4 py-2.5 bg-white border border-surface-300 rounded-xl text-surface-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
+                                       placeholder="e.g. Web Development">
+                                <p class="text-[11px] text-gray-500 mt-1.5">The slug will be automatically generated from the name.</p>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1.5">Description (Optional)</label>
-                                <textarea th:field="*{description}" rows="3"
-                                          class="w-full px-4 py-2.5 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500"></textarea>
+                                <label class="block text-sm font-semibold text-surface-900 mb-1.5">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <textarea id="categoryDescription" name="description" rows="3"
+                                          class="w-full px-4 py-2.5 bg-white border border-surface-300 rounded-xl text-surface-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-colors"
+                                          placeholder="Briefly describe what courses belong here..."></textarea>
                             </div>
                             
-                            <div class="flex items-center gap-3 py-2">
-                                <input type="checkbox" th:field="*{active}" id="active" class="w-5 h-5 rounded border-white/10 bg-surface-950 text-brand-500 focus:ring-brand-500/50">
-                                <label for="active" class="text-sm font-medium text-gray-300">Active (Visible)</label>
+                            <div class="flex items-center gap-3 py-2 bg-surface-50 px-4 rounded-xl border border-surface-200">
+                                <input type="checkbox" id="categoryActive" name="active" value="true" checked
+                                       class="w-5 h-5 rounded border-surface-300 text-brand-600 focus:ring-brand-500/20 bg-white cursor-pointer">
+                                <div>
+                                    <label for="categoryActive" class="text-sm font-semibold text-surface-900 cursor-pointer">Active Status</label>
+                                    <p class="text-xs text-gray-500">Inactive categories won't appear in public filters.</p>
+                                </div>
                             </div>
-                            
-                            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-xl transition-all shadow-lg shadow-brand-600/20">
+                        </div>
+                        
+                        <div class="px-6 py-4 border-t border-surface-100 bg-surface-50 flex justify-end gap-3">
+                            <button type="button" onclick="closeCategoryModal()" class="px-5 py-2.5 bg-white border border-surface-300 text-gray-700 font-medium rounded-xl hover:bg-surface-50 transition-colors shadow-sm">
+                                Cancel
+                            </button>
+                            <button type="submit" id="modalSubmitBtn" class="px-5 py-2.5 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition-colors shadow-sm">
                                 Create Category
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="fixed inset-0 z-50 hidden">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
+            
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                <div class="relative bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-md w-full border border-surface-200">
+                    <div class="px-6 py-6 sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="bi bi-exclamation-triangle text-red-600 text-lg"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-bold text-surface-900" id="deleteModalTitle">Delete Category</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500" id="deleteModalText">
+                                    Are you sure you want to delete this category? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="px-6 py-4 border-t border-surface-100 bg-surface-50 flex justify-end gap-3">
+                        <button type="button" onclick="closeDeleteModal()" class="px-5 py-2 text-sm bg-white border border-surface-300 text-gray-700 font-medium rounded-xl hover:bg-surface-50 transition-colors shadow-sm">
+                            Cancel
+                        </button>
+                        <form id="deleteForm" method="post" action="">
+                            <button type="submit" id="deleteSubmitBtn" class="px-5 py-2 text-sm bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-sm">
+                                Delete Permanently
                             </button>
                         </form>
                     </div>
                 </div>
-
-                <!-- Categories List -->
-                <div class="lg:col-span-2">
-                    <div class="bg-surface-900 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-                        
-                        <div th:if="${#lists.isEmpty(categories)}" class="p-12 text-center">
-                            <i class="bi bi-folder-x text-4xl text-gray-600 mb-3 block"></i>
-                            <h3 class="text-lg font-bold text-white mb-1">No Categories</h3>
-                            <p class="text-gray-400 text-sm">Create your first category using the form.</p>
-                        </div>
-
-                        <div th:unless="${#lists.isEmpty(categories)}" class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-surface-800/50 border-b border-white/5">
-                                        <th class="py-4 px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
-                                        <th class="py-4 px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">Slug</th>
-                                        <th class="py-4 px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Status</th>
-                                        <th class="py-4 px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-white/5">
-                                    <tr th:each="cat : ${categories}" class="hover:bg-white/5 transition-colors">
-                                        <td class="py-4 px-6">
-                                            <div class="font-medium text-white" th:text="${cat.name}"></div>
-                                            <div class="text-xs text-gray-500 truncate max-w-xs mt-1" th:text="${cat.description}"></div>
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-400 font-mono" th:text="${cat.slug}"></td>
-                                        <td class="py-4 px-6 text-center">
-                                            <span th:if="${cat.active}" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">Active</span>
-                                            <span th:unless="${cat.active}" class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20">Inactive</span>
-                                        </td>
-                                        <td class="py-4 px-6 text-right">
-                                            <button class="text-gray-400 hover:text-brand-400 transition-colors p-2" title="Edit coming soon">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
-            
         </div>
+
     </div>
+
+    <!-- Page Scripts -->
+    <script>
+        // Dropdown toggle logic
+        function toggleDropdown(btn) {
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if(menu !== btn.nextElementSibling) {
+                    menu.classList.add('hidden');
+                }
+            });
+            // Toggle current
+            btn.nextElementSibling.classList.toggle('hidden');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown-wrapper')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Add/Edit Modal Logic
+        const categoryModal = document.getElementById('categoryModal');
+        const categoryForm = document.getElementById('categoryForm');
+        
+        function openCategoryModal() {
+            document.getElementById('modalTitle').textContent = 'Add Category';
+            document.getElementById('modalSubmitBtn').textContent = 'Create Category';
+            categoryForm.action = '/admin/categories/add';
+            
+            // Reset fields
+            document.getElementById('categoryId').value = '';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryDescription').value = '';
+            document.getElementById('categoryActive').checked = true;
+            
+            categoryModal.classList.remove('hidden');
+        }
+
+        function openEditModal(id, name, description, active) {
+            document.getElementById('modalTitle').textContent = 'Edit Category';
+            document.getElementById('modalSubmitBtn').textContent = 'Save Changes';
+            categoryForm.action = '/admin/categories/edit';
+            
+            // Populate fields
+            document.getElementById('categoryId').value = id;
+            document.getElementById('categoryName').value = name;
+            
+            // Handle 'null' string from Thymeleaf interpolation if description is null
+            document.getElementById('categoryDescription').value = description && description !== 'null' ? description : '';
+            
+            document.getElementById('categoryActive').checked = active;
+            
+            categoryModal.classList.remove('hidden');
+        }
+
+        function closeCategoryModal() {
+            categoryModal.classList.add('hidden');
+        }
+
+        // Delete Modal Logic
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        
+        function confirmDelete(id, name, courseCount) {
+            if (courseCount > 0) {
+                // Show dependency error instead of delete confirmation
+                document.getElementById('deleteModalTitle').textContent = 'Cannot Delete Category';
+                document.getElementById('deleteModalTitle').classList.remove('text-surface-900');
+                document.getElementById('deleteModalTitle').classList.add('text-red-600');
+                
+                document.getElementById('deleteModalText').innerHTML = `
+                    This category (<b>${name}</b>) cannot be permanently deleted because 
+                    <b>${courseCount} courses</b> are currently associated with it.<br><br>
+                    Please reassign those courses to another category first, or deactivate this category instead.
+                `;
+                
+                document.getElementById('deleteSubmitBtn').classList.add('hidden');
+            } else {
+                // Show normal delete confirmation
+                document.getElementById('deleteModalTitle').textContent = 'Delete Category';
+                document.getElementById('deleteModalTitle').classList.add('text-surface-900');
+                document.getElementById('deleteModalTitle').classList.remove('text-red-600');
+                
+                document.getElementById('deleteModalText').innerHTML = `
+                    Are you sure you want to permanently delete <b>${name}</b>?<br>
+                    This action cannot be undone.
+                `;
+                
+                deleteForm.action = '/admin/categories/' + id + '/delete';
+                document.getElementById('deleteSubmitBtn').classList.remove('hidden');
+            }
+            
+            deleteModal.classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            deleteModal.classList.add('hidden');
+        }
+    </script>
 </body>
 </html>

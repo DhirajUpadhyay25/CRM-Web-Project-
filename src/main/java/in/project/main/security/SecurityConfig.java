@@ -92,7 +92,7 @@ public class SecurityConfig {
                 .accessDeniedPage("/403")
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/createOrder", "/api/verifyPayment")
+                .ignoringRequestMatchers("/api/createOrder", "/api/verifyPayment", "/admin/api/**")
             );
 
         return http.build();

@@ -67,6 +67,49 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    public void deleteCategory(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+        
+        if (category.getCourses() != null && !category.getCourses().isEmpty()) {
+            throw new IllegalStateException("Cannot delete category because " + category.getCourses().size() + " course(s) are currently associated with it.");
+        }
+        
+        categoryRepository.delete(category);
+    }
+
+    @Transactional
+    public void toggleStatus(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found with ID: " + id));
+        category.setActive(!category.isActive());
+        categoryRepository.save(category);
+    }
+
+    public List<Category> searchCategories(String keyword) {
+        return categoryRepository.findByNameContainingIgnoreCaseOrSlugContainingIgnoreCase(keyword, keyword);
+    }
+
+    public List<Category> getCategoriesByStatus(boolean active) {
+        return categoryRepository.findByActive(active);
+    }
+
+    public long getTotalCategories() {
+        return categoryRepository.count();
+    }
+
+    public long getActiveCategoriesCount() {
+        return categoryRepository.countByActive(true);
+    }
+
+    public long getInactiveCategoriesCount() {
+        return categoryRepository.countByActive(false);
+    }
+
+    public long getCategoriesWithCoursesCount() {
+        return categoryRepository.countCategoriesWithCourses();
+    }
+
     private String generateSlug(String name) {
         String baseSlug = name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
         String uniqueSlug = baseSlug;

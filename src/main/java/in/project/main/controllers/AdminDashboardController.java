@@ -17,8 +17,18 @@ public class AdminDashboardController {
 
     @GetMapping("/dashboard")
     public String openAdminDashboard(Model model) {
+        // KPI metrics
         Map<String, Object> metrics = dashboardService.getAdminDashboardMetrics();
         model.addAllAttributes(metrics);
+
+        // Recent activity
+        model.addAttribute("recentOrders", dashboardService.getRecentOrders(5));
+        model.addAttribute("recentStudents", dashboardService.getRecentStudents(5));
+        model.addAttribute("recentLeads", dashboardService.getRecentLeads(5));
+
+        // Attention items
+        model.addAttribute("attentionItems", dashboardService.getAttentionItems());
+
         return "admin/dashboard";
     }
 }
