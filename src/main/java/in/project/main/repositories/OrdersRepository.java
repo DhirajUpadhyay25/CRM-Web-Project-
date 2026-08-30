@@ -29,6 +29,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long>
 
 	boolean existsByCourseName(String courseName);
 
+	Orders findByOrderId(String orderId);
+
 	List<Orders> findTop10ByOrderByIdDesc();
 
 	@Query("SELECT o FROM Orders o WHERE " +

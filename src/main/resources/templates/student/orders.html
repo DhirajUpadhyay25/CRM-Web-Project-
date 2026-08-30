@@ -32,7 +32,8 @@
                                 <th class="py-3.5 px-4">Payment ID</th>
                                 <th class="py-3.5 px-4">Order ID</th>
                                 <th class="py-3.5 px-4">Status</th>
-                                <th class="py-3.5 px-6">Date</th>
+                                <th class="py-3.5 px-4">Date</th>
+                                <th class="py-3.5 px-6 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-surface-200 text-sm">
@@ -79,7 +80,15 @@
                                 </td>
 
                                 <!-- Date -->
-                                <td class="py-3.5 px-6 text-gray-400 text-xs" th:text="${order.date}">—</td>
+                                <td class="py-3.5 px-4 text-gray-400 text-xs" th:text="${order.date}">—</td>
+
+                                <!-- Actions -->
+                                <td class="py-3.5 px-6 text-right">
+                                    <a th:href="@{'/student/orders/' + ${order.id}}" class="inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700 transition-colors">
+                                        <span>Details</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

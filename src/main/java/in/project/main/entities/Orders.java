@@ -34,6 +34,34 @@ public class Orders
 	@Column
 	 private String signature;
 	
+	@Column
+	private String status;
+	
+	@Column
+	private String discountAmount;
+	
+	@Column
+	private String couponCode;
+	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public String getDiscountAmount() {
+		return discountAmount;
+	}
+	public void setDiscountAmount(String discountAmount) {
+		this.discountAmount = discountAmount;
+	}
+	public String getCouponCode() {
+		return couponCode;
+	}
+	public void setCouponCode(String couponCode) {
+		this.couponCode = couponCode;
+	}
+	
 	public String getSignature() {
 		return signature;
 	}

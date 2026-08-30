@@ -236,6 +236,7 @@ public class PublicController {
         freeOrder.setOrderId("free_" + System.currentTimeMillis());
         freeOrder.setPaymentId("free_enrollment");
         freeOrder.setSignature("free_verified");
+        freeOrder.setStatus("COMPLETED");
 
         orderService.storeUserOrders(freeOrder);
 

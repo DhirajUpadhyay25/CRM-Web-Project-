@@ -24,11 +24,15 @@ import in.project.main.entities.Course;
 import in.project.main.entities.Enrollment;
 import in.project.main.entities.Orders;
 import in.project.main.entities.User;
+import in.project.main.entities.Payment;
+import in.project.main.entities.Coupon;
 import in.project.main.entities.enums.CourseStatus;
 import in.project.main.entities.enums.EnrollmentStatus;
 import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
+import in.project.main.repositories.PaymentRepository;
+import in.project.main.repositories.CouponRepository;
 import in.project.main.services.CourseService;
 import in.project.main.services.OrderService;
 import in.project.main.util.DateTimeUtil;
@@ -52,15 +56,21 @@ public class OrdersApi {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private CouponRepository couponRepository;
+
     @Value("${app.razorpay.key-id}")
     private String keyId;
 
     @Value("${app.razorpay.key-secret}")
     private String keySecret;
 
-    // ✅ 1. CREATE ORDER (Price Integrity Enforced Server-Side)
+    // ✅ 1. CREATE ORDER (Price Integrity Enforced Server-Side with Coupon Validation)
     @PostMapping("/createOrder")
-    public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> payload, Principal principal) {
         try {
             String courseName = (String) payload.get("courseName");
             if (courseName == null || courseName.trim().isEmpty()) {
@@ -72,9 +82,34 @@ public class OrdersApi {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid or unpublished course"));
             }
 
+            String userEmail = (principal != null) ? principal.getName() : "anonymous";
+            User user = userRepository.findByEmail(userEmail);
+            if (user != null && enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
+                return ResponseEntity.badRequest().body(Map.of("error", "You already have active access to this course."));
+            }
+
             BigDecimal effectivePrice = course.getEffectivePrice();
             if (effectivePrice.compareTo(BigDecimal.ZERO) <= 0) {
                 return ResponseEntity.badRequest().body(Map.of("error", "This course is free. Please use free enrollment."));
+            }
+
+            // Coupon Code Server-Side Evaluation
+            String couponCode = (String) payload.get("couponCode");
+            BigDecimal discount = BigDecimal.ZERO;
+            if (couponCode != null && !couponCode.trim().isEmpty()) {
+                Coupon coupon = couponRepository.findByCode(couponCode.trim());
+                if (coupon != null && coupon.getIsActive()) {
+                    if ("percentage".equalsIgnoreCase(coupon.getDiscountType())) {
+                        BigDecimal pct = new BigDecimal(coupon.getDiscountValue());
+                        discount = effectivePrice.multiply(pct).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+                    } else {
+                        discount = new BigDecimal(coupon.getDiscountValue());
+                    }
+                    effectivePrice = effectivePrice.subtract(discount);
+                    if (effectivePrice.compareTo(BigDecimal.ZERO) < 0) {
+                        effectivePrice = BigDecimal.ZERO;
+                    }
+                }
             }
 
             // Amount in paise (authoritative calculation)
@@ -87,6 +122,20 @@ public class OrdersApi {
             orderRequest.put("receipt", "rcpt_" + System.currentTimeMillis());
 
             Order order = client.orders.create(orderRequest);
+
+            // Create PENDING Order in Database
+            Orders pendingOrder = new Orders();
+            pendingOrder.setOrderId(order.get("id"));
+            pendingOrder.setCourseName(course.getName());
+            pendingOrder.setCourseAmount(effectivePrice.toPlainString());
+            pendingOrder.setUserEmail(userEmail);
+            pendingOrder.setDateOfPurchase(DateTimeUtil.getCurrentDateTimeFormatted());
+            pendingOrder.setStatus("PENDING");
+            if (couponCode != null && !couponCode.trim().isEmpty()) {
+                pendingOrder.setCouponCode(couponCode.trim());
+                pendingOrder.setDiscountAmount(discount.toPlainString());
+            }
+            ordersRepository.save(pendingOrder);
 
             Map<String, Object> response = new HashMap<>();
             response.put("orderId", order.get("id"));
@@ -102,7 +151,27 @@ public class OrdersApi {
         }
     }
 
-    // ✅ 2. VERIFY PAYMENT (Cryptographic Signature Verification & Price Integrity)
+    // ✅ 2. FAIL ORDER (Transitions Order Status to FAILED)
+    @PostMapping("/failOrder")
+    public ResponseEntity<?> failOrder(@RequestBody Map<String, Object> payload) {
+        try {
+            String orderId = (String) payload.get("orderId");
+            if (orderId == null || orderId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "OrderId is required"));
+            }
+            Orders order = ordersRepository.findByOrderId(orderId);
+            if (order != null && "PENDING".equals(order.getStatus())) {
+                order.setStatus("FAILED");
+                ordersRepository.save(order);
+                return ResponseEntity.ok(Map.of("status", "success", "message", "Order marked as FAILED"));
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", "Order not found or not pending"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // ✅ 3. VERIFY PAYMENT (Cryptographic Signature Verification & Price Integrity)
     @PostMapping("/verifyPayment")
     public ResponseEntity<?> verifyPayment(@RequestBody Orders orders, Principal principal) {
         try {
@@ -125,26 +194,46 @@ public class OrdersApi {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid payment signature"));
             }
 
-            // Set authoritative user email and price
-            String userEmail = (principal != null) ? principal.getName() : orders.getUserEmail();
-            orders.setUserEmail(userEmail);
-            orders.setCourseAmount(course.getEffectivePrice().toPlainString());
-            orders.setDateOfPurchase(DateTimeUtil.getCurrentDateTimeFormatted());
+            Orders existingOrder = ordersRepository.findByOrderId(orders.getOrderId());
+            if (existingOrder == null) {
+                // Handle fallback (e.g. employee custom sale or legacy checkout)
+                existingOrder = new Orders();
+                existingOrder.setOrderId(orders.getOrderId());
+                existingOrder.setCourseName(course.getName());
+                existingOrder.setCourseAmount(course.getEffectivePrice().toPlainString());
+                String userEmail = (principal != null) ? principal.getName() : orders.getUserEmail();
+                existingOrder.setUserEmail(userEmail);
+                existingOrder.setDateOfPurchase(DateTimeUtil.getCurrentDateTimeFormatted());
+            }
 
-            // Prevent duplicate insertion if already recorded
-            if (!ordersRepository.existsByUserEmailAndCourseName(userEmail, course.getName())) {
-                orderService.storeUserOrders(orders);
+            if ("COMPLETED".equals(existingOrder.getStatus())) {
+                return ResponseEntity.ok(Map.of("status", "success", "message", "Payment verified & order stored successfully"));
+            }
 
-                // Create enrollment record for the student panel
-                User user = userRepository.findByEmail(userEmail);
-                if (user != null && !enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
-                    Enrollment enrollment = new Enrollment();
-                    enrollment.setUser(user);
-                    enrollment.setCourse(course);
-                    enrollment.setStatus(EnrollmentStatus.ACTIVE);
-                    enrollment.setPaymentStatus("PAID");
-                    enrollmentRepository.save(enrollment);
-                }
+            existingOrder.setPaymentId(orders.getPaymentId());
+            existingOrder.setSignature(orders.getSignature());
+            existingOrder.setStatus("COMPLETED");
+            ordersRepository.save(existingOrder);
+
+            // Record transaction details in Payment table
+            Payment payment = new Payment();
+            payment.setOrderId(existingOrder.getOrderId());
+            payment.setAmount(existingOrder.getCourseAmount());
+            payment.setStatus("SUCCESS");
+            payment.setPaymentMethod("RAZORPAY");
+            payment.setPaymentDate(DateTimeUtil.getCurrentDateTimeFormatted());
+            paymentRepository.save(payment);
+
+            // Create enrollment record for student dashboard
+            String userEmail = existingOrder.getUserEmail();
+            User user = userRepository.findByEmail(userEmail);
+            if (user != null && !enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
+                Enrollment enrollment = new Enrollment();
+                enrollment.setUser(user);
+                enrollment.setCourse(course);
+                enrollment.setStatus(EnrollmentStatus.ACTIVE);
+                enrollment.setPaymentStatus("PAID");
+                enrollmentRepository.save(enrollment);
             }
 
             return ResponseEntity.ok(Map.of("status", "success", "message", "Payment verified & order stored successfully"));
@@ -152,6 +241,53 @@ public class OrdersApi {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Payment verification error: " + e.getMessage()));
+        }
+    }
+
+    // ✅ 4. VALIDATE COUPON
+    @PostMapping("/coupons/apply")
+    public ResponseEntity<?> applyCoupon(@RequestBody Map<String, Object> payload) {
+        try {
+            String couponCode = (String) payload.get("couponCode");
+            String courseName = (String) payload.get("courseName");
+            if (couponCode == null || couponCode.trim().isEmpty() || courseName == null || courseName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Coupon code and course name are required"));
+            }
+
+            Course course = courseService.getCourseDetails(courseName.trim());
+            if (course == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Course not found"));
+            }
+
+            Coupon coupon = couponRepository.findByCode(couponCode.trim());
+            if (coupon == null || !coupon.getIsActive()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or inactive coupon code"));
+            }
+
+            BigDecimal originalPrice = course.getEffectivePrice();
+            BigDecimal discount = BigDecimal.ZERO;
+
+            if ("percentage".equalsIgnoreCase(coupon.getDiscountType())) {
+                BigDecimal pct = new BigDecimal(coupon.getDiscountValue());
+                discount = originalPrice.multiply(pct).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+            } else {
+                discount = new BigDecimal(coupon.getDiscountValue());
+            }
+
+            BigDecimal discountedPrice = originalPrice.subtract(discount);
+            if (discountedPrice.compareTo(BigDecimal.ZERO) < 0) {
+                discountedPrice = BigDecimal.ZERO;
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "couponCode", coupon.getCode(),
+                "originalPrice", originalPrice.toPlainString(),
+                "discount", discount.toPlainString(),
+                "discountedPrice", discountedPrice.toPlainString()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
 

@@ -38,11 +38,17 @@ import in.project.main.repositories.CourseRepository;
 import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
+import in.project.main.util.DateTimeUtil;
 import in.project.main.repositories.LessonProgressRepository;
 import in.project.main.repositories.LessonRepository;
 import in.project.main.repositories.AssignmentRepository;
 import in.project.main.repositories.AssignmentSubmissionRepository;
 import in.project.main.repositories.StudentActivityRepository;
+import in.project.main.entities.Payment;
+import in.project.main.entities.Refund;
+import in.project.main.repositories.PaymentRepository;
+import in.project.main.repositories.RefundRepository;
+import in.project.main.services.CourseService;
 import in.project.main.entities.enums.EnrollmentStatus;
 import in.project.main.entities.enums.CourseStatus;
 import in.project.main.entities.enums.CourseLevel;
@@ -78,6 +84,12 @@ public class StudentDashboardController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private RefundRepository refundRepository;
 
     @Autowired
     private CourseService courseService;
@@ -288,7 +300,7 @@ public class StudentDashboardController {
                 orderData.put("courseImageUrl", courseInfo[0]);
                 orderData.put("instructorName", courseInfo.length > 5 ? courseInfo[5] : null);
             }
-            orderData.put("status", "COMPLETED");
+            orderData.put("status", order.getStatus() != null ? order.getStatus() : "COMPLETED");
             orderList.add(orderData);
         }
 
@@ -297,6 +309,98 @@ public class StudentDashboardController {
         model.addAttribute("currentPage", page);
 
         return "student/orders";
+    }
+
+    @GetMapping("/orders/{id}")
+    public String orderDetail(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        addCommonStudentAttributes(userDetails, model);
+        String email = userDetails.getUsername();
+        Orders order = ordersRepository.findById(id).orElse(null);
+        if (order == null || !email.equals(order.getUserEmail())) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Order not found or access denied.");
+            return "redirect:/student/orders";
+        }
+
+        Course course = courseService.getCourseDetails(order.getCourseName());
+        Enrollment enrollment = null;
+        if (course != null) {
+            User user = userRepository.findByEmail(email);
+            if (user != null) {
+                enrollment = enrollmentRepository.findByUserEmailAndCourseId(email, course.getId()).orElse(null);
+            }
+        }
+
+        Refund refund = refundRepository.findByOrderId(order.getOrderId());
+
+        model.addAttribute("order", order);
+        model.addAttribute("course", course);
+        model.addAttribute("enrollment", enrollment);
+        model.addAttribute("refund", refund);
+
+        return "student/order-detail";
+    }
+
+    @GetMapping("/orders/{id}/invoice")
+    public String downloadInvoice(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        String email = userDetails.getUsername();
+        Orders order = ordersRepository.findById(id).orElse(null);
+        if (order == null || !email.equals(order.getUserEmail())) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Order not found or access denied.");
+            return "redirect:/student/orders";
+        }
+
+        Course course = courseService.getCourseDetails(order.getCourseName());
+        User user = userRepository.findByEmail(email);
+
+        model.addAttribute("order", order);
+        model.addAttribute("course", course);
+        model.addAttribute("user", user);
+
+        return "student/invoice";
+    }
+
+    @PostMapping("/orders/{id}/refund")
+    public String requestRefund(
+            @PathVariable("id") Long id,
+            @RequestParam("reason") String reason,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        String email = userDetails.getUsername();
+        Orders order = ordersRepository.findById(id).orElse(null);
+        if (order == null || !email.equals(order.getUserEmail())) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Order not found or access denied.");
+            return "redirect:/student/orders";
+        }
+
+        if (!"COMPLETED".equals(order.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Only completed orders are eligible for refunds.");
+            return "redirect:/student/orders/" + id;
+        }
+
+        Refund existingRefund = refundRepository.findByOrderId(order.getOrderId());
+        if (existingRefund != null) {
+            redirectAttributes.addFlashAttribute("errorMsg", "A refund has already been requested for this order.");
+            return "redirect:/student/orders/" + id;
+        }
+
+        Refund refund = new Refund();
+        refund.setOrderId(order.getOrderId());
+        refund.setAmount(order.getCourseAmount());
+        refund.setReason(reason);
+        refund.setStatus("PENDING");
+        refund.setRefundDate(DateTimeUtil.getCurrentDateTimeFormatted());
+        refundRepository.save(refund);
+
+        redirectAttributes.addFlashAttribute("successMsg", "Refund requested successfully. It is pending admin approval.");
+        return "redirect:/student/orders/" + id;
     }
 
     @GetMapping("/notifications")

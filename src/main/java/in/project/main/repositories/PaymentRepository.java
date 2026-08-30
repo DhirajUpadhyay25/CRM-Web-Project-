@@ -6,4 +6,5 @@ import in.project.main.entities.Payment;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
+    Payment findByOrderId(String orderId);
 }

@@ -177,7 +177,8 @@
                                                     th:data-uname="${sessionUser != null ? sessionUser.name : ''}"
                                                     th:data-uemail="${sessionUser != null ? sessionUser.email : ''}"
                                                     th:data-uphoneno="${sessionUser != null ? sessionUser.phoneno : ''}"
-                                                    onclick="purchaseCourseDirect(this.getAttribute('data-cname'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'))"
+                                                    th:data-uprice="${course.getEffectivePrice()}"
+                                                    onclick="purchaseCourseDirect(this.getAttribute('data-cname'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'), this.getAttribute('data-uprice'))"
                                                     class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2">
                                                 <i class="bi bi-credit-card"></i>
                                                 <span>Buy Course Now</span>
@@ -403,6 +404,82 @@
 
     </main>
 
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Overlay -->
+            <div class="fixed inset-0 transition-opacity bg-black bg-opacity-70" onclick="closeCheckoutModal()"></div>
+            
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <!-- Modal Body -->
+            <div class="inline-block align-bottom bg-slate-900 border border-white/10 text-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="p-6 md:p-8 space-y-6">
+                    <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2">
+                            <i class="bi bi-shield-lock-fill text-indigo-400"></i> Secure Checkout
+                        </h3>
+                        <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Customer Information</h4>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-sm space-y-1.5">
+                            <p class="text-gray-400">Name: <strong class="text-white" id="chkCustomerName">Student</strong></p>
+                            <p class="text-gray-400">Email: <strong class="text-white font-mono" id="chkCustomerEmail">student@email.com</strong></p>
+                            <p class="text-gray-400">Phone: <strong class="text-white" id="chkCustomerPhone">—</strong></p>
+                        </div>
+                    </div>
+
+                    <!-- Promo Code -->
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Have a Promo Coupon?</h4>
+                        <div class="flex gap-2">
+                            <input type="text" id="couponCodeInput" placeholder="Enter coupon code..."
+                                   class="flex-1 min-w-0 px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
+                            <button onclick="validateAndApplyCoupon()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors">
+                                Apply
+                            </button>
+                        </div>
+                        <p id="couponFeedback" class="text-[11px] mt-1 hidden"></p>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Order Summary</h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between text-gray-400">
+                                <span>Course Price</span>
+                                <span id="chkOriginalPrice">₹0.00</span>
+                            </div>
+                            <div class="flex justify-between text-red-400 font-semibold hidden" id="chkDiscountRow">
+                                <span>Applied Coupon Discount</span>
+                                <span id="chkDiscountAmount">-₹0.00</span>
+                            </div>
+                            <div class="flex justify-between text-gray-400">
+                                <span>Tax (0% IGST)</span>
+                                <span>₹0.00</span>
+                            </div>
+                            <div class="flex justify-between border-t border-white/5 pt-3 text-sm font-extrabold text-white">
+                                <span>Total Payable</span>
+                                <span class="text-indigo-400" id="chkFinalAmount">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button id="paySecurelyBtn" onclick="initiateSecurePayment()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-indigo-600/30 text-sm flex items-center justify-center gap-2">
+                        <i class="bi bi-credit-card-2-back-fill"></i>
+                        <span>Pay Securely with Razorpay</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <div th:replace="~{fragments/tw-footer :: footer}"></div>
 
@@ -410,11 +487,100 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script th:inline="javascript">
-    function purchaseCourseDirect(courseName, uname, uemail, uphoneno) {
-        var btn = document.getElementById('buyCourseBtn');
+    var currentCheckout = {
+        courseName: '',
+        uname: '',
+        uemail: '',
+        uphoneno: '',
+        originalPrice: 0,
+        finalPrice: 0,
+        couponCode: null
+    };
+
+    function purchaseCourseDirect(courseName, uname, uemail, uphoneno, price) {
+        currentCheckout.courseName = courseName;
+        currentCheckout.uname = uname;
+        currentCheckout.uemail = uemail;
+        currentCheckout.uphoneno = uphoneno;
+        currentCheckout.originalPrice = parseFloat(price);
+        currentCheckout.finalPrice = parseFloat(price);
+        currentCheckout.couponCode = null;
+
+        // Reset Coupon Inputs
+        document.getElementById('couponCodeInput').value = '';
+        var feedback = document.getElementById('couponFeedback');
+        feedback.className = 'text-[11px] mt-1 hidden';
+        document.getElementById('chkDiscountRow').classList.add('hidden');
+
+        // Populate Modal Fields
+        document.getElementById('chkCustomerName').innerText = uname || 'Student';
+        document.getElementById('chkCustomerEmail').innerText = uemail || 'student@email.com';
+        document.getElementById('chkCustomerPhone').innerText = uphoneno || '—';
+        document.getElementById('chkOriginalPrice').innerText = '₹' + currentCheckout.originalPrice.toFixed(2);
+        document.getElementById('chkFinalAmount').innerText = '₹' + currentCheckout.finalPrice.toFixed(2);
+
+        // Open Modal
+        document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+        document.getElementById('checkoutModal').classList.add('hidden');
+    }
+
+    function validateAndApplyCoupon() {
+        var input = document.getElementById('couponCodeInput');
+        var couponCode = input.value.trim();
+        var feedback = document.getElementById('couponFeedback');
+        if (!couponCode) {
+            feedback.innerText = '⚠️ Please enter a coupon code';
+            feedback.className = 'text-[11px] mt-1 text-amber-400 block';
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/api/coupons/apply",
+            contentType: "application/json",
+            data: JSON.stringify({
+                couponCode: couponCode,
+                courseName: currentCheckout.courseName
+            }),
+            success: function(res) {
+                feedback.innerText = '✓ Promo Code Applied Successfully!';
+                feedback.className = 'text-[11px] mt-1 text-emerald-400 block';
+                
+                var discount = parseFloat(res.discount);
+                var discountedPrice = parseFloat(res.discountedPrice);
+                
+                currentCheckout.finalPrice = discountedPrice;
+                currentCheckout.couponCode = couponCode;
+
+                document.getElementById('chkDiscountAmount').innerText = '-₹' + discount.toFixed(2);
+                document.getElementById('chkDiscountRow').classList.remove('hidden');
+                document.getElementById('chkFinalAmount').innerText = '₹' + discountedPrice.toFixed(2);
+            },
+            error: function(err) {
+                var msg = 'Invalid or expired coupon code';
+                if (err.responseJSON && err.responseJSON.error) {
+                    msg = err.responseJSON.error;
+                }
+                feedback.innerText = '❌ ' + msg;
+                feedback.className = 'text-[11px] mt-1 text-red-400 block';
+                
+                // Reset
+                currentCheckout.finalPrice = currentCheckout.originalPrice;
+                currentCheckout.couponCode = null;
+                document.getElementById('chkDiscountRow').classList.add('hidden');
+                document.getElementById('chkFinalAmount').innerText = '₹' + currentCheckout.originalPrice.toFixed(2);
+            }
+        });
+    }
+
+    function initiateSecurePayment() {
+        var btn = document.getElementById('paySecurelyBtn');
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Initializing Secure Checkout...';
+            btn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Connecting to Secure Gateway...';
         }
 
         $.ajax({
@@ -422,13 +588,14 @@
             url: "/api/createOrder",
             contentType: "application/json",
             data: JSON.stringify({
-                courseName: courseName
+                courseName: currentCheckout.courseName,
+                couponCode: currentCheckout.couponCode
             }),
-
-            success: function (orderData) {
+            success: function(orderData) {
+                closeCheckoutModal();
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-credit-card"></i> <span>Buy Course Now</span>';
+                    btn.innerHTML = '<i class="bi bi-credit-card-2-back-fill"></i> <span>Pay Securely with Razorpay</span>';
                 }
 
                 var options = {
@@ -437,12 +604,11 @@
                     "currency": "INR",
                     "order_id": orderData.orderId,
                     "name": "EduTake Platform",
-                    "description": "Enrollment: " + courseName,
-
+                    "description": "Enrollment: " + currentCheckout.courseName,
                     "handler": function (response) {
                         var verifyData = {
-                            courseName: courseName,
-                            userEmail: uemail,
+                            courseName: currentCheckout.courseName,
+                            userEmail: currentCheckout.uemail,
                             paymentId: response.razorpay_payment_id,
                             orderId: response.razorpay_order_id,
                             signature: response.razorpay_signature
@@ -453,48 +619,48 @@
                             url: "/api/verifyPayment",
                             contentType: "application/json",
                             data: JSON.stringify(verifyData),
-
                             success: function () {
-                                alert("🎉 Payment Successful! Welcome to " + courseName);
+                                alert("🎉 Payment Successful! Welcome to " + currentCheckout.courseName);
                                 window.location.href = '/student/courses';
                             },
-
                             error: function (err) {
                                 alert("❌ Payment verification failed. Please contact support.");
-                                console.error(err);
                             }
                         });
                     },
-
                     "prefill": {
-                        "name": uname,
-                        "email": uemail,
-                        "contact": uphoneno
+                        "name": currentCheckout.uname,
+                        "email": currentCheckout.uemail,
+                        "contact": currentCheckout.uphoneno
                     },
-
                     "theme": {
-                        "color": "#6366f1"
+                        "color": "#8b5cf6"
                     }
                 };
 
                 var rzp = new Razorpay(options);
                 rzp.on('payment.failed', function (resp) {
-                    alert("Payment Cancelled / Failed: " + resp.error.description);
+                    // Send to backend fail endpoint
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/failOrder",
+                        contentType: "application/json",
+                        data: JSON.stringify({ orderId: orderData.orderId })
+                    });
+                    alert("Payment Failed / Cancelled: " + resp.error.description);
                 });
                 rzp.open();
             },
-
-            error: function (err) {
+            error: function(err) {
                 if (btn) {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-credit-card"></i> <span>Buy Course Now</span>';
+                    btn.innerHTML = '<i class="bi bi-credit-card-2-back-fill"></i> <span>Pay Securely with Razorpay</span>';
                 }
                 var msg = "Order creation failed";
                 if (err.responseJSON && err.responseJSON.error) {
                     msg = err.responseJSON.error;
                 }
                 alert("❌ " + msg);
-                console.error(err);
             }
         });
     }

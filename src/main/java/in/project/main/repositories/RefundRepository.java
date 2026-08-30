@@ -6,4 +6,6 @@ import in.project.main.entities.Refund;
 
 @Repository
 public interface RefundRepository extends JpaRepository<Refund, Long> {
+    java.util.List<Refund> findByStatus(String status);
+    Refund findByOrderId(String orderId);
 }
