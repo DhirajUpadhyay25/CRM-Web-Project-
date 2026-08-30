@@ -21,9 +21,14 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 
 import in.project.main.entities.Course;
+import in.project.main.entities.Enrollment;
 import in.project.main.entities.Orders;
+import in.project.main.entities.User;
 import in.project.main.entities.enums.CourseStatus;
+import in.project.main.entities.enums.EnrollmentStatus;
+import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
+import in.project.main.repositories.UserRepository;
 import in.project.main.services.CourseService;
 import in.project.main.services.OrderService;
 import in.project.main.util.DateTimeUtil;
@@ -40,6 +45,12 @@ public class OrdersApi {
 
     @Autowired
     private OrdersRepository ordersRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Value("${app.razorpay.key-id}")
     private String keyId;
@@ -123,6 +134,17 @@ public class OrdersApi {
             // Prevent duplicate insertion if already recorded
             if (!ordersRepository.existsByUserEmailAndCourseName(userEmail, course.getName())) {
                 orderService.storeUserOrders(orders);
+
+                // Create enrollment record for the student panel
+                User user = userRepository.findByEmail(userEmail);
+                if (user != null && !enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
+                    Enrollment enrollment = new Enrollment();
+                    enrollment.setUser(user);
+                    enrollment.setCourse(course);
+                    enrollment.setStatus(EnrollmentStatus.ACTIVE);
+                    enrollment.setPaymentStatus("PAID");
+                    enrollmentRepository.save(enrollment);
+                }
             }
 
             return ResponseEntity.ok(Map.of("status", "success", "message", "Payment verified & order stored successfully"));

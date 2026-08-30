@@ -1,12 +1,15 @@
 package in.project.main.services;
 
 import in.project.main.entities.*;
+import in.project.main.entities.enums.*;
 import in.project.main.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -34,6 +37,11 @@ public class DataSeederService {
     @Autowired private LeadRepository leadRepo;
     @Autowired private EnquiryRepository enquiryRepo;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private CategoryRepository categoryRepo;
+    @Autowired private CourseRepository courseRepo;
+    @Autowired private EnrollmentRepository enrollmentRepo;
+    @Autowired private NotificationRepository notificationRepo;
+    @Autowired private OrdersRepository ordersRepo;
 
     @Transactional
     public void seedAll() {
@@ -55,6 +63,7 @@ public class DataSeederService {
         seedRoles();
         seedLeads();
         seedEnquiries();
+        seedStudentPanelData();
         migratePlaintextPasswords();
     }
 
@@ -241,6 +250,169 @@ public class DataSeederService {
         if (enquiryRepo.count() > 0) return;
         Enquiry e1 = new Enquiry(); e1.setName("Amit Kumar"); e1.setEmail("amit@example.com"); e1.setPhone("9876543212"); e1.setSubject("Course duration"); e1.setMessage("How long is the Java course?"); e1.setType(in.project.main.entities.enums.EnquiryType.COURSE_ENQUIRY);
         enquiryRepo.save(e1);
+    }
+
+    @Transactional
+    public void seedStudentPanelData() {
+        seedCategories();
+        seedCourses();
+        seedStudents();
+        seedEnrollmentsAndOrders();
+        seedStudentNotifications();
+    }
+
+    private void seedCategories() {
+        if (categoryRepo.count() > 0) return;
+        String[][] categories = {
+            {"Web Development", "web-development", "Learn to build modern web applications"},
+            {"Data Science", "data-science", "Master data analysis and machine learning"},
+            {"Mobile Development", "mobile-development", "Build iOS and Android apps"},
+            {"Cloud Computing", "cloud-computing", "AWS, Azure, and GCP certifications"},
+            {"Cybersecurity", "cybersecurity", "Protect systems from digital attacks"},
+            {"AI & Machine Learning", "ai-machine-learning", "Build intelligent systems"}
+        };
+        for (String[] c : categories) {
+            Category cat = new Category();
+            cat.setName(c[0]);
+            cat.setSlug(c[1]);
+            cat.setDescription(c[2]);
+            cat.setActive(true);
+            categoryRepo.save(cat);
+        }
+    }
+
+    private void seedCourses() {
+        if (courseRepo.count() > 0) return;
+        List<Category> cats = categoryRepo.findAll();
+        if (cats.isEmpty()) return;
+
+        Object[][] courses = {
+            {"Complete Java Developer", "complete-java-developer", "Master Java from basics to advanced concepts", "John Doe", CourseLevel.ALL_LEVELS, "40 hours", new BigDecimal("4999"), new BigDecimal("2999"), true},
+            {"React.js Masterclass", "reactjs-masterclass", "Build modern UIs with React and hooks", "Jane Smith", CourseLevel.BEGINNER, "35 hours", new BigDecimal("3999"), new BigDecimal("1999"), true},
+            {"Python for Data Science", "python-for-data-science", "Learn Python programming for data analysis", "Alan Turing", CourseLevel.BEGINNER, "45 hours", new BigDecimal("5999"), new BigDecimal("3499"), true},
+            {"Spring Boot Microservices", "spring-boot-microservices", "Build production-ready microservices", "John Doe", CourseLevel.ADVANCED, "50 hours", new BigDecimal("6999"), new BigDecimal("4499"), false},
+            {"Flutter App Development", "flutter-app-development", "Create cross-platform mobile apps", "Grace Hopper", CourseLevel.INTERMEDIATE, "30 hours", new BigDecimal("3499"), new BigDecimal("1999"), true},
+            {"AWS Cloud Practitioner", "aws-cloud-practitioner", "Prepare for AWS certification exam", "Jane Smith", CourseLevel.BEGINNER, "25 hours", new BigDecimal("2999"), new BigDecimal("1499"), false},
+            {"Ethical Hacking Fundamentals", "ethical-hacking-fundamentals", "Learn penetration testing and security", "Alan Turing", CourseLevel.INTERMEDIATE, "38 hours", new BigDecimal("4499"), new BigDecimal("2499"), true},
+            {"Machine Learning A-Z", "machine-learning-a-z", "Hands-on ML with Python and scikit-learn", "Grace Hopper", CourseLevel.INTERMEDIATE, "55 hours", new BigDecimal("7999"), new BigDecimal("4999"), false},
+            {"JavaScript Deep Dive", "javascript-deep-dive", "Master modern JavaScript and ES6+", "John Doe", CourseLevel.ALL_LEVELS, "32 hours", new BigDecimal("2999"), new BigDecimal("1499"), true},
+            {"DevOps Engineering", "devops-engineering", "CI/CD, Docker, Kubernetes, and more", "Jane Smith", CourseLevel.ADVANCED, "42 hours", new BigDecimal("5999"), new BigDecimal("3999"), false},
+            {"UI/UX Design Principles", "ui-ux-design-principles", "Create beautiful user interfaces", "Grace Hopper", CourseLevel.BEGINNER, "20 hours", new BigDecimal("1999"), new BigDecimal("999"), true},
+            {"Blockchain Development", "blockchain-development", "Build decentralized applications", "Alan Turing", CourseLevel.ADVANCED, "36 hours", new BigDecimal("4999"), new BigDecimal("2999"), false}
+        };
+
+        int catIndex = 0;
+        for (Object[] c : courses) {
+            Course course = new Course();
+            course.setName((String) c[0]);
+            course.setSlug((String) c[1]);
+            course.setShortDescription((String) c[2]);
+            course.setInstructor((String) c[3]);
+            course.setLevel((CourseLevel) c[4]);
+            course.setDuration((String) c[5]);
+            course.setOriginalPrice((BigDecimal) c[6]);
+            course.setDiscountedPrice((BigDecimal) c[7]);
+            course.setFeatured((boolean) c[8]);
+            course.setStatus(CourseStatus.PUBLISHED);
+            course.setCategory(cats.get(catIndex % cats.size()));
+            course.setLanguage("English");
+            course.setDescription("Comprehensive course covering all aspects of " + c[0] + ". Includes hands-on projects, real-world examples, and certification preparation.");
+            courseRepo.save(course);
+            catIndex++;
+        }
+    }
+
+    private void seedStudents() {
+        if (userRepo.count() > 0) return;
+        Object[][] students = {
+            {"Rahul Sharma", "rahul@student.com", "9876543210", "Mumbai"},
+            {"Priya Patel", "priya@student.com", "9876543211", "Delhi"},
+            {"Amit Kumar", "amit@student.com", "9876543212", "Bangalore"},
+            {"Sneha Reddy", "sneha@student.com", "9876543213", "Hyderabad"},
+            {"Vikram Singh", "vikram@student.com", "9876543214", "Pune"}
+        };
+        for (Object[] s : students) {
+            User user = new User();
+            user.setName((String) s[0]);
+            user.setEmail((String) s[1]);
+            user.setPassword(passwordEncoder.encode("student123"));
+            user.setPhoneno((String) s[2]);
+            user.setCity((String) s[3]);
+            userRepo.save(user);
+        }
+    }
+
+    private void seedEnrollmentsAndOrders() {
+        List<User> students = new java.util.ArrayList<>(userRepo.findAll());
+        List<Course> courses = courseRepo.findAll();
+        if (students.isEmpty() || courses.isEmpty()) return;
+
+        Random r = new Random();
+        String[] statuses = {"COMPLETED", "ACTIVE", "ACTIVE", "ACTIVE"};
+
+        for (User student : students) {
+            int numCourses = 2 + r.nextInt(3);
+            List<Course> shuffled = new java.util.ArrayList<>(courses);
+            java.util.Collections.shuffle(shuffled, r);
+
+            for (int i = 0; i < Math.min(numCourses, shuffled.size()); i++) {
+                Course course = shuffled.get(i);
+                if (enrollmentRepo.existsByUserIdAndCourseId(student.getId(), course.getId())) continue;
+
+                String status = statuses[r.nextInt(statuses.length)];
+                LocalDateTime enrolledDaysAgo = LocalDateTime.now().minusDays(r.nextInt(30) + 1);
+
+                Enrollment enrollment = new Enrollment();
+                enrollment.setUser(student);
+                enrollment.setCourse(course);
+                enrollment.setStatus(EnrollmentStatus.valueOf(status));
+                enrollment.setPaymentStatus(course.isFree() ? "FREE" : "PAID");
+                if ("COMPLETED".equals(status)) {
+                    enrollment.setCompletedAt(enrolledDaysAgo.plusDays(r.nextInt(14) + 7));
+                }
+                enrollmentRepo.save(enrollment);
+
+                Orders order = new Orders();
+                order.setCourseName(course.getName());
+                order.setCourseAmount(course.getEffectivePrice().toPlainString());
+                order.setUserEmail(student.getEmail());
+                order.setDateOfPurchase(enrolledDaysAgo.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+                order.setOrderId("ORD_" + System.currentTimeMillis() + "_" + r.nextInt(1000));
+                order.setPaymentId("pay_" + System.currentTimeMillis() + "_" + r.nextInt(1000));
+                order.setSignature("sig_verified");
+                ordersRepo.save(order);
+            }
+        }
+    }
+
+    private void seedStudentNotifications() {
+        List<User> students = new java.util.ArrayList<>(userRepo.findAll());
+        if (students.isEmpty()) return;
+
+        Object[][] notifs = {
+            {NotificationType.COURSE_ENROLLED, "Welcome to the Course!", "You have been successfully enrolled. Start learning today!"},
+            {NotificationType.ORDER_PLACED, "Order Confirmed", "Your course purchase has been confirmed."},
+            {NotificationType.PAYMENT_SUCCESS, "Payment Received", "We received your payment successfully."},
+            {NotificationType.COURSE_UPDATE, "Course Updated", "New content has been added to your enrolled course."},
+            {NotificationType.NEW_LESSON, "New Lesson Available", "A new lesson has been published in your course."},
+            {NotificationType.CERTIFICATE_READY, "Certificate Ready", "Congratulations! Your certificate is now available for download."}
+        };
+
+        Random r = new Random();
+        for (User student : students) {
+            int numNotifs = 3 + r.nextInt(4);
+            for (int i = 0; i < numNotifs; i++) {
+                Object[] n = notifs[r.nextInt(notifs.length)];
+                Notification notification = new Notification();
+                notification.setRecipientEmail(student.getEmail());
+                notification.setType((NotificationType) n[0]);
+                notification.setTitle((String) n[1]);
+                notification.setMessage((String) n[2]);
+                notification.setRead(r.nextBoolean());
+                notification.setTargetUrl("/student/dashboard");
+                notificationRepo.save(notification);
+            }
+        }
     }
 
     @Transactional

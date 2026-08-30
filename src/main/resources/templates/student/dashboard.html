@@ -2,182 +2,268 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('My Dashboard', ~{::div})}">
 <body>
     <div>
-        
+
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-surface-900 mb-1">
-                Welcome back, <span class="text-brand-600" th:text="${studentName != null ? studentName : 'Student'}">Student</span>!
-            </h1>
-            <p class="text-gray-500 text-sm">Here's an overview of your learning journey.</p>
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">
+                    Welcome back, <span class="text-brand-600" th:text="${studentName != null ? studentName : 'Student'}">Student</span>!
+                </h1>
+                <p class="text-gray-500 text-sm mt-0.5">Here's your learning dashboard overview.</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="/student/browse" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all hover:shadow-md">
+                    <i class="bi bi-compass"></i> Browse Courses
+                </a>
+            </div>
         </div>
 
-        <!-- KPI CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-            
-            <!-- Enrolled Courses -->
-            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+        <!-- ==========================================
+             KPI CARDS — clickable, animated
+             ========================================== -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+            <!-- Total Enrolled -->
+            <a href="/student/courses" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-brand-300 transition-all cursor-pointer">
                 <div class="flex justify-between items-start mb-3">
-                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
                         <i class="bi bi-book-half"></i>
                     </div>
                     <span class="text-[10px] font-semibold text-gray-500 bg-surface-100 px-2 py-0.5 rounded-full">Total</span>
                 </div>
                 <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Enrolled Courses</h3>
-                <p class="text-2xl font-bold text-surface-900" th:text="${enrolledCourses != null ? enrolledCourses : 0}">0</p>
-            </div>
+                <div class="flex items-end gap-2">
+                    <p class="text-3xl font-extrabold text-surface-900 counter" th:data-target="${totalEnrolled}">0</p>
+                    <span class="text-[10px] text-brand-600 font-semibold mb-1 group-hover:underline">View all →</span>
+                </div>
+            </a>
 
-            <!-- Active Courses -->
-            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+            <!-- Active / In Progress -->
+            <a href="/student/courses" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-emerald-300 transition-all cursor-pointer">
                 <div class="flex justify-between items-start mb-3">
-                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
                         <i class="bi bi-play-circle-fill"></i>
                     </div>
                     <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Active</span>
                 </div>
-                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Active Courses</h3>
-                <p class="text-2xl font-bold text-surface-900" th:text="${activeCourses != null ? activeCourses : 0}">0</p>
-            </div>
+                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">In Progress</h3>
+                <div class="flex items-end gap-2">
+                    <p class="text-3xl font-extrabold text-surface-900 counter" th:data-target="${activeCourses}">0</p>
+                    <span class="text-[10px] text-emerald-600 font-semibold mb-1 group-hover:underline">Continue →</span>
+                </div>
+            </a>
 
             <!-- Completed -->
-            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+            <a href="/student/certificates" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-pointer">
                 <div class="flex justify-between items-start mb-3">
-                    <div class="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg">
+                    <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
                         <i class="bi bi-award-fill"></i>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-500 bg-surface-100 px-2 py-0.5 rounded-full">Done</span>
+                    <span class="text-[10px] font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Done</span>
                 </div>
                 <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Completed</h3>
-                <p class="text-2xl font-bold text-surface-900" th:text="${completedCourses != null ? completedCourses : 0}">0</p>
-            </div>
+                <div class="flex items-end gap-2">
+                    <p class="text-3xl font-extrabold text-surface-900 counter" th:data-target="${completedCourses}">0</p>
+                    <span class="text-[10px] text-purple-600 font-semibold mb-1 group-hover:underline">Certificates →</span>
+                </div>
+            </a>
 
-            <!-- Notifications -->
-            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+            <!-- Unread Notifications -->
+            <a href="/student/notifications" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-orange-300 transition-all cursor-pointer">
                 <div class="flex justify-between items-start mb-3">
-                    <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-lg">
+                    <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
                         <i class="bi bi-bell-fill"></i>
                     </div>
-                    <span class="text-[10px] font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full" th:if="${unreadNotifications != null and unreadNotifications > 0}">New</span>
+                    <span th:if="${unreadNotifications > 0}" class="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full animate-pulse" th:text="${unreadNotifications > 99 ? '99+' : unreadNotifications}">0</span>
+                    <span th:unless="${unreadNotifications > 0}" class="text-[10px] font-semibold text-gray-500 bg-surface-100 px-2 py-0.5 rounded-full">None</span>
                 </div>
-                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Notifications</h3>
-                <p class="text-2xl font-bold text-surface-900" th:text="${unreadNotifications != null ? unreadNotifications : 0}">0</p>
+                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Unread Notifications</h3>
+                <div class="flex items-end gap-2">
+                    <p class="text-3xl font-extrabold text-surface-900 counter" th:data-target="${unreadNotifications}">0</p>
+                    <span class="text-[10px] text-orange-600 font-semibold mb-1 group-hover:underline">View all →</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- ==========================================
+             ENROLLED COURSES — continue learning
+             ========================================== -->
+        <div th:if="${recentOrders != null and !recentOrders.isEmpty()}" class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-surface-900">Your Recent Purchases</h2>
+                <a href="/student/orders" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">View All →</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div th:each="order, iterStat : ${recentOrders}" th:if="${iterStat.index < 6}"
+                     class="bg-white rounded-xl border border-surface-200 shadow-sm p-4 hover:shadow-md hover:border-brand-200 transition-all flex items-center gap-4 group cursor-pointer">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-lg shadow-sm flex-shrink-0">
+                        <i class="bi bi-play-btn-fill"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-semibold text-sm text-surface-900 truncate group-hover:text-brand-600 transition-colors" th:text="${order.courseName}">Course</p>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="text-xs font-bold text-surface-800" th:text="'₹' + ${order.courseAmount}">₹0</span>
+                            <span class="text-[10px] text-gray-400" th:text="${order.dateOfPurchase}">Date</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-600">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span> Paid
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- QUICK LINKS + RECENT ORDERS -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            
-            <!-- Quick Links -->
-            <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                <div class="px-5 py-3.5 border-b border-surface-100 bg-surface-50">
-                    <h2 class="font-semibold text-sm text-surface-900">Quick Links</h2>
-                </div>
-                <div class="p-4 space-y-2">
-                    <a href="/courses" class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50 transition-all group">
-                        <div class="w-9 h-9 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 group-hover:bg-brand-100 group-hover:text-brand-600">
-                            <i class="bi bi-compass"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium text-sm text-surface-900">Browse Courses</p>
-                            <p class="text-[11px] text-gray-400">Discover new courses</p>
-                        </div>
-                    </a>
-                    <a href="/student/profile" class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-purple-300 hover:bg-purple-50 transition-all group">
-                        <div class="w-9 h-9 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 group-hover:bg-purple-100 group-hover:text-purple-600">
-                            <i class="bi bi-person-gear"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium text-sm text-surface-900">My Profile</p>
-                            <p class="text-[11px] text-gray-400">Manage your account</p>
-                        </div>
-                    </a>
-                    <a href="/student/courses" class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-green-300 hover:bg-green-50 transition-all group">
-                        <div class="w-9 h-9 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 group-hover:bg-green-100 group-hover:text-green-600">
-                            <i class="bi bi-play-btn"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium text-sm text-surface-900">My Courses</p>
-                            <p class="text-[11px] text-gray-400">Continue learning</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
+        <!-- ==========================================
+             QUICK ACTIONS + NOTIFICATIONS — two columns
+             ========================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
 
-            <!-- Recent Orders -->
+            <!-- Quick Actions — left -->
             <div class="lg:col-span-2 bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                <div class="px-5 py-3.5 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
-                    <h2 class="font-semibold text-sm text-surface-900">Recent Orders</h2>
-                    <a href="/student/orders" class="text-xs font-semibold text-brand-600 hover:text-brand-700">View All</a>
+                <div class="px-5 py-3.5 border-b border-surface-100 bg-surface-50">
+                    <h2 class="font-semibold text-sm text-surface-900">Quick Actions</h2>
                 </div>
-                <div th:if="${recentOrders != null and !recentOrders.isEmpty()}">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="text-left text-xs text-gray-400 uppercase tracking-wider">
-                                    <th class="px-5 py-2.5 font-semibold">Course</th>
-                                    <th class="px-5 py-2.5 font-semibold">Amount</th>
-                                    <th class="px-5 py-2.5 font-semibold">Status</th>
-                                    <th class="px-5 py-2.5 font-semibold">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="order : ${recentOrders}" class="border-t border-surface-100 hover:bg-surface-50 transition-colors">
-                                    <td class="px-5 py-3 font-medium text-surface-800 max-w-[200px] truncate" th:text="${order.courseName}">—</td>
-                                    <td class="px-5 py-3 font-semibold text-surface-800" th:text="'₹' + ${order.courseAmount}">₹0</td>
-                                    <td class="px-5 py-3">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-600">Completed</span>
-                                    </td>
-                                    <td class="px-5 py-3 text-gray-400 text-xs" th:text="${order.dateOfPurchase}">—</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div th:if="${recentOrders == null or recentOrders.isEmpty()}" class="p-10 text-center">
-                    <div class="w-12 h-12 bg-surface-100 rounded-full flex items-center justify-center text-gray-300 text-xl mx-auto mb-3">
-                        <i class="bi bi-bag"></i>
-                    </div>
-                    <p class="font-medium text-sm text-surface-900">No orders yet</p>
-                    <p class="text-xs text-gray-400 mt-1 mb-4">Start exploring courses to make your first purchase.</p>
-                    <a href="/courses" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
-                        <i class="bi bi-compass"></i> Browse Courses
+                <div class="p-4 grid grid-cols-2 gap-3">
+                    <a href="/student/browse" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50 transition-all group text-center">
+                        <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="bi bi-compass text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-xs text-surface-900">Browse</p>
+                            <p class="text-[10px] text-gray-400">Find courses</p>
+                        </div>
                     </a>
+                    <a href="/student/courses" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-surface-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all group text-center">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="bi bi-play-btn text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-xs text-surface-900">My Courses</p>
+                            <p class="text-[10px] text-gray-400">Keep learning</p>
+                        </div>
+                    </a>
+                    <a href="/student/certificates" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-surface-200 hover:border-purple-300 hover:bg-purple-50 transition-all group text-center">
+                        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="bi bi-award text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-xs text-surface-900">Certificates</p>
+                            <p class="text-[10px] text-gray-400">Your awards</p>
+                        </div>
+                    </a>
+                    <a href="/student/profile" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-surface-200 hover:border-orange-300 hover:bg-orange-50 transition-all group text-center">
+                        <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="bi bi-person-gear text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-xs text-surface-900">Profile</p>
+                            <p class="text-[10px] text-gray-400">Edit info</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Notifications — right -->
+            <div class="lg:col-span-3 bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
+                    <h2 class="font-semibold text-sm text-surface-900">Notifications</h2>
+                    <div class="flex items-center gap-2">
+                        <button onclick="markAllRead()" th:if="${unreadNotifications > 0}" class="text-[11px] text-brand-600 hover:text-brand-700 font-semibold transition-colors">Mark all read</button>
+                        <a href="/student/notifications" class="text-[11px] font-semibold text-gray-400 hover:text-brand-600 transition-colors">View all</a>
+                    </div>
+                </div>
+
+                <!-- Notification items -->
+                <div th:if="${recentNotifications != null and !recentNotifications.isEmpty()}" class="divide-y divide-surface-100 max-h-[340px] overflow-y-auto">
+                    <div th:each="notif : ${recentNotifications}" 
+                         class="px-5 py-3.5 hover:bg-surface-50 transition-colors group flex items-start gap-3"
+                         th:classappend="${!notif.read} ? 'bg-brand-50/30'">
+                        <!-- Icon -->
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 transition-transform group-hover:scale-110"
+                             th:classappend="${notif.type == 'COURSE_ENROLLED'} ? 'bg-blue-50 text-blue-500' : (${notif.type == 'ORDER_PLACED'} ? 'bg-green-50 text-green-500' : (${notif.type == 'PAYMENT_SUCCESS'} ? 'bg-emerald-50 text-emerald-500' : (${notif.type == 'CERTIFICATE_READY'} ? 'bg-yellow-50 text-yellow-500' : (${notif.type == 'NEW_LESSON'} ? 'bg-purple-50 text-purple-500' : (${notif.type == 'COURSE_UPDATE'} ? 'bg-cyan-50 text-cyan-500' : 'bg-gray-50 text-gray-500')))))">
+                            <i class="bi text-sm"
+                               th:classappend="${notif.type == 'COURSE_ENROLLED'} ? 'bi-mortarboard-fill' : (${notif.type == 'ORDER_PLACED'} ? 'bi-bag-check-fill' : (${notif.type == 'PAYMENT_SUCCESS'} ? 'bi-currency-rupee' : (${notif.type == 'CERTIFICATE_READY'} ? 'bi-award-fill' : (${notif.type == 'NEW_LESSON'} ? 'bi-play-circle-fill' : (${notif.type == 'COURSE_UPDATE'} ? 'bi-info-circle-fill' : 'bi-bell-fill')))))"></i>
+                        </div>
+                        <!-- Content -->
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-semibold text-surface-900 truncate" th:text="${notif.title}">Title</p>
+                            <p class="text-xs text-gray-500 mt-0.5 line-clamp-1" th:text="${notif.message}">Message</p>
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <span class="text-[10px] text-gray-400 flex items-center gap-1">
+                                    <i class="bi bi-clock"></i> <span th:text="${notif.timeAgo}">2m ago</span>
+                                </span>
+                                <span th:if="${notif.type}" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                                      th:classappend="${notif.type == 'COURSE_ENROLLED'} ? 'bg-blue-50 text-blue-600' : (${notif.type == 'ORDER_PLACED'} ? 'bg-green-50 text-green-600' : (${notif.type == 'CERTIFICATE_READY'} ? 'bg-yellow-50 text-yellow-600' : 'bg-gray-50 text-gray-500'))"
+                                      th:text="${notif.type.replace('_', ' ')}">Type</span>
+                            </div>
+                        </div>
+                        <!-- Unread dot -->
+                        <div th:unless="${notif.read}" class="w-2.5 h-2.5 rounded-full bg-brand-500 flex-shrink-0 mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Empty state -->
+                <div th:if="${recentNotifications == null or recentNotifications.isEmpty()}" class="p-10 text-center">
+                    <div class="w-12 h-12 bg-surface-100 rounded-full flex items-center justify-center text-gray-300 text-xl mx-auto mb-3">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <p class="font-medium text-sm text-surface-900">No notifications</p>
+                    <p class="text-xs text-gray-400 mt-1">You're all caught up!</p>
                 </div>
             </div>
         </div>
 
-        <!-- RECENT NOTIFICATIONS -->
-        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden mb-8">
-            <div class="px-5 py-3.5 border-b border-surface-100 bg-surface-50 flex justify-between items-center">
-                <h2 class="font-semibold text-sm text-surface-900">Recent Notifications</h2>
-                <a href="/student/notifications" class="text-xs font-semibold text-brand-600 hover:text-brand-700">View All</a>
+        <!-- ==========================================
+             EMPTY STATE — when no orders exist
+             ========================================== -->
+        <div th:if="${recentOrders == null or recentOrders.isEmpty()}" class="bg-gradient-to-br from-brand-50 to-purple-50 rounded-2xl border border-brand-200 p-10 text-center mb-8">
+            <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-brand-500 text-2xl shadow-sm">
+                <i class="bi bi-rocket-takeoff"></i>
             </div>
-            <div th:if="${recentNotifications != null and !recentNotifications.isEmpty()}">
-                <div class="divide-y divide-surface-100">
-                    <div th:each="notif : ${recentNotifications}" class="px-5 py-4 hover:bg-surface-50 transition-colors">
-                        <div class="flex items-start gap-3">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                                 th:classappend="${notif.type == 'COURSE_ENROLLED' ? 'bg-blue-50 text-blue-500' : (notif.type == 'ORDER_PLACED' ? 'bg-green-50 text-green-500' : (notif.type == 'CERTIFICATE_READY' ? 'bg-yellow-50 text-yellow-500' : 'bg-gray-50 text-gray-500'))}">
-                                <i class="bi"
-                                   th:classappend="${notif.type == 'COURSE_ENROLLED' ? 'bi-mortarboard-fill' : (notif.type == 'ORDER_PLACED' ? 'bi-bag-check-fill' : (notif.type == 'CERTIFICATE_READY' ? 'bi-award-fill' : 'bi-bell-fill'))}"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-surface-900" th:text="${notif.title}">Notification</p>
-                                <p class="text-xs text-gray-500 mt-0.5" th:text="${notif.message}"></p>
-                            </div>
-                            <span class="text-[10px] text-gray-400 flex-shrink-0" th:text="${notif.timeAgo}"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div th:if="${recentNotifications == null or recentNotifications.isEmpty()}" class="p-10 text-center">
-                <div class="w-12 h-12 bg-surface-100 rounded-full flex items-center justify-center text-gray-300 text-xl mx-auto mb-3">
-                    <i class="bi bi-bell"></i>
-                </div>
-                <p class="font-medium text-sm text-surface-900">No notifications</p>
-                <p class="text-xs text-gray-400 mt-1">You're all caught up!</p>
-            </div>
+            <h3 class="text-lg font-bold text-surface-900 mb-1">Ready to start learning?</h3>
+            <p class="text-gray-500 text-sm max-w-md mx-auto mb-6">Browse our course catalog and enroll in courses that match your interests and career goals.</p>
+            <a href="/student/browse" class="inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all">
+                <i class="bi bi-compass"></i> Explore Courses
+            </a>
         </div>
 
     </div>
+
+    <!-- ==========================================
+         SCRIPTS — counter animation + mark-all-read
+         ========================================== -->
+    <script>
+        // Animated number counters
+        document.addEventListener('DOMContentLoaded', function() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target')) || 0;
+                if (target === 0) {
+                    counter.textContent = '0';
+                    return;
+                }
+                let current = 0;
+                const increment = Math.max(1, Math.ceil(target / 30));
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        counter.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.textContent = current;
+                    }
+                }, 30);
+            });
+        });
+
+        // Mark all notifications as read
+        function markAllRead() {
+            fetch('/student/api/notifications/mark-all-read', { method: 'POST' })
+                .then(() => location.reload())
+                .catch(() => {});
+        }
+    </script>
 </body>
 </html>

@@ -22,15 +22,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import in.project.main.entities.Course;
 import in.project.main.entities.Enrollment;
 import in.project.main.entities.Notification;
 import in.project.main.entities.Orders;
 import in.project.main.entities.User;
+import in.project.main.entities.enums.CourseLevel;
+import in.project.main.entities.enums.CourseStatus;
 import in.project.main.entities.enums.EnrollmentStatus;
+import in.project.main.repositories.CourseRepository;
 import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
 import in.project.main.security.CustomUserDetails;
+import in.project.main.services.CategoryService;
+import in.project.main.services.CourseService;
 import in.project.main.services.NotificationService;
 
 @Controller
@@ -52,6 +58,18 @@ public class StudentDashboardController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CourseService courseService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @org.springframework.beans.factory.annotation.Value("${app.razorpay.key-id}")
+    private String razorpayKeyId;
+
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/upload/";
     private static final String IMAGE_URL = "/upload/";
 
@@ -68,14 +86,13 @@ public class StudentDashboardController {
         String email = userDetails.getUsername();
         addCommonStudentAttributes(userDetails, model);
 
-        long totalEnrolled = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.ACTIVE);
-        model.addAttribute("enrolledCourses", totalEnrolled);
-
+        long activeCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.ACTIVE);
         long completedCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.COMPLETED);
-        model.addAttribute("completedCourses", completedCount);
+        long totalEnrolled = activeCount + completedCount;
 
-        long inProgressCount = totalEnrolled - completedCount;
-        model.addAttribute("activeCourses", inProgressCount > 0 ? inProgressCount : 0);
+        model.addAttribute("totalEnrolled", totalEnrolled);
+        model.addAttribute("activeCourses", activeCount);
+        model.addAttribute("completedCourses", completedCount);
 
         long totalPurchases = ordersRepository.findByUserEmailOrderByDateOfPurchaseDesc(email, PageRequest.of(0, 1)).getTotalElements();
         model.addAttribute("totalPurchases", totalPurchases);
@@ -85,7 +102,19 @@ public class StudentDashboardController {
         model.addAttribute("recentOrders", recentOrders.getContent());
 
         List<Notification> recentNotifications = notificationService.getRecentNotifications(email, 5);
-        model.addAttribute("recentNotifications", recentNotifications);
+        List<Map<String, Object>> processedNotifications = new ArrayList<>();
+        for (Notification n : recentNotifications) {
+            Map<String, Object> notifMap = new java.util.HashMap<>();
+            notifMap.put("id", n.getId());
+            notifMap.put("title", n.getTitle());
+            notifMap.put("message", n.getMessage());
+            notifMap.put("type", n.getType() != null ? n.getType().name() : "SYSTEM");
+            notifMap.put("read", n.isRead());
+            notifMap.put("targetUrl", n.getTargetUrl());
+            notifMap.put("timeAgo", getTimeAgo(n.getCreatedAt()));
+            processedNotifications.add(notifMap);
+        }
+        model.addAttribute("recentNotifications", processedNotifications);
 
         long unreadNotifications = notificationService.getUnreadCount(email);
         model.addAttribute("unreadNotifications", unreadNotifications);
@@ -189,6 +218,56 @@ public class StudentDashboardController {
         model.addAttribute("unreadCount", unreadCount);
 
         return "student/notifications";
+    }
+
+    @GetMapping("/browse")
+    public String browseCourses(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "12") int size,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "categoryId", required = false) Long categoryId,
+            @RequestParam(name = "level", required = false) CourseLevel level,
+            @RequestParam(name = "pricingType", required = false) String pricingType,
+            @RequestParam(name = "sort", defaultValue = "newest") String sort) {
+
+        addCommonStudentAttributes(userDetails, model);
+        String email = userDetails.getUsername();
+
+        org.springframework.data.domain.Sort sortObj;
+        if ("price_asc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "originalPrice");
+        } else if ("price_desc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "originalPrice");
+        } else if ("title_asc".equalsIgnoreCase(sort)) {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "name");
+        } else {
+            sortObj = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt");
+        }
+
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), sortObj);
+        Page<Course> coursesPage = courseService.getPublicStorefrontCourses(keyword, categoryId, level, pricingType, pageable);
+
+        List<Long> purchasedCourseIds = new ArrayList<>();
+        for (Course course : coursesPage.getContent()) {
+            if (ordersRepository.existsByUserEmailAndCourseName(email, course.getName())) {
+                purchasedCourseIds.add(course.getId());
+            }
+        }
+
+        model.addAttribute("coursesPage", coursesPage);
+        model.addAttribute("categories", categoryService.getActiveCategories());
+        model.addAttribute("levels", CourseLevel.values());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("categoryId", categoryId);
+        model.addAttribute("level", level);
+        model.addAttribute("pricingType", pricingType);
+        model.addAttribute("sort", sort);
+        model.addAttribute("purchasedCourseIds", purchasedCourseIds);
+        model.addAttribute("razorpayKeyId", razorpayKeyId);
+
+        return "student/browse";
     }
 
     @GetMapping("/certificates")

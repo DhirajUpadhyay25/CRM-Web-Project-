@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('Browse Courses', ~{::div})}">
+<body>
+    <div>
+        
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/student/dashboard" class="hover:text-brand-600 transition-colors">Student</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">Browse Courses</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Browse Courses</h1>
+                <p class="text-gray-500 text-sm mt-0.5">Discover and enroll in courses to advance your skills.</p>
+            </div>
+            <a href="/student/courses" class="inline-flex items-center gap-2 px-4 py-2.5 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-sm font-semibold transition-all">
+                <i class="bi bi-book"></i> My Courses
+            </a>
+        </div>
+
+        <!-- Filters -->
+        <form method="get" class="bg-white rounded-2xl border border-surface-200 shadow-sm p-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <!-- Search -->
+                <div class="lg:col-span-2">
+                    <div class="relative">
+                        <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search courses..."
+                               class="w-full pl-10 pr-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+                </div>
+                <!-- Category -->
+                <div>
+                    <select name="categoryId" class="w-full px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${cat.id == categoryId}">Category</option>
+                    </select>
+                </div>
+                <!-- Level -->
+                <div>
+                    <select name="level" class="w-full px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        <option value="">All Levels</option>
+                        <option th:each="lvl : ${levels}" th:value="${lvl}" th:text="${lvl}" th:selected="${lvl == level}">Level</option>
+                    </select>
+                </div>
+                <!-- Sort + Submit -->
+                <div class="flex gap-2">
+                    <select name="sort" class="flex-1 px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        <option value="newest" th:selected="${sort == 'newest'}">Newest</option>
+                        <option value="price_asc" th:selected="${sort == 'price_asc'}">Price: Low to High</option>
+                        <option value="price_desc" th:selected="${sort == 'price_desc'}">Price: High to Low</option>
+                        <option value="title_asc" th:selected="${sort == 'title_asc'}">Title A-Z</option>
+                    </select>
+                    <button type="submit" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Pricing Filters -->
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-surface-100">
+                <span class="text-xs text-gray-500 font-medium">Pricing:</span>
+                <a href="#" th:href="@{/student/browse(page=0, keyword=${keyword}, categoryId=${categoryId}, level=${level}, sort=${sort})}" 
+                   class="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                   th:classappend="${pricingType == null || pricingType == ''} ? 'bg-brand-100 text-brand-700' : 'bg-surface-100 text-gray-500 hover:bg-surface-200'">All</a>
+                <a href="#" th:href="@{/student/browse(page=0, keyword=${keyword}, categoryId=${categoryId}, level=${level}, pricingType='FREE', sort=${sort})}" 
+                   class="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                   th:classappend="${pricingType == 'FREE'} ? 'bg-green-100 text-green-700' : 'bg-surface-100 text-gray-500 hover:bg-surface-200'">Free</a>
+                <a href="#" th:href="@{/student/browse(page=0, keyword=${keyword}, categoryId=${categoryId}, level=${level}, pricingType='PAID', sort=${sort})}" 
+                   class="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                   th:classappend="${pricingType == 'PAID'} ? 'bg-purple-100 text-purple-700' : 'bg-surface-100 text-gray-500 hover:bg-surface-200'">Paid</a>
+            </div>
+        </form>
+
+        <!-- COURSE GRID -->
+        <div th:if="${coursesPage != null and coursesPage.hasContent()}" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+            <div th:each="course : ${coursesPage.content}" class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden hover:shadow-md transition-all group flex flex-col">
+                <!-- Course Image -->
+                <div class="h-44 bg-surface-100 relative overflow-hidden">
+                    <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Course" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-300">
+                        <i class="bi bi-play-btn text-5xl"></i>
+                    </div>
+                    <!-- Badges -->
+                    <div class="absolute top-3 left-3 flex gap-2">
+                        <span th:if="${course.featured}" class="px-2 py-0.5 bg-yellow-500 text-white text-[10px] font-bold rounded-full shadow-sm">FEATURED</span>
+                        <span th:if="${course.isFree()}" class="px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-full shadow-sm">FREE</span>
+                    </div>
+                    <!-- Discount -->
+                    <div th:if="${!course.isFree() && course.discountPercentage != null}" class="absolute top-3 right-3 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full shadow-sm">
+                        <span th:text="'-' + ${course.discountPercentage} + '%'">-20%</span>
+                    </div>
+                </div>
+                <!-- Course Info -->
+                <div class="p-4 flex flex-col flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span th:if="${course.category}" class="text-[10px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full" th:text="${course.category.name}">Category</span>
+                        <span th:if="${course.level}" class="text-[10px] font-semibold text-gray-500 bg-surface-100 px-2 py-0.5 rounded-full" th:text="${course.level}">Level</span>
+                    </div>
+                    <a th:href="@{'/courses/' + ${course.slug}}" class="font-bold text-surface-900 text-sm line-clamp-2 mb-2 group-hover:text-brand-600 transition-colors" th:text="${course.name}">Course Name</a>
+                    <p th:if="${course.shortDescription}" class="text-xs text-gray-500 line-clamp-2 mb-3" th:text="${course.shortDescription}"></p>
+                    <div class="flex items-center gap-4 text-xs text-gray-400 mb-3">
+                        <span th:if="${course.instructor}" class="flex items-center gap-1"><i class="bi bi-person"></i> <span th:text="${course.instructor}">Instructor</span></span>
+                        <span th:if="${course.duration}" class="flex items-center gap-1"><i class="bi bi-clock"></i> <span th:text="${course.duration}">Duration</span></span>
+                    </div>
+                    <div class="mt-auto pt-3 border-t border-surface-100 flex items-center justify-between">
+                        <!-- Price -->
+                        <div>
+                            <span th:if="${course.isFree()}" class="text-lg font-bold text-green-600">Free</span>
+                            <span th:unless="${course.isFree()}" class="text-lg font-bold text-surface-900" th:text="'₹' + ${course.discountedPrice}">₹0</span>
+                            <span th:if="${!course.isFree() && course.originalPrice != null && course.discountedPrice != null && course.originalPrice.compareTo(course.discountedPrice) > 0}" 
+                                  class="text-xs text-gray-400 line-through ml-1" th:text="'₹' + ${course.originalPrice}">₹0</span>
+                        </div>
+                        <!-- Action -->
+                        <div>
+                            <span th:if="${purchasedCourseIds.contains(course.id)}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-semibold">
+                                <i class="bi bi-check-circle-fill"></i> Enrolled
+                            </span>
+                            <a th:unless="${purchasedCourseIds.contains(course.id)}" th:href="@{'/courses/' + ${course.slug}}" 
+                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition-all shadow-sm">
+                                <span th:if="${course.isFree()}">Enroll Free</span>
+                                <span th:unless="${course.isFree()}">View Course</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${coursesPage != null and coursesPage.totalPages > 1}" class="flex justify-center gap-1.5 mb-8">
+            <a th:if="${coursesPage.hasPrevious()}" 
+               th:href="@{/student/browse(page=${coursesPage.number - 1}, keyword=${keyword}, categoryId=${categoryId}, level=${level}, pricingType=${pricingType}, sort=${sort})}"
+               class="px-4 py-2 rounded-xl bg-white border border-surface-200 text-sm font-semibold text-surface-700 hover:bg-surface-100 transition-colors shadow-sm">
+                <i class="bi bi-chevron-left mr-1"></i> Previous
+            </a>
+            <span class="px-4 py-2 text-sm text-gray-500 font-medium">Page <span class="font-bold text-surface-900" th:text="${coursesPage.number + 1}"></span> of <span th:text="${coursesPage.totalPages}"></span></span>
+            <a th:if="${coursesPage.hasNext()}" 
+               th:href="@{/student/browse(page=${coursesPage.number + 1}, keyword=${keyword}, categoryId=${categoryId}, level=${level}, pricingType=${pricingType}, sort=${sort})}"
+               class="px-4 py-2 rounded-xl bg-white border border-surface-200 text-sm font-semibold text-surface-700 hover:bg-surface-100 transition-colors shadow-sm">
+                Next <i class="bi bi-chevron-right ml-1"></i>
+            </a>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${coursesPage == null or !coursesPage.hasContent()}" class="bg-white rounded-2xl border border-surface-200 p-16 text-center">
+            <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3 class="text-base font-bold text-surface-900 mb-1">No courses found</h3>
+            <p class="text-gray-500 text-sm max-w-sm mx-auto mb-6">Try adjusting your search filters or browse all available courses.</p>
+            <a href="/student/browse" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">
+                <i class="bi bi-arrow-counterclockwise"></i> Clear Filters
+            </a>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -18,11 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import in.project.main.entities.Course;
+import in.project.main.entities.Enrollment;
 import in.project.main.entities.Orders;
 import in.project.main.entities.Role;
 import in.project.main.entities.User;
 import in.project.main.entities.enums.CourseLevel;
 import in.project.main.entities.enums.CourseStatus;
+import in.project.main.entities.enums.EnrollmentStatus;
+import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
 import in.project.main.security.CustomUserDetails;
@@ -48,6 +51,9 @@ public class PublicController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Value("${app.razorpay.key-id}")
     private String razorpayKeyId;
@@ -173,7 +179,7 @@ public class PublicController {
 
         if (ordersRepository.existsByUserEmailAndCourseName(email, course.getName())) {
             redirectAttributes.addFlashAttribute("successMsg", "You are already enrolled in this course!");
-            return "redirect:/myCourses";
+            return "redirect:/student/courses";
         }
 
         Orders freeOrder = new Orders();
@@ -187,8 +193,19 @@ public class PublicController {
 
         orderService.storeUserOrders(freeOrder);
 
-        redirectAttributes.addFlashAttribute("successMsg", "🎉 Successfully enrolled in " + course.getName() + "! Start learning below.");
-        return "redirect:/myCourses";
+        // Create enrollment record for the student panel
+        User user = userRepository.findByEmail(email);
+        if (user != null && !enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
+            Enrollment enrollment = new Enrollment();
+            enrollment.setUser(user);
+            enrollment.setCourse(course);
+            enrollment.setStatus(EnrollmentStatus.ACTIVE);
+            enrollment.setPaymentStatus("FREE");
+            enrollmentRepository.save(enrollment);
+        }
+
+        redirectAttributes.addFlashAttribute("successMsg", "Successfully enrolled in " + course.getName() + "! Start learning below.");
+        return "redirect:/student/courses";
     }
 
     // ==========================================
