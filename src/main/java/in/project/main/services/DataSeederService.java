@@ -323,7 +323,17 @@ public class DataSeederService {
     }
 
     private void seedStudents() {
-        if (userRepo.count() > 0) return;
+        // Always create test students if they don't exist
+        String[] testEmails = {"rahul@student.com", "priya@student.com", "amit@student.com", "sneha@student.com", "vikram@student.com"};
+        boolean anyExist = false;
+        for (String email : testEmails) {
+            if (userRepo.findByEmail(email) != null) {
+                anyExist = true;
+                break;
+            }
+        }
+        if (anyExist) return;
+
         Object[][] students = {
             {"Rahul Sharma", "rahul@student.com", "9876543210", "Mumbai"},
             {"Priya Patel", "priya@student.com", "9876543211", "Delhi"},
@@ -343,18 +353,23 @@ public class DataSeederService {
     }
 
     private void seedEnrollmentsAndOrders() {
-        List<User> students = new java.util.ArrayList<>(userRepo.findAll());
+        List<User> allUsers = new java.util.ArrayList<>(userRepo.findAll());
         List<Course> courses = courseRepo.findAll();
-        if (students.isEmpty() || courses.isEmpty()) return;
+        if (allUsers.isEmpty() || courses.isEmpty()) return;
 
         Random r = new Random();
         String[] statuses = {"COMPLETED", "ACTIVE", "ACTIVE", "ACTIVE"};
 
-        for (User student : students) {
+        for (User student : allUsers) {
+            // Check how many enrollments this user already has
+            long existingCount = enrollmentRepo.findByUserEmailOrderByEnrolledAtDesc(student.getEmail()).size();
+            if (existingCount >= 2) continue; // Already has enough data
+
             int numCourses = 2 + r.nextInt(3);
             List<Course> shuffled = new java.util.ArrayList<>(courses);
             java.util.Collections.shuffle(shuffled, r);
 
+            int created = 0;
             for (int i = 0; i < Math.min(numCourses, shuffled.size()); i++) {
                 Course course = shuffled.get(i);
                 if (enrollmentRepo.existsByUserIdAndCourseId(student.getId(), course.getId())) continue;
@@ -372,15 +387,19 @@ public class DataSeederService {
                 }
                 enrollmentRepo.save(enrollment);
 
-                Orders order = new Orders();
-                order.setCourseName(course.getName());
-                order.setCourseAmount(course.getEffectivePrice().toPlainString());
-                order.setUserEmail(student.getEmail());
-                order.setDateOfPurchase(enrolledDaysAgo.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-                order.setOrderId("ORD_" + System.currentTimeMillis() + "_" + r.nextInt(1000));
-                order.setPaymentId("pay_" + System.currentTimeMillis() + "_" + r.nextInt(1000));
-                order.setSignature("sig_verified");
-                ordersRepo.save(order);
+                // Also create order if not exists
+                if (!ordersRepo.existsByUserEmailAndCourseName(student.getEmail(), course.getName())) {
+                    Orders order = new Orders();
+                    order.setCourseName(course.getName());
+                    order.setCourseAmount(course.getEffectivePrice().toPlainString());
+                    order.setUserEmail(student.getEmail());
+                    order.setDateOfPurchase(enrolledDaysAgo.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+                    order.setOrderId("ORD_" + System.currentTimeMillis() + "_" + r.nextInt(1000));
+                    order.setPaymentId("pay_" + System.currentTimeMillis() + "_" + r.nextInt(1000));
+                    order.setSignature("sig_verified");
+                    ordersRepo.save(order);
+                }
+                created++;
             }
         }
     }

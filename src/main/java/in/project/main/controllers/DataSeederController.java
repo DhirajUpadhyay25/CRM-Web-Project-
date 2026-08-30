@@ -24,4 +24,15 @@ public class DataSeederController {
         }
         return "redirect:/admin/dashboard";
     }
+
+    @GetMapping("/seed-enrollments")
+    public String seedEnrollments(RedirectAttributes redirectAttributes) {
+        try {
+            dataSeederService.seedStudentPanelData();
+            redirectAttributes.addFlashAttribute("successMsg", "Student enrollments, orders, and notifications seeded successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Failed to seed enrollment data: " + e.getMessage());
+        }
+        return "redirect:/student/dashboard";
+    }
 }
