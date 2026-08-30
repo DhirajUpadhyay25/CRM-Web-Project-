@@ -24,9 +24,7 @@
             </div>
         </div>
 
-        <!-- ==========================================
-             NOTIFICATIONS LIST
-             ========================================== -->
+        <!-- NOTIFICATIONS LIST -->
         <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
             <div th:if="${notifications != null and !notifications.isEmpty()}">
                 <div class="divide-y divide-surface-100">
@@ -59,9 +57,7 @@
                                         <p class="text-sm text-gray-500 mt-0.5" th:text="${notif.message}">Notification message content goes here.</p>
                                     </div>
                                     <div class="flex items-center gap-2 flex-shrink-0">
-                                        <!-- Unread dot -->
                                         <div th:if="${!notif.read}" class="w-2.5 h-2.5 rounded-full bg-brand-500 flex-shrink-0"></div>
-                                        <!-- Mark as read button -->
                                         <button th:if="${!notif.read}" th:onclick="'markRead(' + ${notif.id} + ')'" 
                                                 class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100" title="Mark as read">
                                             <i class="bi bi-check-lg text-sm"></i>

@@ -28,7 +28,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         } else if (role == Role.EMPLOYEE) {
             redirectUrl = "/employeeProfile";
         } else if (role == Role.STUDENT) {
-            redirectUrl = "/index"; // or /dashboard based on requirement
+            redirectUrl = "/student/dashboard";
         }
         
         response.sendRedirect(redirectUrl);
