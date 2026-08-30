@@ -42,6 +42,13 @@ public class DataSeederService {
     @Autowired private EnrollmentRepository enrollmentRepo;
     @Autowired private NotificationRepository notificationRepo;
     @Autowired private OrdersRepository ordersRepo;
+    @Autowired private QuizRepository quizRepository;
+    @Autowired private QuizQuestionRepository quizQuestionRepository;
+    @Autowired private QuizAttemptRepository quizAttemptRepository;
+    @Autowired private AssignmentRepository assignmentRepository;
+    @Autowired private AssignmentSubmissionRepository assignmentSubmissionRepository;
+    @Autowired private LessonProgressRepository lessonProgressRepository;
+    @Autowired private StudentActivityRepository studentActivityRepository;
 
     @Transactional
     public void seedAll() {
@@ -108,13 +115,195 @@ public class DataSeederService {
 
     private void seedLessons() {
         if (lessonRepo.count() > 0) return;
-        for (int i = 1; i <= 5; i++) {
-            Lesson l = new Lesson();
-            l.setTitle("Lesson " + i + ": Introduction to Concepts");
-            l.setCourseId("1");
-            l.setSectionName("Getting Started");
-            l.setOrderIndex(i);
-            lessonRepo.save(l);
+        List<Course> courses = courseRepo.findAll();
+        for (Course course : courses) {
+            String courseId = String.valueOf(course.getId());
+            
+            // Section 1: Getting Started
+            String[] section1 = {"Introduction & Course Roadmap", "Setting Up Your Development Environment", "Your First Hello World Program"};
+            for (int i = 0; i < section1.length; i++) {
+                Lesson l = new Lesson();
+                l.setTitle(section1[i]);
+                l.setCourseId(courseId);
+                l.setSectionName("Getting Started");
+                l.setOrderIndex(i + 1);
+                lessonRepo.save(l);
+            }
+
+            // Section 2: Core Fundamentals
+            String[] section2 = {"Data Types & Variables", "Control Flow Statements", "Working with Collections"};
+            for (int i = 0; i < section2.length; i++) {
+                Lesson l = new Lesson();
+                l.setTitle(section2[i]);
+                l.setCourseId(courseId);
+                l.setSectionName("Core Fundamentals");
+                l.setOrderIndex(i + 4);
+                lessonRepo.save(l);
+            }
+
+            // Section 3: Advanced Concepts
+            String[] section3 = {"Error Handling & Exceptions", "Best Practices & Formatting", "Final Review & Summary"};
+            for (int i = 0; i < section3.length; i++) {
+                Lesson l = new Lesson();
+                l.setTitle(section3[i]);
+                l.setCourseId(courseId);
+                l.setSectionName("Advanced Concepts");
+                l.setOrderIndex(i + 7);
+                lessonRepo.save(l);
+            }
+        }
+    }
+
+    private void seedQuizzes() {
+        if (quizRepository.count() > 0) return;
+        List<Course> courses = courseRepo.findAll();
+        for (Course course : courses) {
+            Quiz quiz = new Quiz();
+            quiz.setCourseId(course.getId());
+            quiz.setTitle("Final Knowledge Check - " + course.getName());
+            quiz.setDescription("Test your understanding of the core concepts covered in this course. Passing score is 70%.");
+            quiz.setPassingScore(70);
+            quizRepository.save(quiz);
+
+            // Question 1
+            QuizQuestion q1 = new QuizQuestion();
+            q1.setQuizId(quiz.getId());
+            q1.setQuestionText("What is the primary design goal of this technology?");
+            q1.setOptionA("Platform independence and safety");
+            q1.setOptionB("Maximum raw performance regardless of safety");
+            q1.setOptionC("Restricted to web browsers only");
+            q1.setOptionD("To replace all existing operating systems");
+            q1.setCorrectOption(1);
+            quizQuestionRepository.save(q1);
+
+            // Question 2
+            QuizQuestion q2 = new QuizQuestion();
+            q2.setQuizId(quiz.getId());
+            q2.setQuestionText("Which component is responsible for executing the compiled bytecode?");
+            q2.setOptionA("The Compiler");
+            q2.setOptionB("The Runtime Engine / VM");
+            q2.setOptionC("The Linker");
+            q2.setOptionD("The Database Driver");
+            q2.setCorrectOption(2);
+            quizQuestionRepository.save(q2);
+
+            // Question 3
+            QuizQuestion q3 = new QuizQuestion();
+            q3.setQuizId(quiz.getId());
+            q3.setQuestionText("Which statement is true regarding error handling in this language?");
+            q3.setOptionA("Errors can be ignored completely without compilation issues");
+            q3.setOptionB("Exceptions are handled using try-catch blocks");
+            q3.setOptionC("Errors always crash the user operating system");
+            q3.setOptionD("There is no mechanism for error handling");
+            q3.setCorrectOption(2);
+            quizQuestionRepository.save(q3);
+        }
+    }
+
+    private void seedAssignments() {
+        if (assignmentRepository.count() > 0) return;
+        List<Course> courses = courseRepo.findAll();
+        for (Course course : courses) {
+            Assignment ass = new Assignment();
+            ass.setCourseId(course.getId());
+            ass.setTitle("Capstone Implementation Project - " + course.getName());
+            ass.setDescription("Create a practical application incorporating variables, control flow, object structure, and error handling. Package your source code into a ZIP file (under 5MB) and submit it.");
+            ass.setDueDate(LocalDateTime.now().plusDays(7));
+            ass.setMaxScore(100);
+            assignmentRepository.save(ass);
+        }
+    }
+
+    private void seedStudentProgress() {
+        if (lessonProgressRepository.count() > 0) return;
+        List<User> students = userRepo.findAll();
+        for (User student : students) {
+            String email = student.getEmail();
+            List<Enrollment> enrollments = enrollmentRepo.findByUserEmailOrderByEnrolledAtDesc(email);
+            if (enrollments.isEmpty()) continue;
+
+            // Take the first enrollment (e.g. In Progress) and seed some lesson progress
+            Enrollment activeEnrollment = enrollments.get(0);
+            Course activeCourse = activeEnrollment.getCourse();
+            List<Lesson> lessons = lessonRepo.findByCourseIdOrderByOrderIndexAsc(String.valueOf(activeCourse.getId()));
+            
+            if (lessons.size() >= 5) {
+                // Mark 4 lessons completed, 1 in progress (accessed but not completed)
+                for (int i = 0; i < 4; i++) {
+                    LessonProgress lp = new LessonProgress();
+                    lp.setUserEmail(email);
+                    lp.setCourseId(activeCourse.getId());
+                    lp.setLessonId(lessons.get(i).getId());
+                    lp.setCompleted(true);
+                    lp.setCompletedAt(LocalDateTime.now().minusDays(2).plusHours(i));
+                    lp.setLastAccessedAt(LocalDateTime.now().minusDays(2).plusHours(i));
+                    lessonProgressRepository.save(lp);
+                }
+                
+                // Last accessed but not completed (Continue Learning target!)
+                LessonProgress lp = new LessonProgress();
+                lp.setUserEmail(email);
+                lp.setCourseId(activeCourse.getId());
+                lp.setLessonId(lessons.get(4).getId());
+                lp.setCompleted(false);
+                lp.setLastAccessedAt(LocalDateTime.now().minusHours(1));
+                lessonProgressRepository.save(lp);
+
+                // Add activities
+                StudentActivity act1 = new StudentActivity();
+                act1.setUserEmail(email);
+                act1.setActivityType("COURSE_START");
+                act1.setDescription("Started the course: " + activeCourse.getName());
+                act1.setCreatedAt(LocalDateTime.now().minusDays(2));
+                studentActivityRepository.save(act1);
+
+                StudentActivity act2 = new StudentActivity();
+                act2.setUserEmail(email);
+                act2.setActivityType("LESSON_COMPLETE");
+                act2.setDescription("Completed lesson: " + lessons.get(0).getTitle());
+                act2.setCreatedAt(LocalDateTime.now().minusDays(2).plusHours(1));
+                studentActivityRepository.save(act2);
+            }
+
+            // If there's a second enrollment, let's mark it as COMPLETED to test certificates!
+            if (enrollments.size() >= 2) {
+                Enrollment completedEnrollment = enrollments.get(1);
+                completedEnrollment.setStatus(EnrollmentStatus.COMPLETED);
+                completedEnrollment.setCompletedAt(LocalDateTime.now().minusDays(5));
+                enrollmentRepo.save(completedEnrollment);
+
+                Course compCourse = completedEnrollment.getCourse();
+                List<Lesson> compLessons = lessonRepo.findByCourseIdOrderByOrderIndexAsc(String.valueOf(compCourse.getId()));
+                for (Lesson l : compLessons) {
+                    LessonProgress lp = new LessonProgress();
+                    lp.setUserEmail(email);
+                    lp.setCourseId(compCourse.getId());
+                    lp.setLessonId(l.getId());
+                    lp.setCompleted(true);
+                    lp.setCompletedAt(LocalDateTime.now().minusDays(6));
+                    lp.setLastAccessedAt(LocalDateTime.now().minusDays(6));
+                    lessonProgressRepository.save(lp);
+                }
+
+                // Quiz attempt (passed)
+                List<Quiz> quizzes = quizRepository.findByCourseId(compCourse.getId());
+                if (!quizzes.isEmpty()) {
+                    QuizAttempt qa = new QuizAttempt();
+                    qa.setUserEmail(email);
+                    qa.setQuizId(quizzes.get(0).getId());
+                    qa.setScore(90);
+                    qa.setPassed(true);
+                    qa.setAttemptedAt(LocalDateTime.now().minusDays(5));
+                    quizAttemptRepository.save(qa);
+                }
+
+                // Certificate
+                Certificate cert = new Certificate();
+                cert.setCertificateCode("CERT-" + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy")) + "-" + completedEnrollment.getId() + "-" + new Random().nextInt(10000));
+                cert.setEnrollmentId(String.valueOf(completedEnrollment.getId()));
+                cert.setIssueDate(LocalDateTime.now().minusDays(5).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                certRepo.save(cert);
+            }
         }
     }
 
@@ -258,6 +447,10 @@ public class DataSeederService {
         seedCourses();
         seedStudents();
         seedEnrollmentsAndOrders();
+        seedLessons();
+        seedQuizzes();
+        seedAssignments();
+        seedStudentProgress();
         seedStudentNotifications();
     }
 

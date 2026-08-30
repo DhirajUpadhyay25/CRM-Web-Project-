@@ -1,7 +1,10 @@
 package in.project.main.controllers;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,22 +30,39 @@ import in.project.main.entities.Enrollment;
 import in.project.main.entities.Notification;
 import in.project.main.entities.Orders;
 import in.project.main.entities.User;
-import in.project.main.entities.enums.CourseLevel;
-import in.project.main.entities.enums.CourseStatus;
-import in.project.main.entities.enums.EnrollmentStatus;
+import in.project.main.entities.Lesson;
+import in.project.main.entities.LessonProgress;
+import in.project.main.entities.Assignment;
+import in.project.main.entities.StudentActivity;
 import in.project.main.repositories.CourseRepository;
 import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
+import in.project.main.repositories.LessonProgressRepository;
+import in.project.main.repositories.LessonRepository;
+import in.project.main.repositories.AssignmentRepository;
+import in.project.main.repositories.AssignmentSubmissionRepository;
+import in.project.main.repositories.StudentActivityRepository;
+import in.project.main.entities.enums.EnrollmentStatus;
+import in.project.main.entities.enums.CourseStatus;
+import in.project.main.entities.enums.CourseLevel;
 import in.project.main.security.CustomUserDetails;
 import in.project.main.services.CategoryService;
 import in.project.main.services.CourseService;
 import in.project.main.services.DataSeederService;
 import in.project.main.services.NotificationService;
+import in.project.main.services.LearningService;
 
 @Controller
 @RequestMapping("/student")
 public class StudentDashboardController {
+
+    @Autowired private LessonProgressRepository lessonProgressRepository;
+    @Autowired private LessonRepository lessonRepository;
+    @Autowired private AssignmentRepository assignmentRepository;
+    @Autowired private AssignmentSubmissionRepository assignmentSubmissionRepository;
+    @Autowired private StudentActivityRepository studentActivityRepository;
+    @Autowired private LearningService learningService;
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -132,6 +152,87 @@ public class StudentDashboardController {
 
         long unreadNotifications = notificationService.getUnreadCount(email);
         model.addAttribute("unreadNotifications", unreadNotifications);
+
+        // Continue Learning Engine
+        List<Enrollment> activeEnrollments = enrollmentRepository.findByUserEmailOrderByEnrolledAtDesc(email)
+                .stream()
+                .filter(e -> e.getStatus() == EnrollmentStatus.ACTIVE)
+                .toList();
+
+        Course continueCourse = null;
+        Lesson continueLesson = null;
+        String continueModule = null;
+        int continueProgress = 0;
+
+        LessonProgress latestProgress = null;
+        for (Enrollment e : activeEnrollments) {
+            LessonProgress lp = lessonProgressRepository.findFirstByUserEmailAndCourseIdOrderByLastAccessedAtDesc(email, e.getCourse().getId());
+            if (lp != null) {
+                if (latestProgress == null || lp.getLastAccessedAt().isAfter(latestProgress.getLastAccessedAt())) {
+                    latestProgress = lp;
+                    continueCourse = e.getCourse();
+                }
+            }
+        }
+
+        if (continueCourse != null && latestProgress != null) {
+            continueLesson = lessonRepository.findById(latestProgress.getLessonId()).orElse(null);
+            continueModule = continueLesson != null ? continueLesson.getSectionName() : "Getting Started";
+            continueProgress = learningService.getCourseProgressPercent(email, continueCourse.getId());
+        } else if (!activeEnrollments.isEmpty()) {
+            continueCourse = activeEnrollments.get(0).getCourse();
+            List<Lesson> courseLessons = lessonRepository.findByCourseIdOrderByOrderIndexAsc(String.valueOf(continueCourse.getId()));
+            if (!courseLessons.isEmpty()) {
+                continueLesson = courseLessons.get(0);
+                continueModule = continueLesson.getSectionName();
+            }
+            continueProgress = 0;
+        }
+
+        model.addAttribute("continueCourse", continueCourse);
+        model.addAttribute("continueLesson", continueLesson);
+        model.addAttribute("continueModule", continueModule != null ? continueModule : "Getting Started");
+        model.addAttribute("continueProgress", continueProgress);
+
+        // Upcoming Deadlines
+        List<Long> activeCourseIds = activeEnrollments.stream().map(e -> e.getCourse().getId()).toList();
+        List<Map<String, Object>> upcomingDeadlines = new ArrayList<>();
+        if (!activeCourseIds.isEmpty()) {
+            List<Assignment> assignments = assignmentRepository.findByCourseIdIn(activeCourseIds);
+            List<Assignment> pendingAssignments = new ArrayList<>();
+            for (Assignment a : assignments) {
+                if (a.getDueDate().isAfter(LocalDateTime.now())) {
+                    boolean submitted = assignmentSubmissionRepository.findByUserEmailAndAssignmentId(email, a.getId()).isPresent();
+                    if (!submitted) {
+                        pendingAssignments.add(a);
+                    }
+                }
+            }
+            pendingAssignments.sort(Comparator.comparing(Assignment::getDueDate));
+            for (int i = 0; i < Math.min(3, pendingAssignments.size()); i++) {
+                Assignment a = pendingAssignments.get(i);
+                Course c = courseRepository.findById(a.getCourseId()).orElse(null);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", a.getId());
+                map.put("title", a.getTitle());
+                map.put("dueDate", a.getDueDate().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")));
+                map.put("courseName", c != null ? c.getName() : "Course");
+                upcomingDeadlines.add(map);
+            }
+        }
+        model.addAttribute("upcomingDeadlines", upcomingDeadlines);
+
+        // Recent Activity Timeline
+        List<StudentActivity> activities = studentActivityRepository.findByUserEmailOrderByCreatedAtDesc(email, PageRequest.of(0, 5));
+        List<Map<String, Object>> formattedActs = new ArrayList<>();
+        for (StudentActivity sa : activities) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("type", sa.getActivityType());
+            map.put("description", sa.getDescription());
+            map.put("timeStr", sa.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM, hh:mm a")));
+            formattedActs.add(map);
+        }
+        model.addAttribute("recentActivities", formattedActs);
 
         return "student/dashboard";
     }

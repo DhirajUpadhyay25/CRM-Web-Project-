@@ -5,63 +5,92 @@
 <div th:fragment="frg-student-sidebar">
     
     <!-- Dashboard -->
-    <a href="/student/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/dashboard">
-        <i class="bi bi-grid-1x2-fill text-base"></i>
-        <span class="font-medium text-sm">Dashboard</span>
+    <a href="/student/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white mb-2" data-path="/student/dashboard">
+        <i class="bi bi-grid-1x2-fill text-base text-brand-400"></i>
+        <span class="font-semibold text-sm">Dashboard</span>
     </a>
+
+    <!-- Category: Learning -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Learning</p>
+    </div>
     
     <!-- My Courses -->
-    <a href="/student/courses" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/courses">
-        <i class="bi bi-play-btn-fill text-base"></i>
+    <a href="/student/courses" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/courses">
+        <i class="bi bi-book-half text-sm"></i>
         <span class="font-medium text-sm">My Courses</span>
     </a>
     
-    <!-- My Purchases -->
-    <a href="/student/orders" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/orders">
-        <i class="bi bi-bag-check-fill text-base"></i>
-        <span class="font-medium text-sm">My Purchases</span>
+    <!-- Browse Courses -->
+    <a href="/student/browse" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/browse">
+        <i class="bi bi-compass text-sm"></i>
+        <span class="font-medium text-sm">Browse Courses</span>
+    </a>
+
+    <!-- Category: Activities -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Activities</p>
+    </div>
+
+    <!-- Assignments -->
+    <a href="/student/assignments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/assignments">
+        <i class="bi bi-journal-check text-sm"></i>
+        <span class="font-medium text-sm">Assignments</span>
+    </a>
+
+    <!-- Calendar -->
+    <a href="/student/calendar" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/calendar">
+        <i class="bi bi-calendar3 text-sm"></i>
+        <span class="font-medium text-sm">Learning Calendar</span>
+    </a>
+
+    <!-- Category: Progress -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Progress</p>
+    </div>
+
+    <!-- Timeline Activity -->
+    <a href="/student/activity" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/activity">
+        <i class="bi bi-activity text-sm"></i>
+        <span class="font-medium text-sm">My Activity</span>
     </a>
     
     <!-- Certificates -->
-    <a href="/student/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/certificates">
-        <i class="bi bi-award-fill text-base"></i>
+    <a href="/student/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/certificates">
+        <i class="bi bi-award-fill text-sm"></i>
         <span class="font-medium text-sm">Certificates</span>
+    </a>
+
+    <!-- Category: Account -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Account</p>
+    </div>
+    
+    <!-- My Purchases -->
+    <a href="/student/orders" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/orders">
+        <i class="bi bi-credit-card text-sm"></i>
+        <span class="font-medium text-sm">My Purchases</span>
     </a>
     
     <!-- Notifications -->
-    <a href="/student/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/notifications">
-        <i class="bi bi-bell-fill text-base"></i>
+    <a href="/student/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/notifications">
+        <i class="bi bi-bell text-sm"></i>
         <span class="font-medium text-sm">Notifications</span>
     </a>
 
-    <!-- Divider -->
-    <div class="my-3 border-t border-white/10"></div>
-    
-    <!-- Profile -->
-    <a href="/student/profile" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/profile">
-        <i class="bi bi-person-fill text-base"></i>
-        <span class="font-medium text-sm">Profile</span>
-    </a>
-    
     <!-- Settings -->
-    <a href="/student/settings" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/settings">
-        <i class="bi bi-gear-fill text-base"></i>
+    <a href="/student/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/settings">
+        <i class="bi bi-gear text-sm"></i>
         <span class="font-medium text-sm">Settings</span>
     </a>
 
     <!-- Divider -->
-    <div class="my-3 border-t border-white/10"></div>
-    
-    <!-- Browse Courses -->
-    <a href="/student/browse" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/student/browse">
-        <i class="bi bi-compass text-base"></i>
-        <span class="font-medium text-sm">Browse Courses</span>
-    </a>
+    <div class="my-4 border-t border-white/10"></div>
     
     <!-- Back to Home -->
     <a href="/index" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-        <i class="bi bi-house-fill text-base"></i>
-        <span class="font-medium text-sm">Back to Home</span>
+        <i class="bi bi-house-door text-base"></i>
+        <span class="font-semibold text-sm">Back to Website</span>
     </a>
     
 </div>

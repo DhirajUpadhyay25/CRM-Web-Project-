@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('Learning Calendar', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/student/dashboard" class="hover:text-brand-600 transition-colors">Student</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">Learning Calendar</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="mb-6 pb-5 border-b border-surface-200">
+            <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Learning Calendar</h1>
+            <p class="text-gray-500 text-sm mt-0.5">Track upcoming assignment due dates, quiz schedules, and study deadlines in one place.</p>
+        </div>
+
+        <!-- Schedule/Timeline List View -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Pane: Agenda List (8 Cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                <h2 class="font-bold text-sm text-surface-900 flex items-center gap-1.5"><i class="bi bi-calendar-check text-brand-500"></i> Upcoming Deadlines & Schedule</h2>
+                
+                <div th:if="${events != null and !events.isEmpty()}" class="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-100">
+                    
+                    <div th:each="evt : ${events}" class="relative pl-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-white border border-surface-200 hover:border-brand-200 rounded-2xl shadow-sm transition-all group">
+                        
+                        <!-- Timeline circle status -->
+                        <div class="absolute left-1.5 w-3.5 h-3.5 rounded-full border-2 border-white flex items-center justify-center shadow-sm"
+                             th:classappend="${evt.type == 'ASSIGNMENT'} ? 'bg-red-500 text-white' : 'bg-purple-500 text-white'">
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-surface-100 text-gray-500" th:text="${evt.courseName}">Course</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
+                                      th:classappend="${evt.type == 'ASSIGNMENT'} ? 'bg-red-50 text-red-600' : 'bg-purple-50 text-purple-600'"
+                                      th:text="${evt.type}">ASSIGNMENT</span>
+                            </div>
+                            <h3 class="font-extrabold text-sm text-surface-900 mt-2 truncate group-hover:text-brand-600 transition-colors" th:text="${evt.title}">Event Title</h3>
+                            <p class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                                <i class="bi bi-clock-fill"></i> <span th:text="${evt.date}">Time</span>
+                            </p>
+                        </div>
+
+                        <div class="flex-shrink-0">
+                            <a th:href="@{${evt.url}}" class="px-4 py-2 bg-surface-50 border border-surface-200 hover:border-brand-300 hover:bg-brand-50 text-surface-850 hover:text-brand-700 rounded-xl text-xs font-bold transition-all shadow-sm">
+                                Open Target
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${events == null or events.isEmpty()}" class="bg-white rounded-2xl border border-surface-200 p-16 text-center">
+                    <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
+                        <i class="bi bi-calendar-x"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-surface-900 mb-1">No scheduled events</h3>
+                    <p class="text-gray-500 text-sm max-w-sm mx-auto">You do not have any assignments or quizzes scheduled for your enrolled courses right now.</p>
+                </div>
+            </div>
+
+            <!-- Right Pane: Calendar Info Widget (4 Cols) -->
+            <div class="lg:col-span-4">
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6 sticky top-6">
+                    <h3 class="font-bold text-sm text-surface-900 mb-2">Learning Tips</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed mb-4">Stay ahead by reviewing your schedule weekly. Make sure to space out your study modules and allow ample time for capstone coding deliverables.</p>
+                    
+                    <div class="border-t border-surface-100 pt-4 space-y-3">
+                        <div class="flex items-start gap-2 text-xs text-gray-600">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 mt-1 flex-shrink-0"></span>
+                            <span><strong>Assignments</strong> usually require code deliverables uploaded as ZIP files.</span>
+                        </div>
+                        <div class="flex items-start gap-2 text-xs text-gray-600">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500 mt-1 flex-shrink-0"></span>
+                            <span><strong>Quizzes</strong> are multiple choice assessments. You can retry failed quiz attempts immediately.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('Take Quiz', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-4 font-medium">
+            <a href="/student/dashboard" class="hover:text-brand-600 transition-colors">Student</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/student/courses" class="hover:text-brand-600 transition-colors">My Courses</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a th:href="@{/student/courses/{cId}/player(cId=${courseId})}" class="hover:text-brand-600 transition-colors">Player</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold truncate max-w-[200px]" th:text="${quiz.title}">Quiz</span>
+        </nav>
+
+        <!-- Quiz Details Card -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                <div>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase">Assessment</span>
+                    <h1 class="text-xl font-black text-surface-900 mt-1" th:text="${quiz.title}">Quiz Title</h1>
+                    <p class="text-gray-500 text-xs mt-1" th:text="${quiz.description}">Quiz Description</p>
+                </div>
+                <div class="bg-surface-50 rounded-xl p-3 border border-surface-100 text-center shrink-0">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">Passing Score</p>
+                    <p class="text-lg font-black text-brand-600" th:text="${quiz.passingScore + '%'}">70%</p>
+                </div>
+            </div>
+            
+            <div class="border-t border-surface-100 pt-4 flex flex-wrap gap-4 text-xs text-gray-500">
+                <span class="flex items-center gap-1.5"><i class="bi bi-question-circle-fill text-brand-500"></i> <strong class="text-surface-900" th:text="${questions.size() + ' Questions'}">0 Questions</strong></span>
+                <span class="flex items-center gap-1.5"><i class="bi bi-clock-fill text-brand-500"></i> Untimed</span>
+                <span class="flex items-center gap-1.5"><i class="bi bi-arrow-repeat text-brand-500"></i> Multiple attempts allowed</span>
+            </div>
+        </div>
+
+        <!-- Quiz Questions Form -->
+        <form th:action="@{/student/courses/{cId}/quizzes/{qId}/submit(cId=${courseId}, qId=${quiz.id})}" method="post" class="space-y-6">
+            
+            <div th:each="q, iterStat : ${questions}" class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6">
+                <!-- Question Title -->
+                <div class="flex gap-3 mb-4">
+                    <span class="w-6 h-6 rounded-lg bg-brand-50 text-brand-600 font-extrabold text-xs flex items-center justify-center flex-shrink-0" th:text="${iterStat.count}">1</span>
+                    <h3 class="font-bold text-sm text-surface-900 leading-snug" th:text="${q.questionText}">Question text?</h3>
+                </div>
+
+                <!-- Answer Options -->
+                <div class="grid grid-cols-1 gap-3 ml-9">
+                    <!-- Option A -->
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50/20 cursor-pointer transition-all">
+                        <input type="radio" th:name="'question_' + ${q.id}" value="1" required
+                               class="w-4 h-4 text-brand-600 border-surface-300 focus:ring-brand-500 focus:ring-2">
+                        <span class="text-xs text-surface-700" th:text="${q.optionA}">Option A</span>
+                    </label>
+                    <!-- Option B -->
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50/20 cursor-pointer transition-all">
+                        <input type="radio" th:name="'question_' + ${q.id}" value="2"
+                               class="w-4 h-4 text-brand-600 border-surface-300 focus:ring-brand-500 focus:ring-2">
+                        <span class="text-xs text-surface-700" th:text="${q.optionB}">Option B</span>
+                    </label>
+                    <!-- Option C -->
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50/20 cursor-pointer transition-all">
+                        <input type="radio" th:name="'question_' + ${q.id}" value="3"
+                               class="w-4 h-4 text-brand-600 border-surface-300 focus:ring-brand-500 focus:ring-2">
+                        <span class="text-xs text-surface-700" th:text="${q.optionC}">Option C</span>
+                    </label>
+                    <!-- Option D -->
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-brand-300 hover:bg-brand-50/20 cursor-pointer transition-all">
+                        <input type="radio" th:name="'question_' + ${q.id}" value="4"
+                               class="w-4 h-4 text-brand-600 border-surface-300 focus:ring-brand-500 focus:ring-2">
+                        <span class="text-xs text-surface-700" th:text="${q.optionD}">Option D</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit footer -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-surface-200">
+                <a th:href="@{/student/courses/{cId}/player(cId=${courseId})}" class="px-5 py-2.5 bg-white border border-surface-200 hover:bg-surface-50 text-gray-500 font-bold rounded-xl text-xs transition-all">Cancel</a>
+                <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-md shadow-brand-500/10">Submit Answers</button>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>

@@ -6,4 +6,5 @@ import in.project.main.entities.Certificate;
 
 @Repository
 public interface CertificateRepository extends JpaRepository<Certificate, Long> {
+    java.util.Optional<Certificate> findByEnrollmentId(String enrollmentId);
 }

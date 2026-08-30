@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('Course Overview', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-4 font-medium">
+            <a href="/student/dashboard" class="hover:text-brand-600 transition-colors">Student</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/student/courses" class="hover:text-brand-600 transition-colors">My Courses</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold truncate max-w-[200px]" th:text="${course.name}">Course Name</span>
+        </nav>
+
+        <!-- Course Header Card -->
+        <div class="bg-white rounded-3xl border border-surface-200 shadow-sm overflow-hidden mb-8">
+            <div class="relative h-64 bg-surface-900 overflow-hidden flex items-center justify-center">
+                <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="absolute inset-0 w-full h-full object-cover opacity-45 filter blur-sm" alt="Background Blur">
+                <div class="absolute inset-0 bg-gradient-to-t from-surface-950 via-surface-950/60 to-transparent"></div>
+
+                <!-- Floating Info -->
+                <div class="absolute bottom-6 left-6 right-6 text-white flex flex-col md:flex-row md:items-end md:justify-between gap-4 z-10">
+                    <div class="max-w-2xl">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 uppercase tracking-wider" th:text="${course.category != null ? course.category.name : 'General'}">Category</span>
+                        <h1 class="text-2xl sm:text-3xl font-black mt-2 tracking-tight" th:text="${course.name}">Course Title</h1>
+                        <p class="text-gray-300 text-xs sm:text-sm mt-1 line-clamp-2 font-medium" th:text="${course.shortDescription}"></p>
+                    </div>
+
+                    <!-- Progress Badge -->
+                    <div class="flex-shrink-0 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3">
+                        <div class="text-right">
+                            <p class="text-[10px] text-gray-400 font-semibold uppercase">Progress</p>
+                            <p class="text-lg font-black text-brand-300" th:text="${progress.percent + '%'}">0%</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full border-4 border-white/10 flex items-center justify-center relative">
+                            <i class="bi bi-play-btn-fill text-brand-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Body Details -->
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-surface-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="bi bi-person-fill"></i></div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 font-semibold uppercase">Instructor</p>
+                        <p class="text-xs font-bold text-surface-900" th:text="${course.instructor}">Instructor</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg"><i class="bi bi-clock-fill"></i></div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 font-semibold uppercase">Duration</p>
+                        <p class="text-xs font-bold text-surface-900" th:text="${course.duration}">40h</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-lg"><i class="bi bi-mortarboard-fill"></i></div>
+                    <div>
+                        <p class="text-[10px] text-gray-400 font-semibold uppercase">Level</p>
+                        <p class="text-xs font-bold text-surface-900" th:text="${course.level}">Intermediate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Syllabus & Detail Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Pane: Course Syllabus (8 Cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Description Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6">
+                    <h2 class="text-base font-bold text-surface-900 mb-3">Course Description</h2>
+                    <div class="text-xs text-gray-600 leading-relaxed space-y-2 whitespace-pre-line" th:text="${course.description}">
+                        Full description text.
+                    </div>
+                </div>
+
+                <!-- Course Content Syllabus -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6">
+                    <h2 class="text-base font-bold text-surface-900 mb-4">Course Syllabus</h2>
+                    
+                    <div th:if="${lessons != null and !lessons.isEmpty()}" class="space-y-4">
+                        <!-- We will list lessons grouped by sectionName dynamically, or just render them sequentially with sections -->
+                        <div class="relative border-l border-surface-200 pl-6 ml-3 space-y-4">
+                            <div th:each="lesson : ${lessons}" class="relative flex items-center justify-between gap-3 p-3 bg-surface-50 hover:bg-surface-100/50 rounded-xl border border-surface-100 transition-all">
+                                <div class="absolute -left-9.5 w-6 h-6 rounded-full border-4 border-white bg-brand-600 text-white flex items-center justify-center text-[10px]">
+                                    <span th:text="${lesson.orderIndex}">1</span>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] text-gray-400 font-semibold block" th:text="${lesson.sectionName}">Section</span>
+                                    <p class="font-bold text-xs text-surface-900 truncate" th:text="${lesson.title}">Lesson Title</p>
+                                </div>
+                                <div class="flex-shrink-0 text-xs">
+                                    <i class="bi bi-play-circle text-gray-400 text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty State -->
+                    <div th:if="${lessons == null or lessons.isEmpty()}" class="py-8 text-center text-gray-400">
+                        <i class="bi bi-journal-x text-2xl mb-1.5 block text-gray-300"></i>
+                        <p class="text-xs font-semibold">No syllabus available</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pane: Actions & Deadlines (4 Cols) -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Learning CTA Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6 text-center">
+                    <h3 class="font-bold text-surface-900 mb-2">Workspace Controls</h3>
+                    
+                    <div class="mb-5 flex flex-col items-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Status</p>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold"
+                              th:classappend="${enrollment.status.name() == 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-brand-500 text-white'}"
+                              th:text="${enrollment.status.name() == 'COMPLETED' ? 'Completed' : 'In Progress'}">In Progress</span>
+                    </div>
+
+                    <a th:href="@{/student/courses/{cId}/player(cId=${course.id}, lessonId=${targetLessonId})}" 
+                       class="w-full inline-flex items-center justify-center gap-2 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm shadow-md transition-all">
+                        <i class="bi bi-play-fill text-lg"></i>
+                        <span th:text="${progress.percent > 0 ? 'Continue Learning' : 'Start Course'}">Start Learning</span>
+                    </a>
+
+                    <div class="mt-4 pt-4 border-t border-surface-100 grid grid-cols-2 gap-3 text-center text-xs">
+                        <div>
+                            <p class="text-gray-400 font-medium">Modules</p>
+                            <p class="font-black text-surface-900 mt-0.5" th:text="${progress.completedModules + ' / ' + totalModules}">0 / 0</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 font-medium">Lessons</p>
+                            <p class="font-black text-surface-900 mt-0.5" th:text="${progress.completedLessons + ' / ' + progress.totalLessons}">0 / 0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificates Availability Card -->
+                <div th:if="${enrollment.status.name() == 'COMPLETED'}" class="bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-2xl p-6 text-center shadow-lg relative overflow-hidden group">
+                    <div class="absolute right-0 bottom-0 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none translate-x-4 translate-y-4"></div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center text-xl mx-auto mb-3"><i class="bi bi-award-fill text-yellow-300"></i></div>
+                        <h4 class="font-black text-sm">Certificate Unlocked!</h4>
+                        <p class="text-purple-200 text-[11px] mt-1 leading-relaxed">Congratulations, you have completed all requirements! Your official certificate is generated.</p>
+                        <a href="/student/certificates" class="mt-4 w-full inline-flex items-center justify-center gap-1.5 py-2.5 bg-white text-purple-950 font-bold rounded-xl text-xs shadow transition-all hover:bg-purple-50">
+                            <i class="bi bi-download"></i> View Certificate
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
