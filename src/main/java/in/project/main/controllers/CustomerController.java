@@ -2,6 +2,8 @@ package in.project.main.controllers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import in.project.main.entities.Course;
 import in.project.main.entities.Enrollment;
 import in.project.main.entities.User;
+import in.project.main.entities.Orders;
+import in.project.main.entities.QuizAttempt;
+import in.project.main.entities.AssignmentSubmission;
+import in.project.main.entities.Assignment;
+import in.project.main.entities.Quiz;
+import in.project.main.entities.Certificate;
+import in.project.main.entities.StudentActivity;
+import in.project.main.repositories.OrdersRepository;
+import in.project.main.repositories.QuizAttemptRepository;
+import in.project.main.repositories.AssignmentSubmissionRepository;
+import in.project.main.repositories.AssignmentRepository;
+import in.project.main.repositories.QuizRepository;
+import in.project.main.repositories.CertificateRepository;
+import in.project.main.repositories.StudentActivityRepository;
+import in.project.main.repositories.CourseRepository;
 import in.project.main.services.CustomerService;
 
 @Controller
@@ -29,6 +46,30 @@ public class CustomerController
 {
 	@Autowired
 	private CustomerService customerService;
+
+	@Autowired
+	private OrdersRepository ordersRepo;
+
+	@Autowired
+	private QuizAttemptRepository quizAttemptRepo;
+
+	@Autowired
+	private AssignmentSubmissionRepository submissionRepo;
+
+	@Autowired
+	private AssignmentRepository assignmentRepo;
+
+	@Autowired
+	private QuizRepository quizRepo;
+
+	@Autowired
+	private CertificateRepository certificateRepo;
+
+	@Autowired
+	private StudentActivityRepository activityRepo;
+
+	@Autowired
+	private CourseRepository courseRepo;
 	
 	@GetMapping
 	public String openCustomerManagementPage(
@@ -124,7 +165,61 @@ public class CustomerController
 					.filter(e -> e.getStatus() == in.project.main.entities.enums.EnrollmentStatus.ACTIVE).count());
 			model.addAttribute("completedEnrollments", enrollments.stream()
 					.filter(e -> e.getStatus() == in.project.main.entities.enums.EnrollmentStatus.COMPLETED).count());
-			
+
+			// Purchases / Orders
+			List<Orders> orders = ordersRepo.findByUserEmailOrderByDateOfPurchaseDesc(student.getEmail(), org.springframework.data.domain.Pageable.unpaged()).getContent();
+			model.addAttribute("orders", orders);
+
+			// Assessments / Quiz attempts
+			List<QuizAttempt> attempts = quizAttemptRepo.findByUserEmailOrderByAttemptedAtDesc(student.getEmail());
+			List<Map<String, Object>> displayAttempts = new ArrayList<>();
+			for (QuizAttempt qa : attempts) {
+				Quiz q = quizRepo.findById(qa.getQuizId()).orElse(null);
+				Map<String, Object> map = new HashMap<>();
+				map.put("attempt", qa);
+				map.put("quizTitle", q != null ? q.getTitle() : "Quiz " + qa.getQuizId());
+				displayAttempts.add(map);
+			}
+			model.addAttribute("attempts", displayAttempts);
+
+			// Assignments submissions
+			List<AssignmentSubmission> submissions = submissionRepo.findByUserEmail(student.getEmail());
+			List<Map<String, Object>> displaySubmissions = new ArrayList<>();
+			for (AssignmentSubmission as : submissions) {
+				Assignment a = assignmentRepo.findById(as.getAssignmentId()).orElse(null);
+				Map<String, Object> map = new HashMap<>();
+				map.put("submission", as);
+				map.put("assignmentTitle", a != null ? a.getTitle() : "Assignment " + as.getAssignmentId());
+				displaySubmissions.add(map);
+			}
+			model.addAttribute("submissions", displaySubmissions);
+
+			// Certificates
+			List<Certificate> certificates = new ArrayList<>();
+			for (Enrollment e : enrollments) {
+				certificateRepo.findByEnrollmentId(String.valueOf(e.getId())).ifPresent(certificates::add);
+			}
+			List<Map<String, Object>> displayCertificates = new ArrayList<>();
+			for (Certificate cert : certificates) {
+				Enrollment enroll = enrollments.stream().filter(e -> String.valueOf(e.getId()).equals(cert.getEnrollmentId())).findFirst().orElse(null);
+				Map<String, Object> map = new HashMap<>();
+				map.put("certificate", cert);
+				map.put("courseName", enroll != null ? enroll.getCourse().getName() : "Course");
+				displayCertificates.add(map);
+			}
+			model.addAttribute("certificates", displayCertificates);
+
+			// Activity
+			List<StudentActivity> activities = activityRepo.findByUserEmailOrderByCreatedAtDesc(student.getEmail(), org.springframework.data.domain.PageRequest.of(0, 50));
+			List<Map<String, Object>> displayActivities = new ArrayList<>();
+			for (StudentActivity sa : activities) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("activity", sa);
+				map.put("timeStr", sa.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")));
+				displayActivities.add(map);
+			}
+			model.addAttribute("activities", displayActivities);
+
 			return "admin/students/detail";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("errorMsg", "Student not found.");

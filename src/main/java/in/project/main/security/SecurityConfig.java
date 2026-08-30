@@ -54,6 +54,9 @@ public class SecurityConfig {
                 // Admin Routes
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 
+                // Instructor Routes
+                .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")
+                
                 // Employee Routes
                 .requestMatchers(
                     "/employeeProfile", "/sellCourse", "/sellCourseForm",

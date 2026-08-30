@@ -6,5 +6,6 @@ package in.project.main.entities;
 public enum Role {
     ADMIN,
     STUDENT,
-    EMPLOYEE
+    EMPLOYEE,
+    INSTRUCTOR
 }

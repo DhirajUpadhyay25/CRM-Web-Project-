@@ -21,6 +21,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import in.project.main.dto.CourseDTO;
 import in.project.main.dto.CourseStatsDTO;
 import in.project.main.entities.Course;
+import in.project.main.entities.Employee;
+import in.project.main.entities.Role;
+import in.project.main.repositories.EmployeeRepository;
 import in.project.main.entities.enums.CourseLevel;
 import in.project.main.entities.enums.CourseStatus;
 import in.project.main.services.CategoryService;
@@ -36,10 +39,14 @@ public class CourseController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     private void populateDropdowns(Model model) {
         model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("levels", CourseLevel.values());
         model.addAttribute("statuses", CourseStatus.values());
+        model.addAttribute("instructorsList", employeeRepository.findByRole(Role.INSTRUCTOR));
     }
 
     private Sort resolveSort(String sort) {
@@ -170,6 +177,7 @@ public class CourseController {
         dto.setShortDescription(course.getShortDescription());
         dto.setDescription(course.getDescription());
         dto.setInstructor(course.getInstructor());
+        dto.setInstructorEmail(course.getInstructorEmail());
         dto.setLevel(course.getLevel());
         dto.setLanguage(course.getLanguage());
         dto.setDuration(course.getDuration());

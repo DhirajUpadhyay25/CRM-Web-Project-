@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('LMS Reporting & Analytics', ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">Reports &amp; Analytics</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">LMS Reports &amp; Analytics</h1>
+                <p class="text-gray-500 text-xs mt-1">Consolidated reports on students, course performance, sales revenue, and assessments.</p>
+            </div>
+            
+            <!-- Tab Buttons -->
+            <div class="bg-surface-100 p-1 rounded-xl flex gap-1 border border-surface-200">
+                <button onclick="switchReportTab('students')" id="rep-tab-students" class="rep-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all bg-white text-surface-900 shadow-sm border border-surface-200/50">
+                    Students
+                </button>
+                <button onclick="switchReportTab('courses')" id="rep-tab-courses" class="rep-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all text-gray-500 hover:text-surface-900">
+                    Courses
+                </button>
+                <button onclick="switchReportTab('revenue')" id="rep-tab-revenue" class="rep-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all text-gray-500 hover:text-surface-900">
+                    Revenue
+                </button>
+                <button onclick="switchReportTab('quizzes')" id="rep-tab-quizzes" class="rep-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all text-gray-500 hover:text-surface-900">
+                    Assessments
+                </button>
+            </div>
+        </div>
+
+        <!-- 1. STUDENTS REPORT TAB -->
+        <div id="rep-content-students" class="rep-content">
+            <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-surface-100 bg-surface-50/50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-people-fill text-brand-600"></i>
+                        Student Engagement Directory
+                    </h3>
+                </div>
+                
+                <div th:if="${#lists.isEmpty(studentReport)}" class="p-12 text-center text-gray-400">
+                    <i class="bi bi-person-slash text-3xl mb-2"></i>
+                    <p class="text-xs">No student accounts found in database.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(studentReport)}" class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                            <tr>
+                                <th class="py-3 px-5">Student</th>
+                                <th class="py-3 px-4">City</th>
+                                <th class="py-3 px-4 text-center">Enrolled Courses</th>
+                                <th class="py-3 px-4 text-center">Completed Courses</th>
+                                <th class="py-3 px-5">Last Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-surface-200">
+                            <tr th:each="row : ${studentReport}" class="hover:bg-surface-50/70 transition-colors">
+                                <td class="py-3.5 px-5">
+                                    <p class="font-semibold text-surface-900" th:text="${row.name}">Name</p>
+                                    <p class="text-xs text-gray-400 font-mono" th:text="${row.email}">email@domain.com</p>
+                                </td>
+                                <td class="py-3.5 px-4 text-surface-700" th:text="${row.city}">City</td>
+                                <td class="py-3.5 px-4 text-center font-semibold text-surface-900" th:text="${row.enrolledCount}">0</td>
+                                <td class="py-3.5 px-4 text-center font-semibold text-emerald-600" th:text="${row.completedCount}">0</td>
+                                <td class="py-3.5 px-5">
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-semibold text-surface-900" th:text="${row.lastActivityDesc}">Description</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5" th:text="${row.lastActivityTime}">Time</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. COURSES REPORT TAB -->
+        <div id="rep-content-courses" class="rep-content hidden">
+            <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-surface-100 bg-surface-50/50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-play-btn-fill text-brand-600"></i>
+                        Course Performance Metrics
+                    </h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(courseReport)}" class="p-12 text-center text-gray-400">
+                    <i class="bi bi-journal-x text-3xl mb-2"></i>
+                    <p class="text-xs">No courses registered in curriculum catalog.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(courseReport)}" class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                            <tr>
+                                <th class="py-3 px-5">Course Title</th>
+                                <th class="py-3 px-4">Level</th>
+                                <th class="py-3 px-4">Price</th>
+                                <th class="py-3 px-4 text-center">Enrollments</th>
+                                <th class="py-3 px-4 text-center">Completions</th>
+                                <th class="py-3 px-4 text-center">Completion Rate</th>
+                                <th class="py-3 px-5 text-center">Avg Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-surface-200">
+                            <tr th:each="row : ${courseReport}" class="hover:bg-surface-50/70 transition-colors">
+                                <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${row.name}">Course Name</td>
+                                <td class="py-3.5 px-4 text-xs font-semibold text-gray-500" th:text="${row.level}">Level</td>
+                                <td class="py-3.5 px-4 text-xs font-bold text-surface-900" th:text="${row.price}">Price</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-surface-900" th:text="${row.enrollmentsCount}">0</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-brand-600" th:text="${row.completionsCount}">0</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-surface-900" th:text="${row.completionRate + '%'}">0%</td>
+                                <td class="py-3.5 px-5 text-center font-black text-emerald-600" th:text="${row.avgProgress + '%'}">0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. REVENUE REPORT TAB -->
+        <div id="rep-content-revenue" class="rep-content hidden">
+            <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-surface-100 bg-surface-50/50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-cash-coin text-brand-600"></i>
+                        Course Sales Earnings
+                    </h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(revenueReport)}" class="p-12 text-center text-gray-400">
+                    <i class="bi bi-currency-exchange text-3xl mb-2"></i>
+                    <p class="text-xs">No orders or revenue transactions processed yet.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(revenueReport)}" class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                            <tr>
+                                <th class="py-3 px-5">Course Title</th>
+                                <th class="py-3 px-4 text-center">Sales count (Orders)</th>
+                                <th class="py-3 px-5 text-right">Cumulative Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-surface-200">
+                            <tr th:each="row : ${revenueReport}" class="hover:bg-surface-50/70 transition-colors">
+                                <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${row.name}">Course</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-surface-900" th:text="${row.salesCount}">0</td>
+                                <td class="py-3.5 px-5 text-right font-black text-emerald-600 text-base" th:text="${'₹' + #numbers.formatDecimal(row.totalRevenue, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ASSESSMENT REPORT TAB -->
+        <div id="rep-content-quizzes" class="rep-content hidden">
+            <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-surface-100 bg-surface-50/50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-award-fill text-brand-600"></i>
+                        Quiz Performance Statistics
+                    </h3>
+                </div>
+
+                <div th:if="${#lists.isEmpty(quizReport)}" class="p-12 text-center text-gray-400">
+                    <i class="bi bi-patch-question text-3xl mb-2"></i>
+                    <p class="text-xs">No assessments seeded or quizzes mapped yet.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(quizReport)}" class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                            <tr>
+                                <th class="py-3 px-5">Quiz Title</th>
+                                <th class="py-3 px-4">Course Name</th>
+                                <th class="py-3 px-4 text-center">Attempts count</th>
+                                <th class="py-3 px-4 text-center">Pass count</th>
+                                <th class="py-3 px-4 text-center">Pass rate (%)</th>
+                                <th class="py-3 px-5 text-center">Average Score (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-surface-200">
+                            <tr th:each="row : ${quizReport}" class="hover:bg-surface-50/70 transition-colors">
+                                <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${row.title}">Quiz Title</td>
+                                <td class="py-3.5 px-4 text-xs text-gray-500" th:text="${row.courseName}">Course</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-surface-900" th:text="${row.attemptsCount}">0</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-brand-600" th:text="${row.passCount}">0</td>
+                                <td class="py-3.5 px-4 text-center font-bold text-emerald-600" th:text="${row.passRate + '%'}">0%</td>
+                                <td class="py-3.5 px-5 text-center font-extrabold text-surface-900" th:text="${row.avgScore + '%'}">0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client-side Tab Switcher Script -->
+        <script>
+            function switchReportTab(tabId) {
+                // Hide all report tab contents
+                document.querySelectorAll('.rep-content').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                
+                // Show target tab content
+                document.getElementById('rep-content-' + tabId).classList.remove('hidden');
+
+                // Reset all button styles
+                document.querySelectorAll('.rep-tab').forEach(btn => {
+                    btn.className = "rep-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all text-gray-500 hover:text-surface-900";
+                });
+
+                // Set target button styles
+                document.getElementById('rep-tab-' + tabId).className = "rep-tab px-4 py-2 text-xs font-semibold rounded-lg transition-all bg-white text-surface-900 shadow-sm border border-surface-200/50";
+            }
+        </script>
+    </div>
+</body>
+</html>

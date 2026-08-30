@@ -27,6 +27,8 @@ public class CourseDTO {
 
     private String instructor;
 
+    private String instructorEmail;
+
     @NotNull(message = "Level is required")
     private CourseLevel level = CourseLevel.ALL_LEVELS;
 
@@ -101,6 +103,14 @@ public class CourseDTO {
 
     public void setInstructor(String instructor) {
         this.instructor = instructor;
+    }
+
+    public String getInstructorEmail() {
+        return instructorEmail;
+    }
+
+    public void setInstructorEmail(String instructorEmail) {
+        this.instructorEmail = instructorEmail;
     }
 
     public CourseLevel getLevel() {

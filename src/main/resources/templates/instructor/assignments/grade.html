@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{instructor/layout/instructor-layout :: layout('Evaluate Student Homework', ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/instructor/dashboard" class="hover:text-brand-600 transition-colors">Trainer</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/instructor/submissions" class="hover:text-brand-600 transition-colors">Submissions</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">Grade Submission</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-surface-200">
+            <a href="/instructor/submissions" class="w-9 h-9 rounded-xl bg-white border border-surface-200 shadow-sm flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-surface-100 transition-colors">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Evaluate Homework Submission</h1>
+                <p class="text-gray-500 text-xs mt-0.5" th:text="${'Grade homework submitted by: ' + student.name}"></p>
+            </div>
+        </div>
+
+        <!-- Grade Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left 2 Columns: Submissions & Prompt -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Student submission deliverable details -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-file-earmark-text text-brand-600"></i> Student Submission
+                    </h2>
+
+                    <div class="space-y-4">
+                        <!-- Submission text -->
+                        <div class="p-4 bg-surface-50 border border-surface-200 rounded-xl">
+                            <h4 class="text-xs text-gray-500 font-bold uppercase mb-2">Student Comments &amp; Answers</h4>
+                            <div class="text-sm text-surface-800 whitespace-pre-line leading-relaxed" 
+                                 th:text="${submission.submissionText != null ? submission.submissionText : 'No text content provided.'}">
+                            </div>
+                        </div>
+
+                        <!-- Submission file -->
+                        <div th:if="${submission.fileUrl}" class="p-4 bg-brand-50/30 border border-brand-100 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center text-brand-600 text-lg">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-surface-900">Submitted Project File</p>
+                                    <p class="text-xs text-gray-400 truncate max-w-sm" th:text="${submission.fileUrl}"></p>
+                                </div>
+                            </div>
+                            <a th:href="@{${submission.fileUrl}}" target="_blank" 
+                               class="px-3.5 py-2 bg-white text-brand-600 font-semibold rounded-xl border border-brand-200 hover:bg-brand-50 hover:text-brand-700 transition-all text-xs flex items-center gap-1.5 shadow-sm">
+                                <i class="bi bi-cloud-arrow-down-fill"></i>
+                                <span>Download File</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment Prompt definition -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-info-circle text-brand-600"></i> Assignment Definition
+                    </h2>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <span class="text-gray-500 font-medium text-xs uppercase tracking-wider block">Assignment Title:</span>
+                            <p class="font-bold text-surface-900 text-base mt-0.5" th:text="${assignment.title}">Title</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 font-medium text-xs uppercase tracking-wider block">Instructions:</span>
+                            <p class="text-surface-700 mt-1 whitespace-pre-line leading-relaxed" th:text="${assignment.description}">Description</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-t border-surface-100 pt-3">
+                            <div>
+                                <span class="text-gray-500 font-medium text-xs">Maximum Score:</span>
+                                <p class="font-bold text-surface-900" th:text="${assignment.maxScore + ' Points'}"></p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 font-medium text-xs">Due Date:</span>
+                                <p class="font-bold text-surface-900" th:text="${#temporals.format(assignment.dueDate, 'dd MMM yyyy, hh:mm a')}"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Form grading -->
+            <div class="space-y-6">
+                <!-- Grading action form card -->
+                <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-2">
+                        <i class="bi bi-award-fill text-brand-600"></i> Evaluate &amp; Grade
+                    </h2>
+
+                    <!-- Error Msg alert -->
+                    <div th:if="${errorMsg}" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs flex items-center gap-1.5">
+                        <i class="bi bi-exclamation-circle-fill text-red-600"></i>
+                        <span th:text="${errorMsg}">Error</span>
+                    </div>
+
+                    <form th:action="@{/instructor/submissions/{id}/grade(id=${submission.id})}" method="post" class="space-y-4">
+                        <!-- Score -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Award Score</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="score" min="0" th:max="${assignment.maxScore}" required 
+                                       th:value="${submission.score}"
+                                       class="w-full px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm"
+                                       placeholder="0">
+                                <span class="text-sm font-semibold text-gray-400" th:text="${'/ ' + assignment.maxScore}">/ 100</span>
+                            </div>
+                        </div>
+
+                        <!-- Feedback -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Trainer Feedback Remarks</label>
+                            <textarea name="feedback" rows="6" required th:text="${submission.feedback}"
+                                      class="w-full px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm placeholder-gray-400"
+                                      placeholder="Provide grading comments and review feedback..."></textarea>
+                        </div>
+
+                        <!-- Submit button -->
+                        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition-all text-xs flex items-center justify-center gap-2">
+                            <i class="bi bi-check-lg"></i>
+                            <span>Save Evaluation</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

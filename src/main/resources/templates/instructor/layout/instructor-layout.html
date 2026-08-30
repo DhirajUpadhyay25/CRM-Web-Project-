@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title + ' | EduTake Instructor'}">EduTake Instructor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#edd8ff', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 900: '#4c1d95', 950: '#2e1065' },
+                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-surface-50 text-surface-900 antialiased flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-surface-900 text-white w-64 flex-shrink-0 flex flex-col h-full transition-transform duration-300 transform -translate-x-full md:translate-x-0 fixed md:relative z-30">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-5 border-b border-white/5 shrink-0">
+            <a href="/instructor/dashboard" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-lg shadow-lg shadow-brand-500/20">T</div>
+                <span class="font-bold text-xl tracking-tight">Trainer<span class="text-brand-400">.</span></span>
+            </a>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 custom-scrollbar">
+            <!-- Dashboard -->
+            <a href="/instructor/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-gray-300 hover:text-white" data-path="/instructor/dashboard">
+                <i class="bi bi-grid-1x2-fill text-base"></i>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+            
+            <div class="pt-4 pb-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Management
+            </div>
+            
+            <!-- Courses -->
+            <a href="/instructor/courses" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-gray-300 hover:text-white" data-path="/instructor/courses">
+                <i class="bi bi-play-btn-fill text-base"></i>
+                <span class="font-medium text-sm">My Courses</span>
+            </a>
+
+            <!-- Students -->
+            <a href="/instructor/students" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-gray-300 hover:text-white" data-path="/instructor/students">
+                <i class="bi bi-people-fill text-base"></i>
+                <span class="font-medium text-sm">My Students</span>
+            </a>
+
+            <!-- Submissions -->
+            <a href="/instructor/submissions" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-gray-300 hover:text-white" data-path="/instructor/submissions">
+                <i class="bi bi-file-earmark-check-fill text-base"></i>
+                <span class="font-medium text-sm">Submissions</span>
+            </a>
+
+            <div class="pt-4 pb-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Account
+            </div>
+
+            <!-- Profile -->
+            <a href="/instructor/profile" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-gray-300 hover:text-white" data-path="/instructor/profile">
+                <i class="bi bi-person-fill text-base"></i>
+                <span class="font-medium text-sm">Profile</span>
+            </a>
+
+            <!-- Logout -->
+            <a href="/logout" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors text-gray-300 mt-auto">
+                <i class="bi bi-box-arrow-right text-base"></i>
+                <span class="font-medium text-sm">Sign Out</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <!-- Header -->
+        <header class="h-16 border-b border-surface-200 bg-white flex items-center justify-between px-6 shrink-0 z-20">
+            <button id="sidebarToggle" class="md:hidden text-surface-500 hover:text-surface-900 flex items-center">
+                <i class="bi bi-list text-2xl"></i>
+            </button>
+            <div class="ml-auto flex items-center gap-4">
+                <span class="text-sm font-semibold text-surface-700" th:text="${#authentication.name}">Instructor</span>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-8">
+            <div th:replace="${content}"></div>
+        </main>
+    </div>
+
+    <!-- Active Class Logic Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const path = window.location.pathname;
+            document.querySelectorAll(".sidebar-link").forEach(link => {
+                const targetPath = link.getAttribute("data-path");
+                if (path === targetPath || path.startsWith(targetPath + "/")) {
+                    link.className = "sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg bg-brand-600 text-white shadow-md shadow-brand-600/15";
+                }
+            });
+
+            // Mobile sidebar toggle
+            const toggle = document.getElementById("sidebarToggle");
+            const sidebar = document.getElementById("sidebar");
+            if (toggle && sidebar) {
+                toggle.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle("-translate-x-full");
+                });
+                document.body.addEventListener("click", () => {
+                    sidebar.classList.add("-translate-x-full");
+                });
+                sidebar.addEventListener("click", (e) => e.stopPropagation());
+            }
+        });
+    </script>
+
+</body>
+</html>

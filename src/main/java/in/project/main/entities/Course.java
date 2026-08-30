@@ -44,6 +44,9 @@ public class Course {
     @Column
     private String instructor;
 
+    @Column
+    private String instructorEmail;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CourseLevel level = CourseLevel.ALL_LEVELS;
@@ -148,6 +151,14 @@ public class Course {
 
     public void setInstructor(String instructor) {
         this.instructor = instructor;
+    }
+
+    public String getInstructorEmail() {
+        return instructorEmail;
+    }
+
+    public void setInstructorEmail(String instructorEmail) {
+        this.instructorEmail = instructorEmail;
     }
 
     public CourseLevel getLevel() {

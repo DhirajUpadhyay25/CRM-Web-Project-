@@ -11,4 +11,5 @@ public interface AssignmentSubmissionRepository extends JpaRepository<Assignment
     List<AssignmentSubmission> findByUserEmail(String userEmail);
     Optional<AssignmentSubmission> findByUserEmailAndAssignmentId(String userEmail, Long assignmentId);
     List<AssignmentSubmission> findByUserEmailAndAssignmentIdIn(String userEmail, List<Long> assignmentIds);
+    List<AssignmentSubmission> findByStatus(String status);
 }

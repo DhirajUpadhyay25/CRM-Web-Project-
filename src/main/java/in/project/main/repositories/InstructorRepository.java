@@ -6,4 +6,5 @@ import in.project.main.entities.Instructor;
 
 @Repository
 public interface InstructorRepository extends JpaRepository<Instructor, Long> {
+    Instructor findByEmail(String email);
 }

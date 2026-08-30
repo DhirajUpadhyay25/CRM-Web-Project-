@@ -147,6 +147,10 @@
                                 <i class="bi bi-clock text-brand-400 text-[11px]"></i>
                                 <span th:text="${course.duration}"></span>
                             </div>
+                            <div class="flex items-center gap-1" th:if="${lessonCounts != null and lessonCounts.containsKey(course.id)}">
+                                <i class="bi bi-book text-brand-400 text-[11px]"></i>
+                                <span th:text="${lessonCounts.get(course.id)} + ' Lessons'"></span>
+                            </div>
                         </div>
                         
                         <!-- Title -->
@@ -172,6 +176,9 @@
                         <!-- Pricing & CTA Button -->
                         <div class="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                             <div class="flex flex-col">
+                                <div th:if="${enrolledCourseIds != null and enrolledCourseIds.contains(course.id)}" class="text-xs font-bold text-emerald-400 flex items-center gap-1 mb-1">
+                                    <i class="bi bi-patch-check-fill"></i> Enrolled
+                                </div>
                                 <div th:if="${course.isFree()}" class="text-lg font-extrabold text-emerald-400">
                                     Free
                                 </div>
@@ -181,7 +188,15 @@
                                 </div>
                             </div>
                             
-                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-800 hover:bg-brand-600 text-white font-semibold text-xs transition-all border border-white/10 hover:border-brand-500 shadow-sm">
+                            <a th:if="${enrolledCourseIds != null and enrolledCourseIds.contains(course.id)}" 
+                               th:href="@{/student/courses/{id}/overview(id=${course.id})}" 
+                               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs transition-all border border-brand-500 shadow-sm shadow-brand-600/25 animate-pulse">
+                                <span>Learn</span>
+                                <i class="bi bi-arrow-right text-[11px]"></i>
+                            </a>
+                            <a th:unless="${enrolledCourseIds != null and enrolledCourseIds.contains(course.id)}" 
+                               th:href="@{/courses/{slug}(slug=${course.slug})}" 
+                               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-800 hover:bg-brand-600 text-white font-semibold text-xs transition-all border border-white/10 hover:border-brand-500 shadow-sm">
                                 <span>View Course</span>
                                 <i class="bi bi-arrow-right text-[11px]"></i>
                             </a>

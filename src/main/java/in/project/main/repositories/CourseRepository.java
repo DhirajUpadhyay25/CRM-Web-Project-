@@ -20,6 +20,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     Course findByName(String name);
 
+    List<Course> findByInstructorEmail(String instructorEmail);
+
     Optional<Course> findBySlug(String slug);
     
     boolean existsBySlug(String slug);

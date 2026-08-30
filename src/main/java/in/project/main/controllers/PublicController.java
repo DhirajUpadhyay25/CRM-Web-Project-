@@ -1,6 +1,9 @@
 package in.project.main.controllers;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,13 +28,19 @@ import in.project.main.entities.User;
 import in.project.main.entities.enums.CourseLevel;
 import in.project.main.entities.enums.CourseStatus;
 import in.project.main.entities.enums.EnrollmentStatus;
+import in.project.main.entities.enums.NotificationType;
+import in.project.main.entities.Lesson;
+import in.project.main.entities.Certificate;
 import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
+import in.project.main.repositories.LessonRepository;
+import in.project.main.repositories.CertificateRepository;
 import in.project.main.security.CustomUserDetails;
 import in.project.main.services.CategoryService;
 import in.project.main.services.CourseService;
 import in.project.main.services.OrderService;
+import in.project.main.services.NotificationService;
 import in.project.main.util.DateTimeUtil;
 
 @Controller
@@ -54,6 +63,15 @@ public class PublicController {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private LessonRepository lessonRepository;
+
+    @Autowired
+    private CertificateRepository certificateRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Value("${app.razorpay.key-id}")
     private String razorpayKeyId;
@@ -81,12 +99,31 @@ public class PublicController {
             @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "level", required = false) CourseLevel level,
             @RequestParam(name = "pricingType", required = false) String pricingType,
-            @RequestParam(name = "sort", defaultValue = "newest") String sort) {
+            @RequestParam(name = "sort", defaultValue = "newest") String sort,
+            org.springframework.security.core.Authentication authentication) {
 
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), resolvePublicSort(sort));
         Page<Course> coursesPage = courseService.getPublicStorefrontCourses(keyword, categoryId, level, pricingType, pageable);
 
+        // Fetch lesson counts
+        Map<Long, Integer> lessonCounts = new HashMap<>();
+        for (Course c : coursesPage.getContent()) {
+            lessonCounts.put(c.getId(), lessonRepository.findByCourseId(String.valueOf(c.getId())).size());
+        }
+
+        // Fetch enrolled course IDs if student
+        List<Long> enrolledCourseIds = new ArrayList<>();
+        if (authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_STUDENT"))) {
+            String email = authentication.getName();
+            enrolledCourseIds = enrollmentRepository.findByUserEmailOrderByEnrolledAtDesc(email)
+                    .stream()
+                    .map(e -> e.getCourse().getId())
+                    .toList();
+        }
+
         model.addAttribute("coursesPage", coursesPage);
+        model.addAttribute("lessonCounts", lessonCounts);
+        model.addAttribute("enrolledCourseIds", enrolledCourseIds);
         model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("levels", CourseLevel.values());
         model.addAttribute("keyword", keyword);
@@ -140,6 +177,15 @@ public class PublicController {
             User sessionUser = userRepository.findByEmail(email);
             model.addAttribute("sessionUser", sessionUser);
         }
+
+        // Dynamic curriculum loading
+        List<Lesson> lessons = lessonRepository.findByCourseIdOrderByOrderIndexAsc(String.valueOf(course.getId()));
+        Map<String, List<Lesson>> curriculum = new java.util.LinkedHashMap<>();
+        for (Lesson l : lessons) {
+            curriculum.computeIfAbsent(l.getSectionName() != null ? l.getSectionName() : "Getting Started", k -> new ArrayList<>()).add(l);
+        }
+        model.addAttribute("curriculum", curriculum);
+        model.addAttribute("totalLessons", lessons.size());
 
         model.addAttribute("course", course);
         model.addAttribute("isPurchased", isPurchased);
@@ -202,6 +248,15 @@ public class PublicController {
             enrollment.setStatus(EnrollmentStatus.ACTIVE);
             enrollment.setPaymentStatus("FREE");
             enrollmentRepository.save(enrollment);
+
+            // Trigger Notification
+            notificationService.createNotification(
+                    email,
+                    NotificationType.COURSE_ENROLLED,
+                    "Course Enrollment Activated",
+                    "You have been enrolled in course '" + course.getName() + "' for free. Start learning now!",
+                    "/student/courses/" + course.getId() + "/player"
+            );
         }
 
         redirectAttributes.addFlashAttribute("successMsg", "Successfully enrolled in " + course.getName() + "! Start learning below.");
@@ -229,5 +284,38 @@ public class PublicController {
     @GetMapping("/faq")
     public String openFaqPage() {
         return "public/faq";
+    }
+
+    // ==========================================
+    // 5. PUBLIC CERTIFICATE VERIFICATION
+    // ==========================================
+    @GetMapping("/verify/certificate/{code}")
+    public String verifyCertificate(@PathVariable("code") String code, Model model) {
+        Certificate certificate = certificateRepository.findByCertificateCode(code).orElse(null);
+        if (certificate == null) {
+            certificate = certificateRepository.findByEnrollmentId(code).orElse(null);
+        }
+
+        if (certificate != null) {
+            try {
+                Enrollment enrollment = enrollmentRepository.findById(Long.parseLong(certificate.getEnrollmentId())).orElse(null);
+                if (enrollment != null) {
+                    model.addAttribute("verified", true);
+                    model.addAttribute("certificate", certificate);
+                    model.addAttribute("enrollment", enrollment);
+                    model.addAttribute("student", enrollment.getUser());
+                    model.addAttribute("course", enrollment.getCourse());
+                } else {
+                    model.addAttribute("verified", false);
+                }
+            } catch (Exception e) {
+                model.addAttribute("verified", false);
+            }
+        } else {
+            model.addAttribute("verified", false);
+        }
+
+        model.addAttribute("certificateCode", code);
+        return "public/verify-certificate";
     }
 }

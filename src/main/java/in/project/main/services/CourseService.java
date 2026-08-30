@@ -248,6 +248,7 @@ public class CourseService {
         course.setShortDescription(dto.getShortDescription() != null ? dto.getShortDescription().trim() : null);
         course.setDescription(dto.getDescription() != null ? dto.getDescription().trim() : null);
         course.setInstructor(dto.getInstructor() != null ? dto.getInstructor().trim() : null);
+        course.setInstructorEmail(dto.getInstructorEmail() != null ? dto.getInstructorEmail().trim() : null);
         course.setLevel(dto.getLevel());
         course.setLanguage(dto.getLanguage() != null ? dto.getLanguage().trim() : null);
         course.setDuration(dto.getDuration() != null ? dto.getDuration().trim() : null);

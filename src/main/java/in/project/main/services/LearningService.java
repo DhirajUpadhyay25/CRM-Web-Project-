@@ -27,6 +27,28 @@ public class LearningService {
     @Autowired private AssignmentSubmissionRepository submissionRepo;
     @Autowired private StudentActivityRepository activityRepo;
     @Autowired private NotificationRepository notificationRepo;
+    @Autowired private UserRepository userRepo;
+    @Autowired private CourseRepository courseRepo;
+
+    public boolean checkCourseAccess(String email, Long courseId) {
+        User user = userRepo.findByEmail(email);
+        if (user == null || user.isBanStatus()) {
+            return false;
+        }
+        Optional<Course> courseOpt = courseRepo.findById(courseId);
+        if (courseOpt.isEmpty()) {
+            return false;
+        }
+        Optional<Enrollment> enrollmentOpt = enrollmentRepo.findByUserEmailAndCourseId(email, courseId);
+        if (enrollmentOpt.isEmpty()) {
+            return false;
+        }
+        Enrollment enrollment = enrollmentOpt.get();
+        if (enrollment.getStatus() != EnrollmentStatus.ACTIVE && enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
+            return false;
+        }
+        return true;
+    }
 
     @Transactional
     public void recordLessonAccess(String email, Long courseId, Long lessonId) {

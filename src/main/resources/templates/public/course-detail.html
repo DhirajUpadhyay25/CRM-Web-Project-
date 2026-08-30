@@ -285,45 +285,49 @@
                         </div>
                     </div>
 
-                    <!-- 3. Course Curriculum Foundation (Accordion structure ready for future LMS) -->
+                    <!-- 3. Course Curriculum (Dynamic Syllabus) -->
                     <div>
                         <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
                             <i class="bi bi-list-nested text-brand-400"></i>
                             <span>Curriculum Outline</span>
+                            <span class="text-xs font-normal text-gray-400" th:text="'(' + ${totalLessons} + ' Lessons)'"></span>
                         </h2>
                         
-                        <div class="space-y-3">
-                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5 flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs">01</span>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Module 1: Foundations & Architecture Setup</h4>
-                                        <p class="text-xs text-gray-400">Core concepts, workspace setup, and project configuration</p>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-gray-500 font-medium">4 Lessons</span>
-                            </div>
+                        <!-- Empty State -->
+                        <div th:if="${#maps.isEmpty(curriculum)}" class="p-8 text-center bg-surface-900 border border-white/5 rounded-2xl text-gray-400">
+                            <i class="bi bi-journal-code text-2xl mb-2"></i>
+                            <p class="text-xs">No lessons added to this course curriculum yet.</p>
+                        </div>
 
-                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5 flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs">02</span>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Module 2: Practical Implementation & Deep Dive</h4>
-                                        <p class="text-xs text-gray-400">Step-by-step development of core business modules</p>
+                        <!-- Dynamic Syllabus Modules Accordion -->
+                        <div th:unless="${#maps.isEmpty(curriculum)}" class="space-y-4">
+                            <div th:each="entry, stat : ${curriculum}" class="bg-surface-900 border border-white/10 rounded-2xl overflow-hidden">
+                                <!-- Module Header -->
+                                <button th:onclick="'toggleCurriculumModule(' + ${stat.index} + ')'" 
+                                        class="w-full p-5 flex items-center justify-between text-left hover:bg-white/5 transition-all focus:outline-none">
+                                    <div class="flex items-center gap-3.5">
+                                        <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs" 
+                                              th:text="${#numbers.formatInteger(stat.index + 1, 2)}">01</span>
+                                        <div>
+                                            <h4 class="font-bold text-white text-sm" th:text="${entry.key}">Section Name</h4>
+                                            <p class="text-xs text-gray-400" th:text="${#lists.size(entry.value)} + ' lessons in this module'"></p>
+                                        </div>
+                                    </div>
+                                    <i th:id="'curr-chevron-' + ${stat.index}" class="bi bi-chevron-down text-xs text-gray-400 transition-transform"></i>
+                                </button>
+                                
+                                <!-- Module Lessons List (Collapsible) -->
+                                <div th:id="'curr-module-' + ${stat.index}" class="border-t border-white/5 bg-surface-950/40 divide-y divide-white/5 hidden">
+                                    <div th:each="lesson : ${entry.value}" class="p-4 pl-14 flex items-center justify-between hover:bg-white/5 transition-all text-xs sm:text-sm">
+                                        <div class="flex items-center gap-3">
+                                            <i class="bi bi-play-circle text-brand-400"></i>
+                                            <span class="text-gray-200" th:text="${lesson.title}">Lesson Title</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 rounded bg-white/5 text-[10px] text-gray-400 border border-white/5 font-semibold">Video</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <span class="text-xs text-gray-500 font-medium">6 Lessons</span>
-                            </div>
-
-                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5 flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs">03</span>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Module 3: Capstone Project & Certification</h4>
-                                        <p class="text-xs text-gray-400">End-to-end testing, deployment, and completion verification</p>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-gray-500 font-medium">2 Lessons</span>
                             </div>
                         </div>
                     </div>
@@ -493,6 +497,18 @@
                 console.error(err);
             }
         });
+    }
+
+    function toggleCurriculumModule(idx) {
+        var content = document.getElementById('curr-module-' + idx);
+        var chevron = document.getElementById('curr-chevron-' + idx);
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            chevron.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            chevron.classList.remove('rotate-180');
+        }
     }
     </script>
 </body>

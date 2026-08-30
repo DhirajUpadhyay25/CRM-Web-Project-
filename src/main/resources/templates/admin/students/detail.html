@@ -131,104 +131,378 @@
                 </div>
             </div>
 
-            <!-- Right Column: Enrollments & Actions -->
+            <!-- Right Column: Tabbed Student Learning Workspace -->
             <div class="lg:col-span-2 space-y-6">
                 
-                <!-- Enroll in Course -->
-                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="p-5 border-b border-surface-100 bg-surface-50/50">
-                        <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
-                            <i class="bi bi-journal-plus text-brand-600"></i>
-                            Enroll in Course
-                        </h3>
+                <!-- Tab Headers -->
+                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden p-1.5 flex flex-wrap gap-1">
+                    <button onclick="switchTab('courses')" id="tab-btn-courses" class="tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow-sm">
+                        <i class="bi bi-journal-text"></i>
+                        <span>Courses</span>
+                    </button>
+                    <button onclick="switchTab('purchases')" id="tab-btn-purchases" class="tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 text-gray-500 hover:bg-surface-100 hover:text-surface-900">
+                        <i class="bi bi-credit-card"></i>
+                        <span>Purchases</span>
+                        <span class="px-1.5 py-0.5 rounded bg-surface-100 text-[10px] text-gray-500 font-bold" th:text="${#lists.size(orders)}">0</span>
+                    </button>
+                    <button onclick="switchTab('assessments')" id="tab-btn-assessments" class="tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 text-gray-500 hover:bg-surface-100 hover:text-surface-900">
+                        <i class="bi bi-patch-question"></i>
+                        <span>Quizzes</span>
+                        <span class="px-1.5 py-0.5 rounded bg-surface-100 text-[10px] text-gray-500 font-bold" th:text="${#lists.size(attempts)}">0</span>
+                    </button>
+                    <button onclick="switchTab('assignments')" id="tab-btn-assignments" class="tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 text-gray-500 hover:bg-surface-100 hover:text-surface-900">
+                        <i class="bi bi-file-earmark-code"></i>
+                        <span>Assignments</span>
+                        <span class="px-1.5 py-0.5 rounded bg-surface-100 text-[10px] text-gray-500 font-bold" th:text="${#lists.size(submissions)}">0</span>
+                    </button>
+                    <button onclick="switchTab('certificates')" id="tab-btn-certificates" class="tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 text-gray-500 hover:bg-surface-100 hover:text-surface-900">
+                        <i class="bi bi-award"></i>
+                        <span>Certificates</span>
+                        <span class="px-1.5 py-0.5 rounded bg-surface-100 text-[10px] text-gray-500 font-bold" th:text="${#lists.size(certificates)}">0</span>
+                    </button>
+                    <button onclick="switchTab('activity')" id="tab-btn-activity" class="tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 text-gray-500 hover:bg-surface-100 hover:text-surface-900">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Activity</span>
+                    </button>
+                </div>
+
+                <!-- 1. COURSES TAB -->
+                <div id="tab-content-courses" class="tab-content space-y-6">
+                    <!-- Enroll in Course -->
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-surface-100 bg-surface-50/50">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-journal-plus text-brand-600"></i>
+                                Enroll in Course
+                            </h3>
+                        </div>
+                        <div class="p-5">
+                            <form th:action="@{/admin/students/{id}/enroll(id=${student.id})}" method="post" class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex-1">
+                                    <select name="courseId" required class="w-full px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                                        <option value="">Select a course...</option>
+                                        <option th:each="course : ${allCourses}" th:value="${course.id}" th:text="${course.name}">Course</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition-all text-sm flex items-center gap-2">
+                                    <i class="bi bi-plus-lg"></i>
+                                    Enroll
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="p-5">
-                        <form th:action="@{/admin/students/{id}/enroll(id=${student.id})}" method="post" class="flex flex-col sm:flex-row gap-3">
-                            <div class="flex-1">
-                                <select name="courseId" required class="w-full px-3 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
-                                    <option value="">Select a course...</option>
-                                    <option th:each="course : ${allCourses}" th:value="${course.id}" th:text="${course.name}">Course</option>
-                                </select>
+
+                    <!-- Enrolled Courses List -->
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-surface-100 bg-surface-50/50 flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-journal-check text-brand-600"></i>
+                                Enrolled Courses
+                            </h3>
+                        </div>
+                        
+                        <div th:if="${#lists.isEmpty(enrollments)}" class="p-12 text-center">
+                            <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="bi bi-journal-x"></i>
                             </div>
-                            <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition-all text-sm flex items-center gap-2">
-                                <i class="bi bi-plus-lg"></i>
-                                Enroll
-                            </button>
-                        </form>
+                            <h3 class="text-base font-bold text-surface-900 mb-1">No courses enrolled</h3>
+                            <p class="text-gray-500 text-xs max-w-sm mx-auto">This student has not been enrolled in any courses yet.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(enrollments)}" class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-5">Course</th>
+                                        <th class="py-3 px-4">Status</th>
+                                        <th class="py-3 px-4">Payment</th>
+                                        <th class="py-3 px-4">Enrolled</th>
+                                        <th class="py-3 px-5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-200">
+                                    <tr th:each="enrollment : ${enrollments}" class="hover:bg-surface-50/70 transition-colors">
+                                        <td class="py-3.5 px-5">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-lg bg-surface-100 flex-shrink-0 overflow-hidden border border-surface-200">
+                                                    <img th:if="${enrollment.course.imageUrl}" th:src="@{${enrollment.course.imageUrl}}" class="w-full h-full object-cover" alt="Course" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-gray-400\'><i class=\'bi bi-play-btn\'></i></div>'">
+                                                    <div th:unless="${enrollment.course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <i class="bi bi-play-btn"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <a th:href="@{/admin/courses/{id}(id=${enrollment.course.id})}" class="font-semibold text-surface-900 hover:text-brand-600 transition-colors line-clamp-1 text-sm" th:text="${enrollment.course.name}">Course Name</a>
+                                                    <p class="text-xs text-gray-400" th:text="${enrollment.course.category != null ? enrollment.course.category.name : 'Uncategorized'}">Category</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 px-4">
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                                                  th:classappend="${enrollment.status.name() == 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (enrollment.status.name() == 'COMPLETED' ? 'bg-blue-50 text-blue-700 border border-blue-200' : (enrollment.status.name() == 'CANCELLED' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-orange-50 text-orange-700 border border-orange-200'))}"
+                                                  th:text="${enrollment.status}">Status</span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-xs text-gray-600" th:text="${enrollment.paymentStatus ?: '—'}">—</td>
+                                        <td class="py-3.5 px-4 text-xs text-gray-500">
+                                            <span th:if="${enrollment.enrolledAt}" th:text="${#temporals.format(enrollment.enrolledAt, 'dd MMM yyyy')}">Date</span>
+                                            <span th:unless="${enrollment.enrolledAt}" class="text-gray-400">—</span>
+                                        </td>
+                                        <td class="py-3.5 px-5 text-right">
+                                            <form th:action="@{/admin/students/enrollment/{enrollmentId}/unenroll(enrollmentId=${enrollment.id}, studentId=${student.id})}" method="post" class="inline">
+                                                <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove from course" onclick="return confirm('Remove this student from the course?');">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Enrolled Courses Table -->
-                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="p-5 border-b border-surface-100 bg-surface-50/50 flex items-center justify-between">
-                        <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
-                            <i class="bi bi-journal-check text-brand-600"></i>
-                            Enrolled Courses
-                            <span class="text-xs font-normal text-gray-400" th:text="'(' + ${#lists.size(enrollments)} + ')'"></span>
-                        </h3>
-                    </div>
-                    
-                    <!-- Empty State -->
-                    <div th:if="${#lists.isEmpty(enrollments)}" class="p-12 text-center">
-                        <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
-                            <i class="bi bi-journal-x"></i>
+                <!-- 2. PURCHASES TAB -->
+                <div id="tab-content-purchases" class="tab-content hidden">
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-surface-100 bg-surface-50/50">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-credit-card-2-back text-brand-600"></i>
+                                Order History
+                            </h3>
                         </div>
-                        <h3 class="text-base font-bold text-surface-900 mb-1">No courses enrolled</h3>
-                        <p class="text-gray-500 text-xs max-w-sm mx-auto">This student has not been enrolled in any courses yet.</p>
-                    </div>
+                        
+                        <div th:if="${#lists.isEmpty(orders)}" class="p-12 text-center">
+                            <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-surface-900 mb-1">No orders found</h3>
+                            <p class="text-gray-500 text-xs max-w-sm mx-auto">This student hasn't completed any paid purchases yet.</p>
+                        </div>
 
-                    <!-- Enrollments Table -->
-                    <div th:unless="${#lists.isEmpty(enrollments)}" class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
-                                <tr>
-                                    <th class="py-3 px-5">Course</th>
-                                    <th class="py-3 px-4">Status</th>
-                                    <th class="py-3 px-4">Payment</th>
-                                    <th class="py-3 px-4">Enrolled</th>
-                                    <th class="py-3 px-5 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-surface-200">
-                                <tr th:each="enrollment : ${enrollments}" class="hover:bg-surface-50/70 transition-colors">
-                                    <td class="py-3.5 px-5">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-lg bg-surface-100 flex-shrink-0 overflow-hidden border border-surface-200">
-                                                <img th:if="${enrollment.course.imageUrl}" th:src="@{${enrollment.course.imageUrl}}" class="w-full h-full object-cover" alt="Course" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-gray-400\'><i class=\'bi bi-play-btn\'></i></div>'">
-                                                <div th:unless="${enrollment.course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <i class="bi bi-play-btn"></i>
-                                                </div>
-                                            </div>
-                                            <div class="min-w-0">
-                                                <a th:href="@{/admin/courses/{id}(id=${enrollment.course.id})}" class="font-semibold text-surface-900 hover:text-brand-600 transition-colors line-clamp-1 text-sm" th:text="${enrollment.course.name}">Course Name</a>
-                                                <p class="text-xs text-gray-400" th:text="${enrollment.course.category != null ? enrollment.course.category.name : 'Uncategorized'}">Category</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 px-4">
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                                              th:classappend="${enrollment.status.name() == 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (enrollment.status.name() == 'COMPLETED' ? 'bg-blue-50 text-blue-700 border border-blue-200' : (enrollment.status.name() == 'CANCELLED' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-orange-50 text-orange-700 border border-orange-200'))}"
-                                              th:text="${enrollment.status}">Status</span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-xs text-gray-600" th:text="${enrollment.paymentStatus ?: '—'}">—</td>
-                                    <td class="py-3.5 px-4 text-xs text-gray-500">
-                                        <span th:if="${enrollment.enrolledAt}" th:text="${#temporals.format(enrollment.enrolledAt, 'dd MMM yyyy')}">Date</span>
-                                        <span th:unless="${enrollment.enrolledAt}" class="text-gray-400">—</span>
-                                    </td>
-                                    <td class="py-3.5 px-5 text-right">
-                                        <form th:action="@{/admin/students/enrollment/{enrollmentId}/unenroll(enrollmentId=${enrollment.id}, studentId=${student.id})}" method="post" class="inline">
-                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Remove from course" onclick="return confirm('Remove this student from the course?');">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div th:unless="${#lists.isEmpty(orders)}" class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-5">Course</th>
+                                        <th class="py-3 px-4">Order ID</th>
+                                        <th class="py-3 px-4">Amount</th>
+                                        <th class="py-3 px-4">Date</th>
+                                        <th class="py-3 px-5">Payment ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-200">
+                                    <tr th:each="order : ${orders}" class="hover:bg-surface-50/70 transition-colors">
+                                        <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${order.courseName}">Course Name</td>
+                                        <td class="py-3.5 px-4 font-mono text-xs text-gray-500" th:text="${order.orderId}">order_id</td>
+                                        <td class="py-3.5 px-4 font-bold text-surface-900" th:text="${'₹' + order.courseAmount}">₹999</td>
+                                        <td class="py-3.5 px-4 text-xs text-gray-500" th:text="${order.dateOfPurchase}">Date</td>
+                                        <td class="py-3.5 px-5 font-mono text-xs text-brand-600" th:text="${order.paymentId ?: '—'}">pay_id</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. QUIZZES TAB -->
+                <div id="tab-content-assessments" class="tab-content hidden">
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-surface-100 bg-surface-50/50">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-card-checklist text-brand-600"></i>
+                                Quiz Attempt Records
+                            </h3>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(attempts)}" class="p-12 text-center">
+                            <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="bi bi-question-square"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-surface-900 mb-1">No quizzes attempted</h3>
+                            <p class="text-gray-500 text-xs max-w-sm mx-auto">This student has not attempted any quizzes yet.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(attempts)}" class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-5">Quiz Title</th>
+                                        <th class="py-3 px-4">Score</th>
+                                        <th class="py-3 px-4">Result</th>
+                                        <th class="py-3 px-5">Attempt Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-200">
+                                    <tr th:each="row : ${attempts}" class="hover:bg-surface-50/70 transition-colors">
+                                        <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${row.quizTitle}">Quiz Title</td>
+                                        <td class="py-3.5 px-4 font-bold text-surface-900" th:text="${row.attempt.score + '%'}">80%</td>
+                                        <td class="py-3.5 px-4">
+                                            <span th:if="${row.attempt.passed}" class="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-full">Pass</span>
+                                            <span th:unless="${row.attempt.passed}" class="px-2 py-0.5 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-full">Fail</span>
+                                        </td>
+                                        <td class="py-3.5 px-5 text-xs text-gray-500" th:text="${#temporals.format(row.attempt.attemptedAt, 'dd MMM yyyy, hh:mm a')}">Date</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. ASSIGNMENTS TAB -->
+                <div id="tab-content-assignments" class="tab-content hidden">
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-surface-100 bg-surface-50/50">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-file-earmark-text text-brand-600"></i>
+                                Homework Submissions
+                            </h3>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(submissions)}" class="p-12 text-center">
+                            <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="bi bi-file-earmark-x"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-surface-900 mb-1">No assignments submitted</h3>
+                            <p class="text-gray-500 text-xs max-w-sm mx-auto">This student hasn't submitted any homework deliverables yet.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(submissions)}" class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-5">Assignment</th>
+                                        <th class="py-3 px-4">Status</th>
+                                        <th class="py-3 px-4">Score</th>
+                                        <th class="py-3 px-4">File / Link</th>
+                                        <th class="py-3 px-5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-200">
+                                    <tr th:each="row : ${submissions}" class="hover:bg-surface-50/70 transition-colors">
+                                        <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${row.assignmentTitle}">Title</td>
+                                        <td class="py-3.5 px-4">
+                                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                                                  th:classappend="${row.submission.status == 'GRADED' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}"
+                                                  th:text="${row.submission.status}">Status</span>
+                                        </td>
+                                        <td class="py-3.5 px-4 font-bold text-surface-900" th:text="${row.submission.score != null ? row.submission.score : '—'}">—</td>
+                                        <td class="py-3.5 px-4 text-xs">
+                                            <a th:if="${row.submission.fileUrl}" th:href="@{${row.submission.fileUrl}}" target="_blank" class="text-brand-600 hover:underline flex items-center gap-1 font-medium">
+                                                <i class="bi bi-file-earmark-arrow-down"></i> Download File
+                                            </a>
+                                            <span th:unless="${row.submission.fileUrl}" class="text-gray-400">Text Submission</span>
+                                        </td>
+                                        <td class="py-3.5 px-5 text-right">
+                                            <a th:href="@{/admin/assignments/submissions/{id}(id=${row.submission.id})}" class="px-3 py-1.5 bg-surface-100 hover:bg-brand-600 hover:text-white rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1">
+                                                <i class="bi bi-pencil-square"></i>
+                                                <span th:text="${row.submission.status == 'GRADED' ? 'Review' : 'Grade'}">Grade</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. CERTIFICATES TAB -->
+                <div id="tab-content-certificates" class="tab-content hidden">
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-surface-100 bg-surface-50/50">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-patch-check text-brand-600"></i>
+                                Issued Certificates
+                            </h3>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(certificates)}" class="p-12 text-center">
+                            <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                                <i class="bi bi-award"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-surface-900 mb-1">No certificates issued</h3>
+                            <p class="text-gray-500 text-xs max-w-sm mx-auto">This student hasn't completed any course curriculum to earn a certificate yet.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(certificates)}" class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs uppercase font-semibold tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-5">Course</th>
+                                        <th class="py-3 px-4">Certificate Code</th>
+                                        <th class="py-3 px-4">Issued On</th>
+                                        <th class="py-3 px-5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-200">
+                                    <tr th:each="row : ${certificates}" class="hover:bg-surface-50/70 transition-colors">
+                                        <td class="py-3.5 px-5 font-semibold text-surface-900" th:text="${row.courseName}">Course</td>
+                                        <td class="py-3.5 px-4 font-mono text-xs text-brand-600" th:text="${row.certificate.certificateCode}">CODE</td>
+                                        <td class="py-3.5 px-4 text-xs text-gray-500" th:text="${row.certificate.issueDate}">Date</td>
+                                        <td class="py-3.5 px-5 text-right">
+                                            <a th:href="@{/verify/certificate/{code}(code=${row.certificate.certificateCode})}" target="_blank" class="px-3 py-1.5 bg-surface-100 hover:bg-brand-600 hover:text-white rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1">
+                                                <i class="bi bi-shield-check"></i> Verify Page
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. ACTIVITY LOG TAB -->
+                <div id="tab-content-activity" class="tab-content hidden">
+                    <div class="bg-white border border-surface-200 rounded-2xl shadow-sm p-6">
+                        <h3 class="text-sm font-bold text-surface-900 mb-6 flex items-center gap-2">
+                            <i class="bi bi-clock-history text-brand-600"></i>
+                            Student Activity Timeline
+                        </h3>
+
+                        <div th:if="${#lists.isEmpty(activities)}" class="text-center py-12 text-gray-400">
+                            <i class="bi bi-calendar2-x text-3xl mb-2"></i>
+                            <p class="text-xs">No activity logs recorded for this student.</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(activities)}" class="relative pl-6 border-l border-surface-200 ml-3 space-y-8">
+                            <div th:each="act : ${activities}" class="relative">
+                                <!-- Bullet point -->
+                                <span class="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white border-2 border-brand-500 shadow-sm">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-brand-500"></span>
+                                </span>
+                                
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded bg-brand-50 text-[10px] font-bold text-brand-700 uppercase" th:text="${act.activity.activityType}">TYPE</span>
+                                        <span class="text-xs text-gray-400" th:text="${act.timeStr}">Time</span>
+                                    </div>
+                                    <p class="text-sm text-surface-800 mt-1 font-medium" th:text="${act.activity.description}">Description</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
             </div>
+
+            <!-- Client-side Tab Switcher Script -->
+            <script>
+                function switchTab(tabId) {
+                    // Hide all tab contents
+                    document.querySelectorAll('.tab-content').forEach(el => {
+                        el.classList.add('hidden');
+                    });
+                    
+                    // Show target tab content
+                    document.getElementById('tab-content-' + tabId).classList.remove('hidden');
+
+                    // Reset all button styles
+                    document.querySelectorAll('.tab-btn').forEach(btn => {
+                        btn.className = "tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 text-gray-500 hover:bg-surface-100 hover:text-surface-900";
+                    });
+
+                    // Set target button styles
+                    document.getElementById('tab-btn-' + tabId).className = "tab-btn px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 bg-brand-600 text-white shadow-sm";
+                }
+            </script>
         </div>
 
     </div>

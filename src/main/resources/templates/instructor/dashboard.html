@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{instructor/layout/instructor-layout :: layout('Trainer Dashboard', ~{::div})}">
+<body>
+    <div>
+        <!-- Welcome banner -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-black text-surface-900 tracking-tight flex items-center gap-2">
+                Welcome back, <span th:text="${instructorName}">Trainer</span>! 👋
+            </h1>
+            <p class="text-gray-500 text-sm mt-1">Here is a summary of your assigned learning content and student completions today.</p>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-5 mb-8 animate-fade-in">
+            <!-- Courses -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-5 shadow-sm">
+                <div class="w-10 h-10 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center text-lg mb-3">
+                    <i class="bi bi-play-btn-fill"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">My Courses</span>
+                <span class="text-2xl font-black text-surface-900 mt-1 block" th:text="${totalCourses}">0</span>
+            </div>
+
+            <!-- Total Students -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-5 shadow-sm">
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-lg mb-3">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Total Enrolled</span>
+                <span class="text-2xl font-black text-surface-900 mt-1 block" th:text="${totalStudents}">0</span>
+            </div>
+
+            <!-- Active Learners -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-5 shadow-sm">
+                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-lg mb-3">
+                    <i class="bi bi-person-pulse-fill"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Active Learners</span>
+                <span class="text-2xl font-black text-surface-900 mt-1 block" th:text="${activeLearners}">0</span>
+            </div>
+
+            <!-- Completions -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-5 shadow-sm">
+                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-lg mb-3">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Completions</span>
+                <span class="text-2xl font-black text-surface-900 mt-1 block" th:text="${courseCompletions}">0</span>
+            </div>
+
+            <!-- Pending Review -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+                <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-lg mb-3">
+                    <i class="bi bi-file-earmark-check-fill"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Pending Reviews</span>
+                <span class="text-2xl font-black text-surface-900 mt-1 block" th:text="${pendingReviews}">0</span>
+                <div th:if="${pendingReviews > 0}" class="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></div>
+            </div>
+        </div>
+
+        <!-- Quick actions / Shortcuts panel -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Learning Management Quick Actions -->
+            <div class="bg-white border border-surface-200 rounded-3xl p-6 shadow-sm">
+                <h3 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-2">
+                    <i class="bi bi-magic text-brand-600"></i> Course Authoring Shortcuts
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <a href="/instructor/courses/new" class="p-4 rounded-2xl bg-surface-50 border border-surface-200 hover:border-brand-500 hover:bg-brand-50/10 transition-all group">
+                        <h4 class="font-bold text-sm text-surface-900 group-hover:text-brand-600 transition-colors flex items-center gap-1.5">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            <span>Create Course</span>
+                        </h4>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Publish a new learning program or workshop catalog item.</p>
+                    </a>
+
+                    <a href="/instructor/courses" class="p-4 rounded-2xl bg-surface-50 border border-surface-200 hover:border-brand-500 hover:bg-brand-50/10 transition-all group">
+                        <h4 class="font-bold text-sm text-surface-900 group-hover:text-brand-600 transition-colors flex items-center gap-1.5">
+                            <i class="bi bi-book-half"></i>
+                            <span>Manage Content</span>
+                        </h4>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Update lessons, edit descriptions, or add homework assignments.</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Student Action Alert Panel -->
+            <div class="bg-white border border-surface-200 rounded-3xl p-6 shadow-sm">
+                <h3 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-2">
+                    <i class="bi bi-lightning-charge-fill text-brand-600"></i> Critical Reviews Needed
+                </h3>
+                
+                <div th:if="${pendingReviews == 0}" class="py-6 text-center text-gray-400">
+                    <i class="bi bi-check2-circle text-2xl mb-2 text-emerald-500"></i>
+                    <p class="text-xs">No pending student assignments needing grading.</p>
+                </div>
+
+                <div th:if="${pendingReviews > 0}" class="space-y-4">
+                    <p class="text-xs text-gray-500">You have <strong th:text="${pendingReviews}"></strong> student submission deliverables waiting for evaluation feedback.</p>
+                    <a href="/instructor/submissions?status=SUBMITTED" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-md shadow-brand-600/10 transition-all">
+                        <span>Evaluate Submissions</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

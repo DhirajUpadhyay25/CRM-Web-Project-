@@ -61,12 +61,12 @@ public class StudentLearningController {
         String email = userDetails.getUsername();
         addCommonStudentAttributes(userDetails, model);
 
-        // Security Check: Is enrolled?
-        Optional<Enrollment> enrollmentOpt = enrollmentRepo.findByUserEmailAndCourseId(email, courseId);
-        if (enrollmentOpt.isEmpty()) {
-            ra.addFlashAttribute("errorMsg", "You must be enrolled to access this course.");
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, courseId)) {
+            ra.addFlashAttribute("errorMsg", "You must be enrolled and active to access this course.");
             return "redirect:/student/courses";
         }
+        Optional<Enrollment> enrollmentOpt = enrollmentRepo.findByUserEmailAndCourseId(email, courseId);
 
         Course course = enrollmentOpt.get().getCourse();
         List<Lesson> lessons = lessonRepo.findByCourseIdOrderByOrderIndexAsc(String.valueOf(courseId));
@@ -111,12 +111,12 @@ public class StudentLearningController {
         String email = userDetails.getUsername();
         addCommonStudentAttributes(userDetails, model);
 
-        // Security Check: Enrollment bypass
-        Optional<Enrollment> enrollmentOpt = enrollmentRepo.findByUserEmailAndCourseId(email, courseId);
-        if (enrollmentOpt.isEmpty()) {
-            ra.addFlashAttribute("errorMsg", "You are not enrolled in this course.");
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, courseId)) {
+            ra.addFlashAttribute("errorMsg", "You are not enrolled or active in this course.");
             return "redirect:/student/courses";
         }
+        Optional<Enrollment> enrollmentOpt = enrollmentRepo.findByUserEmailAndCourseId(email, courseId);
 
         List<Lesson> lessons = lessonRepo.findByCourseIdOrderByOrderIndexAsc(String.valueOf(courseId));
         if (lessons.isEmpty()) {
@@ -228,10 +228,9 @@ public class StudentLearningController {
 
         String email = userDetails.getUsername();
 
-        // Security Check: Enrolled?
-        Optional<Enrollment> enrollmentOpt = enrollmentRepo.findByUserEmailAndCourseId(email, courseId);
-        if (enrollmentOpt.isEmpty()) {
-            ra.addFlashAttribute("errorMsg", "Not enrolled.");
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, courseId)) {
+            ra.addFlashAttribute("errorMsg", "Access Denied.");
             return "redirect:/student/courses";
         }
 
@@ -271,8 +270,8 @@ public class StudentLearningController {
         String email = userDetails.getUsername();
         addCommonStudentAttributes(userDetails, model);
 
-        // Enrolled check
-        if (!enrollmentRepo.findByUserEmailAndCourseId(email, courseId).isPresent()) {
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, courseId)) {
             ra.addFlashAttribute("errorMsg", "Access Denied.");
             return "redirect:/student/courses";
         }
@@ -308,8 +307,8 @@ public class StudentLearningController {
         String email = userDetails.getUsername();
         addCommonStudentAttributes(userDetails, model);
 
-        // Enrolled check
-        if (!enrollmentRepo.findByUserEmailAndCourseId(email, courseId).isPresent()) {
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, courseId)) {
             ra.addFlashAttribute("errorMsg", "Access Denied.");
             return "redirect:/student/courses";
         }
@@ -394,8 +393,8 @@ public class StudentLearningController {
             return "redirect:/student/assignments";
         }
 
-        // Security check: Enrolled in course?
-        if (!enrollmentRepo.findByUserEmailAndCourseId(email, assignment.getCourseId()).isPresent()) {
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, assignment.getCourseId())) {
             ra.addFlashAttribute("errorMsg", "Access Denied.");
             return "redirect:/student/assignments";
         }
@@ -427,8 +426,8 @@ public class StudentLearningController {
             return "redirect:/student/assignments";
         }
 
-        // Security Check: Enrolled?
-        if (!enrollmentRepo.findByUserEmailAndCourseId(email, assignment.getCourseId()).isPresent()) {
+        // Security Check: Centralized access verification
+        if (!learningService.checkCourseAccess(email, assignment.getCourseId())) {
             ra.addFlashAttribute("errorMsg", "Access Denied.");
             return "redirect:/student/assignments";
         }

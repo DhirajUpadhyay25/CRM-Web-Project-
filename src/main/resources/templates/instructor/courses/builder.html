@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{instructor/layout/instructor-layout :: layout('Course Builder', ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/instructor/dashboard" class="hover:text-brand-600 transition-colors">Trainer</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/instructor/courses" class="hover:text-brand-600 transition-colors">Courses</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold" th:text="${course.name}">Course Title</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Course Curriculum Builder</h1>
+                <p class="text-gray-500 text-xs mt-1" th:text="${'Structuring content for: ' + course.name}"></p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <a th:href="@{/instructor/courses/{id}/preview(id=${course.id})}" target="_blank"
+                   class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-white border border-surface-200 text-surface-700 hover:bg-surface-100 transition-all flex items-center gap-1.5 shadow-sm">
+                    <i class="bi bi-eye"></i>
+                    <span>Preview Course</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${successMsg}" class="mb-5 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-medium flex items-center gap-2 animate-fade-in">
+            <i class="bi bi-check-circle-fill text-emerald-600"></i>
+            <span th:text="${successMsg}">Success</span>
+        </div>
+
+        <!-- Tab switches -->
+        <div class="border-b border-surface-200 mb-6 flex gap-4">
+            <button onclick="switchBuilderTab('lessons')" id="btn-tab-lessons" class="builder-tab-btn pb-3 px-1 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition-all">
+                Lessons &amp; Syllabus
+            </button>
+            <button onclick="switchBuilderTab('assignments')" id="btn-tab-assignments" class="builder-tab-btn pb-3 px-1 text-sm font-semibold text-gray-500 hover:text-surface-900 transition-all">
+                Assignments
+            </button>
+            <button onclick="switchBuilderTab('quizzes')" id="btn-tab-quizzes" class="builder-tab-btn pb-3 px-1 text-sm font-semibold text-gray-500 hover:text-surface-900 transition-all">
+                Quizzes
+            </button>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 1: LESSONS & SYLLABUS -->
+        <!-- ======================================================== -->
+        <div id="tab-content-lessons" class="builder-tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Syllabus outline (Left 2 columns) -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-base font-bold text-surface-900 mb-4 flex items-center justify-between">
+                            <span>Syllabus Content Outline</span>
+                            <span class="text-xs text-gray-400 font-normal">Section-wise modular lessons mapping.</span>
+                        </h2>
+
+                        <!-- Empty state -->
+                        <div th:if="${#maps.isEmpty(curriculum)}" class="p-12 text-center text-gray-400">
+                            <i class="bi bi-journal-code text-3xl mb-2"></i>
+                            <p class="text-xs">No lessons added to this course curriculum yet. Add a lesson on the right to start.</p>
+                        </div>
+
+                        <!-- Dynamic Accordion modules list -->
+                        <div th:unless="${#maps.isEmpty(curriculum)}" class="space-y-4">
+                            <div th:each="entry, stat : ${curriculum}" class="border border-surface-200 rounded-xl overflow-hidden">
+                                <!-- Module Header -->
+                                <div class="bg-surface-50 p-4 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-7 h-7 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-600 flex items-center justify-center font-bold text-xs" 
+                                              th:text="${stat.index + 1}">1</span>
+                                        <div>
+                                            <h4 class="font-bold text-surface-900 text-sm" th:text="${entry.key}">Section Title</h4>
+                                            <p class="text-xs text-gray-400 mt-0.5" th:text="${#lists.size(entry.value)} + ' Lessons'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Module Lessons -->
+                                <div class="divide-y divide-surface-200">
+                                    <div th:each="lesson : ${entry.value}" class="p-3.5 pl-12 flex items-center justify-between hover:bg-surface-50/50 transition-colors text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <i class="bi bi-play-circle text-brand-600"></i>
+                                            <span class="text-surface-700 font-medium" th:text="${lesson.title}">Lesson Name</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-xs text-gray-400">
+                                            <span class="font-semibold text-gray-500" th:text="'Index: ' + ${lesson.orderIndex}">Index: 1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Lesson Sideform (Right 1 column) -->
+                <div class="space-y-6">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-sm font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-1.5">
+                            <i class="bi bi-plus-circle-fill text-brand-600"></i> Add Lesson
+                        </h3>
+
+                        <form th:action="@{/instructor/courses/{id}/lessons/add(id=${course.id})}" method="post" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Lesson Title</label>
+                                <input type="text" name="title" required placeholder="e.g. Introduction to JVM Mechanics"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Module / Section Name</label>
+                                <input type="text" name="sectionName" required placeholder="e.g. Module 1: Core Mechanics"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                                <p class="text-[10px] text-gray-400 mt-1">If the module name matches an existing one, the lesson will be appended under it.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Order Index</label>
+                                <input type="number" name="orderIndex" required min="1" value="1"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm font-semibold">
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Save Lesson</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 2: ASSIGNMENTS -->
+        <!-- ======================================================== -->
+        <div id="tab-content-assignments" class="builder-tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Assignments list (Left 2 columns) -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center justify-between">
+                            <span>Assigned Homework Projects</span>
+                        </h2>
+
+                        <!-- Empty state -->
+                        <div th:if="${#lists.isEmpty(assignments)}" class="p-12 text-center text-gray-400">
+                            <i class="bi bi-file-earmark-lock text-3xl mb-2"></i>
+                            <p class="text-xs">No assignments mapped to this course. Create one using the side panel form.</p>
+                        </div>
+
+                        <!-- Assignments cards -->
+                        <div th:unless="${#lists.isEmpty(assignments)}" class="space-y-4">
+                            <div th:each="asg : ${assignments}" class="p-5 border border-surface-200 rounded-xl hover:border-brand-300 transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-surface-900 text-sm" th:text="${asg.title}">Assignment Title</h4>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2" th:text="${asg.description}"></p>
+                                    <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-400 font-medium">
+                                        <span class="flex items-center gap-1">
+                                            <i class="bi bi-award text-brand-600"></i> Max Score: <strong class="text-surface-800" th:text="${asg.maxScore}"></strong>
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="bi bi-calendar-event text-brand-600"></i> Due: <strong class="text-surface-800" th:text="${#temporals.format(asg.dueDate, 'dd MMM yyyy, hh:mm a')}"></strong>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Assignment Sideform (Right 1 column) -->
+                <div class="space-y-6">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-sm font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-1.5">
+                            <i class="bi bi-plus-circle-fill text-brand-600"></i> Create Assignment
+                        </h3>
+
+                        <form th:action="@{/instructor/courses/{id}/assignments/add(id=${course.id})}" method="post" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Title</label>
+                                <input type="text" name="title" required placeholder="e.g. Build dynamic inquiry API endpoint"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Prompt Instructions</label>
+                                <textarea name="description" rows="5" required placeholder="Outline student deliverables, ZIP file formatting parameters, or coding specs..."
+                                          class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Max Score</label>
+                                    <input type="number" name="maxScore" required min="10" max="200" value="100"
+                                           class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm font-semibold">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Due Date</label>
+                                    <input type="datetime-local" name="dueDate" required
+                                           class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-xs font-medium">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Save Assignment</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB 3: QUIZZES -->
+        <!-- ======================================================== -->
+        <div id="tab-content-quizzes" class="builder-tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Quizzes list (Left 2 columns) -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-base font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center justify-between">
+                            <span>Seeded Assessments &amp; Quizzes</span>
+                        </h2>
+
+                        <!-- Empty state -->
+                        <div th:if="${#lists.isEmpty(quizzes)}" class="p-12 text-center text-gray-400">
+                            <i class="bi bi-patch-question text-3xl mb-2"></i>
+                            <p class="text-xs">No quiz assessments structured yet. Define one using the side form.</p>
+                        </div>
+
+                        <!-- Quizzes list cards -->
+                        <div th:unless="${#lists.isEmpty(quizzes)}" class="space-y-4">
+                            <div th:each="qz : ${quizzes}" class="p-5 border border-surface-200 rounded-xl hover:border-brand-300 transition-all bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h4 class="font-bold text-surface-900 text-sm" th:text="${qz.title}">Quiz Title</h4>
+                                    <p class="text-xs text-gray-500 mt-1 line-clamp-2" th:text="${qz.description}"></p>
+                                    <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-400 font-medium">
+                                        <span class="flex items-center gap-1">
+                                            <i class="bi bi-percent text-brand-600"></i> Passing Score: <strong class="text-surface-800" th:text="${qz.passingScore + '%'}"></strong>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <a th:href="@{/instructor/quizzes/{quizId}/questions(quizId=${qz.id})}" 
+                                       class="px-3.5 py-2 rounded-xl bg-white border border-surface-200 text-brand-600 hover:bg-brand-50 hover:text-brand-700 transition-all text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                                        <i class="bi bi-patch-question-fill"></i>
+                                        <span>Manage Questions</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Quiz Sideform (Right 1 column) -->
+                <div class="space-y-6">
+                    <div class="bg-white border border-surface-200 rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-sm font-bold text-surface-900 mb-4 pb-2 border-b border-surface-100 flex items-center gap-1.5">
+                            <i class="bi bi-plus-circle-fill text-brand-600"></i> Create Quiz
+                        </h3>
+
+                        <form th:action="@{/instructor/courses/{id}/quizzes/add(id=${course.id})}" method="post" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Quiz Title</label>
+                                <input type="text" name="title" required placeholder="e.g. Assessment: Java Fundamentals"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Short description</label>
+                                <textarea name="description" rows="4" placeholder="Brief context or rules of this assessment..."
+                                          class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Passing Score (%)</label>
+                                <input type="number" name="passingScore" required min="1" max="100" value="70"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm font-semibold">
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Save Quiz</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JS tab switcher -->
+        <script>
+            function switchBuilderTab(tabId) {
+                // Hide all contents
+                document.querySelectorAll('.builder-tab-content').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                // Show target content
+                document.getElementById('tab-content-' + tabId).classList.remove('hidden');
+
+                // Reset buttons class
+                document.querySelectorAll('.builder-tab-btn').forEach(btn => {
+                    btn.className = "builder-tab-btn pb-3 px-1 text-sm font-semibold text-gray-500 hover:text-surface-900 transition-all";
+                });
+                // Style active button
+                document.getElementById('btn-tab-' + tabId).className = "builder-tab-btn pb-3 px-1 text-sm font-bold text-brand-600 border-b-2 border-brand-600 transition-all";
+            }
+        </script>
+    </div>
+</body>
+</html>
