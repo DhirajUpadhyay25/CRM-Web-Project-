@@ -45,13 +45,15 @@ public class AdminEnrollmentController {
                 enrollmentStatus,
                 pageable);
 
-        model.addAttribute("enrollments", enrollments);
+        model.addAttribute("enrollmentPage", enrollments);
         model.addAttribute("search", search);
-        model.addAttribute("status", status);
+        model.addAttribute("statusFilter", status);
         model.addAttribute("enrollmentStatuses", java.util.Arrays.asList(EnrollmentStatus.values()));
         model.addAttribute("totalEnrollments", enrollmentRepository.count());
-        model.addAttribute("activeEnrollments", enrollmentRepository.countByStatus(EnrollmentStatus.ACTIVE));
-        model.addAttribute("completedEnrollments", enrollmentRepository.countByStatus(EnrollmentStatus.COMPLETED));
+        model.addAttribute("activeCount", enrollmentRepository.countByStatus(EnrollmentStatus.ACTIVE));
+        model.addAttribute("completedCount", enrollmentRepository.countByStatus(EnrollmentStatus.COMPLETED));
+        model.addAttribute("cancelledCount", enrollmentRepository.countByStatus(EnrollmentStatus.CANCELLED));
+        model.addAttribute("expiredCount", enrollmentRepository.countByStatus(EnrollmentStatus.EXPIRED));
 
         return "admin/learning/enrollments/list";
     }

@@ -1,6 +1,7 @@
 package in.project.main.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,4 +36,18 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("SELECT e FROM Enrollment e JOIN FETCH e.course WHERE e.user.email = :email ORDER BY e.enrolledAt DESC")
     List<Enrollment> findByUserEmailOrderByEnrolledAtDesc(@Param("email") String email);
+
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.user JOIN FETCH e.course WHERE e.user.id = :userId ORDER BY e.enrolledAt DESC")
+    List<Enrollment> findByUserIdWithCourse(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e")
+    long countDistinctEnrolledUsers();
+
+    @Query("SELECT COUNT(DISTINCT e.user.id) FROM Enrollment e WHERE e.status = :status")
+    long countDistinctEnrolledUsersByStatus(@Param("status") EnrollmentStatus status);
+
+    Optional<Enrollment> findByUserIdAndCourseId(Long userId, Long courseId);
+
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.user JOIN FETCH e.course WHERE e.user.id = :userId")
+    List<Enrollment> findAllByUserIdWithDetails(@Param("userId") Long userId);
 }
