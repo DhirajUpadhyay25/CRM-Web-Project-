@@ -3,137 +3,148 @@
 
 <head th:replace="~{fragments/base-head :: head('Register')}"></head>
 
-<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col pt-16">
 
     <!-- Navbar -->
     <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
 
     <!-- Main Content -->
-    <main class="flex-1 flex items-center justify-center px-4 py-24 relative overflow-hidden mt-16">
-        <!-- Background Elements -->
+    <main class="flex-1 flex items-center justify-center px-4 py-16 relative overflow-hidden">
+        <!-- Background Glow Effects -->
         <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-[120px]"></div>
-            <div class="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px]"></div>
+            <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-[130px]"></div>
+            <div class="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[130px]"></div>
         </div>
 
         <div class="w-full max-w-2xl relative z-10 animate-fade-in">
+            
+            <!-- Back to Home link -->
+            <div class="mb-4 text-left">
+                <a href="/index" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-white transition-colors">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+
             <!-- Registration Card -->
-            <div class="bg-surface-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl">
+            <div class="bg-surface-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl">
                 
-                <!-- Header -->
+                <!-- Brand logo and Header -->
                 <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/30 mb-6">
-                        <i class="bi bi-person-plus-fill text-3xl text-white"></i>
+                    <div class="inline-flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center font-bold text-white text-sm">E</div>
+                        <span class="font-extrabold text-xl tracking-tight text-white">EduTake<span class="text-brand-500">.</span></span>
                     </div>
-                    <h1 class="text-3xl font-bold tracking-tight">Create an Account</h1>
-                    <p class="text-gray-400 mt-2">Join EduTake today and start your learning journey.</p>
+                    <h1 class="text-2xl font-black text-white tracking-tight">Create an Account</h1>
+                    <p class="text-xs text-gray-400 mt-1">Join EduTake today and start your learning journey</p>
                 </div>
 
                 <!-- Success Message -->
-                <div th:if="${successMsg}" class="mb-8 flex items-start gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+                <div th:if="${successMsg}" class="mb-6 flex items-start gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
                     <i class="bi bi-check-circle-fill text-green-400 mt-0.5"></i>
-                    <p class="text-sm text-green-300" th:text="${successMsg}"></p>
+                    <p class="text-xs text-green-300" th:text="${successMsg}"></p>
                 </div>
                 
                 <!-- Error Message -->
-                <div th:if="${errorMsg}" class="mb-8 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <div th:if="${errorMsg}" class="mb-6 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
                     <i class="bi bi-exclamation-circle-fill text-red-400 mt-0.5"></i>
-                    <p class="text-sm text-red-300" th:text="${errorMsg}"></p>
+                    <p class="text-xs text-red-300" th:text="${errorMsg}"></p>
                 </div>
 
                 <!-- Registration Form -->
                 <form th:action="@{/regForm}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()" th:object="${user}" class="space-y-6">
 
-                    <!-- Profile Image Upload -->
+                    <!-- Profile Image Upload Section -->
                     <div class="flex flex-col items-center justify-center mb-6">
                         <div class="relative group cursor-pointer">
                             <img id="previewImage" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                                 class="w-28 h-28 rounded-full border-4 border-surface-800 object-cover shadow-lg bg-surface-950 transition-all group-hover:border-brand-500">
+                                 class="w-24 h-24 rounded-full border-4 border-surface-800 object-cover shadow-lg bg-surface-950 transition-all group-hover:border-brand-500">
                             
-                            <label class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
-                                <i class="bi bi-camera-fill text-2xl text-white"></i>
+                            <label class="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+                                <i class="bi bi-camera-fill text-xl text-white"></i>
                                 <input type="file" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10" name="image" accept="image/*" onchange="previewFile(this)">
                             </label>
                         </div>
-                        <p class="text-sm font-medium text-gray-300 mt-3">Upload Profile Photo</p>
-                        <p class="text-xs text-gray-500 mt-1">JPG, PNG or GIF (Max 5MB)</p>
+                        <p class="text-xs font-bold text-gray-300 mt-2">Profile Photo</p>
+                        <p class="text-[10px] text-gray-500 mt-0.5">JPG or PNG (Max 5MB)</p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <!-- Full Name -->
-                        <div class="space-y-1.5">
-                            <label for="name" class="block text-sm font-medium text-gray-300">Full Name</label>
+                        <div class="space-y-1.5 text-left">
+                            <label for="name" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Full Name</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="bi bi-person text-gray-500"></i>
                                 </div>
                                 <input type="text" id="name" name="name" th:field="*{name}" required
-                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
+                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
                                        placeholder="John Doe">
                             </div>
                             <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                         </div>
 
                         <!-- Email -->
-                        <div class="space-y-1.5">
-                            <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
+                        <div class="space-y-1.5 text-left">
+                            <label for="email" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Email Address</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="bi bi-envelope text-gray-500"></i>
                                 </div>
                                 <input type="email" id="email" name="email" th:field="*{email}" required
-                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
+                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
                                        placeholder="you@example.com">
                             </div>
                             <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
 
                         <!-- Phone Number -->
-                        <div class="space-y-1.5">
-                            <label for="phoneno" class="block text-sm font-medium text-gray-300">Phone Number</label>
+                        <div class="space-y-1.5 text-left">
+                            <label for="phoneno" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Phone Number</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="bi bi-telephone text-gray-500"></i>
                                 </div>
                                 <input type="text" id="phoneno" name="phoneno" th:field="*{phoneno}" required
-                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
-                                       placeholder="1234567890">
+                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
+                                       placeholder="10-digit number">
                             </div>
                             <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('phoneno')}" th:errors="*{phoneno}"></div>
                         </div>
                         
                         <!-- City -->
-                        <div class="space-y-1.5">
-                            <label for="city" class="block text-sm font-medium text-gray-300">City</label>
+                        <div class="space-y-1.5 text-left">
+                            <label for="city" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">City</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="bi bi-geo-alt text-gray-500"></i>
                                 </div>
                                 <input type="text" id="city" name="city" th:field="*{city}" required
-                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
-                                       placeholder="New York">
+                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
+                                       placeholder="Your City">
                             </div>
                             <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
                         </div>
 
                         <!-- Password -->
-                        <div class="space-y-1.5 sm:col-span-2">
-                            <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                        <div class="space-y-1.5 sm:col-span-2 text-left">
+                            <label for="password" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Password</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="bi bi-lock text-gray-500"></i>
                                 </div>
                                 <input type="password" id="password" name="password" th:field="*{password}" required
-                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
+                                       class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
                                        placeholder="Create a strong password (min. 5 characters)">
                             </div>
                             <div class="text-red-400 text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                         </div>
                     </div>
 
+                    <!-- Submit action button -->
                     <div class="pt-4">
                         <button type="submit"
-                                class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30 flex items-center justify-center gap-2">
+                                class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all shadow-md shadow-brand-600/10 hover:shadow-brand-500/25 hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm">
                             <span>Create Account</span>
                             <i class="bi bi-arrow-right"></i>
                         </button>
@@ -141,15 +152,15 @@
                 </form>
 
                 <!-- Divider -->
-                <div class="relative my-8">
+                <div class="relative my-6">
                     <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
-                    <div class="relative flex justify-center text-xs"><span class="bg-surface-900 px-4 text-gray-500 uppercase tracking-wider">or</span></div>
+                    <div class="relative flex justify-center text-[10px] font-bold uppercase tracking-wider"><span class="bg-surface-900/60 px-4 text-gray-500">or</span></div>
                 </div>
 
-                <!-- Login Link -->
-                <p class="text-center text-gray-400">
+                <!-- Login redirection link -->
+                <p class="text-center text-xs text-gray-400 font-semibold">
                     Already have an account?
-                    <a href="/login" class="text-brand-400 hover:text-brand-300 font-semibold transition-colors ml-1">Sign in here</a>
+                    <a href="/login" class="text-brand-400 hover:text-brand-300 ml-1 transition-colors">Sign in here</a>
                 </p>
             </div>
         </div>
@@ -159,7 +170,6 @@
     <div th:replace="~{fragments/tw-footer :: footer}"></div>
 
     <script type="text/javascript">
-        // Basic HTML5 pattern matching handles most of this now, but keeping custom validation if needed
         function validateForm() {
             var name = document.forms[0]["name"].value;
             var namePattern = /^[a-z,A-Z ]{3,30}$/;

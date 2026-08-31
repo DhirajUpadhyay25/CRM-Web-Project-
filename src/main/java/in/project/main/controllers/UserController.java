@@ -22,10 +22,14 @@ import org.springframework.web.multipart.MultipartFile;
 import in.project.main.dto.PurchasedCourse;
 import in.project.main.entities.Course;
 import in.project.main.entities.User;
+import in.project.main.entities.enums.CourseStatus;
 import in.project.main.repositories.OrdersRepository;
 import in.project.main.repositories.UserRepository;
+import in.project.main.repositories.EmployeeRepository;
+import in.project.main.repositories.CourseRepository;
 import in.project.main.services.CourseService;
 import in.project.main.services.UserService;
+import in.project.main.services.CategoryService;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +50,15 @@ public class UserController
 	
 	@Autowired
 	private OrdersRepository ordersRepository;
+
+	@Autowired
+	private CategoryService categoryService;
+
+	@Autowired
+	private EmployeeRepository employeeRepository;
+
+	@Autowired
+	private CourseRepository courseRepository;
 	
 	@Value("${app.razorpay.key-id}")
 	private String razorpayKeyId;
@@ -71,6 +84,16 @@ public class UserController
 		
 		model.addAttribute("coursesList", coursesList);
 		model.addAttribute("razorpayKeyId", razorpayKeyId);
+
+		// Platform dynamic stats
+		long totalStudentsCount = userRepository.countByBanStatusFalse();
+		long totalCoursesCount = courseRepository.countByStatus(CourseStatus.PUBLISHED);
+		int totalInstructorsCount = employeeRepository.findByRole(Role.INSTRUCTOR).size();
+
+		model.addAttribute("totalStudentsCount", totalStudentsCount);
+		model.addAttribute("totalCoursesCount", totalCoursesCount);
+		model.addAttribute("totalInstructorsCount", totalInstructorsCount);
+		model.addAttribute("categories", categoryService.getActiveCategories());
 		
 		if(userDetails != null && userDetails.getRole() == Role.STUDENT)
 		{
