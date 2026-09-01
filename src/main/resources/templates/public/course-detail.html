@@ -487,6 +487,18 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script th:inline="javascript">
+    // Every AJAX call on this page must carry the CSRF token. The payment APIs are no longer
+    // exempt from CSRF, so without this header they would be rejected with 403.
+    var csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
+    var csrfHeader = /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN';
+    $.ajaxSetup({
+        beforeSend: function (xhr) {
+            if (csrfToken) {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            }
+        }
+    });
+
     var currentCheckout = {
         courseName: '',
         uname: '',
@@ -592,6 +604,18 @@
                 couponCode: currentCheckout.couponCode
             }),
             success: function(orderData) {
+                // A session that expired while this page was open turns the call above into a
+                // redirect to the login form, which arrives here as HTML instead of an order.
+                if (!orderData || !orderData.orderId || !orderData.amount) {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-credit-card-2-back-fill"></i> <span>Pay Securely with Razorpay</span>';
+                    }
+                    alert("Your session has expired. Please sign in again to continue.");
+                    window.location.href = '/login';
+                    return;
+                }
+
                 closeCheckoutModal();
                 if (btn) {
                     btn.disabled = false;
@@ -606,9 +630,10 @@
                     "name": "EduTake Platform",
                     "description": "Enrollment: " + currentCheckout.courseName,
                     "handler": function (response) {
+                        // Only the three Razorpay handshake values are sent. The course, the
+                        // buyer and the amount are read from the pending order the server
+                        // already stored, so nothing about what is purchased is decided here.
                         var verifyData = {
-                            courseName: currentCheckout.courseName,
-                            userEmail: currentCheckout.uemail,
                             paymentId: response.razorpay_payment_id,
                             orderId: response.razorpay_order_id,
                             signature: response.razorpay_signature

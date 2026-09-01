@@ -69,7 +69,7 @@ public class CourseController {
     // ==========================================
     // 1. ADMIN COURSE LIST & WORKSPACE
     // ==========================================
-    @GetMapping({"/admin/courses", "/courseManagement"})
+    @GetMapping("/admin/courses")
     public String openCourseManagementPage(
             Model model,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -103,14 +103,14 @@ public class CourseController {
     // ==========================================
     // 2. ADD NEW COURSE
     // ==========================================
-    @GetMapping({"/admin/courses/new", "/addCourseForm"})
+    @GetMapping("/admin/courses/new")
     public String openAddCoursePage(Model model) {
         model.addAttribute("courseDTO", new CourseDTO());
         populateDropdowns(model);
         return "admin/courses/add";
     }
 
-    @PostMapping({"/admin/courses/new", "/addCourseForm"})
+    @PostMapping("/admin/courses/new")
     public String addCourseForm(
             @Valid @ModelAttribute("courseDTO") CourseDTO courseDTO,
             BindingResult bindingResult,
@@ -153,7 +153,7 @@ public class CourseController {
     // ==========================================
     // 4. EDIT COURSE
     // ==========================================
-    @GetMapping({"/admin/courses/{id}/edit", "/admin/courses/edit", "/editCourse"})
+    @GetMapping({"/admin/courses/{id}/edit", "/admin/courses/edit"})
     public String openEditCoursePage(
             @PathVariable(value = "id", required = false) Long pathId,
             @RequestParam(value = "id", required = false) Long queryId,
@@ -199,7 +199,7 @@ public class CourseController {
         return "admin/courses/edit";
     }
 
-    @PostMapping({"/admin/courses/{id}/edit", "/admin/courses/edit", "/updateCourse"})
+    @PostMapping({"/admin/courses/{id}/edit", "/admin/courses/edit"})
     public String updateCourseDetailsForm(
             @PathVariable(value = "id", required = false) Long pathId,
             @Valid @ModelAttribute("courseDTO") CourseDTO courseDTO,
@@ -210,8 +210,7 @@ public class CourseController {
         
         Long id = pathId != null ? pathId : courseDTO.getId();
         if (bindingResult.hasErrors()) {
-            populateDropdowns(model);
-            return "admin/courses/edit";
+            return redisplayEditForm(id, model, redirectAttributes);
         }
 
         try {
@@ -220,9 +219,25 @@ public class CourseController {
             return "redirect:/admin/courses";
         } catch (Exception e) {
             model.addAttribute("errorMsg", "Failed to update course: " + e.getMessage());
-            populateDropdowns(model);
-            return "admin/courses/edit";
+            return redisplayEditForm(id, model, redirectAttributes);
         }
+    }
+
+    /**
+     * Re-renders the edit form after a validation or save failure. The template reads
+     * ${course.name}, ${course.slug} and ${course.id}, so the entity has to go back into the
+     * model or the "friendly" error page replaces the user's form and loses their input.
+     * If the course cannot be resolved there is nothing to re-render, so fall back to the list.
+     */
+    private String redisplayEditForm(Long id, Model model, RedirectAttributes redirectAttributes) {
+        Course course = (id != null) ? courseService.getCourseDetailsById(id) : null;
+        if (course == null) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Course not found.");
+            return "redirect:/admin/courses";
+        }
+        model.addAttribute("course", course);
+        populateDropdowns(model);
+        return "admin/courses/edit";
     }
 
     // ==========================================
@@ -273,11 +288,6 @@ public class CourseController {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
         }
         return "redirect:/admin/courses";
-    }
-
-    @GetMapping({"/admin/courses/delete", "/deleteCourseDetails"})
-    public String deleteCourseLegacy(@RequestParam("id") Long id, RedirectAttributes redirectAttributes) {
-        return deleteCoursePost(id, redirectAttributes);
     }
 
     // ==========================================

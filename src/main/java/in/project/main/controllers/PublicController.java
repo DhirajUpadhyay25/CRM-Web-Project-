@@ -287,6 +287,15 @@ public class PublicController {
         return "public/faq";
     }
 
+    /**
+     * Target of SecurityConfig's accessDeniedPage. Without this mapping the forward that
+     * Spring Security performs on an authorization failure lands on no handler at all.
+     */
+    @GetMapping("/403")
+    public String openAccessDeniedPage() {
+        return "403";
+    }
+
     // ==========================================
     // 5. PUBLIC CERTIFICATE VERIFICATION
     // ==========================================

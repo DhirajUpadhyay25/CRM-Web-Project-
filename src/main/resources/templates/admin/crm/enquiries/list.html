@@ -77,8 +77,8 @@
                     <i class="bi bi-question-circle"></i>
                 </div>
                 <h3 class="font-semibold text-surface-900 mb-1">No Enquiries Found</h3>
-                <p class="text-sm text-gray-500" th:if="${search or statusFilter or typeFilter}">Try adjusting your search or filter criteria.</p>
-                <p class="text-sm text-gray-500" th:unless="${search or statusFilter or typeFilter}">No enquiries have been submitted yet.</p>
+                <p class="text-sm text-gray-500" th:if="${!#strings.isEmpty(search) or !#strings.isEmpty(statusFilter) or !#strings.isEmpty(typeFilter)}">Try adjusting your search or filter criteria.</p>
+                <p class="text-sm text-gray-500" th:if="${#strings.isEmpty(search) and #strings.isEmpty(statusFilter) and #strings.isEmpty(typeFilter)}">No enquiries have been submitted yet.</p>
             </div>
 
             <!-- Table -->
@@ -104,25 +104,41 @@
                             <td class="px-6 py-4 text-gray-500" th:text="${enquiry.phone ?: '-'}"></td>
                             <td class="px-6 py-4 text-gray-500 max-w-[150px] truncate" th:text="${enquiry.subject}"></td>
                             <td class="px-6 py-4 text-gray-500 max-w-[200px] truncate" th:text="${enquiry.message}"></td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4" th:with="typeName=${enquiry.type?.name()}">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                                      th:classappend="${enquiry.type == 'GENERAL' ? 'bg-gray-100 text-gray-600' : (enquiry.type == 'COURSE_ENQUIRY' ? 'bg-blue-50 text-blue-600' : (enquiry.type == 'SERVICE_ENQUIRY' ? 'bg-purple-50 text-purple-600' : (enquiry.type == 'CONSULTATION' ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-600')))}"
-                                      th:text="${enquiry.type}">—</span>
+                                      th:classappend="${typeName == 'GENERAL' ? 'bg-gray-100 text-gray-600' : (typeName == 'COURSE_ENQUIRY' ? 'bg-blue-50 text-blue-600' : (typeName == 'SERVICE_ENQUIRY' ? 'bg-purple-50 text-purple-600' : (typeName == 'CONSULTATION' ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-600')))}"
+                                      th:text="${typeName ?: '—'}">—</span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4" th:with="statusName=${enquiry.status?.name()}">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                                      th:classappend="${enquiry.status == 'NEW' ? 'bg-blue-50 text-blue-600' : (enquiry.status == 'IN_PROGRESS' ? 'bg-yellow-50 text-yellow-600' : (enquiry.status == 'RESPONDED' ? 'bg-green-50 text-green-600' : (enquiry.status == 'CLOSED' ? 'bg-gray-100 text-gray-600' : 'bg-gray-50 text-gray-600')))}"
-                                      th:text="${enquiry.status}">—</span>
+                                      th:classappend="${statusName == 'NEW' ? 'bg-blue-50 text-blue-600' : (statusName == 'IN_PROGRESS' ? 'bg-yellow-50 text-yellow-600' : (statusName == 'RESPONDED' ? 'bg-green-50 text-green-600' : (statusName == 'CLOSED' ? 'bg-gray-100 text-gray-600' : 'bg-gray-50 text-gray-600')))}"
+                                      th:text="${statusName ?: '—'}">—</span>
                             </td>
                             <td class="px-6 py-4 text-gray-400 text-xs" th:text="${enquiry.createdAt}">—</td>
-                            <td class="px-6 py-4 text-right space-x-2">
-                                <button th:attr="onclick='openRespondModal(' + ${enquiry.id} + ', \'' + ${enquiry.name} + '\', \'' + ${enquiry.message} + '\')'"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-brand-600 hover:bg-brand-50 hover:text-brand-700 transition-colors" title="View / Respond">
-                                    <i class="bi bi-reply"></i>
-                                </button>
-                                <a th:href="@{/admin/enquiries/delete(id=${enquiry.id})}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors" title="Delete" onclick="return confirm('Are you sure you want to delete this enquiry?');">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <!-- Row data travels as data-* attributes. The old version built a
+                                         JS call by concatenating the raw message into an onclick string,
+                                         so a single apostrophe in an enquiry killed the button - and any
+                                         script tag in it would have executed. -->
+                                    <button type="button" class="enquiry-respond-btn inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-brand-600 hover:bg-brand-50 hover:text-brand-700 transition-colors" title="View / Respond"
+                                            th:attr="data-id=${enquiry.id},
+                                                     data-name=${enquiry.name},
+                                                     data-email=${enquiry.email},
+                                                     data-subject=${enquiry.subject},
+                                                     data-message=${enquiry.message},
+                                                     data-status=${enquiry.status?.name()},
+                                                     data-notes=${enquiry.adminNotes},
+                                                     data-assigned=${enquiry.assignedTo}">
+                                        <i class="bi bi-reply"></i>
+                                    </button>
+                                    <form th:action="@{/admin/enquiries/{id}/delete(id=${enquiry.id})}" method="post" class="inline"
+                                          onsubmit="return confirm('Delete this enquiry? This cannot be undone.');">
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -166,41 +182,79 @@
                         <p class="text-sm font-medium text-surface-900" id="respondFrom"></p>
                     </div>
                     <div class="mb-4">
-                        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Message</p>
-                        <p class="text-sm text-gray-600 bg-surface-50 rounded-lg p-3 border border-surface-200" id="respondMessage"></p>
+                        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Subject</p>
+                        <p class="text-sm font-medium text-surface-900" id="respondSubject"></p>
                     </div>
-                    <form th:action="@{/admin/enquiries/respond}" method="post">
-                        <input type="hidden" name="id" id="respondEnquiryId">
+                    <div class="mb-4">
+                        <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Message</p>
+                        <p class="text-sm text-gray-600 bg-surface-50 rounded-lg p-3 border border-surface-200 whitespace-pre-line" id="respondMessage"></p>
+                    </div>
+                    <!-- Posts to the existing POST /admin/enquiries/{id}/update handler. The old
+                         action /admin/enquiries/respond had no handler at all, and the id was sent
+                         as a hidden field the handler could not read - it takes a path variable. -->
+                    <form id="respondForm" th:action="@{/admin/enquiries/0/update}" method="post">
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-surface-700 mb-1">Admin Notes</label>
-                            <textarea name="adminNotes" rows="4" required class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="Type your response..."></textarea>
+                            <textarea name="adminNotes" id="respondNotes" rows="4" required class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="Type your response..."></textarea>
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-surface-700 mb-1">Update Status</label>
-                            <select name="status" class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                                <option value="IN_PROGRESS">In Progress</option>
-                                <option value="RESPONDED">Responded</option>
-                                <option value="CLOSED">Closed</option>
-                            </select>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-surface-700 mb-1">Update Status</label>
+                                <select name="status" id="respondStatus" class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                    <option value="NEW">New</option>
+                                    <option value="IN_PROGRESS">In Progress</option>
+                                    <option value="RESPONDED">Responded</option>
+                                    <option value="CLOSED">Closed</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-surface-700 mb-1">Assigned To</label>
+                                <input type="text" name="assignedTo" id="respondAssigned" class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="Employee email or name">
+                            </div>
                         </div>
                         <div class="flex items-center justify-end gap-3 pt-2">
                             <button type="button" onclick="document.getElementById('respondModal').classList.add('hidden')" class="px-4 py-2 border border-surface-200 text-surface-700 rounded-lg text-sm font-medium hover:bg-surface-50 transition-colors">Cancel</button>
-                            <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-medium transition-colors">Send Response</button>
+                            <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-medium transition-colors">Save Response</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-    </div>
+        <script>
+            // This script must stay inside the outer div. The layout fragment is included as
+            // ~{::div}, so anything after the closing </div> is discarded - which is why the
+            // previous openRespondModal function never reached the browser and the respond
+            // button did nothing at all.
+            (function () {
+                var modal = document.getElementById('respondModal');
+                var form = document.getElementById('respondForm');
+                if (!modal || !form) { return; }
 
-    <script th:inline="javascript">
-        function openRespondModal(id, name, message) {
-            document.getElementById('respondEnquiryId').value = id;
-            document.getElementById('respondFrom').textContent = name;
-            document.getElementById('respondMessage').textContent = message;
-            document.getElementById('respondModal').classList.remove('hidden');
-        }
-    </script>
+                function setText(id, value) {
+                    var el = document.getElementById(id);
+                    if (el) { el.textContent = value || ''; }
+                }
+                function setValue(id, value) {
+                    var el = document.getElementById(id);
+                    if (el) { el.value = value || ''; }
+                }
+
+                document.querySelectorAll('.enquiry-respond-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        form.setAttribute('action', '/admin/enquiries/' + btn.dataset.id + '/update');
+                        setText('respondFrom', (btn.dataset.name || '') + ' <' + (btn.dataset.email || '') + '>');
+                        setText('respondSubject', btn.dataset.subject);
+                        setText('respondMessage', btn.dataset.message);
+                        setValue('respondNotes', btn.dataset.notes);
+                        setValue('respondStatus', btn.dataset.status || 'NEW');
+                        setValue('respondAssigned', btn.dataset.assigned);
+                        modal.classList.remove('hidden');
+                    });
+                });
+            })();
+        </script>
+
+    </div>
 </body>
 </html>

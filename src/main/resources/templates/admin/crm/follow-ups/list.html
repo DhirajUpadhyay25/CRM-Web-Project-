@@ -48,8 +48,32 @@
             </div>
         </div>
 
+        <!-- Overdue notice. dueTodayCount counts PENDING follow-ups dated today or earlier. -->
+        <div th:if="${dueTodayCount != null and dueTodayCount > 0}" class="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-3">
+            <i class="bi bi-clock-history"></i>
+            <span class="text-sm font-medium">
+                <span th:text="${dueTodayCount}">0</span> pending follow-up(s) are due today or overdue.
+            </span>
+        </div>
+
         <!-- Table -->
         <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+
+            <!-- Filter Bar. The controller has always accepted a status parameter, but there was
+                 no control here to send one, so the filter was unreachable from the UI. -->
+            <div class="p-4 border-b border-surface-200 bg-surface-50">
+                <form method="get" class="flex flex-col sm:flex-row gap-3">
+                    <select name="status" class="px-3 py-2 bg-white border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING" th:selected="${statusFilter == 'PENDING'}">Pending</option>
+                        <option value="COMPLETED" th:selected="${statusFilter == 'COMPLETED'}">Completed</option>
+                        <option value="MISSED" th:selected="${statusFilter == 'MISSED'}">Missed</option>
+                        <option value="CANCELLED" th:selected="${statusFilter == 'CANCELLED'}">Cancelled</option>
+                    </select>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-medium transition-colors">Filter</button>
+                    <a th:if="${!#strings.isEmpty(statusFilter)}" th:href="@{/admin/follow-ups}" class="px-4 py-2 bg-white border border-surface-200 text-surface-700 rounded-lg text-sm font-medium hover:bg-surface-50 transition-colors">Clear</a>
+                </form>
+            </div>
 
             <!-- Empty State -->
             <div th:if="${#lists.isEmpty(followUpPage.content)}" class="p-12 text-center">
@@ -57,7 +81,8 @@
                     <i class="bi bi-telephone-outbound"></i>
                 </div>
                 <h3 class="font-semibold text-surface-900 mb-1">No Follow-ups Found</h3>
-                <p class="text-sm text-gray-500">No follow-up activities have been scheduled yet. Click "Add Follow-up" to get started.</p>
+                <p class="text-sm text-gray-500" th:if="${!#strings.isEmpty(statusFilter)}">No follow-ups match that status.</p>
+                <p class="text-sm text-gray-500" th:if="${#strings.isEmpty(statusFilter)}">No follow-up activities have been scheduled yet. Click "Add Follow-up" to get started.</p>
             </div>
 
             <div th:if="${!#lists.isEmpty(followUpPage.content)}" class="overflow-x-auto">
@@ -76,28 +101,46 @@
                     </thead>
                     <tbody class="divide-y divide-surface-200">
                         <tr th:each="fu : ${followUpPage.content}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-surface-900" th:text="${fu.leadName ?: '-'}"></td>
+                            <!-- fu.leadName does not exist on the entity. The lead is a
+                                 many-to-one association, so the name comes from fu.lead.name and
+                                 the repository fetch-joins it. -->
+                            <td class="px-6 py-4 font-medium text-surface-900" th:text="${fu.lead != null ? fu.lead.name : '-'}"></td>
                             <td class="px-6 py-4 text-gray-500" th:text="${fu.followUpDate}"></td>
                             <td class="px-6 py-4 text-gray-500 max-w-[200px] truncate" th:text="${fu.notes}"></td>
-                            <td class="px-6 py-4">
+                            <!-- status is a FollowUpStatus enum. Comparing it to a string literal
+                                 is always false, which is why every badge rendered grey and the
+                                 Mark Complete button below never appeared on any row. -->
+                            <td class="px-6 py-4" th:with="statusName=${fu.status?.name()}">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                                      th:classappend="${fu.status == 'PENDING' ? 'bg-yellow-50 text-yellow-600' : (fu.status == 'COMPLETED' ? 'bg-green-50 text-green-600' : (fu.status == 'MISSED' ? 'bg-red-50 text-red-600' : (fu.status == 'CANCELLED' ? 'bg-gray-100 text-gray-600' : 'bg-gray-50 text-gray-600')))}"
-                                      th:text="${fu.status}">—</span>
+                                      th:classappend="${statusName == 'PENDING' ? 'bg-yellow-50 text-yellow-600' : (statusName == 'COMPLETED' ? 'bg-green-50 text-green-600' : (statusName == 'MISSED' ? 'bg-red-50 text-red-600' : (statusName == 'CANCELLED' ? 'bg-gray-100 text-gray-600' : 'bg-gray-50 text-gray-600')))}"
+                                      th:text="${statusName ?: '—'}">—</span>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                                      th:classappend="${fu.priority == 'HIGH' ? 'bg-red-50 text-red-600' : (fu.priority == 'MEDIUM' ? 'bg-yellow-50 text-yellow-600' : 'bg-gray-100 text-gray-600'))}"
-                                      th:text="${fu.priority}">—</span>
+                                      th:classappend="${fu.priority == 'HIGH' ? 'bg-red-50 text-red-600' : (fu.priority == 'MEDIUM' ? 'bg-yellow-50 text-yellow-600' : 'bg-gray-100 text-gray-600')}"
+                                      th:text="${fu.priority ?: '—'}">—</span>
                             </td>
                             <td class="px-6 py-4 text-gray-500" th:text="${fu.assignedTo ?: '-'}"></td>
                             <td class="px-6 py-4 text-gray-400 text-xs" th:text="${fu.createdAt}">—</td>
-                            <td class="px-6 py-4 text-right space-x-2">
-                                <a th:if="${fu.status == 'PENDING'}" th:href="@{/admin/follow-ups/complete(id=${fu.id})}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-green-600 hover:bg-green-50 hover:text-green-700 transition-colors" title="Mark Complete" onclick="return confirm('Mark this follow-up as completed?');">
-                                    <i class="bi bi-check-lg"></i>
-                                </a>
-                                <a th:href="@{/admin/follow-ups/delete(id=${fu.id})}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors" title="Delete" onclick="return confirm('Are you sure you want to delete this follow-up?');">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                            <td class="px-6 py-4 text-right">
+                                <!-- Both actions change data, so they are POSTs. As GET anchors
+                                     they were reachable by any link preload or crawler, and they
+                                     pointed at ?id= routes the controller does not expose - it
+                                     maps POST /{id}/complete and POST /{id}/delete. -->
+                                <div class="flex items-center justify-end gap-2">
+                                    <form th:if="${fu.status?.name() == 'PENDING'}" th:action="@{/admin/follow-ups/{id}/complete(id=${fu.id})}" method="post" class="inline"
+                                          onsubmit="return confirm('Mark this follow-up as completed?');">
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-green-600 hover:bg-green-50 hover:text-green-700 transition-colors" title="Mark Complete">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/follow-ups/{id}/delete(id=${fu.id})}" method="post" class="inline"
+                                          onsubmit="return confirm('Delete this follow-up? This cannot be undone.');">
+                                        <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-surface-100 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -113,12 +156,12 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <a th:if="${followUpPage.hasPrevious()}"
-                       th:href="@{/admin/follow-ups(page=${followUpPage.number - 1}, size=${followUpPage.size})}"
+                       th:href="@{/admin/follow-ups(page=${followUpPage.number - 1}, size=${followUpPage.size}, status=${statusFilter})}"
                        class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
                         Previous
                     </a>
                     <a th:if="${followUpPage.hasNext()}"
-                       th:href="@{/admin/follow-ups(page=${followUpPage.number + 1}, size=${followUpPage.size})}"
+                       th:href="@{/admin/follow-ups(page=${followUpPage.number + 1}, size=${followUpPage.size}, status=${statusFilter})}"
                        class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
                         Next
                     </a>
@@ -135,7 +178,9 @@
                         <i class="bi bi-x-lg text-lg"></i>
                     </button>
                 </div>
-                <form th:action="@{/admin/follow-ups/save}" method="post" class="p-6 space-y-4">
+                <!-- Posts to POST /admin/follow-ups/add. The old action /follow-ups/save had no
+                     handler, so this form has never once saved a record. -->
+                <form th:action="@{/admin/follow-ups/add}" method="post" class="p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-surface-700 mb-1">Lead *</label>
                         <select name="leadId" required class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
@@ -145,8 +190,11 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
+                            <!-- type="date", not datetime-local. The entity field is a LocalDate,
+                                 and a datetime-local value carries a time component that
+                                 LocalDate.parse rejects. -->
                             <label class="block text-sm font-medium text-surface-700 mb-1">Follow-up Date *</label>
-                            <input type="datetime-local" name="followUpDate" required class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                            <input type="date" name="followUpDate" required class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-surface-700 mb-1">Priority</label>
@@ -156,6 +204,13 @@
                                 <option value="HIGH">High</option>
                             </select>
                         </div>
+                    </div>
+                    <div>
+                        <!-- assignedTo is a NOT NULL column and the controller requires it. There
+                             was no field for it here, so every submission was rejected with a raw
+                             400 before the handler ran. -->
+                        <label class="block text-sm font-medium text-surface-700 mb-1">Assigned To *</label>
+                        <input type="text" name="assignedTo" required class="w-full px-3 py-2 border border-surface-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="Employee email or name">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-surface-700 mb-1">Notes</label>

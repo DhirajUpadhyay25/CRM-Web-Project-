@@ -34,8 +34,14 @@ build/
 
 ### Secrets & Production Config ###
 application-prod.properties
+application-secrets.properties
 *.env
 .env.*
+
+### Runtime output — these were tracked previously and can contain session cookies,
+### credentials and personal data. Untrack with: git rm --cached <file>
+*.log
+cookies.txt
 
 ### Upload directories ###
 /upload/

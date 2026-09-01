@@ -149,15 +149,18 @@
                             <p class="text-[11px] text-gray-400">Organize course catalog</p>
                         </div>
                     </a>
-                    <a href="/admin/seed-test-data" class="flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
-                        <div class="w-9 h-9 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600">
-                            <i class="bi bi-database-add"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium text-sm text-surface-900">Generate Sample Data</p>
-                            <p class="text-[11px] text-gray-400">Populate empty modules for testing</p>
-                        </div>
-                    </a>
+                    <form th:if="${devToolsEnabled}" th:action="@{/admin/seed-test-data}" method="post"
+                          onsubmit="return confirm('Generate sample data? This writes courses, enrollments and orders to the database.');">
+                        <button type="submit" class="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-surface-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                            <div class="w-9 h-9 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600">
+                                <i class="bi bi-database-add"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-sm text-surface-900">Generate Sample Data</p>
+                                <p class="text-[11px] text-gray-400">Development only &middot; populates empty modules</p>
+                            </div>
+                        </button>
+                    </form>
                 </div>
             </div>
 

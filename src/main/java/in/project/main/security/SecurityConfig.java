@@ -41,34 +41,41 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // Student-specific Enrollment Routes (must come before generic /courses/** permitAll)
                 .requestMatchers("/courses/free-enroll").hasRole("STUDENT")
-                
+
+                // Purchase APIs. Only a signed-in student can start or settle a payment, so
+                // ownership checks inside OrdersApi always have a real principal to compare
+                // against. These must stay ahead of the public matchers below.
+                .requestMatchers(
+                    "/api/createOrder", "/api/verifyPayment", "/api/failOrder"
+                ).hasRole("STUDENT")
+
                 // Public Routes
                 .requestMatchers(
-                    "/", "/index", "/login", "/register", "/regForm", 
+                    "/", "/index", "/login", "/register", "/regForm",
                     "/courses", "/courses/**", "/services", "/about", "/contact", "/faq",
-                    "/api/createOrder", "/api/verifyPayment", 
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/uploads/**",
                     "/error", "/error/**"
                 ).permitAll()
-                
+
                 // Admin Routes
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                
+
                 // Instructor Routes
                 .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")
-                
+
                 // Employee Routes
                 .requestMatchers(
                     "/employeeProfile", "/sellCourse", "/sellCourseForm",
-                    "/inquiryManagement", "/newInquiry", "/submitInquiryForm", "/followUps"
+                    "/inquiryManagement", "/newInquiry", "/submitInquiryForm", "/followUps",
+                    "/api/searchInquiries", "/api/myFollowUps"
                 ).hasAnyRole("EMPLOYEE", "ADMIN")
-                
+
                 // Student Routes
                 .requestMatchers(
                     "/userProfile", "/updateUserProfile", "/myCourses", "/provideFeedback", "/feedbackForm"
                 ).hasAnyRole("STUDENT", "ADMIN")
                 .requestMatchers("/student/**").hasRole("STUDENT")
-                
+
                 // All other requests require authentication
                 .anyRequest().authenticated()
             )
@@ -89,10 +96,9 @@ public class SecurityConfig {
             )
             .exceptionHandling(exception -> exception
                 .accessDeniedPage("/403")
-            )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/createOrder", "/api/verifyPayment")
             );
+        // CSRF stays enabled for every route, including the payment APIs. The checkout page
+        // sends the token on its AJAX calls, so no endpoint needs an exemption.
 
         return http.build();
     }

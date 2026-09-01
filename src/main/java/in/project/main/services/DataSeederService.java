@@ -13,9 +13,15 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 @Service
 public class DataSeederService {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DataSeederService.class);
+
+    /** $2 + revision letter + two digit cost + 53 chars of salt and digest. */
+    private static final Pattern BCRYPT_HASH = Pattern.compile("^\\$2[abxy]\\$\\d{2}\\$.{53}$");
 
     @Autowired private InstructorRepository instructorRepo;
     @Autowired private BatchRepository batchRepo;
@@ -50,6 +56,36 @@ public class DataSeederService {
     @Autowired private LessonProgressRepository lessonProgressRepository;
     @Autowired private StudentActivityRepository studentActivityRepository;
 
+    /**
+     * The accounts seedStudents() creates. Every seed step that fabricates learner data is
+     * restricted to these addresses.
+     *
+     * The three student-data seed steps used to iterate userRepo.findAll(), so running the
+     * seeder invented enrollments, orders and certificates for real registered users.
+     */
+    private static final List<String> TEST_STUDENT_EMAILS = Arrays.asList(
+            "rahul@student.com", "priya@student.com", "amit@student.com",
+            "sneha@student.com", "vikram@student.com");
+
+    /** Password for the seeded admin account. Blank means "do not create it". */
+    @org.springframework.beans.factory.annotation.Value("${app.seed.admin-password:}")
+    private String seedAdminPassword;
+
+    /**
+     * Resolves the seeded test accounts that actually exist. Returns only these, never the
+     * full user table, so demo data can never attach itself to a real person's account.
+     */
+    private List<User> seededTestStudents() {
+        List<User> students = new java.util.ArrayList<>();
+        for (String email : TEST_STUDENT_EMAILS) {
+            User user = userRepo.findByEmail(email);
+            if (user != null) {
+                students.add(user);
+            }
+        }
+        return students;
+    }
+
     @Transactional
     public void seedAll() {
         seedAdmin();
@@ -76,10 +112,17 @@ public class DataSeederService {
 
     private void seedAdmin() {
         if (employeeRepo.findByEmail("admin@edutake.com") != null) return;
+        if (seedAdminPassword == null || seedAdminPassword.isBlank()) {
+            // No password configured, so no account is created. This previously hardcoded
+            // "admin123", which meant every database the seeder touched gained a known
+            // administrator login.
+            log.warn("Skipping admin seed: set app.seed.admin-password to create admin@edutake.com");
+            return;
+        }
         Employee admin = new Employee();
         admin.setName("Administrator");
         admin.setEmail("admin@edutake.com");
-        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setPassword(passwordEncoder.encode(seedAdminPassword));
         admin.setPhoneno("9999999999");
         admin.setCity("System");
         admin.setRole(Role.ADMIN);
@@ -216,7 +259,7 @@ public class DataSeederService {
 
     private void seedStudentProgress() {
         if (lessonProgressRepository.count() > 0) return;
-        List<User> students = userRepo.findAll();
+        List<User> students = seededTestStudents();
         for (User student : students) {
             String email = student.getEmail();
             List<Enrollment> enrollments = enrollmentRepo.findByUserEmailOrderByEnrolledAtDesc(email);
@@ -546,7 +589,7 @@ public class DataSeederService {
     }
 
     private void seedEnrollmentsAndOrders() {
-        List<User> allUsers = new java.util.ArrayList<>(userRepo.findAll());
+        List<User> allUsers = seededTestStudents();
         List<Course> courses = courseRepo.findAll();
         if (allUsers.isEmpty() || courses.isEmpty()) return;
 
@@ -598,7 +641,7 @@ public class DataSeederService {
     }
 
     private void seedStudentNotifications() {
-        List<User> students = new java.util.ArrayList<>(userRepo.findAll());
+        List<User> students = seededTestStudents();
         if (students.isEmpty()) return;
 
         Object[][] notifs = {
@@ -629,19 +672,42 @@ public class DataSeederService {
 
     @Transactional
     public void migratePlaintextPasswords() {
-        // Migrate Employee passwords
+        int employeesMigrated = 0;
+        int usersMigrated = 0;
+
         for (Employee emp : employeeRepo.findAll()) {
-            if (emp.getPassword() != null && !emp.getPassword().startsWith("$2a$")) {
+            if (!isAlreadyHashed(emp.getPassword())) {
                 emp.setPassword(passwordEncoder.encode(emp.getPassword()));
                 employeeRepo.save(emp);
+                employeesMigrated++;
             }
         }
-        // Migrate User passwords
         for (User user : userRepo.findAll()) {
-            if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
+            if (!isAlreadyHashed(user.getPassword())) {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
                 userRepo.save(user);
+                usersMigrated++;
             }
         }
+
+        // Counts only. Never log the values being read or written here.
+        log.info("Password migration complete: {} employee and {} user records re-hashed",
+                 employeesMigrated, usersMigrated);
+    }
+
+    /**
+     * True if the stored value already looks like a BCrypt hash and must be left alone.
+     *
+     * BCrypt hashes are $2 followed by a revision letter, a two digit cost factor and a
+     * 53 character salt+digest. The previous check only recognised the "$2a$" revision, so a
+     * hash written by any other revision ($2b$ and $2y$ are both common) would have been
+     * treated as plaintext and encoded a second time. That is unrecoverable - the original
+     * password no longer verifies and the account is locked out for good.
+     *
+     * A null password is reported as already-hashed so that this migration never invents a
+     * credential for an account that has none.
+     */
+    private boolean isAlreadyHashed(String password) {
+        return password == null || BCRYPT_HASH.matcher(password).matches();
     }
 }

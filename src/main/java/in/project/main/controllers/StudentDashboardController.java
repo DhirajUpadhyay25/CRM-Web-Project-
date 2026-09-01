@@ -55,7 +55,6 @@ import in.project.main.entities.enums.CourseLevel;
 import in.project.main.security.CustomUserDetails;
 import in.project.main.services.CategoryService;
 import in.project.main.services.CourseService;
-import in.project.main.services.DataSeederService;
 import in.project.main.services.NotificationService;
 import in.project.main.services.LearningService;
 
@@ -100,9 +99,6 @@ public class StudentDashboardController {
     @Autowired
     private CourseRepository courseRepository;
 
-    @Autowired
-    private DataSeederService dataSeederService;
-
     @org.springframework.beans.factory.annotation.Value("${app.razorpay.key-id}")
     private String razorpayKeyId;
 
@@ -126,15 +122,9 @@ public class StudentDashboardController {
         long completedCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.COMPLETED);
         long totalEnrolled = activeCount + completedCount;
 
-        // Auto-seed if user has 0 enrollments but courses exist in the system
-        if (totalEnrolled == 0) {
-            try {
-                dataSeederService.seedStudentPanelData();
-                activeCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.ACTIVE);
-                completedCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.COMPLETED);
-                totalEnrolled = activeCount + completedCount;
-            } catch (Exception ignored) {}
-        }
+        // A student with no enrollments sees an empty dashboard. This used to call
+        // seedStudentPanelData() instead, which fabricated enrollments, orders and
+        // certificates for every user in the database on an ordinary page load.
 
         model.addAttribute("totalEnrolled", totalEnrolled);
         model.addAttribute("activeCourses", activeCount);

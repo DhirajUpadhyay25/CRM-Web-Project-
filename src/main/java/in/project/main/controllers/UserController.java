@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import in.project.main.security.CustomUserDetails;
 import in.project.main.entities.Role;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,10 +61,7 @@ public class UserController
 	
 	@Value("${app.razorpay.key-id}")
 	private String razorpayKeyId;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
+
 	@GetMapping({"/", "/index"})
 	public String openIndexPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails, jakarta.servlet.http.HttpServletRequest request)
 	{
@@ -171,10 +167,10 @@ public class UserController
 	            user.setImageName(IMAGE_URL + fileName);
 	        }
 
-	        // ---------- ENCODE PASSWORD ----------
-			user.setPassword(passwordEncoder.encode(user.getPassword()));
-
 	        // ---------- SAVE USER ----------
+	        // The password is hashed once, inside UserService.registerUserService. Encoding it
+	        // here as well produced a BCrypt hash of a BCrypt hash, so the raw password entered
+	        // at login could never match and no self-registered user could sign in.
 
 	        userService.registerUserService(user);
 
