@@ -1,5 +1,7 @@
 package in.project.main.controllers;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,8 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import in.project.main.entities.Announcement;
+import in.project.main.entities.enums.AuditEventType;
+import in.project.main.entities.enums.AuditSeverity;
+import in.project.main.entities.enums.AuditStatus;
+import in.project.main.events.PlatformAuditEvent;
 import in.project.main.repositories.AnnouncementRepository;
+import in.project.main.services.AuditLogService;
+import in.project.main.services.NotificationService;
 
 @Controller
 @RequestMapping("/admin/announcements")
@@ -20,7 +29,10 @@ public class AdminAnnouncementController {
     private AnnouncementRepository repository;
 
     @Autowired
-    private in.project.main.services.NotificationService notificationService;
+    private NotificationService notificationService;
+
+    @Autowired(required = false)
+    private AuditLogService auditLogService;
 
     @GetMapping
     public String list(Model model) {
@@ -34,7 +46,9 @@ public class AdminAnnouncementController {
                       @RequestParam String targetAudience,
                       @RequestParam String publishDate,
                       @RequestParam Boolean isActive,
+                      Principal principal,
                       RedirectAttributes ra) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             Announcement announcement = new Announcement();
             announcement.setTitle(title);
@@ -55,6 +69,21 @@ public class AdminAnnouncementController {
                 } catch (Exception ignored) {}
             }
 
+            if (auditLogService != null) {
+                PlatformAuditEvent audit = PlatformAuditEvent.of(
+                    actorEmail,
+                    AuditEventType.ANNOUNCEMENT_CREATED,
+                    "ANNOUNCEMENT_CREATED",
+                    "Admin published announcement: '" + title + "' (Target: " + targetAudience + ")."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("ANNOUNCEMENT", String.valueOf(saved.getId()), title)
+                .withStatus(AuditStatus.SUCCESS)
+                .withSeverity(AuditSeverity.INFO);
+
+                auditLogService.record(audit);
+            }
+
             ra.addFlashAttribute("success", "Announcement created successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to create announcement: " + e.getMessage());
@@ -69,7 +98,9 @@ public class AdminAnnouncementController {
                          @RequestParam String targetAudience,
                          @RequestParam String publishDate,
                          @RequestParam Boolean isActive,
+                         Principal principal,
                          RedirectAttributes ra) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             Announcement announcement = repository.findById(id).orElseThrow(() -> new RuntimeException("Announcement not found"));
             announcement.setTitle(title);
@@ -78,6 +109,22 @@ public class AdminAnnouncementController {
             announcement.setPublishDate(publishDate);
             announcement.setIsActive(isActive);
             repository.save(announcement);
+
+            if (auditLogService != null) {
+                PlatformAuditEvent audit = PlatformAuditEvent.of(
+                    actorEmail,
+                    AuditEventType.SETTINGS_CHANGED,
+                    "ANNOUNCEMENT_UPDATED",
+                    "Admin updated announcement #" + id + " ('" + title + "')."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("ANNOUNCEMENT", String.valueOf(id), title)
+                .withStatus(AuditStatus.SUCCESS)
+                .withSeverity(AuditSeverity.INFO);
+
+                auditLogService.record(audit);
+            }
+
             ra.addFlashAttribute("success", "Announcement updated successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to update announcement: " + e.getMessage());
@@ -86,9 +133,26 @@ public class AdminAnnouncementController {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+    public String delete(@PathVariable Long id, Principal principal, RedirectAttributes ra) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             repository.deleteById(id);
+
+            if (auditLogService != null) {
+                PlatformAuditEvent audit = PlatformAuditEvent.of(
+                    actorEmail,
+                    AuditEventType.ANNOUNCEMENT_DELETED,
+                    "ANNOUNCEMENT_DELETED",
+                    "Admin deleted announcement ID #" + id + "."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("ANNOUNCEMENT", String.valueOf(id), "Announcement #" + id)
+                .withStatus(AuditStatus.SUCCESS)
+                .withSeverity(AuditSeverity.LOW);
+
+                auditLogService.record(audit);
+            }
+
             ra.addFlashAttribute("success", "Announcement deleted successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to delete announcement: " + e.getMessage());

@@ -71,6 +71,9 @@ public class InstructorDashboardController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired(required = false)
+    private AuditLogService auditLogService;
+
     // Helper: Enforce ownership check
     private Course checkCourseOwnership(Long courseId, String email) {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new IllegalArgumentException("Course not found"));
@@ -296,6 +299,21 @@ public class InstructorDashboardController {
 
             course.setStatus(CourseStatus.PUBLISHED);
             courseRepository.save(course);
+
+            if (auditLogService != null) {
+                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                    userDetails.getUsername(),
+                    in.project.main.entities.enums.AuditEventType.COURSE_PUBLISHED,
+                    "COURSE_PUBLISHED",
+                    "Instructor published course '" + course.getName() + "' (ID: " + id + ")."
+                )
+                .withActor(null, userDetails.getUsername(), userDetails.getName(), "INSTRUCTOR")
+                .withEntity("COURSE", String.valueOf(id), course.getName())
+                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                auditLogService.record(audit);
+            }
             
             ra.addFlashAttribute("successMsg", "Course '" + course.getName() + "' successfully published!");
         } catch (Exception e) {
@@ -338,14 +356,29 @@ public class InstructorDashboardController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes ra) {
 
-        checkCourseOwnership(id, userDetails.getUsername());
+        Course course = checkCourseOwnership(id, userDetails.getUsername());
         
         Lesson lesson = new Lesson();
         lesson.setCourseId(String.valueOf(id));
         lesson.setTitle(title);
         lesson.setSectionName(sectionName);
         lesson.setOrderIndex(orderIndex);
-        lessonRepository.save(lesson);
+        Lesson saved = lessonRepository.save(lesson);
+
+        if (auditLogService != null) {
+            in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                userDetails.getUsername(),
+                in.project.main.entities.enums.AuditEventType.LESSON_CREATED,
+                "LESSON_CREATED",
+                "Instructor added lesson '" + title + "' to course '" + course.getName() + "' (Section: " + sectionName + ")."
+            )
+            .withActor(null, userDetails.getUsername(), userDetails.getName(), "INSTRUCTOR")
+            .withEntity("LESSON", String.valueOf(saved.getId()), title)
+            .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+            .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+            auditLogService.record(audit);
+        }
 
         ra.addFlashAttribute("successMsg", "Lesson added successfully!");
         return "redirect:/instructor/courses/" + id + "/builder";
@@ -361,7 +394,7 @@ public class InstructorDashboardController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes ra) {
 
-        checkCourseOwnership(id, userDetails.getUsername());
+        Course course = checkCourseOwnership(id, userDetails.getUsername());
 
         Assignment assignment = new Assignment();
         assignment.setCourseId(id);
@@ -369,7 +402,22 @@ public class InstructorDashboardController {
         assignment.setDescription(description);
         assignment.setDueDate(LocalDateTime.parse(dueDate));
         assignment.setMaxScore(maxScore);
-        assignmentRepository.save(assignment);
+        Assignment saved = assignmentRepository.save(assignment);
+
+        if (auditLogService != null) {
+            in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                userDetails.getUsername(),
+                in.project.main.entities.enums.AuditEventType.SETTINGS_CHANGED,
+                "ASSIGNMENT_CREATED",
+                "Instructor created assignment '" + title + "' for course '" + course.getName() + "'."
+            )
+            .withActor(null, userDetails.getUsername(), userDetails.getName(), "INSTRUCTOR")
+            .withEntity("ASSIGNMENT", String.valueOf(saved.getId()), title)
+            .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+            .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+            auditLogService.record(audit);
+        }
 
         ra.addFlashAttribute("successMsg", "Assignment created successfully!");
         return "redirect:/instructor/courses/" + id + "/builder";
@@ -384,14 +432,29 @@ public class InstructorDashboardController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes ra) {
 
-        checkCourseOwnership(id, userDetails.getUsername());
+        Course course = checkCourseOwnership(id, userDetails.getUsername());
 
         Quiz quiz = new Quiz();
         quiz.setCourseId(id);
         quiz.setTitle(title);
         quiz.setDescription(description);
         quiz.setPassingScore(passingScore);
-        quizRepository.save(quiz);
+        Quiz saved = quizRepository.save(quiz);
+
+        if (auditLogService != null) {
+            in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                userDetails.getUsername(),
+                in.project.main.entities.enums.AuditEventType.QUIZ_CREATED,
+                "QUIZ_CREATED",
+                "Instructor created quiz '" + title + "' for course '" + course.getName() + "'."
+            )
+            .withActor(null, userDetails.getUsername(), userDetails.getName(), "INSTRUCTOR")
+            .withEntity("QUIZ", String.valueOf(saved.getId()), title)
+            .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+            .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+            auditLogService.record(audit);
+        }
 
         ra.addFlashAttribute("successMsg", "Quiz created successfully!");
         return "redirect:/instructor/courses/" + id + "/builder";

@@ -29,6 +29,9 @@ public class AdminEnquiryController {
     @Autowired
     private EnquiryRepository enquiryRepository;
 
+    @Autowired(required = false)
+    private in.project.main.services.AuditLogService auditLogService;
+
     @GetMapping
     public String listEnquiries(
             @RequestParam(name = "search", required = false) String search,
@@ -69,6 +72,7 @@ public class AdminEnquiryController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "adminNotes", required = false) String adminNotes,
             @RequestParam(value = "assignedTo", required = false) String assignedTo,
+            java.security.Principal principal,
             RedirectAttributes redirectAttributes) {
 
         Enquiry enquiry = enquiryRepository.findById(id).orElse(null);
@@ -76,6 +80,7 @@ public class AdminEnquiryController {
             redirectAttributes.addFlashAttribute("errorMsg", "Enquiry not found.");
             return "redirect:/admin/enquiries";
         }
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             if (status != null && !status.trim().isEmpty()) {
                 EnquiryStatus newStatus = parseStatus(status, enquiry.getStatus());
@@ -94,6 +99,22 @@ public class AdminEnquiryController {
                 enquiry.setAssignedTo(assignedTo);
             }
             enquiryRepository.save(enquiry);
+
+            if (auditLogService != null) {
+                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                    actorEmail,
+                    in.project.main.entities.enums.AuditEventType.ENQUIRY_UPDATED,
+                    "ENQUIRY_UPDATED",
+                    "Admin updated enquiry #" + id + " (Status: " + enquiry.getStatus() + ", Name: " + enquiry.getName() + ")."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("ENQUIRY", String.valueOf(id), enquiry.getName())
+                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                auditLogService.record(audit);
+            }
+
             redirectAttributes.addFlashAttribute("successMsg", "Enquiry updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Failed to update enquiry: " + e.getMessage());
@@ -102,14 +123,27 @@ public class AdminEnquiryController {
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteEnquiry(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        if (!enquiryRepository.existsById(id)) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Enquiry not found.");
-            return "redirect:/admin/enquiries";
-        }
+    public String deleteEnquiry(@PathVariable("id") Long id, java.security.Principal principal, RedirectAttributes redirectAttributes) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             enquiryRepository.deleteById(id);
-            redirectAttributes.addFlashAttribute("successMsg", "Enquiry deleted successfully.");
+
+            if (auditLogService != null) {
+                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                    actorEmail,
+                    in.project.main.entities.enums.AuditEventType.ENQUIRY_UPDATED,
+                    "ENQUIRY_DELETED",
+                    "Admin deleted enquiry ID #" + id + "."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("ENQUIRY", String.valueOf(id), "Enquiry #" + id)
+                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                .withSeverity(in.project.main.entities.enums.AuditSeverity.LOW);
+
+                auditLogService.record(audit);
+            }
+
+            redirectAttributes.addFlashAttribute("successMsg", "Enquiry deleted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Failed to delete enquiry: " + e.getMessage());
         }
@@ -117,23 +151,23 @@ public class AdminEnquiryController {
     }
 
     /** An unrecognised or blank value means "no change" / "no filter", never an exception. */
-    private EnquiryStatus parseStatus(String status, EnquiryStatus fallback) {
-        if (status == null || status.trim().isEmpty()) {
+    private EnquiryStatus parseStatus(String raw, EnquiryStatus fallback) {
+        if (raw == null || raw.trim().isEmpty()) {
             return fallback;
         }
         try {
-            return EnquiryStatus.valueOf(status.trim().toUpperCase());
+            return EnquiryStatus.valueOf(raw.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             return fallback;
         }
     }
 
-    private EnquiryType parseType(String type, EnquiryType fallback) {
-        if (type == null || type.trim().isEmpty()) {
+    private EnquiryType parseType(String raw, EnquiryType fallback) {
+        if (raw == null || raw.trim().isEmpty()) {
             return fallback;
         }
         try {
-            return EnquiryType.valueOf(type.trim().toUpperCase());
+            return EnquiryType.valueOf(raw.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             return fallback;
         }

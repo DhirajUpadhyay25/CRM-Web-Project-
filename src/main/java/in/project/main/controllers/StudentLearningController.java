@@ -37,6 +37,7 @@ public class StudentLearningController {
     @Autowired private AssignmentSubmissionRepository submissionRepo;
     @Autowired private StudentActivityRepository activityRepo;
     @Autowired private UserRepository userRepo;
+    @Autowired(required = false) private in.project.main.services.AuditLogService auditLogService;
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/upload/assignments/";
 
@@ -332,6 +333,21 @@ public class StudentLearningController {
         }
 
         QuizAttempt attempt = learningService.submitQuiz(email, quizId, answers);
+
+        if (auditLogService != null) {
+            in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                email,
+                in.project.main.entities.enums.AuditEventType.QUIZ_SUBMITTED,
+                "QUIZ_SUBMITTED",
+                "Student completed quiz '" + quiz.getTitle() + "' (Score: " + attempt.getScore() + "%, Status: " + (attempt.isPassed() ? "PASSED" : "FAILED") + ")."
+            )
+            .withActor(null, email, userDetails.getName(), "STUDENT")
+            .withEntity("QUIZ", String.valueOf(quizId), quiz.getTitle())
+            .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+            .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+            auditLogService.record(audit);
+        }
 
         model.addAttribute("quiz", quiz);
         model.addAttribute("courseId", courseId);

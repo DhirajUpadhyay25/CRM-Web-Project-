@@ -209,29 +209,51 @@
             </div>
         </div>
 
-    </div>
-
-    <script>
-        function resolveError(id) {
-            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
-            const headers = {};
-            if (token) headers[header] = token;
-
-            fetch('/admin/api/monitoring/errors/' + id + '/resolve', {
-                method: 'POST',
-                headers: headers
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
+        <!-- Inline Script (Inside Root DIV so Thymeleaf includes it) -->
+        <script>
+            function resolveError(id) {
+                const btn = event?.currentTarget;
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="inline-block w-3.5 h-3.5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>';
                 }
-            })
-            .catch(() => alert('Failed to resolve error.'));
-        }
-    </script>
+
+                const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (token) headers[header] = token;
+
+                fetch('/admin/api/monitoring/errors/' + id + '/resolve', {
+                    method: 'POST',
+                    headers: headers
+                })
+                .then(r => {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to refresh telemetry and error table
+                        location.reload();
+                    } else {
+                        alert('Notice: ' + (data.message || 'Could not resolve error.'));
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="bi bi-check2"></i> Resolve';
+                        }
+                    }
+                })
+                .catch(err => {
+                    alert('Failed to resolve error: ' + err.message);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-check2"></i> Resolve';
+                    }
+                });
+            }
+        </script>
+    </div>
 </body>
 </html>

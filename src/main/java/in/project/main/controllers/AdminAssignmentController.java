@@ -35,6 +35,9 @@ public class AdminAssignmentController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired(required = false)
+    private in.project.main.services.AuditLogService auditLogService;
+
     // 1. LIST SUBMISSIONS
     @GetMapping("/submissions")
     public String listSubmissions(
@@ -48,7 +51,6 @@ public class AdminAssignmentController {
             submissions = submissionRepo.findAll();
         }
 
-        // Sort by submittedAt desc
         submissions.sort((o1, o2) -> {
             if (o1.getSubmittedAt() == null || o2.getSubmittedAt() == null) return 0;
             return o2.getSubmittedAt().compareTo(o1.getSubmittedAt());
@@ -100,6 +102,7 @@ public class AdminAssignmentController {
             @PathVariable("id") Long id,
             @RequestParam("score") Integer score,
             @RequestParam("feedback") String feedback,
+            java.security.Principal principal,
             RedirectAttributes ra) {
 
         AssignmentSubmission submission = submissionRepo.findById(id).orElse(null);
@@ -127,6 +130,22 @@ public class AdminAssignmentController {
         // Audit log in LearningService
         learningService.logActivity(submission.getUserEmail(), "ASSIGNMENT_GRADED",
                 "Graded assignment: " + a.getTitle() + " (Score: " + score + "/" + a.getMaxScore() + ")");
+
+        if (auditLogService != null) {
+            String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
+            in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                actorEmail,
+                in.project.main.entities.enums.AuditEventType.SETTINGS_CHANGED,
+                "ASSIGNMENT_GRADED",
+                "Graded student submission for assignment '" + a.getTitle() + "' (Student: " + submission.getUserEmail() + ", Score: " + score + "/" + a.getMaxScore() + ")."
+            )
+            .withActor(null, actorEmail, "Admin", "ADMIN")
+            .withEntity("ASSIGNMENT_SUBMISSION", String.valueOf(id), a.getTitle())
+            .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+            .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+            auditLogService.record(audit);
+        }
 
         // Issue notification
         notificationService.createNotification(

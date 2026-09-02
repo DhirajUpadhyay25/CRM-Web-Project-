@@ -27,6 +27,9 @@ public class AdminLeadController {
     @Autowired
     private LeadRepository leadRepository;
 
+    @Autowired(required = false)
+    private in.project.main.services.AuditLogService auditLogService;
+
     @GetMapping
     public String listLeads(
             @RequestParam(name = "search", required = false) String search,
@@ -79,7 +82,9 @@ public class AdminLeadController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "assignedTo", required = false) String assignedTo,
             @RequestParam(value = "notes", required = false) String notes,
+            java.security.Principal principal,
             RedirectAttributes redirectAttributes) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             Lead lead = new Lead();
             lead.setName(name);
@@ -92,7 +97,23 @@ public class AdminLeadController {
             // The add form has always had a Status select; it used to be discarded and every
             // new lead was forced to NEW.
             lead.setStatus(parseStatus(status, LeadStatus.NEW));
-            leadRepository.save(lead);
+            Lead saved = leadRepository.save(lead);
+
+            if (auditLogService != null) {
+                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                    actorEmail,
+                    in.project.main.entities.enums.AuditEventType.ENQUIRY_CREATED,
+                    "LEAD_CREATED",
+                    "Admin added new sales lead '" + name + "' (" + (email != null ? email : phone) + ")."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("LEAD", String.valueOf(saved.getId()), name)
+                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                auditLogService.record(audit);
+            }
+
             redirectAttributes.addFlashAttribute("successMsg", "Lead created successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Failed to create lead: " + e.getMessage());
@@ -111,6 +132,7 @@ public class AdminLeadController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "notes", required = false) String notes,
             @RequestParam(value = "assignedTo", required = false) String assignedTo,
+            java.security.Principal principal,
             RedirectAttributes redirectAttributes) {
 
         Lead lead = leadRepository.findById(id).orElse(null);
@@ -118,6 +140,7 @@ public class AdminLeadController {
             redirectAttributes.addFlashAttribute("errorMsg", "Lead not found.");
             return "redirect:/admin/leads";
         }
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
             if (name != null && !name.trim().isEmpty()) {
                 lead.setName(name.trim());
@@ -144,6 +167,22 @@ public class AdminLeadController {
                 lead.setAssignedTo(assignedTo);
             }
             leadRepository.save(lead);
+
+            if (auditLogService != null) {
+                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                    actorEmail,
+                    in.project.main.entities.enums.AuditEventType.ENQUIRY_UPDATED,
+                    "LEAD_UPDATED",
+                    "Admin updated lead #" + id + " ('" + lead.getName() + "', Status: " + lead.getStatus() + ")."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("LEAD", String.valueOf(id), lead.getName())
+                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                auditLogService.record(audit);
+            }
+
             redirectAttributes.addFlashAttribute("successMsg", "Lead updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Failed to update lead: " + e.getMessage());
@@ -152,13 +191,30 @@ public class AdminLeadController {
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteLead(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        if (!leadRepository.existsById(id)) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Lead not found.");
-            return "redirect:/admin/leads";
-        }
+    public String deleteLead(@PathVariable("id") Long id, java.security.Principal principal, RedirectAttributes redirectAttributes) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
+            if (!leadRepository.existsById(id)) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Lead not found.");
+                return "redirect:/admin/leads";
+            }
             leadRepository.deleteById(id);
+
+            if (auditLogService != null) {
+                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                    actorEmail,
+                    in.project.main.entities.enums.AuditEventType.ENQUIRY_UPDATED,
+                    "LEAD_DELETED",
+                    "Admin deleted lead ID #" + id + "."
+                )
+                .withActor(null, actorEmail, "Admin", "ADMIN")
+                .withEntity("LEAD", String.valueOf(id), "Lead #" + id)
+                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                .withSeverity(in.project.main.entities.enums.AuditSeverity.LOW);
+
+                auditLogService.record(audit);
+            }
+
             redirectAttributes.addFlashAttribute("successMsg", "Lead deleted successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Failed to delete lead: " + e.getMessage());

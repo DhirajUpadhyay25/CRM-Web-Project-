@@ -324,8 +324,8 @@
         <!-- ============================================ -->
         <!-- AUDIT LOG DETAIL MODAL / SLIDE-OVER -->
         <!-- ============================================ -->
-        <div id="auditModal" class="fixed inset-0 z-50 hidden bg-surface-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl border border-surface-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-down">
+        <div id="auditModal" class="fixed inset-0 z-50 hidden bg-surface-950/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="handleBackdropClick(event)">
+            <div class="bg-white rounded-2xl shadow-2xl border border-surface-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-down" onclick="event.stopPropagation()">
                 <!-- Modal Header -->
                 <div class="px-6 py-4 border-b border-surface-100 flex items-center justify-between bg-surface-50">
                     <div class="flex items-center gap-2">
@@ -337,7 +337,7 @@
                             <p class="text-xs text-gray-500" id="modalSubtitle">Event ID #</p>
                         </div>
                     </div>
-                    <button onclick="closeAuditModal()" class="w-8 h-8 rounded-full hover:bg-surface-200 flex items-center justify-center text-gray-400 hover:text-surface-700 transition-colors">
+                    <button type="button" onclick="closeAuditModal()" class="w-8 h-8 rounded-full hover:bg-surface-200 flex items-center justify-center text-gray-400 hover:text-surface-700 transition-colors">
                         <i class="bi bi-x-lg text-sm"></i>
                     </button>
                 </div>
@@ -351,124 +351,133 @@
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="px-6 py-3 border-t border-surface-100 bg-surface-50 flex justify-end">
-                    <button onclick="closeAuditModal()" class="px-4 py-2 bg-surface-200 hover:bg-surface-300 text-surface-800 rounded-xl text-xs font-semibold transition-colors">
+                <div class="px-6 py-3 border-t border-surface-100 bg-surface-50 flex items-center justify-between">
+                    <span id="modalReqId" class="text-[11px] font-mono text-gray-400"></span>
+                    <button type="button" onclick="closeAuditModal()" class="px-4 py-2 bg-surface-200 hover:bg-surface-300 text-surface-800 rounded-xl text-xs font-semibold transition-colors">
                         Close
                     </button>
                 </div>
             </div>
         </div>
 
+        <!-- Inline Script (Inside Root DIV so Thymeleaf includes it) -->
+        <script>
+            function openAuditModal(id) {
+                const modal = document.getElementById('auditModal');
+                const body = document.getElementById('modalBody');
+                const title = document.getElementById('modalTitle');
+                const subtitle = document.getElementById('modalSubtitle');
+                const reqIdSpan = document.getElementById('modalReqId');
+                
+                modal.classList.remove('hidden');
+                body.innerHTML = '<div class="text-center py-8 text-gray-400"><div class="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2"></div><p>Loading audit entry details...</p></div>';
+
+                fetch('/admin/api/monitoring/audit-logs/' + id)
+                    .then(r => {
+                        if (!r.ok) throw new Error('Not found');
+                        return r.json();
+                    })
+                    .then(log => {
+                        title.textContent = log.action || 'Audit Event';
+                        subtitle.textContent = 'Event ID #' + log.id + ' • ' + (log.createdAt ? log.createdAt.replace('T', ' ') : '');
+                        reqIdSpan.textContent = log.requestId ? 'Request ID: ' + log.requestId : '';
+
+                        let html = `
+                            <!-- Core Event Meta -->
+                            <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-surface-50 border border-surface-200">
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Actor</span>
+                                    <p class="font-semibold text-surface-900 mt-0.5">${log.actorName || log.actorEmail || 'System'}</p>
+                                    <p class="text-xs text-gray-500">${log.actorEmail || ''} (${log.actorRole || 'SYSTEM'})</p>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Status & Severity</span>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="px-2 py-0.5 rounded text-xs font-bold ${log.status === 'SUCCESS' ? 'bg-green-100 text-green-700' : (log.status === 'DENIED' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}">${log.status || 'SUCCESS'}</span>
+                                        <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700">${log.severity || 'INFO'}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Entity Target</span>
+                                    <p class="font-semibold text-surface-900 mt-0.5">${log.entityName || (log.entityType + ' #' + (log.entityId || '')) || 'None'}</p>
+                                    <p class="text-xs text-gray-500 font-mono">${log.entityType || 'SYSTEM'} : ${log.entityId || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Origin / IP</span>
+                                    <p class="font-semibold text-surface-900 font-mono text-xs mt-0.5">${log.ipAddress || '127.0.0.1'}</p>
+                                    <p class="text-xs text-gray-500 font-mono truncate" title="${log.requestId || ''}">Req: ${log.requestId || 'N/A'}</p>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div>
+                                <span class="text-xs font-bold text-surface-800 uppercase tracking-wider block mb-1">Description</span>
+                                <div class="p-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-800 text-xs leading-relaxed">
+                                    ${log.description || log.details || 'No description provided.'}
+                                </div>
+                            </div>
+                        `;
+
+                        if (log.failureReason) {
+                            html += `
+                                <div>
+                                    <span class="text-xs font-bold text-red-600 uppercase tracking-wider block mb-1">Failure Reason</span>
+                                    <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono leading-relaxed">
+                                        ${log.failureReason}
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        if (log.changedFields || log.beforeState || log.afterState) {
+                            html += `
+                                <div>
+                                    <span class="text-xs font-bold text-surface-800 uppercase tracking-wider block mb-1">State Changes ${log.changedFields ? '(' + log.changedFields + ')' : ''}</span>
+                                    <div class="grid grid-cols-2 gap-3 text-xs">
+                                        <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                                            <span class="font-bold text-gray-500 block mb-1">Before State</span>
+                                            <pre class="font-mono text-[11px] text-gray-700 whitespace-pre-wrap overflow-x-auto">${log.beforeState || 'N/A'}</pre>
+                                        </div>
+                                        <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-200">
+                                            <span class="font-bold text-blue-700 block mb-1">After State</span>
+                                            <pre class="font-mono text-[11px] text-blue-900 whitespace-pre-wrap overflow-x-auto">${log.afterState || 'N/A'}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        if (log.userAgent) {
+                            html += `
+                                <div>
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">User Agent Header</span>
+                                    <p class="text-[11px] text-gray-500 font-mono break-all p-2 rounded-lg bg-surface-50 border border-surface-200">${log.userAgent}</p>
+                                </div>
+                            `;
+                        }
+
+                        body.innerHTML = html;
+                    })
+                    .catch(err => {
+                        body.innerHTML = '<div class="p-8 text-center text-red-500 text-sm"><i class="bi bi-exclamation-triangle text-2xl mb-2 block"></i>Failed to load audit entry.</div>';
+                    });
+            }
+
+            function closeAuditModal() {
+                const modal = document.getElementById('auditModal');
+                if (modal) modal.classList.add('hidden');
+            }
+
+            function handleBackdropClick(e) {
+                if (e.target.id === 'auditModal') {
+                    closeAuditModal();
+                }
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeAuditModal();
+            });
+        </script>
     </div>
-
-    <!-- Script for Modal Inspection -->
-    <script>
-        function openAuditModal(id) {
-            const modal = document.getElementById('auditModal');
-            const body = document.getElementById('modalBody');
-            const title = document.getElementById('modalTitle');
-            const subtitle = document.getElementById('modalSubtitle');
-            
-            modal.classList.remove('hidden');
-            body.innerHTML = '<div class="text-center py-8 text-gray-400"><div class="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2"></div><p>Loading audit entry details...</p></div>';
-
-            fetch('/admin/api/monitoring/audit-logs/' + id)
-                .then(r => {
-                    if (!r.ok) throw new Error('Not found');
-                    return r.json();
-                })
-                .then(log => {
-                    title.textContent = log.action || 'Audit Event';
-                    subtitle.textContent = 'Event ID #' + log.id + ' • ' + (log.createdAt || '');
-
-                    let html = `
-                        <!-- Core Event Meta -->
-                        <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-surface-50 border border-surface-200">
-                            <div>
-                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Actor</span>
-                                <p class="font-semibold text-surface-900 mt-0.5">${log.actorName || log.actorEmail || 'System'}</p>
-                                <p class="text-xs text-gray-500">${log.actorEmail || ''} (${log.actorRole || 'SYSTEM'})</p>
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Status & Severity</span>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="px-2 py-0.5 rounded text-xs font-bold ${log.status === 'SUCCESS' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${log.status}</span>
-                                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700">${log.severity || 'INFO'}</span>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Entity Target</span>
-                                <p class="font-semibold text-surface-900 mt-0.5">${log.entityName || (log.entityType + ' #' + (log.entityId || '')) || 'None'}</p>
-                                <p class="text-xs text-gray-500 font-mono">${log.entityType || 'SYSTEM'} : ${log.entityId || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400">Origin / Request</span>
-                                <p class="font-semibold text-surface-900 font-mono text-xs mt-0.5">${log.ipAddress || '127.0.0.1'}</p>
-                                <p class="text-xs text-gray-500 font-mono truncate" title="${log.requestId || ''}">Req: ${log.requestId || 'N/A'}</p>
-                            </div>
-                        </div>
-
-                        <!-- Description -->
-                        <div>
-                            <span class="text-xs font-bold text-surface-800 uppercase tracking-wider block mb-1">Description</span>
-                            <div class="p-3 rounded-xl bg-surface-50 border border-surface-200 text-surface-800 text-xs leading-relaxed">
-                                ${log.description || 'No description provided.'}
-                            </div>
-                        </div>
-                    `;
-
-                    if (log.failureReason) {
-                        html += `
-                            <div>
-                                <span class="text-xs font-bold text-red-600 uppercase tracking-wider block mb-1">Failure Reason</span>
-                                <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono leading-relaxed">
-                                    ${log.failureReason}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    if (log.changedFields || log.beforeState || log.afterState) {
-                        html += `
-                            <div>
-                                <span class="text-xs font-bold text-surface-800 uppercase tracking-wider block mb-1">State Changes (${log.changedFields || 'Fields'})</span>
-                                <div class="grid grid-cols-2 gap-3 text-xs">
-                                    <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
-                                        <span class="font-bold text-gray-500 block mb-1">Before State</span>
-                                        <pre class="font-mono text-[11px] text-gray-700 whitespace-pre-wrap overflow-x-auto">${log.beforeState || 'N/A'}</pre>
-                                    </div>
-                                    <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-200">
-                                        <span class="font-bold text-blue-700 block mb-1">After State</span>
-                                        <pre class="font-mono text-[11px] text-blue-900 whitespace-pre-wrap overflow-x-auto">${log.afterState || 'N/A'}</pre>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    if (log.userAgent) {
-                        html += `
-                            <div>
-                                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">User Agent</span>
-                                <p class="text-[11px] text-gray-500 font-mono break-all p-2 rounded-lg bg-surface-50 border border-surface-200">${log.userAgent}</p>
-                            </div>
-                        `;
-                    }
-
-                    body.innerHTML = html;
-                })
-                .catch(err => {
-                    body.innerHTML = '<div class="p-8 text-center text-red-500 text-sm"><i class="bi bi-exclamation-triangle text-2xl mb-2 block"></i>Failed to load audit entry.</div>';
-                });
-        }
-
-        function closeAuditModal() {
-            document.getElementById('auditModal').classList.add('hidden');
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeAuditModal();
-        });
-    </script>
 </body>
 </html>
