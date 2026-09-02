@@ -147,7 +147,8 @@ public class StudentDashboardController {
             notifMap.put("type", n.getType() != null ? n.getType().name() : "SYSTEM");
             notifMap.put("read", n.isRead());
             notifMap.put("targetUrl", n.getTargetUrl());
-            notifMap.put("timeAgo", getTimeAgo(n.getCreatedAt()));
+            notifMap.put("timeAgo", n.getTimeAgo());
+            notifMap.put("iconClass", n.getIconClass());
             processedNotifications.add(notifMap);
         }
         model.addAttribute("recentNotifications", processedNotifications);

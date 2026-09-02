@@ -75,6 +75,15 @@
                 <span class="font-medium text-sm">Submissions</span>
             </a>
 
+            <!-- Notifications -->
+            <a href="/instructor/notifications" class="sidebar-link flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-gray-300 hover:text-white" data-path="/instructor/notifications">
+                <div class="flex items-center gap-3">
+                    <i class="bi bi-bell-fill text-base"></i>
+                    <span class="font-medium text-sm">Notifications</span>
+                </div>
+                <span id="sidebarNotifBadge" class="hidden px-2 py-0.5 rounded-full bg-brand-500 text-white text-[10px] font-bold">0</span>
+            </a>
+
             <div class="pt-4 pb-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Account
             </div>
@@ -100,7 +109,34 @@
             <button id="sidebarToggle" class="md:hidden text-surface-500 hover:text-surface-900 flex items-center">
                 <i class="bi bi-list text-2xl"></i>
             </button>
+            
             <div class="ml-auto flex items-center gap-4">
+                
+                <!-- Notification Bell & Dropdown -->
+                <div class="relative" id="instNotifContainer">
+                    <button id="instNotifBtn" class="relative w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors" onclick="toggleInstNotifications()">
+                        <i class="bi bi-bell"></i>
+                        <span id="instNotifBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">0</span>
+                    </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="instNotifDropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-surface-200 overflow-hidden z-50 animate-fade-in">
+                        <div class="px-4 py-3 border-b border-surface-100 flex items-center justify-between bg-surface-50">
+                            <h3 class="font-semibold text-sm text-surface-900">Notifications</h3>
+                            <button onclick="markAllInstNotificationsRead()" class="text-xs text-brand-600 hover:text-brand-700 font-medium">Mark all as read</button>
+                        </div>
+                        <div id="instNotifList" class="max-h-80 overflow-y-auto">
+                            <div class="p-6 text-center text-gray-400 text-sm">
+                                <i class="bi bi-bell-slash text-2xl mb-2 block"></i>
+                                No notifications
+                            </div>
+                        </div>
+                        <div class="px-4 py-2.5 border-t border-surface-100 bg-surface-50 text-center">
+                            <a href="/instructor/notifications" class="text-xs text-brand-600 hover:text-brand-700 font-semibold">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+
                 <span class="text-sm font-semibold text-surface-700" th:text="${#authentication.name}">Instructor</span>
             </div>
         </header>
@@ -111,7 +147,7 @@
         </main>
     </div>
 
-    <!-- Active Class Logic Script -->
+    <!-- Active Class & Notification Script -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const path = window.location.pathname;
@@ -136,6 +172,91 @@
                 sidebar.addEventListener("click", (e) => e.stopPropagation());
             }
         });
+
+        // ====== INSTRUCTOR NOTIFICATIONS ======
+        let instNotifOpen = false;
+        function toggleInstNotifications() {
+            const dropdown = document.getElementById('instNotifDropdown');
+            instNotifOpen = !instNotifOpen;
+            if (dropdown) dropdown.classList.toggle('hidden', !instNotifOpen);
+            if (instNotifOpen) loadInstNotifications();
+        }
+
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('instNotifContainer');
+            if (instNotifOpen && container && !container.contains(e.target)) {
+                const dropdown = document.getElementById('instNotifDropdown');
+                if (dropdown) dropdown.classList.add('hidden');
+                instNotifOpen = false;
+            }
+        });
+
+        function loadInstNotifications() {
+            fetch('/instructor/api/notifications/recent')
+                .then(r => r.json())
+                .then(notifications => {
+                    const list = document.getElementById('instNotifList');
+                    if (!notifications || notifications.length === 0) {
+                        list.innerHTML = '<div class="p-6 text-center text-gray-400 text-sm"><i class="bi bi-bell-slash text-2xl mb-2 block"></i>No notifications yet</div>';
+                        return;
+                    }
+                    list.innerHTML = notifications.map(n => {
+                        const iconClass = n.iconClass || 'bi-bell-fill';
+                        const timeAgo = n.timeAgo || '';
+                        const readClass = n.read ? 'bg-white' : 'bg-brand-50/50';
+                        return '<a href="' + (n.targetUrl || '#') + '" onclick="markInstNotifRead(' + n.id + ')" class="block px-4 py-3 hover:bg-surface-50 transition-colors border-b border-surface-100 last:border-0 ' + readClass + '">' +
+                            '<div class="flex items-start gap-3">' +
+                            '<div class="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center flex-shrink-0 mt-0.5 text-brand-600 text-sm">' +
+                            '<i class="bi ' + iconClass + '"></i></div>' +
+                            '<div class="min-w-0 flex-1">' +
+                            '<p class="text-sm font-medium text-surface-900 truncate">' + n.title + '</p>' +
+                            '<p class="text-xs text-gray-500 mt-0.5 line-clamp-1">' + (n.message || '') + '</p>' +
+                            '<p class="text-[10px] text-gray-400 mt-1">' + timeAgo + '</p></div>' +
+                            (!n.read ? '<div class="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0 mt-2"></div>' : '') +
+                            '</div></a>';
+                    }).join('');
+                })
+                .catch(() => {});
+        }
+
+        function markInstNotifRead(id) {
+            fetch('/instructor/api/notifications/' + id + '/read', { method: 'POST' })
+                .then(() => updateInstNotifBadge())
+                .catch(() => {});
+        }
+
+        function markAllInstNotificationsRead() {
+            fetch('/instructor/api/notifications/mark-all-read', { method: 'POST' })
+                .then(() => {
+                    loadInstNotifications();
+                    updateInstNotifBadge();
+                }).catch(() => {});
+        }
+
+        function updateInstNotifBadge() {
+            fetch('/instructor/api/notifications/unread-count')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('instNotifBadge');
+                    const sidebarBadge = document.getElementById('sidebarNotifBadge');
+                    if (data && data.count > 0) {
+                        const countText = data.count > 99 ? '99+' : data.count;
+                        if (badge) {
+                            badge.textContent = countText;
+                            badge.classList.remove('hidden');
+                        }
+                        if (sidebarBadge) {
+                            sidebarBadge.textContent = countText;
+                            sidebarBadge.classList.remove('hidden');
+                        }
+                    } else {
+                        if (badge) badge.classList.add('hidden');
+                        if (sidebarBadge) sidebarBadge.classList.add('hidden');
+                    }
+                }).catch(() => {});
+        }
+        updateInstNotifBadge();
+        setInterval(updateInstNotifBadge, 30000);
     </script>
 
 </body>

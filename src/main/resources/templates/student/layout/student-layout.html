@@ -287,12 +287,21 @@
         function getNotifIcon(type) {
             const icons = {
                 'COURSE_ENROLLED': { icon: 'bi-mortarboard-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'WELCOME_STUDENT': { icon: 'bi-stars', bg: 'bg-amber-50', color: 'text-amber-500' },
                 'ORDER_PLACED': { icon: 'bi-bag-check-fill', bg: 'bg-green-50', color: 'text-green-500' },
                 'PAYMENT_SUCCESS': { icon: 'bi-currency-rupee', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'PAYMENT_FAILED': { icon: 'bi-x-circle-fill', bg: 'bg-red-50', color: 'text-red-500' },
+                'COURSE_PUBLISHED': { icon: 'bi-collection-play-fill', bg: 'bg-brand-50', color: 'text-brand-600' },
                 'COURSE_UPDATE': { icon: 'bi-info-circle-fill', bg: 'bg-cyan-50', color: 'text-cyan-500' },
                 'NEW_LESSON': { icon: 'bi-play-circle-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'NEW_LESSON_ADDED': { icon: 'bi-play-circle-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'QUIZ_CREATED': { icon: 'bi-patch-question-fill', bg: 'bg-amber-50', color: 'text-amber-500' },
+                'NEW_QUIZ_AVAILABLE': { icon: 'bi-question-circle-fill', bg: 'bg-amber-50', color: 'text-amber-500' },
+                'QUIZ_RESULT_AVAILABLE': { icon: 'bi-clipboard-check-fill', bg: 'bg-indigo-50', color: 'text-indigo-500' },
+                'ASSIGNMENT_GRADED': { icon: 'bi-check2-all', bg: 'bg-teal-50', color: 'text-teal-500' },
+                'NEW_ANNOUNCEMENT': { icon: 'bi-megaphone-fill', bg: 'bg-violet-50', color: 'text-violet-500' },
                 'CERTIFICATE_READY': { icon: 'bi-award-fill', bg: 'bg-yellow-50', color: 'text-yellow-500' },
-                'SYSTEM': { icon: 'bi-bell-fill', bg: 'bg-gray-50', color: 'text-gray-500' }
+                'SYSTEM_WARNING': { icon: 'bi-shield-exclamation', bg: 'bg-red-50', color: 'text-red-500' }
             };
             return icons[type] || { icon: 'bi-bell-fill', bg: 'bg-gray-50', color: 'text-gray-500' };
         }
@@ -310,7 +319,9 @@
         }
 
         function markNotifRead(id) {
-            fetch('/student/api/notifications/' + id + '/read', { method: 'POST' }).catch(() => {});
+            fetch('/student/api/notifications/' + id + '/read', { method: 'POST' })
+                .then(() => updateNotifBadge())
+                .catch(() => {});
         }
 
         function markAllNotificationsRead() {
@@ -323,15 +334,16 @@
                 .then(r => r.json())
                 .then(data => {
                     const badge = document.getElementById('notifBadge');
-                    if (data.count > 0) {
+                    if (data && data.count > 0) {
                         badge.textContent = data.count > 99 ? '99+' : data.count;
                         badge.classList.remove('hidden');
-                    } else {
+                    } else if (badge) {
                         badge.classList.add('hidden');
                     }
                 }).catch(() => {});
         }
         updateNotifBadge();
+        setInterval(updateNotifBadge, 30000);
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
