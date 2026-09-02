@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('System Health & Monitoring', ~{::div})}">
+<body>
+    <div>
+
+        <!-- ============================================ -->
+        <!-- HEADER & ACTIONS -->
+        <!-- ============================================ -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <h1 class="text-2xl font-bold text-surface-900">System Health &amp; Monitoring</h1>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold"
+                          th:classappend="${health['status'] == 'HEALTHY' ? 'bg-green-50 text-green-700 border border-green-200' : (health['status'] == 'DEGRADED' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200')}">
+                        <span class="w-2 h-2 rounded-full" th:classappend="${health['status'] == 'HEALTHY' ? 'bg-green-500 animate-pulse' : (health['status'] == 'DEGRADED' ? 'bg-amber-500 animate-pulse' : 'bg-red-500 animate-ping')}"></span>
+                        <span th:text="${health['status']}">HEALTHY</span>
+                    </span>
+                </div>
+                <p class="text-gray-500 text-sm">Real-time health telemetry, database latency, JVM runtime metrics, and grouped system error tracking.</p>
+            </div>
+            
+            <div class="flex items-center gap-2.5">
+                <a href="/admin/audit-logs" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-200 text-surface-700 hover:bg-surface-50 hover:text-brand-600 text-sm font-medium shadow-sm transition-all">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Audit Logs</span>
+                </a>
+                <button onclick="location.reload()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium shadow-sm hover:shadow transition-all">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>Refresh Telemetry</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- LIVE HEALTH DIAGNOSTICS GRID -->
+        <!-- ============================================ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- 1. Database Health -->
+            <div class="bg-white p-5 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Database Connection</span>
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">
+                        <i class="bi bi-database-check"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2 mb-2">
+                    <div class="text-xl font-bold text-surface-900" th:text="${health['database']['status'] == 'UP' ? 'Connected' : 'Disconnected'}">Connected</div>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded-md font-semibold"
+                          th:classappend="${health['database']['latencyMs'] < 100 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}"
+                          th:text="${health['database']['latencyMs'] + ' ms'}">12 ms</span>
+                </div>
+                <p class="text-xs text-gray-400 font-mono" th:text="${health['database']['database']}">MySQL (CrmData)</p>
+            </div>
+
+            <!-- 2. JVM Heap Memory -->
+            <div class="bg-white p-5 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">JVM Heap Memory</span>
+                    <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2 mb-2">
+                    <div class="text-xl font-bold text-surface-900" th:text="${health['memory']['usedMb'] + ' MB'}">256 MB</div>
+                    <span class="text-xs text-gray-500 font-medium" th:text="${'/ ' + health['memory']['maxMb'] + ' MB (' + health['memory']['percentUsed'] + '%)'}">/ 2048 MB</span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full h-1.5 bg-surface-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all"
+                         th:classappend="${health['memory']['percentUsed'] > 85 ? 'bg-red-500' : (health['memory']['percentUsed'] > 60 ? 'bg-amber-500' : 'bg-purple-500')}"
+                         th:style="${'width: ' + health['memory']['percentUsed'] + '%'}"></div>
+                </div>
+            </div>
+
+            <!-- 3. Disk Storage -->
+            <div class="bg-white p-5 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Disk Storage</span>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                        <i class="bi bi-hdd"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2 mb-2">
+                    <div class="text-xl font-bold text-surface-900" th:text="${health['disk']['freeGb'] + ' GB Free'}">450 GB Free</div>
+                    <span class="text-xs text-gray-500 font-medium" th:text="${'of ' + health['disk']['totalGb'] + ' GB'}">of 512 GB</span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full h-1.5 bg-surface-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 rounded-full transition-all" th:style="${'width: ' + health['disk']['percentUsed'] + '%'}"></div>
+                </div>
+            </div>
+
+            <!-- 4. Uptime & Process Threads -->
+            <div class="bg-white p-5 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Uptime &amp; Threads</span>
+                    <div class="w-8 h-8 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-base">
+                        <i class="bi bi-stopwatch"></i>
+                    </div>
+                </div>
+                <div class="text-base font-bold text-surface-900 mb-1" th:text="${health['runtime']['uptimeFormatted']}">2 h, 15 min</div>
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <span th:text="${health['runtime']['threadCount'] + ' Active Threads'}">24 Threads</span>
+                    <span>•</span>
+                    <span th:text="${'Java ' + health['runtime']['javaVersion']}">Java 25</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECURITY ALERTS (IF ANY) -->
+        <!-- ============================================ -->
+        <div th:if="${!#lists.isEmpty(securityAlerts)}" class="mb-6 space-y-3">
+            <div th:each="alert : ${securityAlerts}" class="p-4 rounded-2xl border bg-amber-50/70 border-amber-200 flex items-start gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0 mt-0.5">
+                    <i class="bi bi-shield-exclamation"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                        <h4 class="font-bold text-surface-900 text-sm" th:text="${alert['title']}">Security Alert</h4>
+                        <span class="px-2 py-0.2 rounded text-[10px] font-bold uppercase bg-red-100 text-red-700" th:text="${alert['severity']}">HIGH</span>
+                    </div>
+                    <p class="text-xs text-surface-700 mt-0.5" th:text="${alert['message']}">Alert details</p>
+                </div>
+                <span class="text-[11px] text-gray-400 font-mono whitespace-nowrap" th:text="${alert['timestamp']}"></span>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SYSTEM ERROR TRACKING & GROUPING TABLE -->
+        <!-- ============================================ -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden mb-6">
+            <div class="p-4 border-b border-surface-200 bg-surface-50 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-surface-900 text-base">System Error Log Groups</h3>
+                    <p class="text-xs text-gray-500">Deduplicated exception telemetry grouped by signature and occurrence count.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-200 text-surface-800" th:text="${errorPage.totalElements + ' Error Groups'}">0 Error Groups</span>
+                </div>
+            </div>
+
+            <!-- Empty Errors State -->
+            <div th:if="${#lists.isEmpty(errorPage.content)}" class="p-12 text-center">
+                <div class="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <h4 class="font-bold text-surface-900 text-sm mb-1">No Unresolved System Errors</h4>
+                <p class="text-xs text-gray-500">All backend services, routes, and APIs are operating normally with zero unhandled exceptions.</p>
+            </div>
+
+            <!-- Error Group Table -->
+            <div th:if="${!#lists.isEmpty(errorPage.content)}" class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-gray-500 text-xs font-semibold">
+                        <tr>
+                            <th class="px-5 py-3">Error Type &amp; Signature</th>
+                            <th class="px-5 py-3">Endpoint / Method</th>
+                            <th class="px-5 py-3">Message</th>
+                            <th class="px-5 py-3 text-center">Occurrences</th>
+                            <th class="px-5 py-3">Last Seen</th>
+                            <th class="px-5 py-3">Status</th>
+                            <th class="px-5 py-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-200">
+                        <tr th:each="err : ${errorPage.content}" class="hover:bg-surface-50/80 transition-colors">
+                            <!-- Type -->
+                            <td class="px-5 py-3.5">
+                                <span class="font-bold text-red-600 text-xs block font-mono" th:text="${err.errorType}"></span>
+                                <span class="text-[10px] text-gray-400 font-mono" th:text="${'Sig: ' + err.errorSignature}"></span>
+                            </td>
+
+                            <!-- Endpoint -->
+                            <td class="px-5 py-3.5 font-mono text-xs text-surface-800">
+                                <span class="px-1.5 py-0.5 rounded bg-surface-100 font-semibold mr-1" th:text="${err.httpMethod ?: 'ALL'}">GET</span>
+                                <span th:text="${err.endpoint ?: 'backend'}">/admin/reports</span>
+                            </td>
+
+                            <!-- Message -->
+                            <td class="px-5 py-3.5 text-xs text-surface-700 max-w-xs truncate" th:title="${err.errorMessage}" th:text="${err.errorMessage}"></td>
+
+                            <!-- Occurrences -->
+                            <td class="px-5 py-3.5 text-center">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700" th:text="${err.occurrenceCount + 'x'}">1x</span>
+                            </td>
+
+                            <!-- Last Seen -->
+                            <td class="px-5 py-3.5 text-xs text-gray-500 font-mono" th:text="${#temporals.format(err.lastOccurredAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+
+                            <!-- Status -->
+                            <td class="px-5 py-3.5">
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                                      th:classappend="${err.status == 'RESOLVED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}"
+                                      th:text="${err.status}">UNRESOLVED</span>
+                            </td>
+
+                            <!-- Action -->
+                            <td class="px-5 py-3.5 text-right">
+                                <button th:if="${err.status != 'RESOLVED'}"
+                                        th:onclick="'resolveError(' + ${err.id} + ')'"
+                                        class="px-2.5 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg text-xs font-semibold border border-green-200 transition-colors">
+                                    <i class="bi bi-check2"></i> Resolve
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function resolveError(id) {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+            const headers = {};
+            if (token) headers[header] = token;
+
+            fetch('/admin/api/monitoring/errors/' + id + '/resolve', {
+                method: 'POST',
+                headers: headers
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(() => alert('Failed to resolve error.'));
+        }
+    </script>
+</body>
+</html>

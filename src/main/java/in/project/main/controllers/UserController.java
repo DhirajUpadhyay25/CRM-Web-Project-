@@ -61,6 +61,9 @@ public class UserController
 
 	@Autowired
 	private in.project.main.services.NotificationService notificationService;
+
+	@Autowired
+	private in.project.main.services.AuditLogService auditLogService;
 	
 	@Value("${app.razorpay.key-id}")
 	private String razorpayKeyId;
@@ -203,6 +206,24 @@ public class UserController
 	            // Log and do not break registration
 	        }
 
+	        // Record Audit Event
+	        try {
+	            if (auditLogService != null) {
+	                in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+	                    user.getEmail(),
+	                    in.project.main.entities.enums.AuditEventType.STUDENT_CREATED,
+	                    "STUDENT_REGISTER",
+	                    "Student '" + user.getName() + "' created account with email " + user.getEmail() + "."
+	                )
+	                .withActor(user.getId() != null ? String.valueOf(user.getId()) : null, user.getEmail(), user.getName(), "STUDENT")
+	                .withEntity("STUDENT", user.getId() != null ? String.valueOf(user.getId()) : user.getEmail(), user.getName())
+	                .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+	                .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+	                auditLogService.record(audit);
+	            }
+	        } catch (Exception auditEx) {}
+
 	        model.addAttribute("successMsg", "Registered Successfully");
 
 	        return "register";
@@ -211,6 +232,21 @@ public class UserController
 	    catch(Exception e)
 	    {
 	        e.printStackTrace();
+
+	        try {
+	            if (auditLogService != null) {
+	                in.project.main.events.PlatformAuditEvent failAudit = in.project.main.events.PlatformAuditEvent.of(
+	                    user.getEmail(),
+	                    in.project.main.entities.enums.AuditEventType.STUDENT_CREATED,
+	                    "STUDENT_REGISTER_FAILED",
+	                    "Student registration failed for email " + user.getEmail() + "."
+	                )
+	                .withEntity("STUDENT", user.getEmail(), user.getName())
+	                .withFailure(e.getMessage());
+
+	                auditLogService.record(failAudit);
+	            }
+	        } catch (Exception ignored) {}
 
 	        model.addAttribute("errorMsg", "Registration Failed");
 
@@ -257,6 +293,9 @@ public class UserController
 	{
 		try {
 			User existingUser = userRepository.findByEmail(userDetails.getUsername());
+			String oldName = existingUser.getName();
+			String oldPhone = existingUser.getPhoneno();
+			String oldCity = existingUser.getCity();
 			
 			// Update basic details
 			existingUser.setName(updatedUser.getName());
@@ -278,6 +317,36 @@ public class UserController
 			
 			// Save updated user (using repository directly since service might hash password blindly)
 			userRepository.save(existingUser);
+
+			// Record Audit Event
+			try {
+				if (auditLogService != null) {
+					String changedFields = "";
+					if (!java.util.Objects.equals(oldName, updatedUser.getName())) changedFields += "name, ";
+					if (!java.util.Objects.equals(oldPhone, updatedUser.getPhoneno())) changedFields += "phoneno, ";
+					if (!java.util.Objects.equals(oldCity, updatedUser.getCity())) changedFields += "city, ";
+					if (file != null && !file.isEmpty()) changedFields += "image, ";
+					if (changedFields.endsWith(", ")) changedFields = changedFields.substring(0, changedFields.length() - 2);
+
+					in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+						userDetails.getUsername(),
+						in.project.main.entities.enums.AuditEventType.STUDENT_UPDATED,
+						"PROFILE_UPDATE",
+						"User '" + userDetails.getUsername() + "' updated profile details."
+					)
+					.withActor(String.valueOf(existingUser.getId()), userDetails.getUsername(), existingUser.getName(), "STUDENT")
+					.withEntity("USER", String.valueOf(existingUser.getId()), existingUser.getName())
+					.withChanges(
+						"{\"name\":\"" + oldName + "\",\"phone\":\"" + oldPhone + "\",\"city\":\"" + oldCity + "\"}",
+						"{\"name\":\"" + existingUser.getName() + "\",\"phone\":\"" + existingUser.getPhoneno() + "\",\"city\":\"" + existingUser.getCity() + "\"}",
+						changedFields
+					)
+					.withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+					.withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+					auditLogService.record(audit);
+				}
+			} catch (Exception ignored) {}
 			
 			model.addAttribute("successMsg", "Profile updated successfully!");
 		} catch (Exception e) {

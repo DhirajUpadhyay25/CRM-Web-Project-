@@ -42,6 +42,9 @@ public class CourseController {
     @Autowired
     private in.project.main.services.InstructorService instructorService;
 
+    @Autowired(required = false)
+    private in.project.main.services.AuditLogService auditLogService;
+
     private void populateDropdowns(Model model) {
         model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("levels", CourseLevel.values());
@@ -125,6 +128,25 @@ public class CourseController {
 
         try {
             Course created = courseService.createCourse(courseDTO, courseImg);
+
+            // Record Audit Event
+            try {
+                if (auditLogService != null) {
+                    in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                        "admin@edutake.com",
+                        in.project.main.entities.enums.AuditEventType.COURSE_CREATED,
+                        "COURSE_CREATED",
+                        "Admin created course '" + created.getName() + "' (ID: " + created.getId() + ")."
+                    )
+                    .withActor(null, "admin@edutake.com", "Admin", "ADMIN")
+                    .withEntity("COURSE", String.valueOf(created.getId()), created.getName())
+                    .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                    .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                    auditLogService.record(audit);
+                }
+            } catch (Exception ignored) {}
+
             redirectAttributes.addFlashAttribute("successMsg", "Course '" + created.getName() + "' created successfully!");
             return "redirect:/admin/courses";
         } catch (Exception e) {
@@ -214,7 +236,26 @@ public class CourseController {
         }
 
         try {
-            courseService.updateCourse(id, courseDTO, courseImg);
+            Course updated = courseService.updateCourse(id, courseDTO, courseImg);
+
+            // Record Audit Event
+            try {
+                if (auditLogService != null) {
+                    in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                        "admin@edutake.com",
+                        in.project.main.entities.enums.AuditEventType.COURSE_UPDATED,
+                        "COURSE_UPDATED",
+                        "Admin updated course details for '" + (updated != null ? updated.getName() : "Course #" + id) + "'."
+                    )
+                    .withActor(null, "admin@edutake.com", "Admin", "ADMIN")
+                    .withEntity("COURSE", String.valueOf(id), updated != null ? updated.getName() : "Course #" + id)
+                    .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                    .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                    auditLogService.record(audit);
+                }
+            } catch (Exception ignored) {}
+
             redirectAttributes.addFlashAttribute("successMsg", "Course updated successfully!");
             return "redirect:/admin/courses";
         } catch (Exception e) {
@@ -247,6 +288,25 @@ public class CourseController {
     public String publishCourse(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             Course course = courseService.publishCourse(id);
+
+            // Record Audit Event
+            try {
+                if (auditLogService != null) {
+                    in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                        "admin@edutake.com",
+                        in.project.main.entities.enums.AuditEventType.COURSE_PUBLISHED,
+                        "COURSE_PUBLISHED",
+                        "Admin published course '" + course.getName() + "' (ID: " + id + ") making it live on storefront."
+                    )
+                    .withActor(null, "admin@edutake.com", "Admin", "ADMIN")
+                    .withEntity("COURSE", String.valueOf(id), course.getName())
+                    .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                    .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                    auditLogService.record(audit);
+                }
+            } catch (Exception ignored) {}
+
             redirectAttributes.addFlashAttribute("successMsg", "Course '" + course.getName() + "' is now Published and live on the storefront!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
@@ -258,6 +318,25 @@ public class CourseController {
     public String archiveCourse(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             Course course = courseService.archiveCourse(id);
+
+            // Record Audit Event
+            try {
+                if (auditLogService != null) {
+                    in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                        "admin@edutake.com",
+                        in.project.main.entities.enums.AuditEventType.COURSE_ARCHIVED,
+                        "COURSE_ARCHIVED",
+                        "Admin archived course '" + course.getName() + "' (ID: " + id + ")."
+                    )
+                    .withActor(null, "admin@edutake.com", "Admin", "ADMIN")
+                    .withEntity("COURSE", String.valueOf(id), course.getName())
+                    .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                    .withSeverity(in.project.main.entities.enums.AuditSeverity.MEDIUM);
+
+                    auditLogService.record(audit);
+                }
+            } catch (Exception ignored) {}
+
             redirectAttributes.addFlashAttribute("successMsg", "Course '" + course.getName() + "' has been Archived.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
@@ -283,6 +362,25 @@ public class CourseController {
     public String deleteCoursePost(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             courseService.deleteCourse(id);
+
+            // Record Audit Event
+            try {
+                if (auditLogService != null) {
+                    in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                        "admin@edutake.com",
+                        in.project.main.entities.enums.AuditEventType.COURSE_DELETED,
+                        "COURSE_DELETED",
+                        "Admin deleted course ID #" + id + "."
+                    )
+                    .withActor(null, "admin@edutake.com", "Admin", "ADMIN")
+                    .withEntity("COURSE", String.valueOf(id), "Course #" + id)
+                    .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                    .withSeverity(in.project.main.entities.enums.AuditSeverity.HIGH);
+
+                    auditLogService.record(audit);
+                }
+            } catch (Exception ignored) {}
+
             redirectAttributes.addFlashAttribute("successMsg", "Course deleted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());

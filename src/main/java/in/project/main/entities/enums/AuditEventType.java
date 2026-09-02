@@ -1,0 +1,90 @@
+package in.project.main.entities.enums;
+
+public enum AuditEventType {
+    // Authentication & Security
+    LOGIN_SUCCESS(AuditCategory.AUTHENTICATION, AuditSeverity.INFO, "User Logged In"),
+    LOGIN_FAILED(AuditCategory.SECURITY, AuditSeverity.HIGH, "Failed Login Attempt"),
+    LOGOUT(AuditCategory.AUTHENTICATION, AuditSeverity.INFO, "User Logged Out"),
+    PASSWORD_CHANGED(AuditCategory.AUTHENTICATION, AuditSeverity.MEDIUM, "Password Changed"),
+    PASSWORD_RESET(AuditCategory.AUTHENTICATION, AuditSeverity.HIGH, "Password Reset Requested"),
+    ACCOUNT_LOCKED(AuditCategory.SECURITY, AuditSeverity.CRITICAL, "Account Locked"),
+    ACCESS_GRANTED(AuditCategory.AUTHORIZATION, AuditSeverity.INFO, "Access Granted"),
+    ACCESS_DENIED(AuditCategory.SECURITY, AuditSeverity.HIGH, "Access Denied"),
+
+    // User Operations
+    USER_CREATED(AuditCategory.USER, AuditSeverity.INFO, "User Created"),
+    USER_UPDATED(AuditCategory.USER, AuditSeverity.INFO, "User Updated"),
+    USER_DELETED(AuditCategory.USER, AuditSeverity.HIGH, "User Deleted"),
+    USER_STATUS_CHANGED(AuditCategory.USER, AuditSeverity.MEDIUM, "User Status Changed"),
+    ROLE_CHANGED(AuditCategory.AUTHORIZATION, AuditSeverity.HIGH, "Role Changed"),
+
+    // Student Operations
+    STUDENT_CREATED(AuditCategory.STUDENT, AuditSeverity.INFO, "Student Created"),
+    STUDENT_UPDATED(AuditCategory.STUDENT, AuditSeverity.INFO, "Student Updated"),
+    STUDENT_STATUS_CHANGED(AuditCategory.STUDENT, AuditSeverity.MEDIUM, "Student Status Changed"),
+    STUDENT_DELETED(AuditCategory.STUDENT, AuditSeverity.HIGH, "Student Deleted"),
+
+    // Instructor Operations
+    INSTRUCTOR_CREATED(AuditCategory.INSTRUCTOR, AuditSeverity.INFO, "Instructor Created"),
+    INSTRUCTOR_UPDATED(AuditCategory.INSTRUCTOR, AuditSeverity.INFO, "Instructor Updated"),
+    INSTRUCTOR_STATUS_CHANGED(AuditCategory.INSTRUCTOR, AuditSeverity.MEDIUM, "Instructor Status Changed"),
+    INSTRUCTOR_DELETED(AuditCategory.INSTRUCTOR, AuditSeverity.HIGH, "Instructor Deleted"),
+
+    // Course Operations
+    COURSE_CREATED(AuditCategory.COURSE, AuditSeverity.INFO, "Course Created"),
+    COURSE_UPDATED(AuditCategory.COURSE, AuditSeverity.INFO, "Course Updated"),
+    COURSE_PUBLISHED(AuditCategory.COURSE, AuditSeverity.INFO, "Course Published"),
+    COURSE_UNPUBLISHED(AuditCategory.COURSE, AuditSeverity.MEDIUM, "Course Unpublished"),
+    COURSE_ARCHIVED(AuditCategory.COURSE, AuditSeverity.MEDIUM, "Course Archived"),
+    COURSE_DELETED(AuditCategory.COURSE, AuditSeverity.HIGH, "Course Deleted"),
+    INSTRUCTOR_ASSIGNED(AuditCategory.COURSE, AuditSeverity.INFO, "Instructor Assigned to Course"),
+
+    // Curriculum Operations
+    MODULE_CREATED(AuditCategory.CURRICULUM, AuditSeverity.INFO, "Module Created"),
+    MODULE_UPDATED(AuditCategory.CURRICULUM, AuditSeverity.INFO, "Module Updated"),
+    MODULE_DELETED(AuditCategory.CURRICULUM, AuditSeverity.MEDIUM, "Module Deleted"),
+    LESSON_CREATED(AuditCategory.CURRICULUM, AuditSeverity.INFO, "Lesson Created"),
+    LESSON_UPDATED(AuditCategory.CURRICULUM, AuditSeverity.INFO, "Lesson Updated"),
+    LESSON_DELETED(AuditCategory.CURRICULUM, AuditSeverity.MEDIUM, "Lesson Deleted"),
+
+    // Enrollment & Payment Operations
+    ENROLLMENT_CREATED(AuditCategory.ENROLLMENT, AuditSeverity.INFO, "Enrollment Created"),
+    ENROLLMENT_CANCELLED(AuditCategory.ENROLLMENT, AuditSeverity.MEDIUM, "Enrollment Cancelled"),
+    PAYMENT_INITIATED(AuditCategory.PAYMENT, AuditSeverity.INFO, "Payment Initiated"),
+    PAYMENT_SUCCESS(AuditCategory.PAYMENT, AuditSeverity.INFO, "Payment Completed"),
+    PAYMENT_FAILED(AuditCategory.PAYMENT, AuditSeverity.HIGH, "Payment Failed"),
+    PAYMENT_REFUNDED(AuditCategory.PAYMENT, AuditSeverity.HIGH, "Payment Refunded"),
+
+    // Quiz & Assessment
+    QUIZ_CREATED(AuditCategory.QUIZ, AuditSeverity.INFO, "Quiz Created"),
+    QUIZ_UPDATED(AuditCategory.QUIZ, AuditSeverity.INFO, "Quiz Updated"),
+    QUIZ_DELETED(AuditCategory.QUIZ, AuditSeverity.MEDIUM, "Quiz Deleted"),
+    QUIZ_SUBMITTED(AuditCategory.QUIZ, AuditSeverity.INFO, "Quiz Submitted"),
+
+    // Communication & Administration
+    ANNOUNCEMENT_CREATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Announcement Created"),
+    ANNOUNCEMENT_DELETED(AuditCategory.ADMIN, AuditSeverity.LOW, "Announcement Deleted"),
+    ENQUIRY_CREATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Enquiry Created"),
+    ENQUIRY_UPDATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Enquiry Updated"),
+    SETTINGS_CHANGED(AuditCategory.ADMIN, AuditSeverity.HIGH, "System Settings Changed"),
+    AUDIT_EXPORTED(AuditCategory.ADMIN, AuditSeverity.MEDIUM, "Audit Logs Exported"),
+
+    // System & Errors
+    SYSTEM_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "System Error Encountered"),
+    DATABASE_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "Database Failure"),
+    INTEGRATION_ERROR(AuditCategory.SYSTEM, AuditSeverity.HIGH, "External Service Error");
+
+    private final AuditCategory defaultCategory;
+    private final AuditSeverity defaultSeverity;
+    private final String defaultLabel;
+
+    AuditEventType(AuditCategory defaultCategory, AuditSeverity defaultSeverity, String defaultLabel) {
+        this.defaultCategory = defaultCategory;
+        this.defaultSeverity = defaultSeverity;
+        this.defaultLabel = defaultLabel;
+    }
+
+    public AuditCategory getDefaultCategory() { return defaultCategory; }
+    public AuditSeverity getDefaultSeverity() { return defaultSeverity; }
+    public String getDefaultLabel() { return defaultLabel; }
+}

@@ -73,6 +73,9 @@ public class PublicController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired(required = false)
+    private in.project.main.services.AuditLogService auditLogService;
+
     @Value("${app.razorpay.key-id}")
     private String razorpayKeyId;
 
@@ -284,6 +287,24 @@ public class PublicController {
                         String.valueOf(course.getId())
                 );
             }
+
+            // Record Audit Event
+            try {
+                if (auditLogService != null) {
+                    in.project.main.events.PlatformAuditEvent audit = in.project.main.events.PlatformAuditEvent.of(
+                        email,
+                        in.project.main.entities.enums.AuditEventType.ENROLLMENT_CREATED,
+                        "COURSE_FREE_ENROLL",
+                        (user.getName() != null ? user.getName() : email) + " enrolled in free course '" + course.getName() + "' (ID: " + course.getId() + ")."
+                    )
+                    .withActor(String.valueOf(user.getId()), email, user.getName(), "STUDENT")
+                    .withEntity("ENROLLMENT", String.valueOf(enrollment.getId()), course.getName())
+                    .withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+                    .withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+                    auditLogService.record(audit);
+                }
+            } catch (Exception ignored) {}
         }
 
         redirectAttributes.addFlashAttribute("successMsg", "Successfully enrolled in " + course.getName() + "! Start learning below.");

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Runs automatically on application startup to ensure database columns
- * (e.g. employee.role, instructor.status) are sufficiently sized and
- * legacy values are safely normalized.
+ * (e.g. employee.role, instructor.status, notification/audit columns)
+ * are sufficiently sized and legacy values are safely normalized.
  */
 @Component
 @Order(1)
@@ -44,14 +44,52 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 log.debug("Notice on altering instructor columns: {}", e.getMessage());
             }
 
-            // 4. Expand notification table type, category, and priority columns
+            // 3. Expand notification table type, category, and priority columns
             try {
                 jdbcTemplate.execute("ALTER TABLE notification MODIFY COLUMN type VARCHAR(64) NOT NULL");
                 jdbcTemplate.execute("ALTER TABLE notification MODIFY COLUMN category VARCHAR(64) NOT NULL");
                 jdbcTemplate.execute("ALTER TABLE notification MODIFY COLUMN priority VARCHAR(64) NOT NULL");
-                log.info("Successfully ensured notification table columns (type, category, priority) are VARCHAR(64)");
+                log.info("Successfully ensured notification table columns are VARCHAR(64)");
             } catch (Exception e) {
                 log.debug("Notice on altering notification columns: {}", e.getMessage());
+            }
+
+            // 4. Expand audit_log columns & create system_error_log table
+            try {
+                jdbcTemplate.execute("ALTER TABLE audit_log MODIFY COLUMN event_type VARCHAR(64) NULL");
+                jdbcTemplate.execute("ALTER TABLE audit_log MODIFY COLUMN category VARCHAR(64) NULL");
+                jdbcTemplate.execute("ALTER TABLE audit_log MODIFY COLUMN severity VARCHAR(32) NULL");
+                jdbcTemplate.execute("ALTER TABLE audit_log MODIFY COLUMN status VARCHAR(32) NULL");
+                jdbcTemplate.execute("ALTER TABLE audit_log MODIFY COLUMN admin_email VARCHAR(255) NULL");
+                
+                jdbcTemplate.execute(
+                    "CREATE TABLE IF NOT EXISTS system_error_log (" +
+                    "    id BIGINT AUTO_INCREMENT PRIMARY KEY," +
+                    "    error_type VARCHAR(255) NOT NULL," +
+                    "    error_message TEXT," +
+                    "    error_signature VARCHAR(64) NOT NULL," +
+                    "    service_module VARCHAR(64) DEFAULT 'CORE'," +
+                    "    endpoint VARCHAR(255)," +
+                    "    http_method VARCHAR(16)," +
+                    "    status_code INT DEFAULT 500," +
+                    "    request_id VARCHAR(64)," +
+                    "    actor_email VARCHAR(255)," +
+                    "    ip_address VARCHAR(64)," +
+                    "    stack_trace TEXT," +
+                    "    occurrence_count INT DEFAULT 1," +
+                    "    status VARCHAR(32) DEFAULT 'UNRESOLVED'," +
+                    "    last_occurred_at DATETIME(6)," +
+                    "    created_at DATETIME(6)," +
+                    "    INDEX idx_err_created (created_at)," +
+                    "    INDEX idx_err_signature (error_signature)," +
+                    "    INDEX idx_err_type (error_type)," +
+                    "    INDEX idx_err_status (status)," +
+                    "    INDEX idx_err_endpoint (endpoint)" +
+                    ")"
+                );
+                log.info("Successfully ensured audit_log & system_error_log tables are configured.");
+            } catch (Exception e) {
+                log.debug("Notice on altering audit_log schema: {}", e.getMessage());
             }
 
         } catch (Exception e) {

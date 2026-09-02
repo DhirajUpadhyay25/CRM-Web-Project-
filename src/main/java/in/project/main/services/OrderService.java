@@ -43,6 +43,9 @@ public class OrderService
 	@Autowired
 	private NotificationService notificationService;
 
+	@Autowired(required = false)
+	private AuditLogService auditLogService;
+
 	public void storeUserOrders(Orders orders)
 	{
 		ordersRepository.save(orders);
@@ -177,8 +180,37 @@ public class OrderService
 					String.valueOf(course.getId())
 				);
 			}
+
+			// 4. Audit Log Recording
+			if (auditLogService != null) {
+				in.project.main.events.PlatformAuditEvent payAudit = in.project.main.events.PlatformAuditEvent.of(
+					user.getEmail(),
+					in.project.main.entities.enums.AuditEventType.PAYMENT_SUCCESS,
+					"PAYMENT_SETTLED",
+					"Payment of ₹" + order.getCourseAmount() + " completed for course '" + course.getName() + "' (Order ID: " + order.getOrderId() + ", Payment ID: " + (paymentId != null ? paymentId : "N/A") + ")."
+				)
+				.withActor(String.valueOf(user.getId()), user.getEmail(), user.getName(), "STUDENT")
+				.withEntity("PAYMENT", order.getOrderId(), course.getName())
+				.withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+				.withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+				auditLogService.record(payAudit);
+
+				in.project.main.events.PlatformAuditEvent enrollAudit = in.project.main.events.PlatformAuditEvent.of(
+					user.getEmail(),
+					in.project.main.entities.enums.AuditEventType.ENROLLMENT_CREATED,
+					"COURSE_ENROLLED",
+					"Student '" + user.getName() + "' enrolled in course '" + course.getName() + "' following successful payment."
+				)
+				.withActor(String.valueOf(user.getId()), user.getEmail(), user.getName(), "STUDENT")
+				.withEntity("COURSE", String.valueOf(course.getId()), course.getName())
+				.withStatus(in.project.main.entities.enums.AuditStatus.SUCCESS)
+				.withSeverity(in.project.main.entities.enums.AuditSeverity.INFO);
+
+				auditLogService.record(enrollAudit);
+			}
 		} catch (Exception notifEx) {
-			log.error("Failed to trigger post-payment notifications: {}", notifEx.getMessage());
+			log.error("Failed to trigger post-payment notifications or audit: {}", notifEx.getMessage());
 		}
 
 		return true;

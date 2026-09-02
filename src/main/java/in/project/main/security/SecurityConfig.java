@@ -21,6 +21,15 @@ public class SecurityConfig {
     @Autowired
     private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
+    @Autowired
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    @Autowired
+    private CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new LegacyPlaintextDelegatingPasswordEncoder();
@@ -51,7 +60,7 @@ public class SecurityConfig {
 
                 // Public Routes
                 .requestMatchers(
-                    "/", "/index", "/login", "/register", "/regForm",
+                    "/", "/index", "/login", "/register", "/regForm", "/health",
                     "/courses", "/courses/**", "/services", "/about", "/contact", "/faq",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/uploads/**",
                     "/error", "/error/**"
@@ -84,17 +93,18 @@ public class SecurityConfig {
                 .loginProcessingUrl("/loginForm")
                 .usernameParameter("email")
                 .successHandler(customAuthenticationSuccessHandler)
-                .failureUrl("/login?error=true")
+                .failureHandler(customAuthenticationFailureHandler)
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
-                .logoutSuccessUrl("/")
+                .logoutSuccessHandler(customLogoutSuccessHandler)
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .permitAll()
             )
             .exceptionHandling(exception -> exception
+                .accessDeniedHandler(customAccessDeniedHandler)
                 .accessDeniedPage("/403")
             );
         // CSRF stays enabled for every route, including the payment APIs. The checkout page
