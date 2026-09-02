@@ -50,6 +50,10 @@ public class CourseService {
     @Autowired
     private OrdersRepository ordersRepository;
 
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    private NotificationService notificationService;
+
     public CourseStatsDTO getCourseStatistics() {
         long total = courseRepository.count();
         long published = courseRepository.countByStatus(CourseStatus.PUBLISHED);

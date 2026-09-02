@@ -177,6 +177,32 @@ public class UserController
 
 	        userService.registerUserService(user);
 
+	        // Trigger Notifications
+	        try {
+	            notificationService.sendToAdmin(
+	                in.project.main.entities.enums.NotificationType.NEW_STUDENT_REGISTERED,
+	                "New Student Registered",
+	                (user.getName() != null ? user.getName() : "A new student") + " has registered with email " + user.getEmail() + ".",
+	                "/admin/students",
+	                "USER",
+	                user.getId() != null ? String.valueOf(user.getId()) : user.getEmail(),
+	                user.getEmail(),
+	                user.getName()
+	            );
+
+	            notificationService.sendToUser(
+	                user.getEmail(),
+	                in.project.main.entities.enums.NotificationType.WELCOME_STUDENT,
+	                "Welcome to EduTake!",
+	                "Welcome " + (user.getName() != null ? user.getName() : "Student") + "! Your student account has been created successfully. Explore our courses to begin your journey.",
+	                "/student/dashboard",
+	                "USER",
+	                user.getId() != null ? String.valueOf(user.getId()) : user.getEmail()
+	            );
+	        } catch (Exception notifEx) {
+	            // Log and do not break registration
+	        }
+
 	        model.addAttribute("successMsg", "Registered Successfully");
 
 	        return "register";

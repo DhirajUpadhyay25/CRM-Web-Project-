@@ -250,14 +250,40 @@ public class PublicController {
             enrollment.setPaymentStatus("FREE");
             enrollmentRepository.save(enrollment);
 
-            // Trigger Notification
-            notificationService.createNotification(
+            // Trigger Notifications
+            notificationService.sendToUser(
                     email,
                     NotificationType.COURSE_ENROLLED,
                     "Course Enrollment Activated",
                     "You have been enrolled in course '" + course.getName() + "' for free. Start learning now!",
-                    "/student/courses/" + course.getId() + "/player"
+                    "/student/courses/" + course.getId() + "/player",
+                    "COURSE",
+                    String.valueOf(course.getId())
             );
+
+            notificationService.sendToAdmin(
+                    NotificationType.COURSE_ENROLLED,
+                    "New Free Enrollment",
+                    (user.getName() != null ? user.getName() : email) + " enrolled in free course '" + course.getName() + "'.",
+                    "/admin/students",
+                    "COURSE",
+                    String.valueOf(course.getId()),
+                    user.getEmail(),
+                    user.getName()
+            );
+
+            String instructorEmail = (course.getInstructorRef() != null) ? course.getInstructorRef().getEmail() : course.getInstructorEmail();
+            if (instructorEmail != null && !instructorEmail.isBlank()) {
+                notificationService.sendToInstructor(
+                        instructorEmail,
+                        NotificationType.COURSE_ENROLLED,
+                        "New Student Enrollment",
+                        (user.getName() != null ? user.getName() : email) + " enrolled in your course '" + course.getName() + "'.",
+                        "/instructor/students",
+                        "COURSE",
+                        String.valueOf(course.getId())
+                );
+            }
         }
 
         redirectAttributes.addFlashAttribute("successMsg", "Successfully enrolled in " + course.getName() + "! Start learning below.");

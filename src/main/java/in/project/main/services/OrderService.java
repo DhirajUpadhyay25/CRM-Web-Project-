@@ -40,6 +40,9 @@ public class OrderService
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private NotificationService notificationService;
+
 	public void storeUserOrders(Orders orders)
 	{
 		ordersRepository.save(orders);
@@ -118,6 +121,64 @@ public class OrderService
 			enrollment.setStatus(EnrollmentStatus.ACTIVE);
 			enrollment.setPaymentStatus("PAID");
 			enrollmentRepository.save(enrollment);
+		}
+
+		// Dispatch Notifications
+		try {
+			// 1. Student Payment & Enrollment Notifications
+			notificationService.sendToUser(
+				user.getEmail(),
+				in.project.main.entities.enums.NotificationType.PAYMENT_SUCCESS,
+				"Payment Successful",
+				"Your payment of ₹" + order.getCourseAmount() + " for '" + course.getName() + "' was successfully processed (Order: " + order.getOrderId() + ").",
+				"/student/orders",
+				"ORDER",
+				order.getOrderId()
+			);
+
+			notificationService.sendToUser(
+				user.getEmail(),
+				in.project.main.entities.enums.NotificationType.COURSE_ENROLLED,
+				"Course Access Granted",
+				"You are now enrolled in '" + course.getName() + "'. Start learning today!",
+				"/student/courses/" + course.getId() + "/player",
+				"COURSE",
+				String.valueOf(course.getId())
+			);
+
+			// 2. Admin Notification
+			notificationService.sendToAdmin(
+				in.project.main.entities.enums.NotificationType.PAYMENT_RECEIVED,
+				"Payment Received",
+				"Payment of ₹" + order.getCourseAmount() + " received from " + user.getName() + " (" + user.getEmail() + ") for '" + course.getName() + "'.",
+				"/admin/orders",
+				"ORDER",
+				order.getOrderId(),
+				user.getEmail(),
+				user.getName()
+			);
+
+			// 3. Instructor Notification
+			String instructorEmail = null;
+			if (course.getInstructorRef() != null && course.getInstructorRef().getEmail() != null) {
+				instructorEmail = course.getInstructorRef().getEmail();
+			} else if (course.getInstructorEmail() != null && !course.getInstructorEmail().isBlank()) {
+				instructorEmail = course.getInstructorEmail();
+			}
+
+			if (instructorEmail != null && !instructorEmail.isBlank()) {
+				notificationService.sendToInstructor(
+					instructorEmail,
+					in.project.main.entities.enums.NotificationType.COURSE_ENROLLED,
+					"New Student Enrollment",
+					user.getName() + " enrolled in your course '" + course.getName() + "'.",
+					"/instructor/students",
+					"COURSE",
+					String.valueOf(course.getId())
+				);
+			}
+		} catch (Exception notifEx) {
+			log.error("Failed to trigger post-payment notifications: {}", notifEx.getMessage());
 		}
 
 		return true;
