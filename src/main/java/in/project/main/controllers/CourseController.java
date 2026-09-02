@@ -103,7 +103,7 @@ public class CourseController {
     // ==========================================
     // 2. ADD NEW COURSE
     // ==========================================
-    @GetMapping({"/admin/courses/new", "/admin/courses/add", "/admin/course/new", "/admin/course/add", "/admin/add-course"})
+    @GetMapping({"/admin/courses/new", "/admin/courses/add", "/admin/courses/create", "/admin/course/new", "/admin/course/add", "/admin/course/create", "/admin/add-course"})
     public String openAddCoursePage(Model model) {
         model.addAttribute("courseDTO", new CourseDTO());
         populateDropdowns(model);
@@ -137,7 +137,7 @@ public class CourseController {
     // ==========================================
     // 3. ADMIN COURSE DETAIL / INSPECTION
     // ==========================================
-    @GetMapping({"/admin/courses/{id}", "/admin/course/{id}"})
+    @GetMapping({"/admin/courses/{id:[0-9]+}", "/admin/course/{id:[0-9]+}"})
     public String openCourseDetailPage(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
         Course course = courseService.getCourseDetailsById(id);
         if (course == null) {

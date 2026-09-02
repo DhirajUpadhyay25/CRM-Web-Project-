@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
     <title th:text="${title + ' | EduTake Instructor'}">EduTake Instructor</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -219,14 +221,22 @@
                 .catch(() => {});
         }
 
+        function getCsrfHeaders() {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers[header] = token;
+            return headers;
+        }
+
         function markInstNotifRead(id) {
-            fetch('/instructor/api/notifications/' + id + '/read', { method: 'POST' })
+            fetch('/instructor/api/notifications/' + id + '/read', { method: 'POST', headers: getCsrfHeaders() })
                 .then(() => updateInstNotifBadge())
                 .catch(() => {});
         }
 
         function markAllInstNotificationsRead() {
-            fetch('/instructor/api/notifications/mark-all-read', { method: 'POST' })
+            fetch('/instructor/api/notifications/mark-all-read', { method: 'POST', headers: getCsrfHeaders() })
                 .then(() => {
                     loadInstNotifications();
                     updateInstNotifBadge();
@@ -256,7 +266,7 @@
                 }).catch(() => {});
         }
         updateInstNotifBadge();
-        setInterval(updateInstNotifBadge, 30000);
+        setInterval(updateInstNotifBadge, 15000);
     </script>
 
 </body>

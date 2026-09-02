@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="EduTake — Professional education platform offering courses, live classes, workshops, and training programs.">
+    <title>Login | EduTake</title>
+
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50:  '#f0f4ff',
+                            100: '#dbe4ff',
+                            200: '#bac8ff',
+                            300: '#91a7ff',
+                            400: '#748ffc',
+                            500: '#5c7cfa',
+                            600: '#4c6ef5',
+                            700: '#4263eb',
+                            800: '#3b5bdb',
+                            900: '#364fc7',
+                            950: '#1e3a8a',
+                        },
+                        surface: {
+                            50:  '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger:  '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        display: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons (for icons) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Global Styles -->
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        /* Transition defaults */
+        .transition-default { transition: all 0.2s ease-in-out; }
+    </style>
+</head>
+
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col pt-16">
+
+    <!-- Navbar -->
+    <header>
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-surface-950/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300" id="main-nav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Brand -->
+                <a href="/index" class="flex items-center gap-2.5 group">
+                    <div class="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform duration-300">
+                        <span class="text-white font-black text-base">E</span>
+                    </div>
+                    <span class="text-white font-extrabold text-xl tracking-tight group-hover:text-brand-400 transition-colors">EduTake<span class="text-brand-500">.</span></span>
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center gap-1.5">
+                    <a href="/index" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Home</a>
+                    <a href="/courses" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Courses</a>
+                    <a href="/services" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Services</a>
+                    <a href="/about" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">About</a>
+                    <a href="/contact" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Contact</a>
+                    
+                    <!-- Student specific -->
+                    
+                    
+
+                    <!-- Admin specific -->
+                    
+                    
+                    <!-- Employee specific -->
+                    
+                </div>
+
+                <!-- Auth Buttons / User Profile -->
+                <div class="hidden md:flex items-center gap-4">
+                    <!-- Unauthenticated -->
+                    <div class="flex items-center gap-3">
+                        <a href="/login"
+                           class="px-4 py-2 text-xs font-bold text-gray-300 border border-white/10 hover:border-white/35 hover:text-white rounded-xl transition-all">
+                            Log In
+                        </a>
+                        <a href="/register"
+                           class="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 rounded-xl transition-all shadow-md shadow-brand-600/20 hover:shadow-brand-500/35 hover:-translate-y-0.5">
+                            Get Started
+                        </a>
+                    </div>
+                    
+                    <!-- Authenticated User Profile & Logout -->
+                    
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()"
+                        class="md:hidden p-2 text-gray-400 hover:text-white focus:outline-none transition-colors"
+                        id="mobile-btn">
+                    <i class="bi bi-list text-2xl" id="menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-surface-950/95 backdrop-blur-2xl transition-all duration-300">
+            <div class="px-4 py-4 space-y-2">
+                <a href="/index" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Home</a>
+                <a href="/courses" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Courses</a>
+                <a href="/services" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Services</a>
+                <a href="/about" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">About</a>
+                <a href="/contact" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Contact</a>
+                
+                
+
+                
+                
+
+                <!-- Unauthenticated Mobile -->
+                <div class="pt-4 border-t border-white/5 space-y-2">
+                    <a href="/login" class="block w-full py-3 text-center text-sm font-bold text-gray-300 border border-white/10 rounded-xl hover:bg-white/5 transition-all">Log In</a>
+                    <a href="/register" class="block w-full py-3 text-center text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-500 transition-all shadow-lg">Get Started</a>
+                </div>
+                
+                <!-- Authenticated Mobile -->
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Scrollspy & Scroll Effects Script -->
+    <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('menu-icon');
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            icon.className = 'bi bi-x-lg text-2xl';
+        } else {
+            menu.classList.add('hidden');
+            icon.className = 'bi bi-list text-2xl';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const nav = document.getElementById('main-nav');
+        
+        // Scroll navigation shadow effects
+        window.addEventListener("scroll", function() {
+            if (window.scrollY > 20) {
+                nav.classList.add('bg-surface-950/95', 'shadow-lg', 'shadow-brand-950/5');
+                nav.classList.remove('bg-surface-950/80');
+            } else {
+                nav.classList.add('bg-surface-950/80');
+                nav.classList.remove('bg-surface-950/95', 'shadow-lg', 'shadow-brand-950/5');
+            }
+        });
+
+        // Dynamic Scrollspy Highlight
+        const navLinks = document.querySelectorAll(".desktop-nav-link");
+        const mobileLinks = document.querySelectorAll(".mobile-nav-link");
+        const sections = document.querySelectorAll("section[id]");
+        
+        const isIndexPage = window.location.pathname === "/" || window.location.pathname === "/index" || window.location.pathname.endsWith("/");
+
+        if (isIndexPage) {
+            // Map multi-page relative targets to single-page scroll points on index page
+            const linksMap = {
+                "/courses": "courses",
+                "/about": "about"
+            };
+
+            function handleLinkRewrite(link) {
+                const href = link.getAttribute("href");
+                const anchorTarget = linksMap[href];
+                if (anchorTarget) {
+                    const section = document.getElementById(anchorTarget);
+                    if (section) {
+                        link.setAttribute("href", "#" + anchorTarget);
+                        link.addEventListener("click", function(e) {
+                            e.preventDefault();
+                            section.scrollIntoView({ behavior: "smooth", block: "start" });
+                            
+                            // Close mobile menu if open
+                            const mobileMenu = document.getElementById('mobile-menu');
+                            const icon = document.getElementById('menu-icon');
+                            if (mobileMenu) {
+                                mobileMenu.classList.add('hidden');
+                                if (icon) icon.className = 'bi bi-list text-2xl';
+                            }
+                        });
+                    }
+                }
+            }
+
+            navLinks.forEach(handleLinkRewrite);
+            mobileLinks.forEach(handleLinkRewrite);
+
+            // Smooth scroll for Home link specifically
+            const homeLinks = document.querySelectorAll("a[href='/index']");
+            homeLinks.forEach(link => {
+                link.setAttribute("href", "#hero");
+                link.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    const icon = document.getElementById('menu-icon');
+                    if (mobileMenu) {
+                        mobileMenu.classList.add('hidden');
+                        if (icon) icon.className = 'bi bi-list text-2xl';
+                    }
+                });
+            });
+
+            // Tracking scroll position for active highlights
+            window.addEventListener("scroll", function() {
+                let currentSec = "hero";
+                const scrollPos = window.scrollY + 100; // Offset navbar height
+
+                sections.forEach(sec => {
+                    const secTop = sec.offsetTop;
+                    const secHeight = sec.offsetHeight;
+                    if (scrollPos >= secTop && scrollPos < secTop + secHeight) {
+                        currentSec = sec.getAttribute("id");
+                    }
+                });
+
+                function updateHighlight(link) {
+                    link.classList.remove('text-brand-400', 'bg-white/5', 'border-white/10');
+                    link.classList.add('border-transparent');
+                    
+                    const href = link.getAttribute("href");
+                    if (href === "#" + currentSec) {
+                        link.classList.add('text-brand-400', 'bg-white/5', 'border-white/10');
+                        link.classList.remove('border-transparent');
+                    }
+                }
+
+                navLinks.forEach(updateHighlight);
+                mobileLinks.forEach(updateHighlight);
+            });
+        }
+    });
+    </script>
+</header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center px-4 py-16 relative overflow-hidden">
+        <!-- Background Glow Effects -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-[130px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[130px]"></div>
+        </div>
+
+        <div class="w-full max-w-md relative z-10 animate-fade-in">
+            
+            <!-- Back to Home link -->
+            <div class="mb-4 text-left">
+                <a href="/index" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-white transition-colors">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+
+            <!-- Login Card -->
+            <div class="bg-surface-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                
+                <!-- Brand logo and Welcome header -->
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center font-bold text-white text-sm">E</div>
+                        <span class="font-extrabold text-xl tracking-tight text-white">EduTake<span class="text-brand-500">.</span></span>
+                    </div>
+                    <h1 class="text-2xl font-black text-white tracking-tight">Welcome Back</h1>
+                    <p class="text-xs text-gray-400 mt-1">Sign in to continue your learning journey</p>
+                </div>
+
+                <!-- Success Message (Logout) -->
+                
+
+                <!-- Error Message -->
+                
+
+                <!-- Login Form -->
+                <form action="/loginForm" method="post" class="space-y-5"><input type="hidden" name="_csrf" value="C48xfEbu926hpibbPfO3V31q1EN0Qzi9a8LGYnynToor23yvMrhVGn6Kz1mMlxfpDt6DbhtT-XpDIVuQUqPwUk-Sd78ev0yc"/>
+                    
+                    <!-- Email input -->
+                    <div class="space-y-1.5 text-left">
+                        <label for="email" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Email Address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="bi bi-envelope text-gray-500"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
+                                   placeholder="you@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Password input -->
+                    <div class="space-y-1.5 text-left">
+                        <div class="flex items-center justify-between">
+                            <label for="password" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Password</label>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="bi bi-lock text-gray-500"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                   class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
+                                   placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Submit action button -->
+                    <div class="pt-2">
+                        <button type="submit"
+                                class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all shadow-md shadow-brand-600/10 hover:shadow-brand-500/25 hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm">
+                            <span>Sign In</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
+                    <div class="relative flex justify-center text-[10px] font-bold uppercase tracking-wider"><span class="bg-surface-900/60 px-4 text-gray-500">or</span></div>
+                </div>
+
+                <!-- Registration link redirect -->
+                <p class="text-center text-xs text-gray-400 font-semibold">
+                    Don't have an account?
+                    <a href="/register" class="text-brand-400 hover:text-brand-300 ml-1 transition-colors">Create one free</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-950 border-t border-white/5 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <!-- Brand Column -->
+            <div class="space-y-4">
+                <a href="/index" class="flex items-center gap-2 group inline-flex">
+                    <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">E</span>
+                    </div>
+                    <span class="text-white font-bold text-xl tracking-tight group-hover:text-brand-400 transition-colors">EduTake</span>
+                </a>
+                <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
+                    Empowering careers through practical learning, expert guidance, and professional development programs.
+                </p>
+                <div class="flex gap-4 pt-2">
+                    <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 transition-all">
+                        <i class="bi bi-twitter-x text-sm"></i>
+                    </a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 transition-all">
+                        <i class="bi bi-linkedin text-sm"></i>
+                    </a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 transition-all">
+                        <i class="bi bi-youtube text-sm"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Explore Column -->
+            <div>
+                <h3 class="text-white font-semibold mb-4">Explore</h3>
+                <ul class="space-y-3">
+                    <li><a href="/courses" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">All Courses</a></li>
+                    <li><a href="/services" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Our Services</a></li>
+                    <li><a href="/about" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">About Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Support Column -->
+            <div>
+                <h3 class="text-white font-semibold mb-4">Support</h3>
+                <ul class="space-y-3">
+                    <li><a href="/contact" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Contact Us</a></li>
+                    <li><a href="/faq" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">FAQ</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Terms of Service</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <!-- CTA Column -->
+            <div>
+                <h3 class="text-white font-semibold mb-4">Ready to start?</h3>
+                <p class="text-gray-400 text-sm mb-4">
+                    Join thousands of students learning on EduTake today.
+                </p>
+                <a href="/register" class="inline-flex items-center justify-center px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-brand-600/20 w-full sm:w-auto">
+                    Get Started Free
+                </a>
+            </div>
+        </div>
+
+        <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-gray-500 text-sm">
+                &copy; <span>2026</span> EduTake. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm text-gray-500">
+                <span>Designed for professionals</span>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

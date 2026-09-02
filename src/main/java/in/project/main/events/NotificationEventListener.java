@@ -20,6 +20,12 @@ public class NotificationEventListener {
     @Autowired
     private NotificationService notificationService;
 
+    public NotificationEventListener() {}
+
+    public NotificationEventListener(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+
     @EventListener
     public void handlePlatformNotificationEvent(PlatformNotificationEvent event) {
         if (event == null || event.getRecipientEmails().isEmpty()) {

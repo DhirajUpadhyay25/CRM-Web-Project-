@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
     <title th:text="${title + ' | EduTake Admin'}">EduTake Admin</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -573,14 +575,22 @@
             return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
         }
 
+        function getCsrfHeaders() {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers[header] = token;
+            return headers;
+        }
+
         function markNotifRead(id) {
-            fetch('/admin/api/notifications/' + id + '/read', { method: 'POST' })
+            fetch('/admin/api/notifications/' + id + '/read', { method: 'POST', headers: getCsrfHeaders() })
                 .then(() => updateNotifBadge())
                 .catch(() => {});
         }
 
         function markAllNotificationsRead() {
-            fetch('/admin/api/notifications/mark-all-read', { method: 'POST' })
+            fetch('/admin/api/notifications/mark-all-read', { method: 'POST', headers: getCsrfHeaders() })
                 .then(() => {
                     loadNotifications();
                     updateNotifBadge();
@@ -592,17 +602,19 @@
                 .then(r => r.json())
                 .then(data => {
                     const badge = document.getElementById('notifBadge');
-                    if (data && data.count > 0) {
-                        badge.textContent = data.count > 99 ? '99+' : data.count;
-                        badge.classList.remove('hidden');
-                    } else if (badge) {
-                        badge.classList.add('hidden');
+                    if (badge) {
+                        if (data && data.count > 0) {
+                            badge.textContent = data.count > 99 ? '99+' : data.count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
                     }
                 }).catch(() => {});
         }
-        // Initial badge load and 30-sec polling
+        // Initial badge load and 15-sec polling
         updateNotifBadge();
-        setInterval(updateNotifBadge, 30000);
+        setInterval(updateNotifBadge, 15000);
 
         // ====== GLOBAL SEARCH ======
         let searchDebounce = null;

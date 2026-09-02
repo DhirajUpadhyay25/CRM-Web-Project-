@@ -1,6 +1,7 @@
 package in.project.main.services;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,14 +15,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import in.project.main.entities.Employee;
 import in.project.main.entities.Enrollment;
 import in.project.main.entities.Notification;
+import in.project.main.entities.Role;
 import in.project.main.entities.User;
 import in.project.main.entities.enums.EnrollmentStatus;
 import in.project.main.entities.enums.NotificationCategory;
 import in.project.main.entities.enums.NotificationPriority;
 import in.project.main.entities.enums.NotificationType;
 import in.project.main.events.PlatformNotificationEvent;
+import in.project.main.repositories.EmployeeRepository;
 import in.project.main.repositories.EnrollmentRepository;
 import in.project.main.repositories.NotificationRepository;
 import in.project.main.repositories.UserRepository;
@@ -41,8 +45,41 @@ public class NotificationService {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired(required = false)
+    private EmployeeRepository employeeRepository;
+
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    public NotificationService() {}
+
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            UserRepository userRepository,
+            EnrollmentRepository enrollmentRepository,
+            ApplicationEventPublisher eventPublisher) {
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.eventPublisher = eventPublisher;
+    }
+
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            UserRepository userRepository,
+            EnrollmentRepository enrollmentRepository,
+            EmployeeRepository employeeRepository,
+            ApplicationEventPublisher eventPublisher) {
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.employeeRepository = employeeRepository;
+        this.eventPublisher = eventPublisher;
+    }
+
+    public void sendToAdmin(NotificationType type, String title, String message, String targetUrl) {
+        sendToAdmin(type, title, message, targetUrl, null, null, null, null);
+    }
 
     // ==========================================
     // Query & Fetch Operations
@@ -229,7 +266,24 @@ public class NotificationService {
     }
 
     public void sendToAdmin(NotificationType type, String title, String message, String targetUrl, String entityType, String entityId, String actorEmail, String actorName) {
-        PlatformNotificationEvent event = new PlatformNotificationEvent(DEFAULT_ADMIN_EMAIL, type, title, message, targetUrl)
+        List<String> adminEmails = new ArrayList<>();
+        adminEmails.add(DEFAULT_ADMIN_EMAIL);
+        if (employeeRepository != null) {
+            try {
+                List<Employee> admins = employeeRepository.findByRole(Role.ADMIN);
+                if (admins != null) {
+                    for (Employee emp : admins) {
+                        if (emp.getEmail() != null && !emp.getEmail().isBlank()) {
+                            adminEmails.add(emp.getEmail().trim().toLowerCase());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Could not query admin employees for notification dispatch: {}", e.getMessage());
+            }
+        }
+        List<String> uniqueAdmins = adminEmails.stream().distinct().collect(Collectors.toList());
+        PlatformNotificationEvent event = new PlatformNotificationEvent(uniqueAdmins, type, title, message, targetUrl)
                 .withEntity(entityType, entityId)
                 .withActor(actorEmail, actorName);
         publishEvent(event);

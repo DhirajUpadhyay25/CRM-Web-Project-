@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
-    <title th:text="${title + ' | EduTake Student'}">EduTake Student</title>
+    <meta name="_csrf" content="lKLxh_aeSoashPVdZ_-gwe-2DlXUue0RTUxK2qZ_GX_i5taFp8fI4cKrKeeB5pRpAdKU8omHIzS1iI88eXQv75FGKRrVg-_m"/>
+    <meta name="_csrf_header" content="X-CSRF-TOKEN"/>
+    <title>My Dashboard | EduTake Student</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -51,18 +51,109 @@
         
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 custom-scrollbar">
-            <div th:replace="~{fragments/student-sidebar :: frg-student-sidebar}"></div>
+            <div>
+    
+    <!-- Dashboard -->
+    <a href="/student/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white mb-2" data-path="/student/dashboard">
+        <i class="bi bi-grid-1x2-fill text-base text-brand-400"></i>
+        <span class="font-semibold text-sm">Dashboard</span>
+    </a>
+
+    <!-- Category: Learning -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Learning</p>
+    </div>
+    
+    <!-- My Courses -->
+    <a href="/student/courses" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/courses">
+        <i class="bi bi-book-half text-sm"></i>
+        <span class="font-medium text-sm">My Courses</span>
+    </a>
+    
+    <!-- Browse Courses -->
+    <a href="/student/browse" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/browse">
+        <i class="bi bi-compass text-sm"></i>
+        <span class="font-medium text-sm">Browse Courses</span>
+    </a>
+
+    <!-- Category: Activities -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Activities</p>
+    </div>
+
+    <!-- Assignments -->
+    <a href="/student/assignments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/assignments">
+        <i class="bi bi-journal-check text-sm"></i>
+        <span class="font-medium text-sm">Assignments</span>
+    </a>
+
+    <!-- Calendar -->
+    <a href="/student/calendar" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/calendar">
+        <i class="bi bi-calendar3 text-sm"></i>
+        <span class="font-medium text-sm">Learning Calendar</span>
+    </a>
+
+    <!-- Category: Progress -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Progress</p>
+    </div>
+
+    <!-- Timeline Activity -->
+    <a href="/student/activity" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/activity">
+        <i class="bi bi-activity text-sm"></i>
+        <span class="font-medium text-sm">My Activity</span>
+    </a>
+    
+    <!-- Certificates -->
+    <a href="/student/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/certificates">
+        <i class="bi bi-award-fill text-sm"></i>
+        <span class="font-medium text-sm">Certificates</span>
+    </a>
+
+    <!-- Category: Account -->
+    <div class="px-3 mb-1.5 mt-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Account</p>
+    </div>
+    
+    <!-- My Purchases -->
+    <a href="/student/orders" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/orders">
+        <i class="bi bi-credit-card text-sm"></i>
+        <span class="font-medium text-sm">My Purchases</span>
+    </a>
+    
+    <!-- Notifications -->
+    <a href="/student/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/notifications">
+        <i class="bi bi-bell text-sm"></i>
+        <span class="font-medium text-sm">Notifications</span>
+    </a>
+
+    <!-- Settings -->
+    <a href="/student/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white" data-path="/student/settings">
+        <i class="bi bi-gear text-sm"></i>
+        <span class="font-medium text-sm">Settings</span>
+    </a>
+
+    <!-- Divider -->
+    <div class="my-4 border-t border-white/10"></div>
+    
+    <!-- Back to Home -->
+    <a href="/index" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+        <i class="bi bi-house-door text-base"></i>
+        <span class="font-semibold text-sm">Back to Website</span>
+    </a>
+    
+</div>
         </nav>
         
         <!-- Bottom User Area -->
         <div class="p-4 border-t border-white/10 shrink-0">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-sm shadow-lg shadow-brand-500/20 overflow-hidden">
-                    <img th:if="${studentImage}" th:src="@{${studentImage}}" class="w-full h-full object-cover" alt="Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                    <span th:unless="${studentImage}" class="flex items-center justify-center w-full h-full" th:text="${studentName != null ? studentName.substring(0,1).toUpperCase() : 'S'}">S</span>
+                    
+                    <span class="flex items-center justify-center w-full h-full">R</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-sm font-semibold text-white truncate" th:text="${studentName != null ? studentName : 'Student'}">Student</p>
+                    <p class="text-sm font-semibold text-white truncate">Rohan Verma</p>
                     <p class="text-xs text-gray-500 truncate">Student Portal</p>
                 </div>
             </div>
@@ -129,17 +220,17 @@
                 <div class="relative" id="profileContainer">
                     <button onclick="toggleProfileMenu()" class="flex items-center gap-2 hover:bg-surface-100 rounded-xl px-2 py-1.5 transition-colors">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-xs shadow-sm overflow-hidden">
-                            <img th:if="${studentImage}" th:src="@{'/uploads/' + ${studentImage}}" class="w-full h-full object-cover" alt="Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                            <span th:unless="${studentImage}" class="flex items-center justify-center w-full h-full" th:text="${studentName != null ? studentName.substring(0,1).toUpperCase() : 'S'}">S</span>
+                            
+                            <span class="flex items-center justify-center w-full h-full">R</span>
                         </div>
-                        <span class="hidden lg:block text-sm font-medium text-surface-800 max-w-[100px] truncate" th:text="${studentName != null ? studentName : 'Student'}">Student</span>
+                        <span class="hidden lg:block text-sm font-medium text-surface-800 max-w-[100px] truncate">Rohan Verma</span>
                         <i class="hidden lg:block bi bi-chevron-down text-[10px] text-gray-400"></i>
                     </button>
                     
                     <div id="profileDropdown" class="hidden absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-surface-200 overflow-hidden z-50 animate-slide-down">
                         <div class="px-4 py-3 border-b border-surface-100 bg-surface-50">
-                            <p class="text-sm font-semibold text-surface-900 truncate" th:text="${studentName != null ? studentName : 'Student'}">Student</p>
-                            <p class="text-xs text-gray-500 truncate" th:text="${studentEmail}">email@example.com</p>
+                            <p class="text-sm font-semibold text-surface-900 truncate">Rohan Verma</p>
+                            <p class="text-xs text-gray-500 truncate">student_1788350904491@gmail.com</p>
                         </div>
                         <div class="py-1">
                             <a href="/student/profile" class="flex items-center gap-3 px-4 py-2.5 text-sm text-surface-700 hover:bg-surface-50 transition-colors">
@@ -165,16 +256,185 @@
         <!-- MAIN SCROLLING CONTENT -->
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <!-- Flash Messages -->
-            <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-start gap-3 shadow-sm animate-fade-in">
-                <i class="bi bi-check-circle-fill text-green-500 mt-0.5"></i>
-                <p class="font-medium text-sm" th:text="${successMsg}"></p>
-            </div>
-            <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-3 shadow-sm animate-fade-in">
-                <i class="bi bi-exclamation-triangle-fill text-red-500 mt-0.5"></i>
-                <p class="font-medium text-sm" th:text="${errorMsg}"></p>
-            </div>
             
-            <div th:replace="${content}"></div>
+            
+            
+            <div>
+
+        <!-- 1. Personalized Header / Welcome -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight flex items-center gap-2">
+                    Welcome back, <span class="text-brand-600">Rohan Verma</span>! 👋
+                </h1>
+                <p class="text-gray-500 text-sm mt-0.5">Let's continue your learning journey and achieve your goals today.</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="/student/browse" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+                    <i class="bi bi-compass"></i> Explore Courses
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Continue Learning Section (If Active Courses Exist) -->
+        
+
+        <!-- 3. Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <a href="/student/courses" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-brand-300 transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                        <i class="bi bi-book-half"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-gray-500 bg-surface-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Total</span>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Enrolled Courses</h3>
+                <div class="flex items-end justify-between">
+                    <p class="text-3xl font-extrabold text-surface-900">0</p>
+                    <span class="text-[10px] text-brand-600 font-semibold mb-1 group-hover:underline">View all →</span>
+                </div>
+            </a>
+
+            <a href="/student/courses" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-emerald-300 transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                        <i class="bi bi-play-circle-fill"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">In Progress</h3>
+                <div class="flex items-end justify-between">
+                    <p class="text-3xl font-extrabold text-surface-900">0</p>
+                    <span class="text-[10px] text-emerald-600 font-semibold mb-1 group-hover:underline">Continue →</span>
+                </div>
+            </a>
+
+            <a href="/student/certificates" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Done</span>
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Completed</h3>
+                <div class="flex items-end justify-between">
+                    <p class="text-3xl font-extrabold text-surface-900">0</p>
+                    <span class="text-[10px] text-purple-600 font-semibold mb-1 group-hover:underline">Certificates →</span>
+                </div>
+            </a>
+
+            <a href="/student/notifications" class="group bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-lg hover:border-orange-300 transition-all">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full animate-pulse">1</span>
+                    
+                </div>
+                <h3 class="text-xs font-semibold text-gray-500 mb-0.5">Unread Messages</h3>
+                <div class="flex items-end justify-between">
+                    <p class="text-3xl font-extrabold text-surface-900">1</p>
+                    <span class="text-[10px] text-orange-600 font-semibold mb-1 group-hover:underline">View all →</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- 4. Main Dashboard Grid Columns -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+            <!-- Left Panel: Deadlines & Recent Activities -->
+            <div class="lg:col-span-1 space-y-6">
+
+                <!-- Upcoming Deadlines -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="px-5 py-4 border-b border-surface-100 flex items-center justify-between">
+                        <h2 class="font-bold text-sm text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-clock-history text-red-500"></i> Upcoming Deadlines
+                        </h2>
+                        <a href="/student/assignments" class="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors">View All</a>
+                    </div>
+                    <div class="p-4 flex-1">
+                        
+                        <!-- Empty State -->
+                        <div class="py-6 text-center text-gray-400">
+                            <i class="bi bi-emoji-smile text-2xl mb-1.5 block text-gray-300"></i>
+                            <p class="text-xs font-semibold">All caught up!</p>
+                            <p class="text-[10px] mt-0.5">No pending assignment deadlines.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities Timeline -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden flex flex-col">
+                    <div class="px-5 py-4 border-b border-surface-100 flex items-center justify-between">
+                        <h2 class="font-bold text-sm text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-activity text-emerald-500"></i> Recent Activity
+                        </h2>
+                        <a href="/student/activity" class="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors">History</a>
+                    </div>
+                    <div class="p-4 flex-1">
+                        
+                        <div class="py-6 text-center text-gray-400">
+                            <i class="bi bi-inbox text-2xl mb-1.5 block text-gray-300"></i>
+                            <p class="text-xs font-semibold">No recent activity</p>
+                            <p class="text-[10px] mt-0.5">Start a course to log your first activity!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Enrolled Courses & Orders -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Notifications Panel -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-surface-100 flex items-center justify-between bg-surface-50/50">
+                        <h2 class="font-bold text-sm text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-bell text-brand-600"></i> Notifications
+                        </h2>
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="markAllNotificationsRead()" class="text-xs font-bold text-brand-600 hover:text-brand-700 transition-colors">Mark all read</button>
+                            <a href="/student/notifications" class="text-xs font-semibold text-gray-400 hover:text-brand-600 transition-colors">All</a>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-surface-100 max-h-[300px] overflow-y-auto custom-scrollbar">
+                        <div class="p-4 hover:bg-surface-50 transition-colors flex items-start gap-3 relative bg-brand-50/20">
+                            
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-50 text-gray-500">
+                                <i class="bi text-sm bi-bell-fill"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-surface-900">Welcome to EduTake!</p>
+                                <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">Welcome Rohan Verma! Your student account has been created successfully. Explore our courses to begin your journey.</p>
+                                <p class="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                                    <i class="bi bi-clock"></i> <span>Just now</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <!-- Recent Purchases -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-surface-100 flex items-center justify-between">
+                        <h2 class="font-bold text-sm text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-credit-card-2-back text-blue-500"></i> Recent Purchases
+                        </h2>
+                        <a href="/student/orders" class="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors">View All</a>
+                    </div>
+                    <div class="p-4">
+                        
+                        <div class="py-8 text-center text-gray-400">
+                            <i class="bi bi-cart-x text-2xl mb-1.5 block text-gray-300"></i>
+                            <p class="text-xs font-semibold">No purchases found</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
         </main>
         
         <div id="sidebarOverlay" class="fixed inset-0 bg-surface-900/50 backdrop-blur-sm z-20 hidden md:hidden"></div>

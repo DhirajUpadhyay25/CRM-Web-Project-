@@ -130,7 +130,7 @@ public class UserController
 	public String handleRegForm(
 	        @Valid @ModelAttribute("user") User user,
 	        BindingResult result,
-	        @RequestParam("image") MultipartFile file,
+	        @RequestParam(value = "image", required = false) MultipartFile file,
 	        Model model)
 	{
 
@@ -145,7 +145,7 @@ public class UserController
 
 	        // ---------- IMAGE UPLOAD ----------
 
-	        if(!file.isEmpty())
+	        if(file != null && !file.isEmpty())
 	        {
 	            // Original file name
 	            String originalFileName = file.getOriginalFilename();
@@ -292,27 +292,27 @@ public class UserController
 	@GetMapping("/myCourses")
 	public String myCoursesPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model)
 	{
+		if (userDetails == null) {
+			return "redirect:/login";
+		}
 		List<Object[]> pcDbList = ordersRepository.findPurchasedCoursesByEmail(userDetails.getUsername());
 		
 		List<PurchasedCourse> purchasedCoursesList = new ArrayList<>();
 		
-		for(Object[] course : pcDbList)
-		{
-//			System.out.println(course[0]);
-//			System.out.println(course[1]);
-//			System.out.println(course[2]);
-//			System.out.println(course[3]);
-//			System.out.println(course[4]);
-			
-			PurchasedCourse purchasedCourse = new PurchasedCourse();
-			
-			purchasedCourse.setPurchasedOn((String)course[0]);
-			purchasedCourse.setDescription((String)course[1]);
-			purchasedCourse.setImageUrl((String)course[2]);
-			purchasedCourse.setCourseName((String)course[3]);
-			purchasedCourse.setUpdatedOn((String)course[4]);
-			
-			purchasedCoursesList.add(purchasedCourse);
+		if (pcDbList != null) {
+			for(Object[] course : pcDbList)
+			{
+				if (course == null || course.length < 5) continue;
+				
+				PurchasedCourse purchasedCourse = new PurchasedCourse();
+				purchasedCourse.setPurchasedOn(course[0] != null ? course[0].toString() : "");
+				purchasedCourse.setDescription(course[1] != null ? course[1].toString() : "");
+				purchasedCourse.setImageUrl(course[2] != null ? course[2].toString() : "");
+				purchasedCourse.setCourseName(course[3] != null ? course[3].toString() : "");
+				purchasedCourse.setUpdatedOn(course[4] != null ? course[4].toString() : "");
+				
+				purchasedCoursesList.add(purchasedCourse);
+			}
 		}
 		
 		model.addAttribute("purchasedCoursesList", purchasedCoursesList);

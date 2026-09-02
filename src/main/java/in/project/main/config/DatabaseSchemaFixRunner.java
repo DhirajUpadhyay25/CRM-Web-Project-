@@ -44,14 +44,14 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 log.debug("Notice on altering instructor columns: {}", e.getMessage());
             }
 
-            // 3. Normalize legacy mixed-case status rows in instructor table
+            // 4. Expand notification table type, category, and priority columns
             try {
-                jdbcTemplate.execute("UPDATE instructor SET status = 'ACTIVE' WHERE UPPER(status) = 'ACTIVE' OR status = 'Active'");
-                jdbcTemplate.execute("UPDATE instructor SET status = 'INACTIVE' WHERE UPPER(status) = 'INACTIVE' OR status = 'Inactive'");
-                jdbcTemplate.execute("UPDATE instructor SET verification_status = 'VERIFIED' WHERE UPPER(verification_status) = 'VERIFIED' OR verification_status = 'Verified' OR verification_status IS NULL");
-                log.info("Normalized legacy instructor status records in database.");
+                jdbcTemplate.execute("ALTER TABLE notification MODIFY COLUMN type VARCHAR(64) NOT NULL");
+                jdbcTemplate.execute("ALTER TABLE notification MODIFY COLUMN category VARCHAR(64) NOT NULL");
+                jdbcTemplate.execute("ALTER TABLE notification MODIFY COLUMN priority VARCHAR(64) NOT NULL");
+                log.info("Successfully ensured notification table columns (type, category, priority) are VARCHAR(64)");
             } catch (Exception e) {
-                log.debug("Notice on normalizing instructor status: {}", e.getMessage());
+                log.debug("Notice on altering notification columns: {}", e.getMessage());
             }
 
         } catch (Exception e) {

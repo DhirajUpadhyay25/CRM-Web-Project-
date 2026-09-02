@@ -145,7 +145,7 @@ public class AdminInstructorController {
     // ==========================================
     // 4. INSTRUCTOR DETAILS PAGE (5 TABS)
     // ==========================================
-    @GetMapping({"/{id}", "/view/{id}", "/detail/{id}"})
+    @GetMapping({"/{id:[0-9]+}", "/view/{id:[0-9]+}", "/detail/{id:[0-9]+}"})
     public String openInstructorDetailsPage(
             @PathVariable Long id,
             @RequestParam(name = "tab", defaultValue = "overview") String tab,
@@ -169,7 +169,7 @@ public class AdminInstructorController {
     // ==========================================
     // 5. EDIT INSTRUCTOR PAGE
     // ==========================================
-    @GetMapping({"/{id}/edit", "/edit/{id}"})
+    @GetMapping({"/{id:[0-9]+}/edit", "/edit/{id:[0-9]+}"})
     public String openEditInstructorPage(
             @PathVariable Long id,
             Model model,
