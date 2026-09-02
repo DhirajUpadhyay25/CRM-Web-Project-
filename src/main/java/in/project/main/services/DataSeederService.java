@@ -130,16 +130,87 @@ public class DataSeederService {
     }
 
     private void seedInstructors() {
-        if (instructorRepo.count() > 0) return;
-        List<String> names = Arrays.asList("John Doe", "Jane Smith", "Alan Turing", "Grace Hopper");
-        for (String name : names) {
-            Instructor i = new Instructor();
-            i.setName(name);
-            i.setEmail(name.toLowerCase().replace(" ", ".") + "@example.com");
-            i.setBio("Experienced instructor in technology.");
-            i.setSpecialization("Software Engineering");
-            i.setStatus("Active");
-            instructorRepo.save(i);
+        if (instructorRepo.count() == 0) {
+            Object[][] instructorData = {
+                {"John", "Doe", "john.doe@example.com", "+1 (555) 234-5678", "Principal Cloud & Java Architect", "Backend Engineering", "12+ years building distributed cloud platforms and guiding engineering teams.", "Java, Spring Boot, Microservices, AWS, Docker, Kubernetes", "San Francisco", "USA"},
+                {"Jane", "Smith", "jane.smith@example.com", "+1 (555) 345-6789", "Senior Fullstack & AI Specialist", "Full Stack Development", "Specializes in modern React, Next.js, and enterprise Generative AI applications.", "React, TypeScript, Next.js, Node.js, Python, OpenAI", "New York", "USA"},
+                {"Alan", "Turing", "alan.turing@example.com", "+44 (20) 7946-0912", "Chief Data Scientist & Algorithmic Lead", "Data Science & AI", "Leading machine learning researcher and algorithmic design educator.", "Python, TensorFlow, PyTorch, Algorithms, Deep Learning", "London", "UK"},
+                {"Grace", "Hopper", "grace.hopper@example.com", "+1 (555) 876-5432", "Systems & DevOps Engineering Lead", "Systems & DevOps", "Specializing in scalable infrastructure, CI/CD pipelines, and high-concurrency systems.", "Rust, Go, CI/CD, Kubernetes, Linux, Performance Tuning", "Austin", "USA"}
+            };
+
+            for (Object[] row : instructorData) {
+                String firstName = (String) row[0];
+                String lastName = (String) row[1];
+                String email = (String) row[2];
+                String phone = (String) row[3];
+                String headline = (String) row[4];
+                String spec = (String) row[5];
+                String bio = (String) row[6];
+                String skills = (String) row[7];
+                String city = (String) row[8];
+                String country = (String) row[9];
+
+                Instructor i = new Instructor();
+                i.setFirstName(firstName);
+                i.setLastName(lastName);
+                i.setName(firstName + " " + lastName);
+                i.setEmail(email);
+                i.setPhone(phone);
+                i.setHeadline(headline);
+                i.setSpecialization(spec);
+                i.setBio(bio);
+                i.setSkills(skills);
+                i.setExperience("8+ Years in Industry");
+                i.setEducation("M.S. in Computer Science");
+                i.setCertifications("AWS Certified Solutions Architect, Oracle Java Champion");
+                i.setLanguages("English, Spanish");
+                i.setCity(city);
+                i.setCountry(country);
+                i.setWebsite("https://" + firstName.toLowerCase() + lastName.toLowerCase() + ".dev");
+                i.setLinkedinUrl("https://linkedin.com/in/" + firstName.toLowerCase() + lastName.toLowerCase());
+                i.setGithubUrl("https://github.com/" + firstName.toLowerCase() + lastName.toLowerCase());
+                i.setStatus(InstructorStatus.ACTIVE);
+                i.setVerificationStatus(VerificationStatus.VERIFIED);
+                instructorRepo.save(i);
+
+                Employee emp = employeeRepo.findByEmail(email);
+                if (emp == null) {
+                    emp = new Employee();
+                    emp.setEmail(email);
+                }
+                emp.setName(i.getName());
+                emp.setPhoneno(phone);
+                emp.setCity(city);
+                emp.setPassword(passwordEncoder.encode("instructor123"));
+                emp.setRole(Role.INSTRUCTOR);
+                employeeRepo.save(emp);
+            }
+        } else {
+            for (Instructor i : instructorRepo.findAll()) {
+                boolean changed = false;
+                if (i.getStatus() == null) {
+                    i.setStatus(InstructorStatus.ACTIVE);
+                    changed = true;
+                }
+                if (i.getVerificationStatus() == null) {
+                    i.setVerificationStatus(VerificationStatus.VERIFIED);
+                    changed = true;
+                }
+                if (i.getFirstName() == null || i.getFirstName().isBlank()) {
+                    if (i.getName() != null && i.getName().contains(" ")) {
+                        String[] parts = i.getName().split(" ", 2);
+                        i.setFirstName(parts[0]);
+                        i.setLastName(parts[1]);
+                    } else {
+                        i.setFirstName(i.getName() != null ? i.getName() : "Instructor");
+                        i.setLastName("");
+                    }
+                    changed = true;
+                }
+                if (changed) {
+                    instructorRepo.save(i);
+                }
+            }
         }
     }
 
