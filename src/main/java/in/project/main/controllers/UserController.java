@@ -58,6 +58,9 @@ public class UserController
 
 	@Autowired
 	private CourseRepository courseRepository;
+
+	@Autowired
+	private in.project.main.services.NotificationService notificationService;
 	
 	@Value("${app.razorpay.key-id}")
 	private String razorpayKeyId;
