@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Manage Permissions', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Breadcrumb & Header -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-surface-200 pb-5">
+            <div>
+                <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                    <a href="/admin/roles" class="hover:text-brand-600 transition-colors">Roles &amp; RBAC</a>
+                    <i class="bi bi-chevron-right text-[10px]"></i>
+                    <span class="text-surface-900 font-bold">Permissions Matrix</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight" th:text="${role.displayName}">Administrator</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold"
+                          th:classappend="${role.systemRole ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-brand-50 text-brand-700 border border-brand-200'}"
+                          th:text="${role.roleName}">ADMIN</span>
+                </div>
+                <p class="text-gray-500 text-sm mt-1" th:text="${role.description ?: 'Configure granular module permissions and access control for this role.'}">Configure granular module permissions and access control for this role.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/admin/roles" class="px-4 py-2 rounded-xl bg-white border border-surface-200 text-surface-900 hover:bg-surface-50 text-sm font-semibold transition-all shadow-sm">
+                    Back to Roles
+                </a>
+                <button type="button" onclick="document.getElementById('permissionsForm').submit()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                    <i class="bi bi-save-fill"></i> Save Permissions
+                </button>
+            </div>
+        </div>
+
+        <!-- Role Permissions Coverage Overview -->
+        <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div>
+                    <h3 class="text-sm font-bold text-surface-900">Permission Grant Coverage</h3>
+                    <p class="text-xs text-gray-500">Percentage of total LMS actions authorized for this role.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-surface-900" id="grantedCountDisplay" th:text="${role.permissions != null ? role.permissions.size() : 0}">0</span>
+                    <span class="text-xs text-gray-400">/ <span id="totalPermsCountDisplay">44</span> Permissions Granted</span>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200" id="coveragePercentDisplay">0%</span>
+                </div>
+            </div>
+            <div class="w-full bg-surface-100 rounded-full h-2.5 overflow-hidden">
+                <div id="coverageProgressBar" class="bg-gradient-to-r from-brand-500 to-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Global Action Controls & Search Filter -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="relative flex-1 max-w-md">
+                <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="permissionSearch" onkeyup="filterPermissions()" placeholder="Search by name, code (e.g. courses.create) or description..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <select id="permStateFilter" onchange="filterPermissions()" class="px-3 py-2 rounded-xl border border-surface-200 text-xs font-semibold bg-white text-gray-700 focus:ring-2 focus:ring-brand-500">
+                    <option value="ALL">All Permissions</option>
+                    <option value="GRANTED">Granted Only</option>
+                    <option value="REVOKED">Revoked Only</option>
+                    <option value="SENSITIVE">Sensitive Actions Only</option>
+                </select>
+                <button type="button" onclick="toggleAllPermissions(true)" class="px-3 py-2 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold transition-colors flex items-center gap-1.5">
+                    <i class="bi bi-check-all text-base"></i> Grant All
+                </button>
+                <button type="button" onclick="toggleAllPermissions(false)" class="px-3 py-2 rounded-xl bg-surface-100 hover:bg-surface-200 text-gray-700 text-xs font-semibold transition-colors flex items-center gap-1.5">
+                    <i class="bi bi-x text-base"></i> Revoke All
+                </button>
+            </div>
+        </div>
+
+        <!-- Permissions Form Matrix -->
+        <form id="permissionsForm" th:action="@{'/admin/roles/' + ${role.id} + '/permissions'}" method="post">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div class="space-y-6">
+                <!-- Iterate each Module -->
+                <div th:each="entry : ${modulesMap}" class="module-card bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden" th:data-module="${entry.key}">
+                    
+                    <!-- Module Header -->
+                    <div class="px-6 py-4 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-600 flex items-center justify-center font-bold text-sm">
+                                <i class="bi bi-collection-fill"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-surface-900 text-sm tracking-wide" th:text="${entry.key}">COURSES</h2>
+                                <span class="text-xs text-gray-400 module-count-badge" th:text="${entry.value.size() + ' Permissions'}">5 Permissions</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" th:data-module="${entry.key}" onclick="setModulePermissions(this, true)" class="px-2.5 py-1 rounded-lg bg-white border border-surface-200 hover:bg-surface-100 text-[11px] font-semibold text-gray-700 transition-colors">
+                                Grant Module
+                            </button>
+                            <button type="button" th:data-module="${entry.key}" onclick="setModulePermissions(this, false)" class="px-2.5 py-1 rounded-lg bg-white border border-surface-200 hover:bg-surface-100 text-[11px] font-semibold text-gray-700 transition-colors">
+                                Revoke Module
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Module Permissions Grid -->
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <label th:each="perm : ${entry.value}" 
+                               class="perm-item p-4 rounded-xl border border-surface-200/80 hover:border-brand-300 hover:bg-brand-50/10 transition-all flex items-start gap-3 cursor-pointer select-none"
+                               th:data-module="${entry.key}"
+                               th:data-sensitive="${perm.sensitive}">
+                            <input type="checkbox" name="permissions" th:value="${perm.code}"
+                                   th:checked="${role.permissions != null and role.permissions.contains(perm)}"
+                                   th:data-module="${entry.key}"
+                                   th:data-sensitive="${perm.sensitive}"
+                                   onchange="updateCoverageStats()"
+                                   class="perm-checkbox w-4 h-4 text-brand-600 rounded mt-0.5 focus:ring-brand-500" />
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-sm font-semibold text-surface-900 perm-name" th:text="${perm.name}">View Courses</span>
+                                    <span th:if="${perm.sensitive}" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-50 text-red-600 border border-red-200" title="Sensitive High-Impact Action">
+                                        <i class="bi bi-exclamation-triangle-fill text-[9px]"></i> Sensitive
+                                    </span>
+                                </div>
+                                <p class="text-xs font-mono text-gray-500 mt-0.5 perm-code" th:text="${perm.code}">courses.view</p>
+                                <p class="text-xs text-gray-400 mt-1 line-clamp-2 perm-desc" th:text="${perm.description}">Browse course catalog and details</p>
+                            </div>
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Sticky Bottom Save Bar -->
+            <div class="sticky bottom-4 mt-8 bg-surface-900/95 backdrop-blur-md rounded-2xl p-4 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-white/10 text-white z-20 animate-fade-in">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-300">Updating Access Control Matrix for <strong class="text-white" th:text="${role.displayName}">Administrator</strong></p>
+                        <p class="text-[11px] text-gray-400">Zero-Trust authorization enforced across all web views and REST endpoints.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 self-end sm:self-auto">
+                    <a href="/admin/roles" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all">Cancel</a>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-lg shadow-brand-600/30 flex items-center gap-1.5">
+                        <i class="bi bi-save-fill"></i> Save Permissions
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+        <script>
+            function updateCoverageStats() {
+                const total = document.querySelectorAll('.perm-checkbox').length;
+                const checked = document.querySelectorAll('.perm-checkbox:checked').length;
+                const percent = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+                const countEl = document.getElementById('grantedCountDisplay');
+                const totalEl = document.getElementById('totalPermsCountDisplay');
+                const percentEl = document.getElementById('coveragePercentDisplay');
+                const barEl = document.getElementById('coverageProgressBar');
+
+                if (countEl) countEl.textContent = checked;
+                if (totalEl) totalEl.textContent = total;
+                if (percentEl) percentEl.textContent = percent + '%';
+                if (barEl) barEl.style.width = percent + '%';
+            }
+
+            function toggleAllPermissions(check) {
+                document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = check);
+                updateCoverageStats();
+            }
+
+            function setModulePermissions(btn, check) {
+                const module = btn.getAttribute('data-module');
+                document.querySelectorAll('.perm-checkbox[data-module="' + module + '"]').forEach(cb => cb.checked = check);
+                updateCoverageStats();
+            }
+
+            function filterPermissions() {
+                const q = document.getElementById('permissionSearch').value.toLowerCase().trim();
+                const stateFilter = document.getElementById('permStateFilter').value;
+                const items = document.querySelectorAll('.perm-item');
+
+                items.forEach(item => {
+                    const name = item.querySelector('.perm-name')?.textContent.toLowerCase() || '';
+                    const code = item.querySelector('.perm-code')?.textContent.toLowerCase() || '';
+                    const desc = item.querySelector('.perm-desc')?.textContent.toLowerCase() || '';
+                    const cb = item.querySelector('.perm-checkbox');
+                    const isChecked = cb ? cb.checked : false;
+                    const isSensitive = item.getAttribute('data-sensitive') === 'true';
+
+                    const matchesQuery = !q || name.includes(q) || code.includes(q) || desc.includes(q);
+                    
+                    let matchesState = true;
+                    if (stateFilter === 'GRANTED') matchesState = isChecked;
+                    else if (stateFilter === 'REVOKED') matchesState = !isChecked;
+                    else if (stateFilter === 'SENSITIVE') matchesState = isSensitive;
+
+                    if (matchesQuery && matchesState) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+
+                // Hide empty module cards
+                document.querySelectorAll('.module-card').forEach(card => {
+                    const visibleItems = card.querySelectorAll('.perm-item:not(.hidden)');
+                    if (visibleItems.length === 0) {
+                        card.classList.add('hidden');
+                    } else {
+                        card.classList.remove('hidden');
+                    }
+                });
+            }
+
+            // Initialize coverage stats on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                updateCoverageStats();
+            });
+        </script>
+
+    </div>
+</body>
+</html>

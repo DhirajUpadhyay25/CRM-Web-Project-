@@ -33,6 +33,10 @@ public class Employee
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role", length = 50, nullable = false)
 	private Role role = Role.EMPLOYEE;
+
+	@jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.EAGER)
+	@jakarta.persistence.JoinColumn(name = "system_role_id")
+	private SystemRole systemRole;
 	
 	public Long getId() { return id; }
 	public void setId(Long id) { this.id = id; }
@@ -48,4 +52,6 @@ public class Employee
 	public void setCity(String city) { this.city = city; }
 	public Role getRole() { return role; }
 	public void setRole(Role role) { this.role = role; }
+	public SystemRole getSystemRole() { return systemRole; }
+	public void setSystemRole(SystemRole systemRole) { this.systemRole = systemRole; }
 }

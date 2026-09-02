@@ -58,51 +58,51 @@
         <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 custom-scrollbar">
             
             <!-- Dashboard -->
-            <a href="/admin/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/dashboard">
+            <a th:if="${@rbac.can('dashboard.view')}" href="/admin/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/dashboard">
                 <i class="bi bi-grid-1x2-fill text-base"></i>
                 <span class="font-medium text-sm">Dashboard</span>
             </a>
             
             <!-- LEARNING Section -->
-            <div class="mt-5">
+            <div class="mt-5" th:if="${@rbac.can('courses.view') or @rbac.can('students.view') or @rbac.can('instructors.view')}">
                 <button onclick="toggleSection('learning')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>Learning</span>
                     <i id="learning-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="learning-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
-                    <a href="/admin/courses" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/courses">
+                    <a th:if="${@rbac.can('courses.view')}" href="/admin/courses" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/courses">
                         <i class="bi bi-play-btn-fill text-base"></i>
                         <span class="text-sm">Courses</span>
                     </a>
-                    <a href="/admin/categories" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/categories">
+                    <a th:if="${@rbac.can('categories.view')}" href="/admin/categories" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/categories">
                         <i class="bi bi-collection-fill text-base"></i>
                         <span class="text-sm">Categories</span>
                     </a>
-                    <a href="/admin/batches" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/batches">
+                    <a th:if="${@rbac.can('batches.view')}" href="/admin/batches" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/batches">
                         <i class="bi bi-calendar3 text-base"></i>
                         <span class="text-sm">Classes / Batches</span>
                     </a>
-                    <a href="/admin/students" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/students">
+                    <a th:if="${@rbac.can('students.view')}" href="/admin/students" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/students">
                         <i class="bi bi-mortarboard-fill text-base"></i>
                         <span class="text-sm">Students</span>
                     </a>
-                    <a href="/admin/instructors" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/instructors">
+                    <a th:if="${@rbac.can('instructors.view')}" href="/admin/instructors" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/instructors">
                         <i class="bi bi-person-workspace text-base"></i>
                         <span class="text-sm">Instructors</span>
                     </a>
-                    <a href="/admin/enrollments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enrollments">
+                    <a th:if="${@rbac.can('enrollments.view')}" href="/admin/enrollments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enrollments">
                         <i class="bi bi-journal-check text-base"></i>
                         <span class="text-sm">Enrollments</span>
                     </a>
-                    <a href="/admin/lessons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/lessons">
+                    <a th:if="${@rbac.can('curriculum.view')}" href="/admin/lessons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/lessons">
                         <i class="bi bi-book-half text-base"></i>
                         <span class="text-sm">Curriculum</span>
                     </a>
-                    <a href="/admin/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/certificates">
+                    <a th:if="${@rbac.can('certificates.view')}" href="/admin/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/certificates">
                         <i class="bi bi-award-fill text-base"></i>
                         <span class="text-sm">Certificates</span>
                     </a>
-                    <a href="/admin/assignments/submissions" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/assignments/submissions">
+                    <a th:if="${@rbac.can('assignments.view')}" href="/admin/assignments/submissions" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/assignments/submissions">
                         <i class="bi bi-file-earmark-check-fill text-base"></i>
                         <span class="text-sm">Submissions / Assignments</span>
                     </a>
@@ -110,57 +110,47 @@
             </div>
 
             <!-- COMMERCE Section -->
-            <div class="mt-3">
+            <div class="mt-3" th:if="${@rbac.can('orders.view') or @rbac.can('payments.view') or @rbac.can('coupons.view')}">
                 <button onclick="toggleSection('commerce')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>Commerce</span>
                     <i id="commerce-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="commerce-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
-                    <a href="/admin/orders" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/orders">
+                    <a th:if="${@rbac.can('orders.view')}" href="/admin/orders" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/orders">
                         <i class="bi bi-bag-check-fill text-base"></i>
                         <span class="text-sm">Orders</span>
                     </a>
-                    <a href="/admin/payments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/payments">
+                    <a th:if="${@rbac.can('payments.view')}" href="/admin/payments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/payments">
                         <i class="bi bi-credit-card-fill text-base"></i>
                         <span class="text-sm">Payments</span>
                     </a>
-                    <a href="/admin/coupons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/coupons">
+                    <a th:if="${@rbac.can('coupons.view')}" href="/admin/coupons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/coupons">
                         <i class="bi bi-tag-fill text-base"></i>
                         <span class="text-sm">Coupons / Discounts</span>
                     </a>
-                    <a href="/admin/refunds" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/refunds">
+                    <a th:if="${@rbac.can('refunds.view')}" href="/admin/refunds" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/refunds">
                         <i class="bi bi-arrow-return-left text-base"></i>
                         <span class="text-sm">Refunds</span>
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
-                        <i class="bi bi-receipt text-base"></i>
-                        <span class="text-sm">Invoices</span>
-                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
                     </a>
                 </div>
             </div>
 
             <!-- CRM Section -->
-            <div class="mt-3">
+            <div class="mt-3" th:if="${@rbac.can('leads.view') or @rbac.can('enquiries.view')}">
                 <button onclick="toggleSection('crm')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>CRM</span>
                     <i id="crm-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="crm-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
-                    <a href="/admin/leads" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/leads">
+                    <a th:if="${@rbac.can('leads.view')}" href="/admin/leads" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/leads">
                         <i class="bi bi-funnel-fill text-base"></i>
                         <span class="text-sm">Leads</span>
                     </a>
-                    <a href="/admin/enquiries" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enquiries">
+                    <a th:if="${@rbac.can('enquiries.view')}" href="/admin/enquiries" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enquiries">
                         <i class="bi bi-question-circle-fill text-base"></i>
                         <span class="text-sm">Enquiries</span>
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 cursor-not-allowed">
-                        <i class="bi bi-person-heart text-base"></i>
-                        <span class="text-sm">Customers</span>
-                        <span class="ml-auto text-[10px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
-                    </a>
-                    <a href="/admin/follow-ups" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/follow-ups">
+                    <a th:if="${@rbac.can('followups.view')}" href="/admin/follow-ups" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/follow-ups">
                         <i class="bi bi-telephone-outbound-fill text-base"></i>
                         <span class="text-sm">Follow-ups</span>
                     </a>
@@ -168,21 +158,21 @@
             </div>
 
             <!-- COMMUNICATION Section -->
-            <div class="mt-3">
+            <div class="mt-3" th:if="${@rbac.can('notifications.view') or @rbac.can('announcements.view')}">
                 <button onclick="toggleSection('comm')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>Communication</span>
                     <i id="comm-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="comm-items" class="sidebar-section-items space-y-0.5 mt-1">
-                    <a href="/admin/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/notifications">
+                    <a th:if="${@rbac.can('notifications.view')}" href="/admin/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/notifications">
                         <i class="bi bi-bell-fill text-base"></i>
                         <span class="text-sm">Notifications</span>
                     </a>
-                    <a href="/admin/announcements" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/announcements">
+                    <a th:if="${@rbac.can('announcements.view')}" href="/admin/announcements" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/announcements">
                         <i class="bi bi-megaphone-fill text-base"></i>
                         <span class="text-sm">Announcements</span>
                     </a>
-                    <a href="/admin/messages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/messages">
+                    <a th:if="${@rbac.can('messages.view')}" href="/admin/messages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/messages">
                         <i class="bi bi-envelope-fill text-base"></i>
                         <span class="text-sm">Email / Messages</span>
                     </a>
@@ -190,33 +180,33 @@
             </div>
 
             <!-- CONTENT Section -->
-            <div class="mt-3">
+            <div class="mt-3" th:if="${@rbac.can('pages.view') or @rbac.can('blogs.view') or @rbac.can('media.view')}">
                 <button onclick="toggleSection('content')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>Content</span>
                     <i id="content-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="content-items" class="sidebar-section-items space-y-0.5 mt-1">
-                    <a href="/admin/feedback" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/feedback">
+                    <a th:if="${@rbac.can('feedback.view')}" href="/admin/feedback" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/feedback">
                         <i class="bi bi-chat-quote-fill text-base"></i>
                         <span class="text-sm">Feedback</span>
                     </a>
-                    <a href="/admin/pages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/pages">
+                    <a th:if="${@rbac.can('pages.view')}" href="/admin/pages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/pages">
                         <i class="bi bi-file-earmark-text-fill text-base"></i>
                         <span class="text-sm">Pages</span>
                     </a>
-                    <a href="/admin/blogs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/blogs">
+                    <a th:if="${@rbac.can('blogs.view')}" href="/admin/blogs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/blogs">
                         <i class="bi bi-journal-richtext text-base"></i>
                         <span class="text-sm">Blog / Articles</span>
                     </a>
-                    <a href="/admin/faqs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/faqs">
+                    <a th:if="${@rbac.can('faqs.view')}" href="/admin/faqs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/faqs">
                         <i class="bi bi-patch-question-fill text-base"></i>
                         <span class="text-sm">FAQs</span>
                     </a>
-                    <a href="/admin/testimonials" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/testimonials">
+                    <a th:if="${@rbac.can('testimonials.view')}" href="/admin/testimonials" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/testimonials">
                         <i class="bi bi-star-fill text-base"></i>
                         <span class="text-sm">Testimonials</span>
                     </a>
-                    <a href="/admin/media" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/media">
+                    <a th:if="${@rbac.can('media.view')}" href="/admin/media" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/media">
                         <i class="bi bi-images text-base"></i>
                         <span class="text-sm">Media Library</span>
                     </a>
@@ -224,13 +214,13 @@
             </div>
 
             <!-- ANALYTICS Section -->
-            <div class="mt-3">
+            <div class="mt-3" th:if="${@rbac.can('reports.view')}">
                 <button onclick="toggleSection('analytics')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>Analytics</span>
                     <i id="analytics-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="analytics-items" class="sidebar-section-items space-y-0.5 mt-1">
-                    <a href="/admin/reports" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/reports">
+                    <a th:if="${@rbac.can('reports.view')}" href="/admin/reports" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/reports">
                         <i class="bi bi-graph-up-arrow text-base"></i>
                         <span class="text-sm">LMS Reports</span>
                     </a>
@@ -238,29 +228,29 @@
             </div>
 
             <!-- SYSTEM Section -->
-            <div class="mt-3">
+            <div class="mt-3" th:if="${@rbac.can('users.view') or @rbac.can('roles.view') or @rbac.can('audit_logs.view') or @rbac.can('monitoring.view') or @rbac.can('settings.view')}">
                 <button onclick="toggleSection('system')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>System</span>
                     <i id="system-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
                 </button>
                 <div id="system-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
-                    <a href="/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/users">
+                    <a th:if="${@rbac.can('users.view')}" href="/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/users">
                         <i class="bi bi-people-fill text-base"></i>
                         <span class="text-sm">Users</span>
                     </a>
-                    <a href="/admin/roles" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/roles">
+                    <a th:if="${@rbac.can('roles.view')}" href="/admin/roles" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/roles">
                         <i class="bi bi-shield-lock-fill text-base"></i>
                         <span class="text-sm">Roles &amp; Permissions</span>
                     </a>
-                    <a href="/admin/audit-logs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/audit-logs">
+                    <a th:if="${@rbac.can('audit_logs.view')}" href="/admin/audit-logs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/audit-logs">
                         <i class="bi bi-clock-history text-base"></i>
                         <span class="text-sm">Audit Logs</span>
                     </a>
-                    <a href="/admin/monitoring" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/monitoring">
+                    <a th:if="${@rbac.can('monitoring.view')}" href="/admin/monitoring" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/monitoring">
                         <i class="bi bi-activity text-base"></i>
                         <span class="text-sm">System Health</span>
                     </a>
-                    <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/settings">
+                    <a th:if="${@rbac.can('settings.view')}" href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/settings">
                         <i class="bi bi-gear-fill text-base"></i>
                         <span class="text-sm">Settings</span>
                     </a>

@@ -11,12 +11,16 @@ public enum AuditEventType {
     ACCESS_GRANTED(AuditCategory.AUTHORIZATION, AuditSeverity.INFO, "Access Granted"),
     ACCESS_DENIED(AuditCategory.SECURITY, AuditSeverity.HIGH, "Access Denied"),
 
-    // User Operations
+    // User & Role Operations
     USER_CREATED(AuditCategory.USER, AuditSeverity.INFO, "User Created"),
     USER_UPDATED(AuditCategory.USER, AuditSeverity.INFO, "User Updated"),
     USER_DELETED(AuditCategory.USER, AuditSeverity.HIGH, "User Deleted"),
     USER_STATUS_CHANGED(AuditCategory.USER, AuditSeverity.MEDIUM, "User Status Changed"),
     ROLE_CHANGED(AuditCategory.AUTHORIZATION, AuditSeverity.HIGH, "Role Changed"),
+    ROLE_CREATED(AuditCategory.AUTHORIZATION, AuditSeverity.MEDIUM, "RBAC Role Created"),
+    ROLE_UPDATED(AuditCategory.AUTHORIZATION, AuditSeverity.MEDIUM, "RBAC Role Updated"),
+    ROLE_DELETED(AuditCategory.AUTHORIZATION, AuditSeverity.HIGH, "RBAC Role Deleted"),
+    ROLE_ASSIGNED(AuditCategory.AUTHORIZATION, AuditSeverity.HIGH, "RBAC Role Assigned"),
 
     // Student Operations
     STUDENT_CREATED(AuditCategory.STUDENT, AuditSeverity.INFO, "Student Created"),
@@ -67,6 +71,10 @@ public enum AuditEventType {
     ENQUIRY_CREATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Enquiry Created"),
     ENQUIRY_UPDATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Enquiry Updated"),
     SETTINGS_CHANGED(AuditCategory.ADMIN, AuditSeverity.HIGH, "System Settings Changed"),
+    SETTING_UPDATED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Platform Setting Updated"),
+    MAINTENANCE_MODE_ENABLED(AuditCategory.SYSTEM, AuditSeverity.HIGH, "Maintenance Mode Enabled"),
+    MAINTENANCE_MODE_DISABLED(AuditCategory.SYSTEM, AuditSeverity.HIGH, "Maintenance Mode Disabled"),
+    TEST_EMAIL_SENT(AuditCategory.SYSTEM, AuditSeverity.LOW, "Test Email Sent"),
     AUDIT_EXPORTED(AuditCategory.ADMIN, AuditSeverity.MEDIUM, "Audit Logs Exported"),
 
     // System & Errors

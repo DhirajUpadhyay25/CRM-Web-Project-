@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('User Role Assignments', ~{::div})}">
+<body>
+    <div>
+
+        <!-- Header -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-surface-200 pb-5">
+            <div>
+                <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-1">
+                    <a href="/admin/roles" class="hover:text-brand-600 transition-colors">Roles &amp; RBAC</a>
+                    <i class="bi bi-chevron-right text-[10px]"></i>
+                    <span class="text-surface-900 font-bold">User Role Assignments</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Staff &amp; Admin Role Assignments</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-600 border border-brand-200">
+                        Zero-Trust RBAC
+                    </span>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">Assign custom or system RBAC roles to administrative employees to govern platform authorization.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/admin/roles" class="px-4 py-2 rounded-xl bg-white border border-surface-200 text-surface-900 hover:bg-surface-50 text-sm font-semibold transition-all shadow-sm flex items-center gap-2">
+                    <i class="bi bi-shield-lock-fill text-brand-600"></i> Manage Roles
+                </a>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-check-circle-fill text-emerald-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${successMsg}"></span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-exclamation-octagon-fill text-red-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Staff Personnel</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${employees != null ? employees.size() : 0}">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Assigned to RBAC Roles</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${employees != null ? #lists.size(employees.?[systemRole != null]) : 0}">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-shield-shaded"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available Roles</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${roles != null ? roles.size() : 0}">5</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="relative flex-1 max-w-md">
+                <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="userSearchInput" onkeyup="filterUsers()" placeholder="Search staff by name, email, phone or city..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="userRoleFilter" onchange="filterUsers()" class="px-3 py-2 rounded-xl border border-surface-200 text-xs font-semibold bg-white text-gray-700 focus:ring-2 focus:ring-brand-500">
+                    <option value="ALL">All Roles</option>
+                    <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.displayName}">Super Admin</option>
+                    <option value="NONE">Unassigned</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Users Assignment Table -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left" id="usersTable">
+                    <thead class="bg-surface-50 text-xs text-gray-500 uppercase tracking-wider border-b border-surface-200">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">Personnel &amp; Account</th>
+                            <th class="px-6 py-4 font-bold">Contact Details</th>
+                            <th class="px-6 py-4 font-bold">Current Assigned Role</th>
+                            <th class="px-6 py-4 font-bold text-right">Assign New Role</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-100">
+                        <tr th:each="emp : ${employees}" class="user-row hover:bg-surface-50/80 transition-colors"
+                            th:data-name="${emp.name}"
+                            th:data-email="${emp.email}"
+                            th:data-phone="${emp.phoneno}"
+                            th:data-city="${emp.city}"
+                            th:data-role-id="${emp.systemRole != null ? emp.systemRole.id : 'NONE'}">
+                            
+                            <!-- User & Account -->
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center font-bold text-white text-sm shadow-md shadow-brand-500/20">
+                                        <span th:text="${emp.name != null and !emp.name.isEmpty() ? emp.name.substring(0,1).toUpperCase() : 'U'}">U</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-surface-900 text-sm user-name" th:text="${emp.name}">Admin User</div>
+                                        <div class="text-xs text-gray-500 user-email" th:text="${emp.email}">admin@edutake.com</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Contact Details -->
+                            <td class="px-6 py-4">
+                                <div class="text-xs font-semibold text-surface-900 user-phone" th:text="${emp.phoneno ?: 'N/A'}">+91 9876543210</div>
+                                <div class="text-xs text-gray-400 user-city" th:text="${emp.city ?: 'Location not set'}">Mumbai</div>
+                            </td>
+
+                            <!-- Current Assigned Role -->
+                            <td class="px-6 py-4">
+                                <div th:if="${emp.systemRole != null}" class="inline-flex items-center gap-1.5">
+                                    <a th:href="@{'/admin/roles/' + ${emp.systemRole.id} + '/permissions'}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 transition-colors">
+                                        <i class="bi bi-shield-check"></i>
+                                        <span th:text="${emp.systemRole.displayName}">Super Admin</span>
+                                        <i class="bi bi-box-arrow-up-right text-[9px] text-brand-400"></i>
+                                    </a>
+                                </div>
+                                <div th:unless="${emp.systemRole != null}">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-surface-100 text-surface-700">
+                                        <span th:text="${emp.role != null ? emp.role.name() : 'DEFAULT'}">EMPLOYEE</span>
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Role Selector & Submit -->
+                            <td class="px-6 py-4 text-right">
+                                <form th:action="@{'/admin/roles/users/' + ${emp.id} + '/assign'}" method="post" class="inline-flex items-center gap-2">
+                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <select name="roleId" class="px-3 py-2 rounded-xl border border-surface-200 text-xs font-medium focus:ring-2 focus:ring-brand-500 bg-white">
+                                        <option value="">-- Remove Role --</option>
+                                        <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.displayName + ' (' + r.roleName + ')'}" th:selected="${emp.systemRole != null and emp.systemRole.id == r.id}"></option>
+                                    </select>
+                                    <button type="submit" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1">
+                                        <i class="bi bi-check2"></i> Assign
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            function filterUsers() {
+                const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
+                const roleFilter = document.getElementById('userRoleFilter').value;
+                const rows = document.querySelectorAll('.user-row');
+
+                rows.forEach(row => {
+                    const name = row.getAttribute('data-name')?.toLowerCase() || '';
+                    const email = row.getAttribute('data-email')?.toLowerCase() || '';
+                    const phone = row.getAttribute('data-phone')?.toLowerCase() || '';
+                    const city = row.getAttribute('data-city')?.toLowerCase() || '';
+                    const roleId = row.getAttribute('data-role-id');
+
+                    const matchesQuery = !q || name.includes(q) || email.includes(q) || phone.includes(q) || city.includes(q);
+                    const matchesRole = roleFilter === 'ALL' || roleId === roleFilter;
+
+                    if (matchesQuery && matchesRole) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+        </script>
+
+    </div>
+</body>
+</html>

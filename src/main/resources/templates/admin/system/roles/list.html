@@ -1,46 +1,482 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Role Management', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Role-Based Access Control', ~{::div})}">
 <body>
     <div>
-        <div class="mb-6 flex justify-between items-center">
+
+        <!-- Header -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-surface-200 pb-5">
             <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Role Management</h1>
-                <p class="text-gray-500 text-sm">Manage roles across the platform.</p>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Roles &amp; Access Control (RBAC)</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-600 border border-brand-200">
+                        Granular Security Matrix
+                    </span>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">Define platform roles, assign granular per-module permissions, and manage staff access control with audit trails.</p>
             </div>
-            <button class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors">
-                <i class="bi bi-plus-lg mr-1.5"></i> Add Role
-            </button>
+            <div class="flex items-center gap-3">
+                <a href="/admin/roles/users" class="px-4 py-2 rounded-xl bg-white border border-surface-200 text-surface-900 hover:bg-surface-50 text-sm font-semibold transition-all shadow-sm flex items-center gap-2">
+                    <i class="bi bi-people-fill text-brand-600"></i> User Assignments
+                </a>
+                <button type="button" onclick="openAddRoleModal()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                    <i class="bi bi-plus-lg"></i> Create Custom Role
+                </button>
+            </div>
         </div>
 
+        <!-- Feedback Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-check-circle-fill text-emerald-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${successMsg}"></span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-exclamation-octagon-fill text-red-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Role Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Defined Roles</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${roles != null ? roles.size() : 0}">5</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System Core Roles</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${roles != null ? #lists.size(roles.?[systemRole]) : 0}">5</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-person-gear"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Custom Roles</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${roles != null ? #lists.size(roles.?[!systemRole]) : 0}">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="bi bi-check-all"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Permissions Catalog</p>
+                    <p class="text-2xl font-extrabold text-surface-900" th:text="${totalPermissionsCount ?: 44}">44</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="relative flex-1 max-w-md">
+                <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="roleSearchInput" onkeyup="filterRoles()" placeholder="Search roles by title, code or description..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="roleTypeFilter" onchange="filterRoles()" class="px-3 py-2 rounded-xl border border-surface-200 text-xs font-semibold bg-white text-gray-700 focus:ring-2 focus:ring-brand-500">
+                    <option value="ALL">All Role Types</option>
+                    <option value="SYSTEM">System Core Only</option>
+                    <option value="CUSTOM">Custom Roles Only</option>
+                </select>
+                <select id="roleStatusFilter" onchange="filterRoles()" class="px-3 py-2 rounded-xl border border-surface-200 text-xs font-semibold bg-white text-gray-700 focus:ring-2 focus:ring-brand-500">
+                    <option value="ALL">All Statuses</option>
+                    <option value="ACTIVE">Active Only</option>
+                    <option value="INACTIVE">Inactive Only</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Roles Table -->
         <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-surface-50 text-left text-xs text-gray-400 uppercase tracking-wider border-b border-surface-200">
-                            <th class="px-6 py-3 font-semibold">ID</th>
-                            <th class="px-6 py-3 font-semibold">Details</th>
-                            <th class="px-6 py-3 font-semibold">Actions</th>
+                <table class="w-full text-sm text-left" id="rolesTable">
+                    <thead class="bg-surface-50 text-xs text-gray-500 uppercase tracking-wider border-b border-surface-200">
+                        <tr>
+                            <th class="px-6 py-4 font-bold">Role &amp; Identity</th>
+                            <th class="px-6 py-4 font-bold">Type</th>
+                            <th class="px-6 py-4 font-bold">Status</th>
+                            <th class="px-6 py-4 font-bold">Granted Permissions</th>
+                            <th class="px-6 py-4 font-bold">Assigned Users</th>
+                            <th class="px-6 py-4 font-bold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-100">
-                        <tr th:each="item : ${items}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 text-surface-900" th:text="${item.id}">1</td>
-                            <td class="px-6 py-4 text-gray-500">Item Details Here</td>
+                        <tr th:each="role : ${roles}" class="role-row hover:bg-surface-50/80 transition-colors"
+                            th:data-name="${role.displayName}"
+                            th:data-code="${role.roleName}"
+                            th:data-desc="${role.description}"
+                            th:data-type="${role.systemRole ? 'SYSTEM' : 'CUSTOM'}"
+                            th:data-status="${role.active ? 'ACTIVE' : 'INACTIVE'}">
+                            
+                            <!-- Role & Identity -->
                             <td class="px-6 py-4">
-                                <button class="text-brand-600 hover:text-brand-800 text-xs font-semibold mr-3">Edit</button>
-                                <button class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shadow-sm"
+                                         th:classappend="${role.roleName == 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-700' : (role.roleName == 'ADMIN' ? 'bg-brand-100 text-brand-700' : (role.roleName == 'INSTRUCTOR' ? 'bg-amber-100 text-amber-700' : (role.roleName == 'STUDENT' ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-100 text-gray-700')))}">
+                                        <i th:class="${role.roleName == 'SUPER_ADMIN' ? 'bi bi-shield-shaded' : (role.roleName == 'ADMIN' ? 'bi bi-shield-lock-fill' : (role.roleName == 'INSTRUCTOR' ? 'bi bi-mortarboard-fill' : (role.roleName == 'STUDENT' ? 'bi bi-person-fill' : 'bi bi-person-gear')))}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-surface-900 text-sm role-display-name" th:text="${role.displayName}">Super Admin</div>
+                                        <div class="text-xs font-mono font-semibold text-gray-500 role-code-name" th:text="${role.roleName}">SUPER_ADMIN</div>
+                                        <div class="text-xs text-gray-400 mt-0.5 line-clamp-1 role-description" th:text="${role.description}">Full platform administrator</div>
+                                    </div>
+                                </div>
                             </td>
-                        </tr>
-                        <tr th:if="${items == null or items.isEmpty()}">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                <i class="bi bi-inbox text-3xl mb-2 block"></i>
-                                No roles found. Use the Data Seeder to add sample data.
+
+                            <!-- Type -->
+                            <td class="px-6 py-4">
+                                <span th:if="${role.systemRole}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    <i class="bi bi-lock-fill text-[10px]"></i> System Core
+                                </span>
+                                <span th:unless="${role.systemRole}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <i class="bi bi-person-gear text-[10px]"></i> Custom Role
+                                </span>
+                            </td>
+
+                            <!-- Status & Quick Toggle -->
+                            <td class="px-6 py-4">
+                                <form th:action="@{'/admin/roles/' + ${role.id} + '/toggle-status'}" method="post" class="inline-block">
+                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" th:title="${role.active ? 'Click to deactivate' : 'Click to activate'}"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-transform active:scale-95 cursor-pointer"
+                                            th:classappend="${role.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'}">
+                                        <span class="w-1.5 h-1.5 rounded-full" th:classappend="${role.active ? 'bg-emerald-500' : 'bg-gray-400'}"></span>
+                                        <span th:text="${role.active ? 'Active' : 'Inactive'}">Active</span>
+                                    </button>
+                                </form>
+                            </td>
+
+                            <!-- Granted Permissions -->
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <a th:href="@{'/admin/roles/' + ${role.id} + '/permissions'}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-100 hover:bg-brand-50 hover:text-brand-700 text-surface-900 text-xs font-semibold transition-all border border-surface-200/60 shadow-xs">
+                                        <i class="bi bi-key-fill text-brand-600"></i>
+                                        <span th:text="${(role.permissions != null ? role.permissions.size() : 0) + ' Permissions'}">0 Permissions</span>
+                                        <i class="bi bi-pencil-square text-[11px] text-gray-400"></i>
+                                    </a>
+                                    <button type="button" th:data-id="${role.id}" th:data-name="${role.displayName}" onclick="previewPermissionsModal(this)" class="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-surface-100 transition-colors" title="Quick View Permissions">
+                                        <i class="bi bi-eye-fill text-sm"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                            <!-- Assigned Users -->
+                            <td class="px-6 py-4">
+                                <a href="/admin/roles/users" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-brand-600 transition-colors">
+                                    <i class="bi bi-people text-sm"></i>
+                                    <span th:text="${(roleUserCounts != null and roleUserCounts.containsKey(role.id) ? roleUserCounts.get(role.id) : 0) + ' Users'}">0 Users</span>
+                                </a>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <!-- Permissions Matrix -->
+                                    <a th:href="@{'/admin/roles/' + ${role.id} + '/permissions'}" class="p-2 rounded-xl bg-surface-100 hover:bg-brand-50 hover:text-brand-600 text-gray-600 transition-all" title="Manage Permissions Matrix">
+                                        <i class="bi bi-grid-3x3-gap-fill text-sm"></i>
+                                    </a>
+                                    <!-- Edit Metadata -->
+                                    <button type="button" th:data-id="${role.id}" th:data-name="${role.roleName}" th:data-display="${role.displayName}" th:data-desc="${role.description}" th:data-active="${role.active}" onclick="openEditRoleModal(this)" class="p-2 rounded-xl bg-surface-100 hover:bg-brand-50 hover:text-brand-600 text-gray-600 transition-all" title="Edit Role Details">
+                                        <i class="bi bi-pencil-fill text-sm"></i>
+                                    </button>
+                                    <!-- Duplicate -->
+                                    <button type="button" th:data-id="${role.id}" th:data-name="${role.roleName}" onclick="openDuplicateRoleModal(this)" class="p-2 rounded-xl bg-surface-100 hover:bg-purple-50 hover:text-purple-600 text-gray-600 transition-all" title="Duplicate Role">
+                                        <i class="bi bi-copy text-sm"></i>
+                                    </button>
+                                    <!-- Delete (Custom Only) -->
+                                    <button th:if="${!role.systemRole}" type="button" th:data-id="${role.id}" th:data-name="${role.displayName}" onclick="openDeleteRoleModal(this)" class="p-2 rounded-xl bg-surface-100 hover:bg-red-50 hover:text-red-600 text-gray-600 transition-all" title="Delete Custom Role">
+                                        <i class="bi bi-trash-fill text-sm"></i>
+                                    </button>
+                                    <span th:if="${role.systemRole}" class="p-2 text-gray-300 cursor-not-allowed" title="System core role cannot be deleted">
+                                        <i class="bi bi-lock-fill text-sm"></i>
+                                    </span>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- ============================================================= -->
+        <!-- CREATE ROLE MODAL -->
+        <!-- ============================================================= -->
+        <div id="addRoleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-surface-200 animate-slide-down">
+                <div class="px-6 py-4 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+                    <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-shield-plus text-brand-600"></i> Create Custom Role
+                    </h3>
+                    <button type="button" onclick="closeAddRoleModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <form th:action="@{/admin/roles/create}" method="post" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Role Identifier (Unique Code)</label>
+                        <input type="text" name="roleName" placeholder="e.g. CONTENT_MANAGER, SALES_LEAD" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-mono uppercase" required />
+                        <p class="text-[11px] text-gray-400 mt-1">Uppercase alphanumeric string used for system access control checks.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Display Name</label>
+                        <input type="text" name="displayName" placeholder="e.g. Content Manager" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium" required />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Description</label>
+                        <textarea name="description" rows="3" placeholder="Summary of role responsibilities and permission scope" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"></textarea>
+                    </div>
+                    <div class="pt-3 flex justify-end gap-3 border-t border-surface-100">
+                        <button type="button" onclick="closeAddRoleModal()" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-surface-100 text-sm font-semibold">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-md shadow-brand-500/20">Create Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- EDIT ROLE MODAL -->
+        <!-- ============================================================= -->
+        <div id="editRoleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-surface-200 animate-slide-down">
+                <div class="px-6 py-4 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+                    <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-pencil-square text-brand-600"></i> Edit Role Details
+                    </h3>
+                    <button type="button" onclick="closeEditRoleModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <form id="editRoleForm" method="post" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Display Name</label>
+                        <input type="text" id="editDisplayName" name="displayName" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium" required />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Description</label>
+                        <textarea id="editDescription" name="description" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm"></textarea>
+                    </div>
+                    <div class="flex items-center gap-3 pt-2">
+                        <input type="checkbox" id="editActive" name="active" value="true" class="w-4 h-4 text-brand-600 rounded" />
+                        <label for="editActive" class="text-sm font-semibold text-surface-900">Active Role Status</label>
+                    </div>
+                    <div class="pt-3 flex justify-end gap-3 border-t border-surface-100">
+                        <button type="button" onclick="closeEditRoleModal()" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-surface-100 text-sm font-semibold">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-md shadow-brand-500/20">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- DUPLICATE ROLE MODAL -->
+        <!-- ============================================================= -->
+        <div id="duplicateRoleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-surface-200 animate-slide-down">
+                <div class="px-6 py-4 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+                    <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-copy text-purple-600"></i> Duplicate Role
+                    </h3>
+                    <button type="button" onclick="closeDuplicateRoleModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <form id="duplicateRoleForm" method="post" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <p class="text-xs text-gray-500">This will copy all existing permissions from the selected role to a new custom role.</p>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">New Role Identifier</label>
+                        <input type="text" id="duplicateNewRoleName" name="newRoleName" placeholder="e.g. INSTRUCTOR_LEAD" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono uppercase" required />
+                    </div>
+                    <div class="pt-3 flex justify-end gap-3 border-t border-surface-100">
+                        <button type="button" onclick="closeDuplicateRoleModal()" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-surface-100 text-sm font-semibold">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold shadow-md shadow-purple-500/20">Duplicate Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- DELETE ROLE MODAL -->
+        <!-- ============================================================= -->
+        <div id="deleteRoleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-surface-200 animate-slide-down">
+                <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex items-center justify-between">
+                    <h3 class="font-bold text-red-900 flex items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill text-red-600"></i> Delete Custom Role
+                    </h3>
+                    <button type="button" onclick="closeDeleteRoleModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <form id="deleteRoleForm" method="post" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <p class="text-sm text-gray-700">Are you sure you want to permanently delete role <strong id="deleteRoleDisplayName" class="text-surface-900"></strong>? Any employees assigned to this role will be detached.</p>
+                    <div class="pt-3 flex justify-end gap-3 border-t border-surface-100">
+                        <button type="button" onclick="closeDeleteRoleModal()" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-surface-100 text-sm font-semibold">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-md shadow-red-500/20">Delete Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- QUICK PERMISSIONS PREVIEW MODAL -->
+        <!-- ============================================================= -->
+        <div id="previewPermsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden border border-surface-200 animate-slide-down flex flex-col max-h-[85vh]">
+                <div class="px-6 py-4 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-key-fill text-brand-600"></i> Granted Permissions
+                        </h3>
+                        <p class="text-xs text-gray-500" id="previewRoleSubtitle">Role: Super Admin</p>
+                    </div>
+                    <button type="button" onclick="closePreviewPermsModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="p-6 overflow-y-auto space-y-3 flex-1" id="previewPermsContainer">
+                    <div class="text-center py-8 text-gray-400">Loading permissions...</div>
+                </div>
+                <div class="px-6 py-3 bg-surface-50 border-t border-surface-200 flex items-center justify-between">
+                    <span class="text-xs text-gray-500" id="previewTotalCount">0 permissions granted</span>
+                    <a id="previewMatrixBtn" href="#" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm flex items-center gap-1.5">
+                        <i class="bi bi-pencil-square"></i> Open Full Matrix
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function filterRoles() {
+                const q = document.getElementById('roleSearchInput').value.toLowerCase().trim();
+                const typeFilter = document.getElementById('roleTypeFilter').value;
+                const statusFilter = document.getElementById('roleStatusFilter').value;
+                const rows = document.querySelectorAll('.role-row');
+
+                rows.forEach(row => {
+                    const name = row.getAttribute('data-name')?.toLowerCase() || '';
+                    const code = row.getAttribute('data-code')?.toLowerCase() || '';
+                    const desc = row.getAttribute('data-desc')?.toLowerCase() || '';
+                    const type = row.getAttribute('data-type');
+                    const status = row.getAttribute('data-status');
+
+                    const matchesQuery = !q || name.includes(q) || code.includes(q) || desc.includes(q);
+                    const matchesType = typeFilter === 'ALL' || type === typeFilter;
+                    const matchesStatus = statusFilter === 'ALL' || status === statusFilter;
+
+                    if (matchesQuery && matchesType && matchesStatus) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            function openAddRoleModal() {
+                document.getElementById('addRoleModal').classList.remove('hidden');
+            }
+            function closeAddRoleModal() {
+                document.getElementById('addRoleModal').classList.add('hidden');
+            }
+
+            function openEditRoleModal(btn) {
+                const id = btn.getAttribute('data-id');
+                const display = btn.getAttribute('data-display');
+                const desc = btn.getAttribute('data-desc');
+                const active = btn.getAttribute('data-active') === 'true';
+
+                document.getElementById('editRoleForm').action = '/admin/roles/' + id + '/edit';
+                document.getElementById('editDisplayName').value = display || '';
+                document.getElementById('editDescription').value = desc || '';
+                document.getElementById('editActive').checked = active;
+                document.getElementById('editRoleModal').classList.remove('hidden');
+            }
+            function closeEditRoleModal() {
+                document.getElementById('editRoleModal').classList.add('hidden');
+            }
+
+            function openDuplicateRoleModal(btn) {
+                const id = btn.getAttribute('data-id');
+                const name = btn.getAttribute('data-name');
+                document.getElementById('duplicateRoleForm').action = '/admin/roles/' + id + '/duplicate';
+                document.getElementById('duplicateNewRoleName').value = name + '_COPY';
+                document.getElementById('duplicateRoleModal').classList.remove('hidden');
+            }
+            function closeDuplicateRoleModal() {
+                document.getElementById('duplicateRoleModal').classList.add('hidden');
+            }
+
+            function openDeleteRoleModal(btn) {
+                const id = btn.getAttribute('data-id');
+                const display = btn.getAttribute('data-name');
+                document.getElementById('deleteRoleForm').action = '/admin/roles/' + id + '/delete';
+                document.getElementById('deleteRoleDisplayName').textContent = display;
+                document.getElementById('deleteRoleModal').classList.remove('hidden');
+            }
+            function closeDeleteRoleModal() {
+                document.getElementById('deleteRoleModal').classList.add('hidden');
+            }
+
+            function previewPermissionsModal(btn) {
+                const id = btn.getAttribute('data-id');
+                const name = btn.getAttribute('data-name');
+                const container = document.getElementById('previewPermsContainer');
+                document.getElementById('previewRoleSubtitle').textContent = 'Role: ' + name;
+                document.getElementById('previewMatrixBtn').href = '/admin/roles/' + id + '/permissions';
+                container.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="bi bi-arrow-repeat animate-spin text-2xl"></i><p class="mt-2 text-xs">Loading permissions...</p></div>';
+                document.getElementById('previewPermsModal').classList.remove('hidden');
+
+                fetch('/admin/api/roles/' + id + '/permissions')
+                    .then(res => res.json())
+                    .then(perms => {
+                        if (!perms || perms.length === 0) {
+                            container.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="bi bi-shield-x text-3xl"></i><p class="mt-2 text-sm">No permissions granted to this role.</p></div>';
+                            document.getElementById('previewTotalCount').textContent = '0 permissions granted';
+                            return;
+                        }
+
+                        document.getElementById('previewTotalCount').textContent = perms.length + ' permissions granted';
+                        
+                        // Group by module
+                        const groups = {};
+                        perms.forEach(p => {
+                            const mod = p.module || 'OTHER';
+                            if (!groups[mod]) groups[mod] = [];
+                            groups[mod].push(p);
+                        });
+
+                        let html = '';
+                        for (const mod in groups) {
+                            html += '<div class="p-3 bg-surface-50 rounded-xl border border-surface-200/80 mb-2">';
+                            html += '<h4 class="text-xs font-bold text-surface-900 tracking-wider uppercase mb-2 flex items-center gap-1.5"><i class="bi bi-folder-fill text-brand-600"></i> ' + mod + ' (' + groups[mod].length + ')</h4>';
+                            html += '<div class="flex flex-wrap gap-1.5">';
+                            groups[mod].forEach(p => {
+                                html += '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ' + (p.sensitive ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-white text-surface-800 border border-surface-200') + '" title="' + (p.description || '') + '">';
+                                html += '<i class="bi bi-check2 text-emerald-600 font-bold"></i> ' + (p.name || p.code);
+                                if (p.sensitive) html += ' <i class="bi bi-exclamation-triangle-fill text-red-500 text-[10px]" title="Sensitive"></i>';
+                                html += '</span>';
+                            });
+                            html += '</div></div>';
+                        }
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        container.innerHTML = '<div class="text-center py-8 text-red-500"><i class="bi bi-exclamation-circle text-2xl"></i><p class="mt-2 text-sm">Failed to load permissions.</p></div>';
+                    });
+            }
+
+            function closePreviewPermsModal() {
+                document.getElementById('previewPermsModal').classList.add('hidden');
+            }
+        </script>
+
     </div>
 </body>
 </html>

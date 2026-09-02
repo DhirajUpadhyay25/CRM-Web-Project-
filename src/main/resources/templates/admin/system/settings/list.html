@@ -1,165 +1,548 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Settings', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Settings & Configuration', ~{::div})}">
 <body>
     <div>
 
-        <!-- Header -->
-        <div class="mb-6 border-b border-surface-200 pb-4">
-            <h1 class="text-2xl font-bold text-surface-900 mb-1">Settings</h1>
-            <p class="text-gray-500 text-sm">Platform configuration and system information.</p>
+        <!-- Page Header -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-surface-200 pb-5">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Settings &amp; Platform Policies</h1>
+                    <span th:if="${isMaintenanceActive}" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white animate-pulse">
+                        Maintenance Mode ACTIVE
+                    </span>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">Configure global application branding, LMS learning policies, security parameters, and communication gateways.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="openTestEmailModal()" class="px-4 py-2 rounded-xl bg-white border border-surface-200 text-surface-900 hover:bg-surface-50 text-sm font-semibold transition-all shadow-sm flex items-center gap-2">
+                    <i class="bi bi-send text-brand-600"></i> Send Test Email
+                </button>
+                <button type="button" onclick="quickToggleMaintenance()" class="px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center gap-2"
+                        th:classappend="${isMaintenanceActive} ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-surface-800 hover:bg-surface-900 text-white'">
+                    <i class="bi bi-power"></i> <span th:text="${isMaintenanceActive} ? 'Disable Maintenance' : 'Enable Maintenance'">Toggle Maintenance</span>
+                </button>
+            </div>
         </div>
 
-        <!-- Alerts -->
-        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
-            <i class="bi bi-check-circle-fill"></i>
-            <span class="text-sm font-medium" th:text="${successMsg}"></span>
+        <!-- Success/Error Feedback Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-check-circle-fill text-emerald-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${successMsg}">Settings updated successfully.</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="bi bi-x-lg"></i></button>
         </div>
-        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            <span class="text-sm font-medium" th:text="${errorMsg}"></span>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            <!-- Platform Info -->
-            <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                    <h2 class="font-bold text-surface-900 flex items-center gap-2">
-                        <i class="bi bi-info-circle text-brand-500"></i> Platform Information
-                    </h2>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Application Name</span>
-                        <span class="text-sm font-medium text-surface-900" th:text="${appName ?: 'EduTake'}">EduTake</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Version</span>
-                        <span class="text-sm font-medium text-surface-900" th:text="${appVersion ?: '1.0.0'}">1.0.0</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2">
-                        <span class="text-sm text-gray-500">Environment</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-600" th:text="${environment ?: 'Production'}">Production</span>
-                    </div>
-                </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-exclamation-octagon-fill text-red-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${errorMsg}">Failed to update settings.</span>
             </div>
-
-            <!-- Admin Account -->
-            <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                    <h2 class="font-bold text-surface-900 flex items-center gap-2">
-                        <i class="bi bi-person-circle text-brand-500"></i> Admin Account
-                    </h2>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Admin Email</span>
-                        <span class="text-sm font-medium text-surface-900" th:text="${adminEmail ?: 'admin@edutake.com'}">admin@edutake.com</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Role</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-50 text-brand-600">Super Admin</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2">
-                        <span class="text-sm text-gray-500">Last Login</span>
-                        <span class="text-sm text-surface-900" th:text="${lastLogin ?: 'N/A'}">N/A</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Database Info -->
-            <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                    <h2 class="font-bold text-surface-900 flex items-center gap-2">
-                        <i class="bi bi-database text-brand-500"></i> Database Information
-                    </h2>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Database Type</span>
-                        <span class="text-sm font-medium text-surface-900" th:text="${dbType ?: 'H2 / MySQL'}">H2 / MySQL</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Status</span>
-                        <span class="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
-                            <i class="bi bi-check-circle-fill text-xs"></i> Connected
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between py-2">
-                        <span class="text-sm text-gray-500">Total Tables</span>
-                        <span class="text-sm font-medium text-surface-900" th:text="${tableCount ?: 'N/A'}">N/A</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Razorpay Config -->
-            <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                    <h2 class="font-bold text-surface-900 flex items-center gap-2">
-                        <i class="bi bi-credit-card text-brand-500"></i> Razorpay Configuration
-                    </h2>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Key ID</span>
-                        <span class="text-sm font-medium text-surface-900 font-mono" th:text="${razorpayKeyId ?: 'rzp_test_XXXXXXX'}">rzp_test_XXXXXXX</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2 border-b border-surface-100">
-                        <span class="text-sm text-gray-500">Key Secret</span>
-                        <span class="text-sm font-medium text-surface-900 font-mono">••••••••••••</span>
-                    </div>
-                    <div class="flex items-center justify-between py-2">
-                        <span class="text-sm text-gray-500">Status</span>
-                        <span class="inline-flex items-center gap-1.5 text-sm font-medium"
-                              th:classappend="${razorpayConfigured ? 'text-green-600' : 'text-amber-600'}">
-                            <i th:if="${razorpayConfigured}" class="bi bi-check-circle-fill text-xs"></i>
-                            <i th:unless="${razorpayConfigured}" class="bi bi-exclamation-circle-fill text-xs"></i>
-                            <span th:text="${razorpayConfigured ? 'Configured' : 'Not Configured'}">Not Configured</span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
+            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700"><i class="bi bi-x-lg"></i></button>
         </div>
 
-        <!-- Quick Actions - dev profile only. Both actions target @Profile("dev") controllers,
-             so outside dev the routes do not exist and these buttons would 404. -->
-        <div th:if="${devToolsEnabled}" class="mt-6 bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                <h2 class="font-bold text-surface-900 flex items-center gap-2">
-                    <i class="bi bi-lightning text-brand-500"></i> Quick Actions
-                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700">Development only</span>
-                </h2>
+        <!-- Settings Navigation Tabs -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm mb-6 overflow-hidden">
+            <div class="flex flex-wrap border-b border-surface-200 bg-surface-50 px-3 pt-2 gap-1" id="settingsTabs">
+                <button type="button" onclick="switchTab('general')" id="tab-btn-general" class="tab-btn active px-4 py-3 text-sm font-semibold rounded-t-xl border-b-2 border-brand-600 text-brand-600 bg-white flex items-center gap-2 transition-all">
+                    <i class="bi bi-sliders"></i> General
+                </button>
+                <button type="button" onclick="switchTab('platform')" id="tab-btn-platform" class="tab-btn px-4 py-3 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition-all">
+                    <i class="bi bi-mortarboard-fill"></i> LMS &amp; Policies
+                </button>
+                <button type="button" onclick="switchTab('security')" id="tab-btn-security" class="tab-btn px-4 py-3 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition-all">
+                    <i class="bi bi-shield-lock-fill"></i> Security &amp; Auth
+                </button>
+                <button type="button" onclick="switchTab('email')" id="tab-btn-email" class="tab-btn px-4 py-3 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition-all">
+                    <i class="bi bi-envelope-at-fill"></i> Email / SMTP
+                </button>
+                <button type="button" onclick="switchTab('file')" id="tab-btn-file" class="tab-btn px-4 py-3 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition-all">
+                    <i class="bi bi-folder-fill"></i> File &amp; Media
+                </button>
+                <button type="button" onclick="switchTab('maintenance')" id="tab-btn-maintenance" class="tab-btn px-4 py-3 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition-all">
+                    <i class="bi bi-cone-striped"></i> Maintenance
+                </button>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <form th:action="@{/admin/seed-test-data}" method="post"
-                          onsubmit="return confirm('Seed test data? This writes courses, enrollments, orders and certificates to the database.');">
-                        <button type="submit" class="w-full text-left flex items-center gap-4 p-4 rounded-xl border border-surface-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-200 transition-colors">
-                                <i class="bi bi-database-add text-lg"></i>
+
+            <!-- ============================================================= -->
+            <!-- TAB 1: GENERAL SETTINGS -->
+            <!-- ============================================================= -->
+            <div id="tab-content-general" class="tab-content p-6 sm:p-8 space-y-6">
+                <form th:action="@{/admin/settings/update/GENERAL}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Platform / Application Name</label>
+                            <input type="text" name="general.app_name" th:value="${generalSettings['general.app_name']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Application Tagline / Description</label>
+                            <input type="text" name="general.app_description" th:value="${generalSettings['general.app_description']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Public Contact Email</label>
+                            <input type="email" name="general.contact_email" th:value="${generalSettings['general.contact_email']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Support Helpline Email</label>
+                            <input type="email" name="general.support_email" th:value="${generalSettings['general.support_email']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Support Phone Number</label>
+                            <input type="text" name="general.support_phone" th:value="${generalSettings['general.support_phone']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Base Website URL</label>
+                            <input type="url" name="general.website_url" th:value="${generalSettings['general.website_url']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Default Timezone</label>
+                            <select name="general.default_timezone" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white">
+                                <option value="Asia/Kolkata" th:selected="${generalSettings['general.default_timezone'] == 'Asia/Kolkata'}">Asia/Kolkata (IST +05:30)</option>
+                                <option value="UTC" th:selected="${generalSettings['general.default_timezone'] == 'UTC'}">UTC (GMT +00:00)</option>
+                                <option value="America/New_York" th:selected="${generalSettings['general.default_timezone'] == 'America/New_York'}">America/New_York (EST -05:00)</option>
+                                <option value="Europe/London" th:selected="${generalSettings['general.default_timezone'] == 'Europe/London'}">Europe/London (GMT +01:00)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Default Currency &amp; Symbol</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="text" name="general.currency" th:value="${generalSettings['general.currency']}" placeholder="INR" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                                <input type="text" name="general.currency_symbol" th:value="${generalSettings['general.currency_symbol']}" placeholder="₹" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Date Format</label>
+                            <select name="general.date_format" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white">
+                                <option value="YYYY-MM-DD" th:selected="${generalSettings['general.date_format'] == 'YYYY-MM-DD'}">YYYY-MM-DD (2026-09-02)</option>
+                                <option value="DD/MM/YYYY" th:selected="${generalSettings['general.date_format'] == 'DD/MM/YYYY'}">DD/MM/YYYY (02/09/2026)</option>
+                                <option value="MM/DD/YYYY" th:selected="${generalSettings['general.date_format'] == 'MM/DD/YYYY'}">MM/DD/YYYY (09/02/2026)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Default Table Pagination</label>
+                            <input type="number" name="general.default_pagination_size" th:value="${generalSettings['general.default_pagination_size']}" min="5" max="100" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-surface-200 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                            <i class="bi bi-save-fill"></i> Save General Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 2: PLATFORM / LMS POLICIES -->
+            <!-- ============================================================= -->
+            <div id="tab-content-platform" class="tab-content hidden p-6 sm:p-8 space-y-6">
+                <form th:action="@{/admin/settings/update/PLATFORM}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Student Policies -->
+                        <div class="bg-surface-50 rounded-2xl p-6 border border-surface-200 space-y-4">
+                            <h3 class="font-bold text-surface-900 flex items-center gap-2 text-sm border-b border-surface-200 pb-3">
+                                <i class="bi bi-person-fill text-brand-600"></i> Student &amp; Learner Policies
+                            </h3>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Public Registration</p>
+                                    <p class="text-xs text-gray-500">Allow prospective students to register accounts</p>
+                                </div>
+                                <input type="checkbox" name="platform.student_registration_enabled" value="true" th:checked="${platformSettings['platform.student_registration_enabled'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Require Email Verification</p>
+                                    <p class="text-xs text-gray-500">Block dashboard access until email confirmation</p>
+                                </div>
+                                <input type="checkbox" name="platform.student_email_verification_required" value="true" th:checked="${platformSettings['platform.student_email_verification_required'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Allow Profile Editing</p>
+                                    <p class="text-xs text-gray-500">Permit students to update their profile bio and avatars</p>
+                                </div>
+                                <input type="checkbox" name="platform.student_profile_edit_allowed" value="true" th:checked="${platformSettings['platform.student_profile_edit_allowed'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                        </div>
+
+                        <!-- Instructor Policies -->
+                        <div class="bg-surface-50 rounded-2xl p-6 border border-surface-200 space-y-4">
+                            <h3 class="font-bold text-surface-900 flex items-center gap-2 text-sm border-b border-surface-200 pb-3">
+                                <i class="bi bi-person-workspace text-brand-600"></i> Instructor &amp; Teacher Policies
+                            </h3>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Instructor Applications</p>
+                                    <p class="text-xs text-gray-500">Allow new instructors to submit teacher applications</p>
+                                </div>
+                                <input type="checkbox" name="platform.instructor_registration_enabled" value="true" th:checked="${platformSettings['platform.instructor_registration_enabled'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Admin Approval Required</p>
+                                    <p class="text-xs text-gray-500">Require manual admin verification before teaching</p>
+                                </div>
+                                <input type="checkbox" name="platform.instructor_approval_required" value="true" th:checked="${platformSettings['platform.instructor_approval_required'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Instructors Can Publish</p>
+                                    <p class="text-xs text-gray-500">Allow instructors to publish courses directly</p>
+                                </div>
+                                <input type="checkbox" name="platform.instructor_publish_allowed" value="true" th:checked="${platformSettings['platform.instructor_publish_allowed'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                        </div>
+
+                        <!-- Course & Commerce Policies -->
+                        <div class="bg-surface-50 rounded-2xl p-6 border border-surface-200 space-y-4">
+                            <h3 class="font-bold text-surface-900 flex items-center gap-2 text-sm border-b border-surface-200 pb-3">
+                                <i class="bi bi-play-circle-fill text-brand-600"></i> Course &amp; Catalog Rules
+                            </h3>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Allow Free Courses</p>
+                                    <p class="text-xs text-gray-500">Enable 100% free courses with zero-dollar checkout</p>
+                                </div>
+                                <input type="checkbox" name="platform.free_courses_allowed" value="true" th:checked="${platformSettings['platform.free_courses_allowed'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Allow Commercial Paid Courses</p>
+                                    <p class="text-xs text-gray-500">Enable paid courses with Razorpay gateway</p>
+                                </div>
+                                <input type="checkbox" name="platform.paid_courses_allowed" value="true" th:checked="${platformSettings['platform.paid_courses_allowed'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Edit After Publishing</p>
+                                    <p class="text-xs text-gray-500">Allow modifying syllabus after a course is live</p>
+                                </div>
+                                <input type="checkbox" name="platform.course_edit_after_publish" value="true" th:checked="${platformSettings['platform.course_edit_after_publish'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                        </div>
+
+                        <!-- Enrollment Policies -->
+                        <div class="bg-surface-50 rounded-2xl p-6 border border-surface-200 space-y-4">
+                            <h3 class="font-bold text-surface-900 flex items-center gap-2 text-sm border-b border-surface-200 pb-3">
+                                <i class="bi bi-journal-check text-brand-600"></i> Enrollment Lifecycle
+                            </h3>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Student Self-Enrollment</p>
+                                    <p class="text-xs text-gray-500">Allow direct self-enrollment from course landing pages</p>
+                                </div>
+                                <input type="checkbox" name="platform.enrollment_self_allowed" value="true" th:checked="${platformSettings['platform.enrollment_self_allowed'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-semibold text-surface-900">Allow Cancellation / Refund</p>
+                                    <p class="text-xs text-gray-500">Permit students to request enrollment refund</p>
+                                </div>
+                                <input type="checkbox" name="platform.enrollment_cancellation_allowed" value="true" th:checked="${platformSettings['platform.enrollment_cancellation_allowed'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
                             </div>
                             <div>
-                                <p class="font-medium text-sm text-surface-900">Seed Test Data</p>
-                                <p class="text-xs text-gray-500">Populate modules with sample data for testing</p>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Enrollment Validity (Days)</label>
+                                <input type="number" name="platform.enrollment_expiration_days" th:value="${platformSettings['platform.enrollment_expiration_days']}" class="w-full px-4 py-2 rounded-xl border border-surface-200 text-sm" />
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-surface-200 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                            <i class="bi bi-save-fill"></i> Save LMS Policies
                         </button>
-                    </form>
-                    <form th:action="@{/admin/migrate-passwords}" method="post"
-                          onsubmit="return confirm('Re-hash legacy passwords? This rewrites the password column for every user.');">
-                        <button type="submit" class="w-full text-left flex items-center gap-4 p-4 rounded-xl border border-surface-200 hover:border-purple-300 hover:bg-purple-50 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 group-hover:bg-purple-200 transition-colors">
-                                <i class="bi bi-key-fill text-lg"></i>
-                            </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 3: SECURITY & AUTH -->
+            <!-- ============================================================= -->
+            <div id="tab-content-security" class="tab-content hidden p-6 sm:p-8 space-y-6">
+                <form th:action="@{/admin/settings/update/SECURITY}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Minimum Password Length</label>
+                            <input type="number" name="security.min_password_length" th:value="${securitySettings['security.min_password_length']}" min="6" max="32" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Max Failed Login Attempts</label>
+                            <input type="number" name="security.max_login_attempts" th:value="${securitySettings['security.max_login_attempts']}" min="3" max="20" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Account Lockout Duration (Minutes)</label>
+                            <input type="number" name="security.lockout_duration_minutes" th:value="${securitySettings['security.lockout_duration_minutes']}" min="5" max="1440" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Session Timeout (Minutes)</label>
+                            <input type="number" name="security.session_timeout_minutes" th:value="${securitySettings['security.session_timeout_minutes']}" min="15" max="1440" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Password Reset Expiration (Hours)</label>
+                            <input type="number" name="security.password_reset_expiry_hours" th:value="${securitySettings['security.password_reset_expiry_hours']}" min="1" max="72" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div class="flex items-center gap-3 pt-6">
+                            <input type="checkbox" name="security.allow_multiple_sessions" value="true" th:checked="${securitySettings['security.allow_multiple_sessions'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
                             <div>
-                                <p class="font-medium text-sm text-surface-900">Migrate Passwords</p>
-                                <p class="text-xs text-gray-500">Re-hash legacy passwords to BCrypt</p>
+                                <label class="text-sm font-semibold text-surface-900">Allow Multiple Active Sessions</label>
+                                <p class="text-xs text-gray-500">Allow users to remain signed in on mobile and desktop simultaneously</p>
                             </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="security.login_notification_enabled" value="true" th:checked="${securitySettings['security.login_notification_enabled'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            <div>
+                                <label class="text-sm font-semibold text-surface-900">Login Notifications</label>
+                                <p class="text-xs text-gray-500">Send an email/bell alert whenever an account signs in</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="security.suspicious_login_detection" value="true" th:checked="${securitySettings['security.suspicious_login_detection'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            <div>
+                                <label class="text-sm font-semibold text-surface-900">Suspicious Login Detection</label>
+                                <p class="text-xs text-gray-500">Flag unknown client IPs or abnormal sign-in activity in audit logs</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-surface-200 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                            <i class="bi bi-shield-check"></i> Save Security Parameters
                         </button>
-                    </form>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 4: EMAIL & SMTP -->
+            <!-- ============================================================= -->
+            <div id="tab-content-email" class="tab-content hidden p-6 sm:p-8 space-y-6">
+                <form th:action="@{/admin/settings/update/EMAIL}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">SMTP Host</label>
+                            <input type="text" name="email.smtp_host" th:value="${emailSettings['email.smtp_host']}" placeholder="smtp.gmail.com" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">SMTP Port</label>
+                            <input type="number" name="email.smtp_port" th:value="${emailSettings['email.smtp_port']}" placeholder="587" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">SMTP Username</label>
+                            <input type="text" name="email.smtp_username" th:value="${emailSettings['email.smtp_username']}" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">SMTP Password / App Secret</label>
+                            <input type="password" name="email.smtp_password" th:value="${emailSettings['email.smtp_password']}" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-mono" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Encryption Type</label>
+                            <select name="email.encryption" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm bg-white">
+                                <option value="TLS" th:selected="${emailSettings['email.encryption'] == 'TLS'}">TLS (STARTTLS - Port 587)</option>
+                                <option value="SSL" th:selected="${emailSettings['email.encryption'] == 'SSL'}">SSL (Port 465)</option>
+                                <option value="NONE" th:selected="${emailSettings['email.encryption'] == 'NONE'}">NONE (Unencrypted - Port 25)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Default Sender Email</label>
+                            <input type="email" name="email.sender_email" th:value="${emailSettings['email.sender_email']}" placeholder="no-reply@edutake.com" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Default Sender Name</label>
+                            <input type="text" name="email.sender_name" th:value="${emailSettings['email.sender_name']}" placeholder="EduTake Platform" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div class="flex items-center gap-3 pt-6">
+                            <input type="checkbox" name="email.enabled" value="true" th:checked="${emailSettings['email.enabled'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                            <div>
+                                <label class="text-sm font-semibold text-surface-900">Email System Enabled</label>
+                                <p class="text-xs text-gray-500">Global switch to enable outgoing emails &amp; digests</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-surface-200 flex items-center justify-between">
+                        <button type="button" onclick="openTestEmailModal()" class="px-4 py-2.5 rounded-xl bg-surface-100 hover:bg-surface-200 text-surface-900 text-sm font-semibold transition-all flex items-center gap-2">
+                            <i class="bi bi-send text-brand-600"></i> Dispatch Test Email
+                        </button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                            <i class="bi bi-save-fill"></i> Save Email Gateway
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 5: FILE & MEDIA LIMITS -->
+            <!-- ============================================================= -->
+            <div id="tab-content-file" class="tab-content hidden p-6 sm:p-8 space-y-6">
+                <form th:action="@{/admin/settings/update/FILE}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Max Single File Upload Size (MB)</label>
+                            <input type="number" name="media.max_upload_size_mb" th:value="${fileSettings['media.max_upload_size_mb']}" min="1" max="100" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Max Profile Avatar Size (KB)</label>
+                            <input type="number" name="media.max_profile_image_kb" th:value="${fileSettings['media.max_profile_image_kb']}" min="500" max="10240" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" required />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Allowed Image File Extensions</label>
+                            <input type="text" name="media.allowed_image_formats" th:value="${fileSettings['media.allowed_image_formats']}" placeholder="jpg,jpeg,png,webp,gif" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Allowed Document Extensions</label>
+                            <input type="text" name="media.allowed_doc_formats" th:value="${fileSettings['media.allowed_doc_formats']}" placeholder="pdf,doc,docx,zip" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Allowed Video Extensions</label>
+                            <input type="text" name="media.allowed_video_formats" th:value="${fileSettings['media.allowed_video_formats']}" placeholder="mp4,webm,mov" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Max Course Thumbnail Size (KB)</label>
+                            <input type="number" name="media.max_thumbnail_kb" th:value="${fileSettings['media.max_thumbnail_kb']}" min="1024" max="20480" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-surface-200 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                            <i class="bi bi-save-fill"></i> Save Media Limits
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- TAB 6: MAINTENANCE MODE -->
+            <!-- ============================================================= -->
+            <div id="tab-content-maintenance" class="tab-content hidden p-6 sm:p-8 space-y-6">
+                <form th:action="@{/admin/settings/update/MAINTENANCE}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <!-- Live Banner -->
+                    <div class="p-6 rounded-2xl border flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                         th:classappend="${isMaintenanceActive} ? 'bg-amber-500/10 border-amber-500/30 text-amber-900' : 'bg-surface-50 border-surface-200 text-surface-900'">
+                        <div>
+                            <div class="flex items-center gap-2 font-bold text-base">
+                                <span class="w-3 h-3 rounded-full" th:classappend="${isMaintenanceActive} ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'"></span>
+                                Platform Status: <span th:text="${isMaintenanceActive} ? 'UNDER MAINTENANCE' : 'OPERATIONAL (ONLINE)'">OPERATIONAL</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">When maintenance mode is active, non-admin web and API requests are blocked with the customized notice.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm font-semibold">Enable Maintenance Mode</label>
+                            <input type="checkbox" name="maintenance.enabled" value="true" th:checked="${maintenanceSettings['maintenance.enabled'] == 'true'}" class="w-5 h-5 text-brand-600 rounded" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Public Broadcast Notice</label>
+                            <textarea name="maintenance.message" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium" th:text="${maintenanceSettings['maintenance.message']}"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Estimated Availability</label>
+                                <input type="text" name="maintenance.expected_time" th:value="${maintenanceSettings['maintenance.expected_time']}" placeholder="2 hours" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm" />
+                            </div>
+                            <div class="flex items-center gap-3 pt-6">
+                                <input type="checkbox" name="maintenance.admin_bypass" value="true" th:checked="${maintenanceSettings['maintenance.admin_bypass'] == 'true'}" class="w-4 h-4 text-brand-600 rounded" />
+                                <div>
+                                    <label class="text-sm font-semibold text-surface-900">Allow Admin Bypass</label>
+                                    <p class="text-xs text-gray-500">Permit signed-in administrators to browse the control panel</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-5 border-t border-surface-200 flex justify-end">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-md shadow-brand-500/20 flex items-center gap-2">
+                            <i class="bi bi-save-fill"></i> Save Maintenance Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TEST EMAIL MODAL -->
+        <!-- ============================================================= -->
+        <div id="testEmailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-surface-200 animate-slide-down">
+                <div class="px-6 py-4 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+                    <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                        <i class="bi bi-send text-brand-600"></i> Send Test Email
+                    </h3>
+                    <button type="button" onclick="closeTestEmailModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
                 </div>
+                <form th:action="@{/admin/settings/email/test}" method="post" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Recipient Email Address</label>
+                        <input type="email" name="testRecipient" value="admin@edutake.com" class="w-full px-4 py-2.5 rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm font-medium" required />
+                    </div>
+                    <p class="text-xs text-gray-500">This test dispatches a sample notification to verify SMTP host connectivity and credentials.</p>
+                    <div class="pt-3 flex justify-end gap-3">
+                        <button type="button" onclick="closeTestEmailModal()" class="px-4 py-2 rounded-xl text-gray-600 hover:bg-surface-100 text-sm font-semibold">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-md shadow-brand-500/20">Send Now</button>
+                    </div>
+                </form>
             </div>
         </div>
+
+        <!-- Tab Switching & Modal JavaScript -->
+        <script>
+            function switchTab(tabId) {
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('border-brand-600', 'text-brand-600', 'bg-white');
+                    b.classList.add('border-transparent', 'text-gray-500');
+                });
+
+                const content = document.getElementById('tab-content-' + tabId);
+                const btn = document.getElementById('tab-btn-' + tabId);
+                if (content && btn) {
+                    content.classList.remove('hidden');
+                    btn.classList.remove('border-transparent', 'text-gray-500');
+                    btn.classList.add('border-brand-600', 'text-brand-600', 'bg-white');
+                }
+            }
+
+            function openTestEmailModal() {
+                document.getElementById('testEmailModal').classList.remove('hidden');
+            }
+
+            function closeTestEmailModal() {
+                document.getElementById('testEmailModal').classList.add('hidden');
+            }
+
+            function quickToggleMaintenance() {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+                fetch('/admin/api/settings/maintenance/toggle', {
+                    method: 'POST',
+                    headers: { [csrfHeader]: csrfToken }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    window.location.reload();
+                })
+                .catch(err => {
+                    alert('Failed to toggle maintenance mode: ' + err);
+                });
+            }
+        </script>
 
     </div>
 </body>
