@@ -41,6 +41,10 @@ public class Course {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instructor_id")
+    private Instructor instructorRef;
+
     @Column
     private String instructor;
 
@@ -292,6 +296,18 @@ public class Course {
 
     public void setSeoDescription(String seoDescription) {
         this.seoDescription = seoDescription;
+    }
+
+    public Instructor getInstructorRef() {
+        return instructorRef;
+    }
+
+    public void setInstructorRef(Instructor instructorRef) {
+        this.instructorRef = instructorRef;
+        if (instructorRef != null) {
+            this.instructor = instructorRef.getName();
+            this.instructorEmail = instructorRef.getEmail();
+        }
     }
 
     public LocalDateTime getPublishedAt() {

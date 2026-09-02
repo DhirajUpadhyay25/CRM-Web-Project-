@@ -40,13 +40,13 @@ public class CourseController {
     private CategoryService categoryService;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private in.project.main.services.InstructorService instructorService;
 
     private void populateDropdowns(Model model) {
         model.addAttribute("categories", categoryService.getActiveCategories());
         model.addAttribute("levels", CourseLevel.values());
         model.addAttribute("statuses", CourseStatus.values());
-        model.addAttribute("instructorsList", employeeRepository.findByRole(Role.INSTRUCTOR));
+        model.addAttribute("instructorsList", instructorService.getActiveInstructors());
     }
 
     private Sort resolveSort(String sort) {
@@ -69,7 +69,7 @@ public class CourseController {
     // ==========================================
     // 1. ADMIN COURSE LIST & WORKSPACE
     // ==========================================
-    @GetMapping("/admin/courses")
+    @GetMapping({"/admin/courses", "/admin/course"})
     public String openCourseManagementPage(
             Model model,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -103,14 +103,14 @@ public class CourseController {
     // ==========================================
     // 2. ADD NEW COURSE
     // ==========================================
-    @GetMapping("/admin/courses/new")
+    @GetMapping({"/admin/courses/new", "/admin/courses/add", "/admin/course/new", "/admin/course/add", "/admin/add-course"})
     public String openAddCoursePage(Model model) {
         model.addAttribute("courseDTO", new CourseDTO());
         populateDropdowns(model);
         return "admin/courses/add";
     }
 
-    @PostMapping("/admin/courses/new")
+    @PostMapping({"/admin/courses/new", "/admin/courses/add", "/admin/courses/create", "/admin/course/new", "/admin/course/add"})
     public String addCourseForm(
             @Valid @ModelAttribute("courseDTO") CourseDTO courseDTO,
             BindingResult bindingResult,
@@ -137,7 +137,7 @@ public class CourseController {
     // ==========================================
     // 3. ADMIN COURSE DETAIL / INSPECTION
     // ==========================================
-    @GetMapping("/admin/courses/{id}")
+    @GetMapping({"/admin/courses/{id}", "/admin/course/{id}"})
     public String openCourseDetailPage(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
         Course course = courseService.getCourseDetailsById(id);
         if (course == null) {
