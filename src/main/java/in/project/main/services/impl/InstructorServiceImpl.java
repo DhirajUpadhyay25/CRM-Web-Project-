@@ -59,6 +59,10 @@ public class InstructorServiceImpl implements InstructorService {
     private InstructorRepository instructorRepository;
 
     @Autowired
+    @org.springframework.context.annotation.Lazy
+    private in.project.main.services.NotificationService notificationService;
+
+    @Autowired
     private CourseRepository courseRepository;
 
     @Autowired

@@ -180,7 +180,48 @@ public class CourseService {
         if (course.getPublishedAt() == null) {
             course.setPublishedAt(LocalDateTime.now());
         }
-        return courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+
+        // Dispatch Notifications
+        try {
+            // Notify Students
+            notificationService.sendToAllStudents(
+                in.project.main.entities.enums.NotificationType.COURSE_PUBLISHED,
+                "New Course Published",
+                "New course '" + saved.getName() + "' is now live! Explore the curriculum and start learning.",
+                "/courses/" + (saved.getSlug() != null ? saved.getSlug() : saved.getId())
+            );
+
+            // Notify Admin
+            notificationService.sendToAdmin(
+                in.project.main.entities.enums.NotificationType.COURSE_PUBLISHED,
+                "Course Published",
+                "Course '" + saved.getName() + "' (ID: " + saved.getId() + ") has been published successfully.",
+                "/admin/courses",
+                "COURSE",
+                String.valueOf(saved.getId()),
+                null,
+                null
+            );
+
+            // Notify Instructor if assigned
+            String instructorEmail = (saved.getInstructorRef() != null) ? saved.getInstructorRef().getEmail() : saved.getInstructorEmail();
+            if (instructorEmail != null && !instructorEmail.isBlank()) {
+                notificationService.sendToInstructor(
+                    instructorEmail,
+                    in.project.main.entities.enums.NotificationType.COURSE_PUBLISHED,
+                    "Course Approved & Published",
+                    "Your course '" + saved.getName() + "' has been approved and published to students.",
+                    "/instructor/courses",
+                    "COURSE",
+                    String.valueOf(saved.getId())
+                );
+            }
+        } catch (Exception notifEx) {
+            // Non-critical notification failure
+        }
+
+        return saved;
     }
 
     @Transactional
@@ -189,7 +230,22 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("Course not found with ID: " + id));
 
         course.setStatus(CourseStatus.ARCHIVED);
-        return courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+
+        try {
+            notificationService.sendToAdmin(
+                in.project.main.entities.enums.NotificationType.COURSE_ARCHIVED,
+                "Course Archived",
+                "Course '" + saved.getName() + "' (ID: " + saved.getId() + ") was archived.",
+                "/admin/courses",
+                "COURSE",
+                String.valueOf(saved.getId()),
+                null,
+                null
+            );
+        } catch (Exception ignored) {}
+
+        return saved;
     }
 
     @Transactional
