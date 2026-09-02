@@ -31,7 +31,7 @@ public class Employee
 	private String city;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(name = "role", length = 50, nullable = false)
 	private Role role = Role.EMPLOYEE;
 	
 	public Long getId() { return id; }
