@@ -398,33 +398,41 @@ public class StudentDashboardController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "filter", required = false) String filter,
+            @RequestParam(name = "category", required = false) String categoryStr,
+            @RequestParam(name = "search", required = false) String search) {
 
         addCommonStudentAttributes(userDetails, model);
         String email = userDetails.getUsername();
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size));
-        Page<Notification> notificationsPage = notificationService.getAllNotifications(email, pageable);
 
-        List<Map<String, Object>> notifList = new ArrayList<>();
-        for (Notification n : notificationsPage.getContent()) {
-            Map<String, Object> notifData = new java.util.HashMap<>();
-            notifData.put("id", n.getId());
-            notifData.put("title", n.getTitle());
-            notifData.put("message", n.getMessage());
-            notifData.put("type", n.getType());
-            notifData.put("read", n.isRead());
-            notifData.put("targetUrl", n.getTargetUrl());
-            notifData.put("createdAt", n.getCreatedAt());
-            notifData.put("timeAgo", getTimeAgo(n.getCreatedAt()));
-            notifList.add(notifData);
+        Boolean isRead = null;
+        if ("unread".equalsIgnoreCase(filter)) {
+            isRead = false;
+        } else if ("read".equalsIgnoreCase(filter)) {
+            isRead = true;
         }
 
-        model.addAttribute("notifications", notifList);
+        in.project.main.entities.enums.NotificationCategory category = null;
+        if (categoryStr != null && !categoryStr.isBlank() && !"ALL".equalsIgnoreCase(categoryStr)) {
+            try {
+                category = in.project.main.entities.enums.NotificationCategory.valueOf(categoryStr.toUpperCase());
+            } catch (Exception ignored) {}
+        }
+
+        Page<Notification> notificationsPage = notificationService.getFilteredNotifications(
+                email, isRead, category, search, pageable);
+
+        model.addAttribute("notifications", notificationsPage.getContent());
         model.addAttribute("notificationsPage", notificationsPage);
         model.addAttribute("currentPage", page);
-
-        long unreadCount = notificationService.getUnreadCount(email);
-        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("unreadCount", notificationService.getUnreadCount(email));
+        model.addAttribute("totalCount", notificationService.getTotalCount(email));
+        model.addAttribute("currentFilter", filter != null ? filter : "all");
+        model.addAttribute("currentCategory", categoryStr != null ? categoryStr : "ALL");
+        model.addAttribute("searchQuery", search != null ? search : "");
+        model.addAttribute("categories", in.project.main.entities.enums.NotificationCategory.values());
 
         return "student/notifications";
     }
@@ -571,19 +579,36 @@ public class StudentDashboardController {
 
     @PostMapping("/api/notifications/{id}/read")
     @ResponseBody
-    public void markNotifRead(@PathVariable Long id) {
-        notificationService.markAsRead(id);
+    public Map<String, Object> markNotifRead(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails != null ? userDetails.getUsername() : null;
+        boolean success = notificationService.markAsRead(id, email);
+        return Map.of("status", success ? "success" : "ignored", "unreadCount", notificationService.getUnreadCount(email));
     }
 
     @PostMapping("/api/notifications/mark-all-read")
     @ResponseBody
-    public void markAllNotifsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        notificationService.markAllAsRead(userDetails.getUsername());
+    public Map<String, Object> markAllNotifsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails != null ? userDetails.getUsername() : null;
+        notificationService.markAllAsRead(email);
+        return Map.of("status", "success", "unreadCount", 0L);
+    }
+
+    @PostMapping("/api/notifications/{id}/delete")
+    @ResponseBody
+    public Map<String, Object> deleteNotif(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails != null ? userDetails.getUsername() : null;
+        boolean deleted = notificationService.deleteNotification(id, email);
+        return Map.of("status", deleted ? "success" : "ignored", "unreadCount", notificationService.getUnreadCount(email));
     }
 
     @GetMapping("/api/notifications/recent")
     @ResponseBody
     public List<Map<String, Object>> recentNotificationsApi(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return List.of();
         String email = userDetails.getUsername();
         List<Notification> notifications = notificationService.getRecentNotifications(email, 10);
         List<Map<String, Object>> result = new ArrayList<>();
@@ -592,9 +617,13 @@ public class StudentDashboardController {
             data.put("id", n.getId());
             data.put("title", n.getTitle());
             data.put("message", n.getMessage());
-            data.put("type", n.getType().name());
+            data.put("type", n.getType() != null ? n.getType().name() : "SYSTEM_ANNOUNCEMENT");
+            data.put("category", n.getCategory() != null ? n.getCategory().name() : "SYSTEM");
+            data.put("priority", n.getPriority() != null ? n.getPriority().name() : "NORMAL");
             data.put("read", n.isRead());
-            data.put("targetUrl", n.getTargetUrl());
+            data.put("targetUrl", n.getTargetUrl() != null ? n.getTargetUrl() : "#");
+            data.put("timeAgo", n.getTimeAgo());
+            data.put("iconClass", n.getIconClass());
             data.put("createdAt", n.getCreatedAt() != null ? n.getCreatedAt().toString() : null);
             result.add(data);
         }
@@ -604,17 +633,7 @@ public class StudentDashboardController {
     @GetMapping("/api/notifications/unread-count")
     @ResponseBody
     public Map<String, Long> unreadCountApi(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) return Map.of("count", 0L);
         return Map.of("count", notificationService.getUnreadCount(userDetails.getUsername()));
-    }
-
-    private String getTimeAgo(java.time.LocalDateTime dateTime) {
-        if (dateTime == null) return "";
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        long seconds = java.time.Duration.between(dateTime, now).getSeconds();
-        if (seconds < 60) return "Just now";
-        if (seconds < 3600) return (seconds / 60) + " min ago";
-        if (seconds < 86400) return (seconds / 3600) + " hr ago";
-        if (seconds < 604800) return (seconds / 86400) + " day(s) ago";
-        return dateTime.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM"));
     }
 }

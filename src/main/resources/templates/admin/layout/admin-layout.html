@@ -533,8 +533,25 @@
         function getNotifIcon(type) {
             const icons = {
                 'NEW_STUDENT': { icon: 'bi-person-plus-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
-                'NEW_ORDER': { icon: 'bi-bag-check-fill', bg: 'bg-green-50', color: 'text-green-500' },
-                'PAYMENT_RECEIVED': { icon: 'bi-currency-rupee', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'NEW_STUDENT_REGISTERED': { icon: 'bi-person-check-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'STUDENT_ADDED_BY_ADMIN': { icon: 'bi-person-plus', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'NEW_INSTRUCTOR_CREATED': { icon: 'bi-person-badge-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'INSTRUCTOR_WELCOME': { icon: 'bi-award-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'INSTRUCTOR_STATUS_CHANGED': { icon: 'bi-shield-check', bg: 'bg-indigo-50', color: 'text-indigo-500' },
+                'INSTRUCTOR_COURSE_ASSIGNED': { icon: 'bi-journal-plus', bg: 'bg-brand-50', color: 'text-brand-600' },
+                'COURSE_CREATED': { icon: 'bi-book-half', bg: 'bg-brand-50', color: 'text-brand-600' },
+                'COURSE_PUBLISHED': { icon: 'bi-send-check-fill', bg: 'bg-emerald-50', color: 'text-emerald-600' },
+                'COURSE_UPDATED': { icon: 'bi-pencil-square', bg: 'bg-cyan-50', color: 'text-cyan-600' },
+                'COURSE_ARCHIVED': { icon: 'bi-archive-fill', bg: 'bg-gray-100', color: 'text-gray-600' },
+                'NEW_ORDER': { icon: 'bi-receipt', bg: 'bg-green-50', color: 'text-green-500' },
+                'ORDER_PLACED': { icon: 'bi-bag-check-fill', bg: 'bg-green-50', color: 'text-green-500' },
+                'PAYMENT_RECEIVED': { icon: 'bi-cash-coin', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'PAYMENT_SUCCESS': { icon: 'bi-check-circle-fill', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'PAYMENT_FAILED': { icon: 'bi-x-circle-fill', bg: 'bg-red-50', color: 'text-red-500' },
+                'COURSE_ENROLLED': { icon: 'bi-mortarboard-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'QUIZ_CREATED': { icon: 'bi-question-circle-fill', bg: 'bg-amber-50', color: 'text-amber-500' },
+                'ASSIGNMENT_GRADED': { icon: 'bi-check2-all', bg: 'bg-teal-50', color: 'text-teal-500' },
+                'NEW_ANNOUNCEMENT': { icon: 'bi-megaphone-fill', bg: 'bg-violet-50', color: 'text-violet-500' },
                 'NEW_ENQUIRY': { icon: 'bi-question-circle-fill', bg: 'bg-orange-50', color: 'text-orange-500' },
                 'NEW_LEAD': { icon: 'bi-funnel-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
                 'NEW_FEEDBACK': { icon: 'bi-chat-quote-fill', bg: 'bg-cyan-50', color: 'text-cyan-500' },
@@ -557,7 +574,9 @@
         }
 
         function markNotifRead(id) {
-            fetch('/admin/api/notifications/' + id + '/read', { method: 'POST' }).catch(() => {});
+            fetch('/admin/api/notifications/' + id + '/read', { method: 'POST' })
+                .then(() => updateNotifBadge())
+                .catch(() => {});
         }
 
         function markAllNotificationsRead() {
@@ -573,16 +592,17 @@
                 .then(r => r.json())
                 .then(data => {
                     const badge = document.getElementById('notifBadge');
-                    if (data.count > 0) {
+                    if (data && data.count > 0) {
                         badge.textContent = data.count > 99 ? '99+' : data.count;
                         badge.classList.remove('hidden');
-                    } else {
+                    } else if (badge) {
                         badge.classList.add('hidden');
                     }
                 }).catch(() => {});
         }
-        // Initial badge load
+        // Initial badge load and 30-sec polling
         updateNotifBadge();
+        setInterval(updateNotifBadge, 30000);
 
         // ====== GLOBAL SEARCH ======
         let searchDebounce = null;
