@@ -22,6 +22,18 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     List<Course> findByInstructorEmail(String instructorEmail);
 
+    List<Course> findByInstructorRef(in.project.main.entities.Instructor instructor);
+
+    List<Course> findByInstructorRefId(Long instructorId);
+
+    @Query("SELECT c FROM Course c WHERE c.instructorRef.id = :instructorId OR (c.instructorRef IS NULL AND c.instructorEmail = :email)")
+    List<Course> findByInstructorIdOrEmail(@Param("instructorId") Long instructorId, @Param("email") String email);
+
+    @Query("SELECT COUNT(c) FROM Course c WHERE c.instructorRef.id = :instructorId OR (c.instructorRef IS NULL AND c.instructorEmail = :email)")
+    long countByInstructorIdOrEmail(@Param("instructorId") Long instructorId, @Param("email") String email);
+
+    List<Course> findByInstructorRefIsNull();
+
     Optional<Course> findBySlug(String slug);
     
     boolean existsBySlug(String slug);
