@@ -45,6 +45,9 @@ public class CourseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private in.project.main.repositories.InstructorRepository instructorRepository;
+
+    @Autowired
     private OrdersRepository ordersRepository;
 
     public CourseStatsDTO getCourseStatistics() {
@@ -249,6 +252,16 @@ public class CourseService {
         course.setDescription(dto.getDescription() != null ? dto.getDescription().trim() : null);
         course.setInstructor(dto.getInstructor() != null ? dto.getInstructor().trim() : null);
         course.setInstructorEmail(dto.getInstructorEmail() != null ? dto.getInstructorEmail().trim() : null);
+        
+        if (dto.getInstructorEmail() != null && !dto.getInstructorEmail().trim().isEmpty()) {
+            in.project.main.entities.Instructor inst = instructorRepository.findByEmail(dto.getInstructorEmail().trim());
+            course.setInstructorRef(inst);
+            if (inst != null && (course.getInstructor() == null || course.getInstructor().isBlank())) {
+                course.setInstructor(inst.getName());
+            }
+        } else {
+            course.setInstructorRef(null);
+        }
         course.setLevel(dto.getLevel());
         course.setLanguage(dto.getLanguage() != null ? dto.getLanguage().trim() : null);
         course.setDuration(dto.getDuration() != null ? dto.getDuration().trim() : null);
