@@ -175,9 +175,18 @@
                     </h2>
                     
                     <div class="space-y-3 text-xs">
-                        <div class="flex justify-between py-1 border-b border-surface-100">
+                        <div class="flex justify-between items-center py-1 border-b border-surface-100">
                             <span class="text-gray-500">Instructor:</span>
-                            <span class="font-semibold text-surface-900" th:text="${course.instructor != null ? course.instructor : 'None assigned'}">Instructor</span>
+                            <div th:if="${course.instructorRef != null}">
+                                <a th:href="@{/admin/instructors/{id}(id=${course.instructorRef.id})}" 
+                                   class="font-semibold text-brand-600 hover:text-brand-800 transition-colors flex items-center gap-1">
+                                    <span th:text="${course.instructorRef.name}">Instructor</span>
+                                    <i class="bi bi-box-arrow-up-right text-[10px]"></i>
+                                </a>
+                            </div>
+                            <div th:unless="${course.instructorRef != null}">
+                                <span class="font-semibold text-surface-900" th:text="${course.instructor != null ? course.instructor : 'None assigned'}">Instructor</span>
+                            </div>
                         </div>
                         <div class="flex justify-between py-1 border-b border-surface-100">
                             <span class="text-gray-500">Language:</span>
