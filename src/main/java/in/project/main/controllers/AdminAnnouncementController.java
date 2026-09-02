@@ -19,6 +19,9 @@ public class AdminAnnouncementController {
     @Autowired
     private AnnouncementRepository repository;
 
+    @Autowired
+    private in.project.main.services.NotificationService notificationService;
+
     @GetMapping
     public String list(Model model) {
         model.addAttribute("items", repository.findAll());
@@ -39,7 +42,19 @@ public class AdminAnnouncementController {
             announcement.setTargetAudience(targetAudience);
             announcement.setPublishDate(publishDate);
             announcement.setIsActive(isActive);
-            repository.save(announcement);
+            Announcement saved = repository.save(announcement);
+
+            if (Boolean.TRUE.equals(isActive)) {
+                try {
+                    notificationService.sendToAllStudents(
+                        in.project.main.entities.enums.NotificationType.NEW_ANNOUNCEMENT,
+                        "Announcement: " + title,
+                        content != null && content.length() > 150 ? content.substring(0, 147) + "..." : content,
+                        "/student/dashboard"
+                    );
+                } catch (Exception ignored) {}
+            }
+
             ra.addFlashAttribute("success", "Announcement created successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to create announcement: " + e.getMessage());

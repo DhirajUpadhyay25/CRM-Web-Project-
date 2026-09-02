@@ -313,6 +313,30 @@ public class InstructorServiceImpl implements InstructorService {
                 "SUCCESS"
         );
 
+        // 6. Notifications
+        try {
+            notificationService.sendToAdmin(
+                in.project.main.entities.enums.NotificationType.NEW_INSTRUCTOR_CREATED,
+                "New Instructor Created",
+                "Instructor '" + saved.getName() + "' (" + saved.getEmail() + ") was added by " + (adminEmail != null ? adminEmail : "Admin") + ".",
+                "/admin/instructors/" + saved.getId(),
+                "INSTRUCTOR",
+                String.valueOf(saved.getId()),
+                adminEmail,
+                "Admin"
+            );
+
+            notificationService.sendToInstructor(
+                saved.getEmail(),
+                in.project.main.entities.enums.NotificationType.INSTRUCTOR_WELCOME,
+                "Welcome to EduTake Teaching Portal",
+                "Welcome " + saved.getName() + "! Your instructor account has been created. You can now manage your courses and students.",
+                "/instructor/dashboard",
+                "INSTRUCTOR",
+                String.valueOf(saved.getId())
+            );
+        } catch (Exception ignored) {}
+
         return saved;
     }
 
@@ -432,6 +456,18 @@ public class InstructorServiceImpl implements InstructorService {
                 "SUCCESS"
         );
 
+        try {
+            notificationService.sendToInstructor(
+                saved.getEmail(),
+                in.project.main.entities.enums.NotificationType.INSTRUCTOR_STATUS_CHANGED,
+                "Instructor Account Status Updated",
+                "Your instructor account status has been updated to: " + newStatus + (reason != null && !reason.isBlank() ? " (" + reason + ")" : ""),
+                "/instructor/profile",
+                "INSTRUCTOR",
+                String.valueOf(saved.getId())
+            );
+        } catch (Exception ignored) {}
+
         return saved;
     }
 
@@ -499,6 +535,18 @@ public class InstructorServiceImpl implements InstructorService {
                 "Assigned course '" + course.getName() + "' (ID: " + courseId + ") to instructor '" + instructor.getName() + "'",
                 "SUCCESS"
         );
+
+        try {
+            notificationService.sendToInstructor(
+                instructor.getEmail(),
+                in.project.main.entities.enums.NotificationType.INSTRUCTOR_COURSE_ASSIGNED,
+                "New Course Assigned",
+                "You have been assigned to lead course '" + course.getName() + "'.",
+                "/instructor/courses",
+                "COURSE",
+                String.valueOf(courseId)
+            );
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -520,6 +568,18 @@ public class InstructorServiceImpl implements InstructorService {
                 "Unassigned course '" + course.getName() + "' (ID: " + courseId + ") from instructor '" + instructor.getName() + "'",
                 "SUCCESS"
         );
+
+        try {
+            notificationService.sendToInstructor(
+                instructor.getEmail(),
+                in.project.main.entities.enums.NotificationType.INSTRUCTOR_COURSE_UNASSIGNED,
+                "Course Unassigned",
+                "Course '" + course.getName() + "' has been unassigned from your profile.",
+                "/instructor/courses",
+                "COURSE",
+                String.valueOf(courseId)
+            );
+        } catch (Exception ignored) {}
     }
 
     @Override
