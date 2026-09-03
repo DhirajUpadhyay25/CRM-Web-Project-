@@ -216,7 +216,7 @@
         </div>
 
         <!-- Broadcast Notification Modal -->
-        <div id="broadcastModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="broadcastModal" style="display:none" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl max-w-xl w-full border border-surface-200 p-6 shadow-2xl relative">
                 
                 <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
@@ -288,11 +288,18 @@
     <!-- Scripts -->
     <script>
         function openBroadcastModal() {
-            document.getElementById('broadcastModal').classList.remove('hidden');
+            document.getElementById('broadcastModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
         function closeBroadcastModal() {
-            document.getElementById('broadcastModal').classList.add('hidden');
+            document.getElementById('broadcastModal').style.display = 'none';
+            document.body.style.overflow = '';
         }
+        // Close on backdrop click
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('broadcastModal');
+            if (e.target === modal) closeBroadcastModal();
+        });
     </script>
 </body>
 </html>
