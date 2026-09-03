@@ -103,9 +103,7 @@ public class InstructorDashboardController {
         long courseCompletions = 0;
 
         if (!courseIds.isEmpty()) {
-            List<Enrollment> enrollments = enrollmentRepository.findAll().stream()
-                    .filter(e -> courseIds.contains(e.getCourse().getId()))
-                    .collect(Collectors.toList());
+            List<Enrollment> enrollments = enrollmentRepository.findByCourseIdInWithDetails(courseIds);
             totalStudents = enrollments.size();
             courseCompletions = enrollments.stream().filter(e -> e.getStatus() == EnrollmentStatus.COMPLETED).count();
             activeLearners = enrollments.stream().filter(e -> e.getStatus() == EnrollmentStatus.ACTIVE).count();
@@ -529,9 +527,7 @@ public class InstructorDashboardController {
 
         List<Map<String, Object>> studentList = new ArrayList<>();
         if (!courseIds.isEmpty()) {
-            List<Enrollment> enrollments = enrollmentRepository.findAll().stream()
-                    .filter(e -> courseIds.contains(e.getCourse().getId()))
-                    .collect(Collectors.toList());
+            List<Enrollment> enrollments = enrollmentRepository.findByCourseIdInWithDetails(courseIds);
 
             for (Enrollment e : enrollments) {
                 Map<String, Object> map = new HashMap<>();

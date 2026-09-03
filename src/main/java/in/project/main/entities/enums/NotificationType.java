@@ -42,6 +42,10 @@ public enum NotificationType {
     COURSE_ENROLLED("Course Enrolled", NotificationCategory.ENROLLMENT, NotificationPriority.NORMAL, "bi-mortarboard-fill"),
     COURSE_ACCESS_GRANTED("Course Access Granted", NotificationCategory.ENROLLMENT, NotificationPriority.NORMAL, "bi-unlock-fill"),
     COURSE_ACCESS_REVOKED("Course Access Revoked", NotificationCategory.ENROLLMENT, NotificationPriority.HIGH, "bi-lock-fill"),
+    ENROLLMENT_SUSPENDED("Enrollment Suspended", NotificationCategory.ENROLLMENT, NotificationPriority.HIGH, "bi-pause-circle-fill"),
+    ENROLLMENT_RESUMED("Enrollment Resumed", NotificationCategory.ENROLLMENT, NotificationPriority.NORMAL, "bi-play-circle-fill"),
+    ENROLLMENT_CANCELLED("Enrollment Cancelled", NotificationCategory.ENROLLMENT, NotificationPriority.HIGH, "bi-x-circle-fill"),
+    ENROLLMENT_COMPLETED("Course Completed", NotificationCategory.ENROLLMENT, NotificationPriority.NORMAL, "bi-trophy-fill"),
 
     // 6. Payments
     PAYMENT_RECEIVED("Payment Received", NotificationCategory.PAYMENT, NotificationPriority.NORMAL, "bi-cash-coin"),

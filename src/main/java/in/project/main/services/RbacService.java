@@ -510,7 +510,14 @@ public class RbacService {
 
         seedPermission("enrollments.view", "ENROLLMENTS", "View Enrollments", "Browse course enrollments", false);
         seedPermission("enrollments.create", "ENROLLMENTS", "Create Enrollments", "Manually enroll students in courses", false);
-        seedPermission("enrollments.cancel", "ENROLLMENTS", "Cancel Enrollments", "Revoke student course access", true);
+        seedPermission("enrollments.update", "ENROLLMENTS", "Update Enrollments", "Modify enrollment expiration and details", false);
+        seedPermission("enrollments.suspend", "ENROLLMENTS", "Suspend Enrollments", "Temporarily suspend student course access", true);
+        seedPermission("enrollments.cancel", "ENROLLMENTS", "Cancel Enrollments", "Terminate student course enrollment", true);
+        seedPermission("enrollments.revoke", "ENROLLMENTS", "Revoke Enrollments", "Administratively revoke course access", true);
+        seedPermission("enrollments.bulk_manage", "ENROLLMENTS", "Bulk Manage Enrollments", "Execute batch enrollments and status changes", true);
+        seedPermission("enrollments.export", "ENROLLMENTS", "Export Enrollments", "Export enrollment data to CSV", false);
+        seedPermission("enrollments.view_payment", "ENROLLMENTS", "View Payment Details", "View financial and transaction records of enrollments", false);
+        seedPermission("enrollments.view_analytics", "ENROLLMENTS", "View Enrollment Analytics", "Inspect enrollment trends and conversion analytics", false);
 
         seedPermission("curriculum.view", "CURRICULUM", "View Curriculum", "View course lessons and topics", false);
         seedPermission("curriculum.create", "CURRICULUM", "Create Curriculum", "Add lessons, videos, and attachments", false);

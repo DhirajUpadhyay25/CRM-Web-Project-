@@ -53,7 +53,15 @@ public enum AuditEventType {
 
     // Enrollment & Payment Operations
     ENROLLMENT_CREATED(AuditCategory.ENROLLMENT, AuditSeverity.INFO, "Enrollment Created"),
+    ENROLLMENT_ACTIVATED(AuditCategory.ENROLLMENT, AuditSeverity.INFO, "Enrollment Activated"),
+    ENROLLMENT_SUSPENDED(AuditCategory.ENROLLMENT, AuditSeverity.HIGH, "Enrollment Suspended"),
+    ENROLLMENT_RESUMED(AuditCategory.ENROLLMENT, AuditSeverity.INFO, "Enrollment Resumed"),
     ENROLLMENT_CANCELLED(AuditCategory.ENROLLMENT, AuditSeverity.MEDIUM, "Enrollment Cancelled"),
+    ENROLLMENT_REVOKED(AuditCategory.ENROLLMENT, AuditSeverity.HIGH, "Enrollment Revoked"),
+    ENROLLMENT_EXTENDED(AuditCategory.ENROLLMENT, AuditSeverity.INFO, "Enrollment Extended"),
+    ENROLLMENT_COMPLETED(AuditCategory.ENROLLMENT, AuditSeverity.INFO, "Enrollment Completed"),
+    BULK_ENROLLMENT_CREATED(AuditCategory.ENROLLMENT, AuditSeverity.MEDIUM, "Bulk Enrollment Created"),
+    ENROLLMENT_EXPORTED(AuditCategory.ADMIN, AuditSeverity.LOW, "Enrollments Exported"),
     PAYMENT_INITIATED(AuditCategory.PAYMENT, AuditSeverity.INFO, "Payment Initiated"),
     PAYMENT_SUCCESS(AuditCategory.PAYMENT, AuditSeverity.INFO, "Payment Completed"),
     PAYMENT_FAILED(AuditCategory.PAYMENT, AuditSeverity.HIGH, "Payment Failed"),

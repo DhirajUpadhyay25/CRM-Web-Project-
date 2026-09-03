@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -243,14 +244,33 @@ public class PublicController {
 
         orderService.storeUserOrders(freeOrder);
 
-        // Create enrollment record for the student panel
+        // Create or reactivate enrollment record for the student panel
         User user = userRepository.findByEmail(email);
-        if (user != null && !enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId())) {
-            Enrollment enrollment = new Enrollment();
-            enrollment.setUser(user);
-            enrollment.setCourse(course);
-            enrollment.setStatus(EnrollmentStatus.ACTIVE);
-            enrollment.setPaymentStatus("FREE");
+        if (user != null) {
+            Optional<Enrollment> existingOpt = enrollmentRepository.findByUserIdAndCourseId(user.getId(), course.getId());
+            Enrollment enrollment;
+            if (existingOpt.isPresent()) {
+                enrollment = existingOpt.get();
+                enrollment.setStatus(EnrollmentStatus.ACTIVE);
+                enrollment.setPaymentStatus("FREE");
+                enrollment.setEnrollmentType("FREE");
+                enrollment.setEnrollmentSource("FREE_ENROLLMENT");
+                enrollment.setOrderId(freeOrder.getOrderId());
+                enrollment.setEnrolledAt(java.time.LocalDateTime.now());
+                enrollment.setStartDate(java.time.LocalDateTime.now());
+                enrollment.setStatusReason(null);
+            } else {
+                enrollment = new Enrollment();
+                enrollment.setUser(user);
+                enrollment.setCourse(course);
+                enrollment.setStatus(EnrollmentStatus.ACTIVE);
+                enrollment.setPaymentStatus("FREE");
+                enrollment.setEnrollmentType("FREE");
+                enrollment.setEnrollmentSource("FREE_ENROLLMENT");
+                enrollment.setOrderId(freeOrder.getOrderId());
+                enrollment.setEnrolledAt(java.time.LocalDateTime.now());
+                enrollment.setStartDate(java.time.LocalDateTime.now());
+            }
             enrollmentRepository.save(enrollment);
 
             // Trigger Notifications

@@ -1,5 +1,6 @@
 package in.project.main.services;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,13 +117,32 @@ public class OrderService
 			return true;
 		}
 
-		if (!enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId()))
+		Optional<Enrollment> existingOpt = enrollmentRepository.findByUserIdAndCourseId(user.getId(), course.getId());
+		if (existingOpt.isPresent())
+		{
+			Enrollment existing = existingOpt.get();
+			existing.setStatus(EnrollmentStatus.ACTIVE);
+			existing.setPaymentStatus("PAID");
+			existing.setEnrollmentType("PAID");
+			existing.setEnrollmentSource("STUDENT_PURCHASE");
+			existing.setOrderId(order.getOrderId());
+			existing.setEnrolledAt(java.time.LocalDateTime.now());
+			existing.setStartDate(java.time.LocalDateTime.now());
+			existing.setStatusReason(null);
+			enrollmentRepository.save(existing);
+		}
+		else
 		{
 			Enrollment enrollment = new Enrollment();
 			enrollment.setUser(user);
 			enrollment.setCourse(course);
 			enrollment.setStatus(EnrollmentStatus.ACTIVE);
 			enrollment.setPaymentStatus("PAID");
+			enrollment.setEnrollmentType("PAID");
+			enrollment.setEnrollmentSource("STUDENT_PURCHASE");
+			enrollment.setOrderId(order.getOrderId());
+			enrollment.setEnrolledAt(java.time.LocalDateTime.now());
+			enrollment.setStartDate(java.time.LocalDateTime.now());
 			enrollmentRepository.save(enrollment);
 		}
 

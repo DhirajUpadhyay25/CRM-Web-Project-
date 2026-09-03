@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Enrollment Details', ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/admin/enrollments" class="hover:text-brand-600 transition-colors">Enrollments</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold" th:text="${'#' + enrollment.id + ' - ' + enrollment.studentName}">Enrollment #1</span>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-check-circle-fill text-emerald-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}">Action completed successfully.</span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-exclamation-triangle-fill text-red-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}">An error occurred.</span>
+        </div>
+
+        <!-- Hero Header Card -->
+        <div class="bg-white border border-surface-200 rounded-3xl p-6 sm:p-7 mb-6 shadow-sm relative overflow-hidden">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                
+                <!-- Left: Student Info & Quick State -->
+                <div class="flex items-start sm:items-center gap-4.5">
+                    <div class="relative flex-shrink-0">
+                        <img th:if="${enrollment.studentAvatar}" th:src="${enrollment.studentAvatar}" th:alt="${enrollment.studentName}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-surface-200 shadow-md" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div th:style="${enrollment.studentAvatar} ? 'display:none' : 'display:flex'" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-600 text-white font-bold text-2xl items-center justify-center shadow-md" th:text="${enrollment.studentInitials}">ST</div>
+                        <span th:if="${enrollment.accessAllowed}" class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full shadow-sm" title="Learning Access Granted"></span>
+                        <span th:unless="${enrollment.accessAllowed}" class="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full shadow-sm" title="Access Blocked"></span>
+                    </div>
+
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-surface-900 tracking-tight" th:text="${enrollment.studentName ?: 'Unknown Student'}">
+                                Student Name
+                            </h1>
+                            <!-- Status Badge -->
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border shadow-2xs" th:classappend="${enrollment.statusBadgeClass}">
+                                <span class="w-1.5 h-1.5 rounded-full" th:classappend="${enrollment.statusDotClass}"></span>
+                                <span th:text="${enrollment.statusDisplayName}">Active</span>
+                            </span>
+                            <!-- Payment Badge -->
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border" th:classappend="${enrollment.paymentBadgeClass}" th:text="${enrollment.paymentStatus ?: 'FREE'}">
+                                PAID
+                            </span>
+                        </div>
+
+                        <p class="text-xs sm:text-sm font-medium text-surface-700 mb-2" th:text="${'Enrolled in: ' + (enrollment.courseName ?: 'Unknown Course')}">
+                            Enrolled in Course
+                        </p>
+
+                        <div class="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <i class="bi bi-envelope text-gray-400"></i>
+                                <span th:text="${enrollment.studentEmail}">student@example.com</span>
+                            </span>
+                            <span th:if="${enrollment.studentPhone}" class="flex items-center gap-1">
+                                <i class="bi bi-telephone text-gray-400"></i>
+                                <span th:text="${enrollment.studentPhone}">+1 000-000-0000</span>
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="bi bi-mortarboard text-gray-400"></i>
+                                <span>Student ID: <strong th:text="${'#' + enrollment.studentId}">#1</strong></span>
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="bi bi-calendar3 text-gray-400"></i>
+                                <span>Enrolled: <strong th:text="${enrollment.enrolledAt != null ? #temporals.format(enrollment.enrolledAt, 'MMM dd, yyyy') : '-'}">Sep 03, 2026</strong></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Action Buttons Toolbar -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                    <a href="/admin/enrollments" class="px-3.5 py-2 bg-white hover:bg-surface-100 text-surface-700 font-semibold rounded-xl border border-surface-200 shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Back to List</span>
+                    </a>
+
+                    <!-- Status Action Dropdown / Buttons -->
+                    <div class="flex items-center gap-2" th:if="${@rbac.can('enrollments.update')}">
+                        
+                        <!-- Resume / Activate Button -->
+                        <form th:if="${enrollment.status.name() != 'ACTIVE' and enrollment.status.name() != 'COMPLETED'}" 
+                              method="post" th:action="@{/admin/enrollments/{id}/resume(id=${enrollment.id})}" class="inline">
+                            <button type="submit" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                                <i class="bi bi-play-fill"></i>
+                                <span>Activate / Resume</span>
+                            </button>
+                        </form>
+
+                        <!-- Mark Completed Button -->
+                        <form th:if="${enrollment.status.name() == 'ACTIVE'}" 
+                              method="post" th:action="@{/admin/enrollments/{id}/complete(id=${enrollment.id})}" class="inline"
+                              onsubmit="return confirm('Mark this course enrollment as COMPLETED? This will record the completion timestamp and trigger certificate issue if eligible.');">
+                            <button type="submit" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                                <i class="bi bi-trophy-fill"></i>
+                                <span>Mark Completed</span>
+                            </button>
+                        </form>
+
+                        <!-- Suspend Button -->
+                        <button th:if="${enrollment.status.name() == 'ACTIVE'}" 
+                                type="button" onclick="openActionModal('SUSPENDED')" 
+                                class="px-3.5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                            <i class="bi bi-pause-fill"></i>
+                            <span>Suspend Access</span>
+                        </button>
+
+                        <!-- Cancel / Revoke Trigger -->
+                        <button th:if="${enrollment.status.name() == 'ACTIVE' or enrollment.status.name() == 'SUSPENDED'}" 
+                                type="button" onclick="openActionModal('REVOKED')" 
+                                class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1.5 text-xs">
+                            <i class="bi bi-shield-slash-fill"></i>
+                            <span>Revoke Access</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Details Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Column: Course Details & Learning Progress (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Course Overview Card -->
+                <div class="bg-white rounded-3xl border border-surface-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between pb-4 mb-4 border-b border-surface-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-sm">
+                                <i class="bi bi-book-half"></i>
+                            </div>
+                            <h3 class="font-bold text-surface-900 text-base">Course Information</h3>
+                        </div>
+                        <a th:href="@{/courses/{slug}(slug=${enrollment.courseSlug})}" target="_blank" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                            <span>Preview Course</span>
+                            <i class="bi bi-box-arrow-up-right text-[10px]"></i>
+                        </a>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-5 items-start">
+                        <img th:if="${enrollment.courseImage}" th:src="${enrollment.courseImage}" class="w-full sm:w-36 h-24 object-cover rounded-2xl border border-surface-200 shadow-sm" alt="Course Thumbnail">
+                        <div class="flex-1 space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full" th:text="${enrollment.categoryName ?: 'Course'}">Category</span>
+                                <span class="text-[10px] font-bold text-gray-500 bg-surface-100 px-2.5 py-0.5 rounded-full" th:text="${enrollment.courseLevel ?: 'All Levels'}">Level</span>
+                                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full" th:text="${enrollment.courseStatus}">PUBLISHED</span>
+                            </div>
+                            <h4 class="font-bold text-surface-900 text-base" th:text="${enrollment.courseName}">Course Name</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2" th:text="${enrollment.courseHeadline}"></p>
+                            
+                            <div class="pt-2 flex flex-wrap items-center gap-4 text-xs text-gray-500 border-t border-surface-100">
+                                <span>Instructor: <strong class="text-surface-800" th:text="${enrollment.instructorName ?: 'Platform Instructor'}">Instructor</strong></span>
+                                <span>Duration: <strong class="text-surface-800" th:text="${enrollment.courseDuration ?: 'Self-paced'}">10h</strong></span>
+                                <span>Price: <strong class="text-surface-800" th:text="${'₹' + (enrollment.courseDiscountedPrice ?: enrollment.courseOriginalPrice ?: 0)}">₹0</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Progress Breakdown Card -->
+                <div class="bg-white rounded-3xl border border-surface-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between pb-4 mb-4 border-b border-surface-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
+                                <i class="bi bi-bar-chart-line-fill"></i>
+                            </div>
+                            <h3 class="font-bold text-surface-900 text-base">Learning Progress</h3>
+                        </div>
+                        <span class="text-sm font-extrabold text-brand-600" th:text="${enrollment.progressPercent + '% Overall'}">0%</span>
+                    </div>
+
+                    <!-- Progress Bar Hero -->
+                    <div class="bg-surface-50 rounded-2xl p-4 mb-5 border border-surface-100">
+                        <div class="flex items-center justify-between text-xs font-semibold text-surface-700 mb-2">
+                            <span>Syllabus Completion</span>
+                            <span th:text="${enrollment.completedLessonsCount + ' of ' + enrollment.totalLessonsCount + ' lessons'}">0 of 0</span>
+                        </div>
+                        <div class="w-full bg-surface-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-gradient-to-r from-brand-500 to-indigo-600 h-full rounded-full transition-all duration-700" th:style="'width: ' + ${enrollment.progressPercent} + '%;'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-5">
+                        <div class="p-3 bg-surface-50 rounded-2xl border border-surface-100">
+                            <p class="text-[11px] font-semibold text-gray-500 mb-0.5">Lessons Done</p>
+                            <p class="text-lg font-extrabold text-surface-900" th:text="${enrollment.completedLessonsCount + ' / ' + enrollment.totalLessonsCount}">0/0</p>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-2xl border border-surface-100">
+                            <p class="text-[11px] font-semibold text-gray-500 mb-0.5">Modules Done</p>
+                            <p class="text-lg font-extrabold text-surface-900" th:text="${enrollment.completedModulesCount + ' / ' + enrollment.totalModulesCount}">0/0</p>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-2xl border border-surface-100">
+                            <p class="text-[11px] font-semibold text-gray-500 mb-0.5">Quizzes Passed</p>
+                            <p class="text-lg font-extrabold text-emerald-600" th:text="${enrollment.quizzesPassedCount + ' / ' + enrollment.totalQuizzesCount}">0/0</p>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-2xl border border-surface-100">
+                            <p class="text-[11px] font-semibold text-gray-500 mb-0.5">Assignments</p>
+                            <p class="text-lg font-extrabold text-indigo-600" th:text="${enrollment.assignmentsSubmittedCount + ' / ' + enrollment.totalAssignmentsCount}">0/0</p>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Box if Earned -->
+                    <div th:if="${enrollment.certificateCode}" class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl">
+                                <i class="bi bi-award-fill"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-amber-900">Certificate Issued</h5>
+                                <p class="text-[11px] font-mono text-amber-700" th:text="${enrollment.certificateCode}">CERT-2026-001</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-amber-800 font-medium" th:text="${'Issued on ' + enrollment.certificateIssuedDate}">Sep 03, 2026</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Metadata, Payment, and Audit Timeline (5 cols) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- Enrollment Lifecycle Metadata Card -->
+                <div class="bg-white rounded-3xl border border-surface-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between pb-3.5 mb-3.5 border-b border-surface-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-surface-100 text-surface-700 flex items-center justify-center text-xs font-bold">
+                                <i class="bi bi-card-checklist"></i>
+                            </div>
+                            <h3 class="font-bold text-surface-900 text-sm">Enrollment Details</h3>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-gray-400" th:text="${'#' + enrollment.id}">#1</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50">
+                            <span class="text-gray-500 font-medium">Status</span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border" th:classappend="${enrollment.statusBadgeClass}">
+                                <span class="w-1.5 h-1.5 rounded-full" th:classappend="${enrollment.statusDotClass}"></span>
+                                <span th:text="${enrollment.statusDisplayName}">Active</span>
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50">
+                            <span class="text-gray-500 font-medium">Enrollment Type</span>
+                            <span class="font-bold text-surface-800" th:text="${enrollment.enrollmentType ?: 'PAID'}">PAID</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50">
+                            <span class="text-gray-500 font-medium">Enrollment Source</span>
+                            <span class="font-semibold text-surface-700" th:text="${enrollment.enrollmentSource ?: 'STUDENT_PURCHASE'}">STUDENT_PURCHASE</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50">
+                            <span class="text-gray-500 font-medium">Enrolled Date</span>
+                            <span class="font-semibold text-surface-800" th:text="${enrollment.enrolledAt != null ? #temporals.format(enrollment.enrolledAt, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50">
+                            <span class="text-gray-500 font-medium">Start Date</span>
+                            <span class="font-semibold text-surface-800" th:text="${enrollment.startDate != null ? #temporals.format(enrollment.startDate, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50">
+                            <span class="text-gray-500 font-medium">Expiration Date</span>
+                            <span class="font-semibold" th:classappend="${enrollment.expiryDate != null ? 'text-orange-600' : 'text-gray-500'}" th:text="${enrollment.expiryDate != null ? #temporals.format(enrollment.expiryDate, 'yyyy-MM-dd HH:mm') : 'Lifetime Access'}">Lifetime</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.completedAt}">
+                            <span class="text-gray-500 font-medium">Completed Date</span>
+                            <span class="font-bold text-blue-600" th:text="${#temporals.format(enrollment.completedAt, 'yyyy-MM-dd HH:mm')}">-</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.lastAccessedAt}">
+                            <span class="text-gray-500 font-medium">Last Learning Activity</span>
+                            <span class="font-semibold text-surface-800" th:text="${#temporals.format(enrollment.lastAccessedAt, 'yyyy-MM-dd HH:mm')}">-</span>
+                        </div>
+
+                        <div th:if="${enrollment.statusReason}" class="pt-2 p-3 bg-red-50/60 rounded-xl border border-red-200 text-xs">
+                            <span class="font-bold text-red-800 block mb-0.5">Status Reason:</span>
+                            <span class="text-red-700" th:text="${enrollment.statusReason}">Reason provided</span>
+                        </div>
+
+                        <div th:if="${enrollment.adminNote}" class="pt-2 p-3 bg-surface-50 rounded-xl border border-surface-100 text-xs">
+                            <span class="font-bold text-surface-800 block mb-0.5">Internal Admin Note:</span>
+                            <span class="text-gray-600" th:text="${enrollment.adminNote}">Note provided</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment & Order Information Card -->
+                <div class="bg-white rounded-3xl border border-surface-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between pb-3.5 mb-3.5 border-b border-surface-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                                <i class="bi bi-credit-card-2-front-fill"></i>
+                            </div>
+                            <h3 class="font-bold text-surface-900 text-sm">Payment & Commerce</h3>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border" th:classappend="${enrollment.paymentBadgeClass}" th:text="${enrollment.paymentStatus}">PAID</span>
+                    </div>
+
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.orderId}">
+                            <span class="text-gray-500 font-medium">Order ID</span>
+                            <span class="font-mono font-bold text-surface-800" th:text="${enrollment.orderId}">order_123</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.paymentId}">
+                            <span class="text-gray-500 font-medium">Payment Reference</span>
+                            <span class="font-mono text-gray-700" th:text="${enrollment.paymentId}">pay_123</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.transactionAmount}">
+                            <span class="text-gray-500 font-medium">Amount Paid</span>
+                            <span class="font-extrabold text-surface-900 text-sm" th:text="${'₹' + enrollment.transactionAmount}">₹0</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.paymentMethod}">
+                            <span class="text-gray-500 font-medium">Method</span>
+                            <span class="font-semibold text-surface-700 uppercase" th:text="${enrollment.paymentMethod}">RAZORPAY</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1 border-b border-surface-50" th:if="${enrollment.paymentDate}">
+                            <span class="text-gray-500 font-medium">Payment Date</span>
+                            <span class="text-gray-600" th:text="${enrollment.paymentDate}">-</span>
+                        </div>
+                        <div class="flex items-center justify-between py-1" th:if="${enrollment.couponCode}">
+                            <span class="text-gray-500 font-medium">Applied Coupon</span>
+                            <span class="font-bold text-purple-600" th:text="${enrollment.couponCode}">CODE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operational History & Forensic Audit Timeline -->
+                <div class="bg-white rounded-3xl border border-surface-200 shadow-sm p-6">
+                    <div class="flex items-center gap-2 pb-3.5 mb-3.5 border-b border-surface-100">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h3 class="font-bold text-surface-900 text-sm">Audit History</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div th:each="item : ${enrollment.historyTimeline}" class="flex items-start gap-3 text-xs relative">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs shadow-2xs" th:classappend="${item.badgeClass}">
+                                <i class="bi" th:classappend="${item.iconClass}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-0.5">
+                                    <span class="font-bold text-surface-900" th:text="${item.title}">Event Title</span>
+                                    <span class="text-[10px] text-gray-400" th:text="${item.timestamp}">Date</span>
+                                </div>
+                                <p class="text-gray-600 text-[11px] leading-relaxed" th:text="${item.description}">Description</p>
+                                <span class="text-[10px] text-gray-400 block mt-0.5" th:text="${'Actor: ' + item.actor}">Actor</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- ACTION MODAL (Suspend / Cancel / Revoke)                             -->
+        <!-- =================================================================== -->
+        <div id="detailActionModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full border border-surface-200 shadow-2xl overflow-hidden animate-scale-up">
+                <div class="p-6 border-b border-surface-100 flex items-center justify-between">
+                    <div>
+                        <h3 id="modalTitle" class="text-base font-bold text-surface-900">Change Enrollment Status</h3>
+                        <p class="text-xs text-gray-500 mt-0.5" th:text="${'Student: ' + enrollment.studentName}">Student</p>
+                    </div>
+                    <button type="button" onclick="closeActionModal()" class="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 text-gray-500 flex items-center justify-center transition-colors">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                </div>
+                <form method="post" th:action="@{/admin/enrollments/{id}/status(id=${enrollment.id})}" class="p-6 space-y-4">
+                    <input type="hidden" name="status" id="modalStatusInput" value="">
+
+                    <p id="modalDescription" class="text-xs text-surface-700 leading-relaxed">
+                        Are you sure you want to perform this status transition?
+                    </p>
+
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Mandatory Reason *</label>
+                        <textarea name="reason" required rows="3" placeholder="Provide reason for audit logging..." class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="notifyStudent" id="detailNotifyChk" checked value="true" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-surface-300">
+                        <label for="detailNotifyChk" class="text-xs font-medium text-surface-700">Send notification to student</label>
+                    </div>
+
+                    <div class="pt-4 border-t border-surface-100 flex items-center justify-end gap-2.5">
+                        <button type="button" onclick="closeActionModal()" class="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold transition-colors">
+                            Cancel
+                        </button>
+                        <button id="modalSubmitBtn" type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
+                            Confirm Action
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        function openActionModal(targetStatus) {
+            document.getElementById('modalStatusInput').value = targetStatus;
+            document.getElementById('modalTitle').innerText = targetStatus + ' Enrollment';
+
+            const desc = document.getElementById('modalDescription');
+            const submitBtn = document.getElementById('modalSubmitBtn');
+
+            if (targetStatus === 'SUSPENDED') {
+                desc.innerText = 'The student will temporarily lose access to the course content and learning player. Learning progress is preserved.';
+                submitBtn.className = 'px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+            } else if (targetStatus === 'REVOKED') {
+                desc.innerText = 'Warning: Administratively revoking access immediately terminates course access. This action is permanently recorded in forensic audit logs.';
+                submitBtn.className = 'px-5 py-2 bg-red-700 hover:bg-red-800 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+            } else if (targetStatus === 'CANCELLED') {
+                desc.innerText = 'Terminates this course enrollment based on administrative request.';
+                submitBtn.className = 'px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+            }
+
+            document.getElementById('detailActionModal').classList.remove('hidden');
+        }
+        function closeActionModal() {
+            document.getElementById('detailActionModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

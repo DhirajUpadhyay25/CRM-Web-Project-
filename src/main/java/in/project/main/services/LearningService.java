@@ -44,10 +44,7 @@ public class LearningService {
             return false;
         }
         Enrollment enrollment = enrollmentOpt.get();
-        if (enrollment.getStatus() != EnrollmentStatus.ACTIVE && enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
-            return false;
-        }
-        return true;
+        return enrollment.canAccess();
     }
 
     @Transactional
@@ -63,6 +60,12 @@ public class LearningService {
                 });
         progress.setLastAccessedAt(LocalDateTime.now());
         progressRepo.save(progress);
+
+        // Update enrollment last accessed timestamp
+        enrollmentRepo.findByUserEmailAndCourseId(email, courseId).ifPresent(e -> {
+            e.setLastAccessedAt(LocalDateTime.now());
+            enrollmentRepo.save(e);
+        });
     }
 
     @Transactional
