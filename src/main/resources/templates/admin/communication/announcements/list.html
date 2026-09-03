@@ -281,7 +281,7 @@
         <!-- ============================================ -->
         <!-- CREATE ANNOUNCEMENT MODAL -->
         <!-- ============================================ -->
-        <div id="createModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="createModal" style="display:none" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl max-w-2xl w-full border border-surface-200 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
                     <div class="flex items-center gap-3">
@@ -381,7 +381,7 @@
         <!-- ============================================ -->
         <!-- EDIT ANNOUNCEMENT MODAL -->
         <!-- ============================================ -->
-        <div id="editModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="editModal" style="display:none" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl max-w-2xl w-full border border-surface-200 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
                     <div class="flex items-center gap-3">
@@ -478,10 +478,12 @@
     <!-- Page Scripts -->
     <script>
         function openCreateModal() {
-            document.getElementById('createModal').classList.remove('hidden');
+            document.getElementById('createModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
         function closeCreateModal() {
-            document.getElementById('createModal').classList.add('hidden');
+            document.getElementById('createModal').style.display = 'none';
+            document.body.style.overflow = '';
         }
         function openEditModal(btn) {
             const id = btn.getAttribute('data-id');
@@ -500,20 +502,29 @@
             }
             toggleCourseSelect('editAudienceSelect', 'editCourseWrapper');
 
-            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
         function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').style.display = 'none';
+            document.body.style.overflow = '';
         }
         function toggleCourseSelect(selectId, wrapperId) {
             const val = document.getElementById(selectId).value;
             const wrap = document.getElementById(wrapperId);
             if (val === 'COURSE_SPECIFIC') {
-                wrap.classList.remove('hidden');
+                wrap.style.display = 'block';
             } else {
-                wrap.classList.add('hidden');
+                wrap.style.display = 'none';
             }
         }
+        // Close modals on backdrop click
+        document.addEventListener('click', function(e) {
+            const createModal = document.getElementById('createModal');
+            const editModal = document.getElementById('editModal');
+            if (e.target === createModal) closeCreateModal();
+            if (e.target === editModal) closeEditModal();
+        });
     </script>
 </body>
 </html>
