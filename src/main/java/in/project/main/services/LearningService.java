@@ -209,37 +209,15 @@ public class LearningService {
 
             logActivity(email, "COURSE_COMPLETE", "Successfully completed the course: " + enrollment.getCourse().getName());
 
-            // Generate Certificate
-            issueCertificate(email, enrollment);
+            // Notify Student of Certificate Eligibility
+            Notification notif = new Notification();
+            notif.setRecipientEmail(email);
+            notif.setType(NotificationType.CERTIFICATE_ELIGIBLE);
+            notif.setTitle("Certificate Eligible!");
+            notif.setMessage("Congratulations! You completed " + enrollment.getCourse().getName() + " and are now eligible to claim your official certificate.");
+            notif.setTargetUrl("/student/certificates");
+            notificationRepo.save(notif);
         }
-    }
-
-    @Transactional
-    public void issueCertificate(String email, Enrollment enrollment) {
-        String enrollmentIdStr = String.valueOf(enrollment.getId());
-        
-        // Prevent duplicate certificate
-        // Check if certificate with this enrollmentId already exists.
-        // Wait, CertificateRepository doesn't have an explicit findByEnrollmentId, let's query via findAll or add method.
-        // Let's check Certificate.java: private String enrollmentId;
-        // Let's add findByEnrollmentId to CertificateRepository first.
-        // Let's just create it.
-        Certificate cert = new Certificate();
-        cert.setCertificateCode("CERT-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy")) + "-" + enrollment.getId() + "-" + new Random().nextInt(10000));
-        cert.setEnrollmentId(enrollmentIdStr);
-        cert.setIssueDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        certificateRepo.save(cert);
-
-        // Notify
-        Notification notif = new Notification();
-        notif.setRecipientEmail(email);
-        notif.setType(NotificationType.CERTIFICATE_READY);
-        notif.setTitle("Certificate Earned!");
-        notif.setMessage("Congratulations! You've earned a certificate for " + enrollment.getCourse().getName());
-        notif.setTargetUrl("/student/certificates");
-        notificationRepo.save(notif);
-
-        logActivity(email, "CERTIFICATE_EARNED", "Earned certificate for: " + enrollment.getCourse().getName());
     }
 
     @Transactional

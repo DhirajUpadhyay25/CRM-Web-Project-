@@ -197,14 +197,13 @@ public class CustomerController
 			// Certificates
 			List<Certificate> certificates = new ArrayList<>();
 			for (Enrollment e : enrollments) {
-				certificateRepo.findByEnrollmentId(String.valueOf(e.getId())).ifPresent(certificates::add);
+				certificateRepo.findByEnrollmentId(e.getId()).ifPresent(certificates::add);
 			}
 			List<Map<String, Object>> displayCertificates = new ArrayList<>();
 			for (Certificate cert : certificates) {
-				Enrollment enroll = enrollments.stream().filter(e -> String.valueOf(e.getId()).equals(cert.getEnrollmentId())).findFirst().orElse(null);
 				Map<String, Object> map = new HashMap<>();
 				map.put("certificate", cert);
-				map.put("courseName", enroll != null ? enroll.getCourse().getName() : "Course");
+				map.put("courseName", cert.getCourseName() != null ? cert.getCourseName() : (cert.getCourse() != null ? cert.getCourse().getName() : "Course"));
 				displayCertificates.add(map);
 			}
 			model.addAttribute("certificates", displayCertificates);

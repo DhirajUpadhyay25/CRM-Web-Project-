@@ -78,10 +78,6 @@
                         <i class="bi bi-collection-fill text-base"></i>
                         <span class="text-sm">Categories</span>
                     </a>
-                    <a th:if="${@rbac.can('batches.view')}" href="/admin/batches" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/batches">
-                        <i class="bi bi-calendar3 text-base"></i>
-                        <span class="text-sm">Classes / Batches</span>
-                    </a>
                     <a th:if="${@rbac.can('students.view')}" href="/admin/students" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/students">
                         <i class="bi bi-mortarboard-fill text-base"></i>
                         <span class="text-sm">Students</span>
@@ -94,17 +90,9 @@
                         <i class="bi bi-journal-check text-base"></i>
                         <span class="text-sm">Enrollments</span>
                     </a>
-                    <a th:if="${@rbac.can('curriculum.view')}" href="/admin/lessons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/lessons">
-                        <i class="bi bi-book-half text-base"></i>
-                        <span class="text-sm">Curriculum</span>
-                    </a>
                     <a th:if="${@rbac.can('certificates.view')}" href="/admin/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/certificates">
                         <i class="bi bi-award-fill text-base"></i>
                         <span class="text-sm">Certificates</span>
-                    </a>
-                    <a th:if="${@rbac.can('assignments.view')}" href="/admin/assignments/submissions" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/assignments/submissions">
-                        <i class="bi bi-file-earmark-check-fill text-base"></i>
-                        <span class="text-sm">Submissions / Assignments</span>
                     </a>
                 </div>
             </div>

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -413,55 +414,85 @@ public class DataSeederService {
 
                 // Certificate
                 Certificate cert = new Certificate();
-                cert.setCertificateCode("CERT-" + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy")) + "-" + completedEnrollment.getId() + "-" + new Random().nextInt(10000));
-                cert.setEnrollmentId(String.valueOf(completedEnrollment.getId()));
-                cert.setIssueDate(LocalDateTime.now().minusDays(5).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                cert.setEnrollment(completedEnrollment);
+                cert.setStudent(completedEnrollment.getUser());
+                cert.setCourse(completedEnrollment.getCourse());
+                cert.setStudentName(completedEnrollment.getUser() != null ? completedEnrollment.getUser().getName() : email);
+                cert.setStudentEmail(email);
+                cert.setCourseName(completedEnrollment.getCourse().getName());
+                cert.setCourseCategory(completedEnrollment.getCourse().getCategory() != null ? completedEnrollment.getCourse().getCategory().getName() : "General");
+                cert.setInstructorName(completedEnrollment.getCourse().getInstructor() != null ? completedEnrollment.getCourse().getInstructor() : "EduTake Faculty");
+                cert.setCertificateNumber("EDU-2026-00010" + completedEnrollment.getId());
+                cert.setVerificationCode("VERIFY" + completedEnrollment.getId() + "A");
+                cert.setStatus(in.project.main.entities.enums.CertificateStatus.ISSUED);
+                cert.setIssueDate(LocalDate.now().minusDays(5));
+                cert.setCompletionDate(LocalDateTime.now().minusDays(5));
+                cert.setQrCodeData(in.project.main.utils.QRCodeGeneratorUtil.generateQrSvgDataUri("http://localhost:8080/verify/certificate/VERIFY" + completedEnrollment.getId() + "A", 160));
                 certRepo.save(cert);
             }
         }
     }
 
     private void seedCertificates() {
-        if (certRepo.count() > 0) return;
-        for (int i = 1; i <= 3; i++) {
-            Certificate c = new Certificate();
-            c.setCertificateCode("CERT-2024-00" + i);
-            c.setEnrollmentId(String.valueOf(i));
-            c.setIssueDate("2024-01-15");
-            certRepo.save(c);
-        }
+        // Handled dynamically per enrollment
     }
 
     private void seedPayments() {
         if (paymentRepo.count() > 0) return;
-        List<String> methods = Arrays.asList("Credit Card", "UPI", "Net Banking");
+        List<String> methods = Arrays.asList("RAZORPAY", "UPI", "CARD", "NETBANKING", "CASH");
         Random r = new Random();
         for (int i = 1; i <= 5; i++) {
             Payment p = new Payment();
+            p.setPaymentId("PAY_" + (1000 + i));
             p.setOrderId("ORD-00" + i);
+            p.setUserEmail(TEST_STUDENT_EMAILS.get(i % TEST_STUDENT_EMAILS.size()));
             p.setAmount(String.valueOf(999 + r.nextInt(4000)));
-            p.setPaymentMethod(methods.get(r.nextInt(methods.size())));
-            p.setStatus("Completed");
-            p.setPaymentDate("2024-08-" + (10 + i));
+            p.setPaymentMethod(methods.get(i % methods.size()));
+            p.setStatus(i == 1 ? "PENDING" : (i == 4 ? "REFUNDED" : "SUCCESS"));
+            p.setPaymentDate("2026-08-" + (10 + i));
             paymentRepo.save(p);
         }
     }
 
     private void seedCoupons() {
         if (couponRepo.count() > 0) return;
-        Coupon c1 = new Coupon(); c1.setCode("WELCOME50"); c1.setDiscountType("PERCENTAGE"); c1.setDiscountValue("50"); c1.setExpiryDate("2024-12-31"); c1.setIsActive(true);
-        Coupon c2 = new Coupon(); c2.setCode("FLAT500"); c2.setDiscountType("FIXED"); c2.setDiscountValue("500"); c2.setExpiryDate("2024-11-30"); c2.setIsActive(true);
+        Coupon c1 = new Coupon(); 
+        c1.setCode("WELCOME50"); 
+        c1.setDiscountType("PERCENTAGE"); 
+        c1.setDiscountValue("50"); 
+        c1.setMinOrderAmount("500");
+        c1.setMaxDiscountCap("1000");
+        c1.setExpiryDate("2028-12-31"); 
+        c1.setUsageLimit(500);
+        c1.setUsedCount(12);
+        c1.setDescription("Welcome gift for new students");
+        c1.setIsActive(true);
+
+        Coupon c2 = new Coupon(); 
+        c2.setCode("FLAT500"); 
+        c2.setDiscountType("FLAT"); 
+        c2.setDiscountValue("500"); 
+        c2.setMinOrderAmount("999");
+        c2.setExpiryDate("2028-11-30"); 
+        c2.setUsageLimit(100);
+        c2.setUsedCount(5);
+        c2.setDescription("Flat ₹500 off on select premium courses");
+        c2.setIsActive(true);
+
         couponRepo.saveAll(Arrays.asList(c1, c2));
     }
 
     private void seedRefunds() {
         if (refundRepo.count() > 0) return;
         Refund r = new Refund();
-        r.setOrderId("ORD-002");
+        r.setOrderId("ORD-004");
+        r.setUserEmail("priya@student.com");
+        r.setCourseName("Full Stack Java Masterclass");
         r.setAmount("1500");
-        r.setReason("Accidental purchase");
-        r.setStatus("Processed");
-        r.setRefundDate("2024-08-20");
+        r.setReason("Accidental duplicate purchase during registration");
+        r.setStatus("PENDING_REVIEW");
+        r.setRefundDate("2026-09-01");
+        r.setRequestedAt("2026-09-01 10:30:00");
         refundRepo.save(r);
     }
 

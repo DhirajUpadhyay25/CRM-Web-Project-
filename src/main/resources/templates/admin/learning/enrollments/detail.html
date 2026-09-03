@@ -408,32 +408,39 @@
             </div>
         </div>
 
-    </div>
+        <script th:inline="javascript">
+            function openActionModal(targetStatus) {
+                document.getElementById('modalStatusInput').value = targetStatus;
+                document.getElementById('modalTitle').innerText = targetStatus + ' Enrollment';
 
-    <script th:inline="javascript">
-        function openActionModal(targetStatus) {
-            document.getElementById('modalStatusInput').value = targetStatus;
-            document.getElementById('modalTitle').innerText = targetStatus + ' Enrollment';
+                const desc = document.getElementById('modalDescription');
+                const submitBtn = document.getElementById('modalSubmitBtn');
 
-            const desc = document.getElementById('modalDescription');
-            const submitBtn = document.getElementById('modalSubmitBtn');
+                if (targetStatus === 'SUSPENDED') {
+                    desc.innerText = 'The student will temporarily lose access to the course content and learning player. Learning progress is preserved.';
+                    submitBtn.className = 'px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+                } else if (targetStatus === 'REVOKED') {
+                    desc.innerText = 'Warning: Administratively revoking access immediately terminates course access. This action is permanently recorded in forensic audit logs.';
+                    submitBtn.className = 'px-5 py-2 bg-red-700 hover:bg-red-800 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+                } else if (targetStatus === 'CANCELLED') {
+                    desc.innerText = 'Terminates this course enrollment based on administrative request.';
+                    submitBtn.className = 'px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+                }
 
-            if (targetStatus === 'SUSPENDED') {
-                desc.innerText = 'The student will temporarily lose access to the course content and learning player. Learning progress is preserved.';
-                submitBtn.className = 'px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
-            } else if (targetStatus === 'REVOKED') {
-                desc.innerText = 'Warning: Administratively revoking access immediately terminates course access. This action is permanently recorded in forensic audit logs.';
-                submitBtn.className = 'px-5 py-2 bg-red-700 hover:bg-red-800 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
-            } else if (targetStatus === 'CANCELLED') {
-                desc.innerText = 'Terminates this course enrollment based on administrative request.';
-                submitBtn.className = 'px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors';
+                document.getElementById('detailActionModal').classList.remove('hidden');
+            }
+            function closeActionModal() {
+                var modal = document.getElementById('detailActionModal');
+                if (modal) modal.classList.add('hidden');
             }
 
-            document.getElementById('detailActionModal').classList.remove('hidden');
-        }
-        function closeActionModal() {
-            document.getElementById('detailActionModal').classList.add('hidden');
-        }
-    </script>
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeActionModal();
+            });
+            document.getElementById('detailActionModal')?.addEventListener('click', function(e) {
+                if (e.target === this) closeActionModal();
+            });
+        </script>
+    </div>
 </body>
 </html>

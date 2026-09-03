@@ -321,6 +321,55 @@ public class InstructorDashboardController {
     }
 
     // ========================================================
+    // 5.5 CURRICULUM OVERVIEW
+    // ========================================================
+    @GetMapping("/curriculum")
+    public String listCurriculum(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        String email = userDetails.getUsername();
+        List<Course> courses = courseRepository.findByInstructorEmail(email);
+
+        List<Map<String, Object>> courseCurriculums = new ArrayList<>();
+        long totalLessons = 0;
+        long totalSections = 0;
+        long totalAssignments = 0;
+        long totalQuizzes = 0;
+
+        for (Course c : courses) {
+            List<Lesson> lessons = lessonRepository.findByCourseIdOrderByOrderIndexAsc(String.valueOf(c.getId()));
+            Set<String> sections = lessons.stream()
+                    .map(l -> l.getSectionName() != null ? l.getSectionName() : "General")
+                    .collect(Collectors.toSet());
+
+            List<Assignment> assignments = assignmentRepository.findByCourseId(c.getId());
+            List<Quiz> quizzes = quizRepository.findByCourseId(c.getId());
+
+            Map<String, Object> item = new HashMap<>();
+            item.put("course", c);
+            item.put("lessons", lessons);
+            item.put("lessonCount", lessons.size());
+            item.put("sectionCount", sections.size());
+            item.put("assignmentCount", assignments.size());
+            item.put("quizCount", quizzes.size());
+
+            totalLessons += lessons.size();
+            totalSections += sections.size();
+            totalAssignments += assignments.size();
+            totalQuizzes += quizzes.size();
+
+            courseCurriculums.add(item);
+        }
+
+        model.addAttribute("curriculums", courseCurriculums);
+        model.addAttribute("totalCourses", courses.size());
+        model.addAttribute("totalLessons", totalLessons);
+        model.addAttribute("totalSections", totalSections);
+        model.addAttribute("totalAssignments", totalAssignments);
+        model.addAttribute("totalQuizzes", totalQuizzes);
+
+        return "instructor/curriculum/list";
+    }
+
+    // ========================================================
     // 6. COURSE CURRICULUM BUILDER
     // ========================================================
     @GetMapping("/courses/{id}/builder")

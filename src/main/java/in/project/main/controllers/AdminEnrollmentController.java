@@ -74,7 +74,14 @@ public class AdminEnrollmentController {
             @RequestParam(name = "size", defaultValue = "10") int size,
             Model model) {
 
-        Sort sort = "asc".equalsIgnoreCase(sortDir) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        String validSortBy = "enrolledAt";
+        if (sortBy != null) {
+            String s = sortBy.trim();
+            if (s.equals("id") || s.equals("status") || s.equals("completedAt") || s.equals("startDate") || s.equals("expiryDate") || s.equals("lastAccessedAt") || s.equals("paymentStatus") || s.equals("enrollmentType") || s.equals("enrolledAt")) {
+                validSortBy = s;
+            }
+        }
+        Sort sort = "asc".equalsIgnoreCase(sortDir) ? Sort.by(validSortBy).ascending() : Sort.by(validSortBy).descending();
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), sort);
 
         EnrollmentStatus enrollmentStatus = null;

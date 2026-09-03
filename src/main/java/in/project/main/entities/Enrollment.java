@@ -167,5 +167,13 @@ public class Enrollment {
 
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
+
+    public String getUserEmail() {
+        return user != null ? user.getEmail() : null;
+    }
+
+    public String getUserName() {
+        return user != null ? user.getName() : null;
+    }
 }
 

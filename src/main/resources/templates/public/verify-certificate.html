@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/base-head :: head('Verify Certificate | EduTake')}"></head>
+<head th:replace="~{fragments/base-head :: head('Verify Educational Credential | EduTake')}"></head>
 
 <body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
 
@@ -11,58 +11,63 @@
     <!-- Main Content -->
     <main class="flex-1 flex items-center justify-center mt-16 py-16 relative overflow-hidden">
         
-        <!-- Background Glow -->
+        <!-- Ambient Background Glow -->
         <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-600/10 rounded-full blur-[120px]"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-600/10 rounded-full blur-[130px]"></div>
         </div>
 
-        <div class="container mx-auto px-4 max-w-md relative z-10 animate-fade-in">
+        <div class="container mx-auto px-4 max-w-lg relative z-10 animate-fade-in">
             
-            <!-- VERIFIED STATE -->
-            <div th:if="${verified}" class="bg-surface-900 border border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
+            <!-- 1. VERIFIED AUTHENTIC STATE -->
+            <div th:if="${verified}" class="bg-surface-900 border border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
                 <!-- Glowing emerald overlay border -->
                 <div class="absolute inset-0 rounded-3xl border border-emerald-500/10 pointer-events-none"></div>
 
-                <!-- Verified Badge & Icon -->
+                <!-- Verified Badge & Header -->
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-emerald-500/5">
                         <i class="bi bi-shield-fill-check"></i>
                     </div>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 tracking-wider">
-                        Verified Credentials
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 tracking-wider inline-flex items-center gap-1">
+                        <i class="bi bi-patch-check-fill"></i> Verified Authentic Credential
                     </span>
-                    <h2 class="text-xl font-extrabold text-white mt-2">Credential Authentic</h2>
+                    <h2 class="text-xl font-extrabold text-white mt-2.5">Official Educational Credential</h2>
+                    <p class="text-gray-400 text-xs mt-0.5">Officially issued and registered in EduTake verification ledger.</p>
                 </div>
 
-                <div class="space-y-4 border-t border-white/5 pt-4 text-xs sm:text-sm">
-                    <div>
-                        <span class="text-gray-400 font-medium">Certificate Code:</span>
-                        <p class="font-mono text-brand-400 font-bold mt-0.5 text-sm" th:text="${certificate.certificateCode}">CODE</p>
-                    </div>
-                    
-                    <div>
-                        <span class="text-gray-400 font-medium">Recipient Name:</span>
-                        <p class="font-bold text-white mt-0.5 text-base" th:text="${student.name}">Student Name</p>
+                <!-- Credential Info Table -->
+                <div class="space-y-4 border-t border-white/10 pt-5 text-xs sm:text-sm">
+                    <div class="bg-surface-800/60 p-3.5 rounded-2xl border border-white/5 flex items-center justify-between">
+                        <span class="text-gray-400 text-xs font-medium">Certificate Number:</span>
+                        <span class="font-mono text-emerald-400 font-bold text-xs" th:text="${verification.certificateNumber}">EDU-2026-000101</span>
                     </div>
 
                     <div>
-                        <span class="text-gray-400 font-medium">Program / Course:</span>
-                        <p class="font-bold text-white mt-0.5" th:text="${course.name}">Course Name</p>
+                        <span class="text-gray-400 text-xs font-medium">Recipient:</span>
+                        <p class="font-bold text-white text-base mt-0.5" th:text="${verification.studentName}">Student Full Name</p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-gray-400 text-xs font-medium">Certified Program:</span>
+                        <p class="font-bold text-white text-sm mt-0.5" th:text="${verification.courseName}">Course Name</p>
+                        <div class="text-gray-400 text-xs mt-0.5" th:if="${verification.instructorName}">
+                            <i class="bi bi-person-badge"></i> <span th:text="${verification.instructorName}">Instructor</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 bg-surface-800/40 p-3.5 rounded-2xl border border-white/5 text-xs">
                         <div>
                             <span class="text-gray-400 font-medium">Issue Date:</span>
-                            <p class="font-bold text-white mt-0.5" th:text="${certificate.issueDate}">Date</p>
+                            <p class="font-semibold text-white mt-0.5" th:text="${verification.formattedIssueDate}">12 May 2026</p>
                         </div>
                         <div>
                             <span class="text-gray-400 font-medium">Issuer:</span>
-                            <p class="font-bold text-white mt-0.5">EduTake LMS</p>
+                            <p class="font-semibold text-white mt-0.5" th:text="${verification.issuerOrganization}">EduTake Academy</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-8 pt-4 border-t border-white/5 flex gap-2">
+                <div class="mt-6 pt-4 border-t border-white/5 flex gap-2.5">
                     <a href="/" class="flex-1 py-2.5 bg-surface-800 hover:bg-surface-750 text-white font-semibold rounded-xl text-center text-xs border border-white/10 transition-all">
                         Home
                     </a>
@@ -72,36 +77,69 @@
                 </div>
             </div>
 
-            <!-- UNVERIFIED STATE -->
-            <div th:unless="${verified}" class="bg-surface-900 border border-red-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative text-center">
-                <!-- Glowing red overlay border -->
-                <div class="absolute inset-0 rounded-3xl border border-red-500/10 pointer-events-none"></div>
+            <!-- 2. REVOKED STATE -->
+            <div th:if="${!verified and verification != null and verification.status != null and verification.status.name() == 'REVOKED'}" class="bg-surface-900 border border-red-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative text-center">
+                <div class="w-16 h-16 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-red-500/5">
+                    <i class="bi bi-slash-circle-fill"></i>
+                </div>
+                
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-red-500/10 text-red-400 border border-red-500/20 tracking-wider inline-flex items-center gap-1">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Credential Revoked
+                </span>
 
+                <h2 class="text-xl font-extrabold text-white mt-3 mb-2">Certificate Nullified</h2>
+                <p class="text-gray-300 text-xs sm:text-sm leading-relaxed mb-4 bg-red-500/10 p-3.5 rounded-2xl border border-red-500/20" th:text="${verification.statusMessage}">
+                    Notice: This certificate has been administratively revoked and is no longer recognized as valid.
+                </p>
+
+                <div class="text-xs text-gray-400 space-y-1 mb-6 text-left bg-surface-800 p-4 rounded-2xl border border-white/5">
+                    <div><strong>Certificate Number:</strong> <span class="font-mono text-white" th:text="${verification.certificateNumber}">EDU-2026-000101</span></div>
+                    <div><strong>Recipient:</strong> <span class="text-white" th:text="${verification.studentName}">Student</span></div>
+                    <div><strong>Course:</strong> <span class="text-white" th:text="${verification.courseName}">Course</span></div>
+                </div>
+
+                <a href="/" class="block w-full py-2.5 bg-surface-800 hover:bg-surface-750 text-white font-semibold rounded-xl text-xs border border-white/10 transition-all">
+                    Back to Home
+                </a>
+            </div>
+
+            <!-- 3. UNVERIFIED / NOT FOUND STATE -->
+            <div th:if="${!verified and (verification == null or verification.status == null or verification.status.name() != 'REVOKED')}" class="bg-surface-900 border border-red-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative text-center">
                 <div class="w-16 h-16 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-red-500/5">
                     <i class="bi bi-shield-fill-x"></i>
                 </div>
                 
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-red-500/10 text-red-400 border border-red-500/20 tracking-wider">
-                    Invalid Credentials
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-red-500/10 text-red-400 border border-red-500/20 tracking-wider">
+                    Verification Failed
                 </span>
 
-                <h2 class="text-xl font-extrabold text-white mt-3 mb-2">Verification Failed</h2>
+                <h2 class="text-xl font-extrabold text-white mt-3 mb-2">No Active Credential Found</h2>
                 <p class="text-gray-400 text-xs sm:text-sm leading-relaxed mb-6">
-                    We could not find any active student credentials matching the certificate code: <strong class="font-mono text-red-400" th:text="${certificateCode}"></strong>. Please verify the code or contact support.
+                    We could not find any active educational credential matching the verification code: <strong class="font-mono text-red-400" th:text="${certificateCode}"></strong>. Please verify the code or contact EduTake academic support.
                 </p>
 
-                <div class="flex gap-2">
-                    <a href="/" class="flex-1 py-2.5 bg-surface-800 hover:bg-surface-750 text-white font-semibold rounded-xl text-xs border border-white/10 transition-all">
-                        Back to Home
-                    </a>
-                </div>
+                <!-- Search form to try another code -->
+                <form onsubmit="event.preventDefault(); var c = document.getElementById('searchCodeInput').value.trim(); if(c) window.location.href='/verify/certificate/' + encodeURIComponent(c);" class="mb-6">
+                    <div class="flex gap-2">
+                        <input type="text" id="searchCodeInput" placeholder="Enter certificate code (e.g. 8F7K2M9P)..." class="flex-1 px-4 py-2.5 bg-surface-800 border border-white/10 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 font-mono">
+                        <button type="submit" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold transition-all">
+                            Verify
+                        </button>
+                    </div>
+                </form>
+
+                <a href="/" class="block w-full py-2.5 bg-surface-800 hover:bg-surface-750 text-white font-semibold rounded-xl text-xs border border-white/10 transition-all">
+                    Back to Home
+                </a>
             </div>
 
         </div>
     </main>
 
     <!-- Footer -->
-    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+    <footer class="border-t border-white/10 py-6 text-center text-xs text-gray-500 relative z-10">
+        <p>© 2026 EduTake Learning Academy. All rights reserved. Secure Credential Verification System.</p>
+    </footer>
 
 </body>
 </html>

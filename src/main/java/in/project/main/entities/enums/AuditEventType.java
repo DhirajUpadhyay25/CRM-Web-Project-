@@ -85,6 +85,19 @@ public enum AuditEventType {
     TEST_EMAIL_SENT(AuditCategory.SYSTEM, AuditSeverity.LOW, "Test Email Sent"),
     AUDIT_EXPORTED(AuditCategory.ADMIN, AuditSeverity.MEDIUM, "Audit Logs Exported"),
 
+    // Certificate Lifecycle Operations
+    CERTIFICATE_ELIGIBILITY_GRANTED(AuditCategory.COURSE, AuditSeverity.INFO, "Certificate Eligibility Achieved"),
+    CERTIFICATE_REQUESTED(AuditCategory.STUDENT, AuditSeverity.INFO, "Certificate Claim Requested"),
+    CERTIFICATE_REVIEW_STARTED(AuditCategory.ADMIN, AuditSeverity.INFO, "Certificate Review Initiated"),
+    CERTIFICATE_APPROVED(AuditCategory.ADMIN, AuditSeverity.INFO, "Certificate Request Approved"),
+    CERTIFICATE_REJECTED(AuditCategory.ADMIN, AuditSeverity.MEDIUM, "Certificate Request Rejected"),
+    CERTIFICATE_ISSUED(AuditCategory.ADMIN, AuditSeverity.INFO, "Certificate Officially Issued"),
+    CERTIFICATE_REVOKED(AuditCategory.ADMIN, AuditSeverity.HIGH, "Certificate Revoked"),
+    CERTIFICATE_REISSUED(AuditCategory.ADMIN, AuditSeverity.MEDIUM, "Certificate Reissued"),
+    CERTIFICATE_DOWNLOADED(AuditCategory.STUDENT, AuditSeverity.LOW, "Certificate Downloaded"),
+    CERTIFICATE_VERIFIED(AuditCategory.SYSTEM, AuditSeverity.LOW, "Certificate Verified"),
+    CERTIFICATE_EXPORTED(AuditCategory.ADMIN, AuditSeverity.LOW, "Certificates Exported"),
+
     // System & Errors
     SYSTEM_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "System Error Encountered"),
     DATABASE_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "Database Failure"),

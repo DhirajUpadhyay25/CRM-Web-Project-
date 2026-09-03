@@ -19,6 +19,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     long countByStatus(EnrollmentStatus status);
 
+    List<Enrollment> findByStatus(EnrollmentStatus status);
+
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE LOWER(e.paymentStatus) = LOWER(:paymentStatus)")
     long countByPaymentStatusIgnoreCase(@Param("paymentStatus") String paymentStatus);
 

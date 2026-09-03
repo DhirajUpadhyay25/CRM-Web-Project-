@@ -1,6 +1,10 @@
 package in.project.main.controllers;
 
+import java.io.PrintWriter;
+import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,26 +12,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import in.project.main.entities.Course;
-import in.project.main.entities.Enrollment;
-import in.project.main.entities.Orders;
-import in.project.main.entities.Payment;
-import in.project.main.entities.Refund;
-import in.project.main.entities.User;
-import in.project.main.entities.enums.EnrollmentStatus;
-import in.project.main.repositories.EnrollmentRepository;
-import in.project.main.repositories.OrdersRepository;
-import in.project.main.repositories.PaymentRepository;
-import in.project.main.repositories.RefundRepository;
-import in.project.main.repositories.UserRepository;
+import in.project.main.entities.*;
+import in.project.main.repositories.*;
 import in.project.main.services.CourseService;
+import in.project.main.services.PaymentService;
+import in.project.main.services.RefundService;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping("/admin/orders")
@@ -40,6 +33,9 @@ public class AdminOrderController {
     private UserRepository userRepository;
 
     @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
     private CourseService courseService;
 
     @Autowired
@@ -49,7 +45,13 @@ public class AdminOrderController {
     private PaymentRepository paymentRepository;
 
     @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
     private RefundRepository refundRepository;
+
+    @Autowired
+    private RefundService refundService;
 
     @GetMapping
     public String listOrders(
@@ -62,8 +64,11 @@ public class AdminOrderController {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by("id").descending());
         Page<Orders> ordersPage;
 
-        if (search != null && !search.trim().isEmpty()) {
-            ordersPage = ordersRepository.searchOrders(search.trim(), pageable);
+        String cleanSearch = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+        String cleanStatus = (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status.trim())) ? status.trim() : null;
+
+        if (cleanSearch != null) {
+            ordersPage = ordersRepository.searchOrders(cleanSearch, pageable);
         } else {
             ordersPage = ordersRepository.findAll(pageable);
         }
@@ -75,6 +80,10 @@ public class AdminOrderController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalRevenue", ordersRepository.calculateTotalRevenue());
         model.addAttribute("totalOrders", ordersRepository.count());
+
+        // For manual order creation modal
+        model.addAttribute("courses", courseRepository.findAll());
+        model.addAttribute("students", userRepository.findAll());
 
         return "admin/commerce/orders/list";
     }
@@ -96,68 +105,111 @@ public class AdminOrderController {
         }
 
         Refund refund = refundRepository.findByOrderId(order.getOrderId());
+        Payment payment = paymentRepository.findByOrderId(order.getOrderId());
 
         model.addAttribute("order", order);
         model.addAttribute("course", course);
         model.addAttribute("user", user);
         model.addAttribute("enrollment", enrollment);
         model.addAttribute("refund", refund);
+        model.addAttribute("payment", payment);
 
         return "admin/commerce/orders/detail";
     }
 
+    @PostMapping("/create")
+    public String createManualOrder(
+            @RequestParam("userEmail") String userEmail,
+            @RequestParam("courseName") String courseName,
+            @RequestParam("amount") String amount,
+            @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam(name = "notes", required = false) String notes,
+            Principal principal,
+            RedirectAttributes ra) {
+
+        String adminEmail = principal != null ? principal.getName() : "admin@edutake.com";
+        try {
+            Payment payment = paymentService.recordManualPayment(null, userEmail, courseName, amount, paymentMethod, notes, adminEmail);
+            ra.addFlashAttribute("successMsg", "Sales order and enrollment created successfully for " + userEmail + ".");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Failed to create order: " + e.getMessage());
+        }
+
+        return "redirect:/admin/orders";
+    }
+
     @PostMapping("/refunds/{id}/approve")
-    public String approveRefund(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        Refund refund = refundRepository.findById(id).orElse(null);
-        if (refund == null) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Refund ticket not found.");
+    public String approveRefund(
+            @PathVariable("id") Long id,
+            @RequestParam(name = "adminNote", required = false) String adminNote,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        String adminEmail = principal != null ? principal.getName() : "admin@edutake.com";
+        try {
+            Refund refund = refundService.approveAndProcessRefund(id, adminEmail, adminNote);
+            Orders order = ordersRepository.findByOrderId(refund.getOrderId());
+            redirectAttributes.addFlashAttribute("successMsg", "Refund approved successfully. Order #" + refund.getOrderId() + " refunded and enrollment cancelled.");
+            return "redirect:/admin/orders" + (order != null ? "/" + order.getId() : "");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Failed to approve refund: " + e.getMessage());
             return "redirect:/admin/orders";
         }
-
-        Orders order = ordersRepository.findByOrderId(refund.getOrderId());
-        if (order != null) {
-            order.setStatus("REFUNDED");
-            ordersRepository.save(order);
-
-            // Set transaction to REFUNDED
-            Payment payment = paymentRepository.findByOrderId(order.getOrderId());
-            if (payment != null) {
-                payment.setStatus("REFUNDED");
-                paymentRepository.save(payment);
-            }
-
-            // Revoke enrollment access
-            Course course = courseService.getCourseDetails(order.getCourseName());
-            if (course != null) {
-                Enrollment enrollment = enrollmentRepository.findByUserEmailAndCourseId(order.getUserEmail(), course.getId()).orElse(null);
-                if (enrollment != null) {
-                    enrollment.setStatus(EnrollmentStatus.CANCELLED);
-                    enrollmentRepository.save(enrollment);
-                }
-            }
-        }
-
-        refund.setStatus("APPROVED");
-        refund.setRefundDate(in.project.main.util.DateTimeUtil.getCurrentDateTimeFormatted());
-        refundRepository.save(refund);
-
-        redirectAttributes.addFlashAttribute("successMsg", "Refund approved successfully and course enrollment revoked.");
-        return "redirect:/admin/orders" + (order != null ? "/" + order.getId() : "");
     }
 
     @PostMapping("/refunds/{id}/reject")
-    public String rejectRefund(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        Refund refund = refundRepository.findById(id).orElse(null);
-        if (refund == null) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Refund ticket not found.");
+    public String rejectRefund(
+            @PathVariable("id") Long id,
+            @RequestParam(name = "rejectionReason", required = false) String rejectionReason,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        String adminEmail = principal != null ? principal.getName() : "admin@edutake.com";
+        try {
+            Refund refund = refundService.rejectRefund(id, adminEmail, rejectionReason);
+            Orders order = ordersRepository.findByOrderId(refund.getOrderId());
+            redirectAttributes.addFlashAttribute("successMsg", "Refund request declined.");
+            return "redirect:/admin/orders" + (order != null ? "/" + order.getId() : "");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Failed to reject refund: " + e.getMessage());
             return "redirect:/admin/orders";
         }
+    }
 
-        refund.setStatus("REJECTED");
-        refundRepository.save(refund);
+    @GetMapping("/export")
+    public void exportOrdersCsv(
+            @RequestParam(name = "search", required = false) String search,
+            HttpServletResponse response) {
 
-        Orders order = ordersRepository.findByOrderId(refund.getOrderId());
-        redirectAttributes.addFlashAttribute("successMsg", "Refund request rejected successfully.");
-        return "redirect:/admin/orders" + (order != null ? "/" + order.getId() : "");
+        try {
+            response.setContentType("text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=\"orders_export_" + System.currentTimeMillis() + ".csv\"");
+
+            Pageable unpaged = PageRequest.of(0, 5000, Sort.by("id").descending());
+            Page<Orders> page;
+            if (search != null && !search.trim().isEmpty()) {
+                page = ordersRepository.searchOrders(search.trim(), unpaged);
+            } else {
+                page = ordersRepository.findAll(unpaged);
+            }
+
+            PrintWriter writer = response.getWriter();
+            writer.println("Order ID,Student Email,Course Name,Amount,Status,Date Of Purchase,Payment ID,Coupon Code,Discount Amount");
+
+            for (Orders o : page.getContent()) {
+                writer.println(String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"",
+                        o.getOrderId() != null ? o.getOrderId() : "",
+                        o.getUserEmail() != null ? o.getUserEmail() : "",
+                        o.getCourseName() != null ? o.getCourseName().replace("\"", "\"\"") : "",
+                        o.getCourseAmount() != null ? o.getCourseAmount() : "0",
+                        o.getStatus() != null ? o.getStatus() : "COMPLETED",
+                        o.getDateOfPurchase() != null ? o.getDateOfPurchase() : "",
+                        o.getPaymentId() != null ? o.getPaymentId() : "",
+                        o.getCouponCode() != null ? o.getCouponCode() : "",
+                        o.getDiscountAmount() != null ? o.getDiscountAmount() : "0"
+                ));
+            }
+            writer.flush();
+        } catch (Exception ignored) {}
     }
 }

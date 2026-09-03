@@ -64,11 +64,38 @@ public class OrdersApi {
     @Autowired
     private CouponRepository couponRepository;
 
+    @Autowired
+    private in.project.main.services.CouponService couponService;
+
     @Value("${app.razorpay.key-id}")
     private String keyId;
 
     @Value("${app.razorpay.key-secret}")
     private String keySecret;
+
+    // ------------------------------------------------------------------
+    // 0. VALIDATE COUPON
+    // ------------------------------------------------------------------
+    @org.springframework.web.bind.annotation.GetMapping("/coupons/validate")
+    public ResponseEntity<?> validateCouponGet(
+            @org.springframework.web.bind.annotation.RequestParam("code") String code,
+            @org.springframework.web.bind.annotation.RequestParam("courseName") String courseName,
+            Principal principal) {
+        String email = principal != null ? principal.getName() : null;
+        Map<String, Object> result = couponService.validateAndApplyCoupon(code, courseName, email);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/coupons/validate")
+    public ResponseEntity<?> validateCouponPost(
+            @RequestBody Map<String, Object> payload,
+            Principal principal) {
+        String code = (String) payload.get("code");
+        String courseName = (String) payload.get("courseName");
+        String email = principal != null ? principal.getName() : null;
+        Map<String, Object> result = couponService.validateAndApplyCoupon(code, courseName, email);
+        return ResponseEntity.ok(result);
+    }
 
     // ------------------------------------------------------------------
     // 1. CREATE ORDER - price is always computed server-side

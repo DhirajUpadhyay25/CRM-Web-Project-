@@ -1,46 +1,447 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Payment Management', ~{::div})}">
 <body>
     <div>
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Payment Management</h1>
-                <p class="text-gray-500 text-sm">Manage payments across the platform.</p>
-            </div>
-            <button class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors">
-                <i class="bi bi-plus-lg mr-1.5"></i> Add Payment
-            </button>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span>Commerce</span>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">Payments</span>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-check-circle-fill text-emerald-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}">Payment action completed successfully.</span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-exclamation-triangle-fill text-red-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}">An error occurred.</span>
         </div>
 
-        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-surface-50 text-left text-xs text-gray-400 uppercase tracking-wider border-b border-surface-200">
-                            <th class="px-6 py-3 font-semibold">ID</th>
-                            <th class="px-6 py-3 font-semibold">Details</th>
-                            <th class="px-6 py-3 font-semibold">Actions</th>
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Payment Management</h1>
+                <p class="text-gray-500 text-sm mt-0.5">Track financial transactions, gateway settlements, offline receipts, and payment health across the platform.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a th:href="@{/admin/payments/export(search=${search}, status=${statusFilter}, method=${methodFilter})}" class="px-3.5 py-2 bg-white text-surface-700 font-medium rounded-xl border border-surface-200 shadow-sm hover:bg-surface-50 transition-all flex items-center gap-2 text-sm">
+                    <i class="bi bi-download text-gray-500"></i>
+                    <span>Export CSV</span>
+                </a>
+                <button type="button" onclick="openManualPaymentModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-2 text-sm cursor-pointer">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    <span>Record Manual Payment</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6" th:if="${stats != null}">
+            <!-- Total Collected -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-emerald-600 uppercase">Total Collected</span>
+                    <i class="bi bi-wallet2 text-emerald-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-surface-900" th:text="${'₹' + #numbers.formatDecimal(stats.totalCollected, 1, 2)}">₹0.00</div>
+                <div class="text-[11px] text-gray-400 mt-0.5" th:text="${stats.successCount + ' successful transactions'}">0 transactions</div>
+            </div>
+
+            <!-- Successful Payments -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-blue-600 uppercase">Success Rate</span>
+                    <i class="bi bi-check2-circle text-blue-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-blue-600" th:text="${stats.successCount}">0</div>
+                <div class="text-[11px] text-gray-400 mt-0.5">Settled payments</div>
+            </div>
+
+            <!-- Total Refunded -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-purple-600 uppercase">Refunded</span>
+                    <i class="bi bi-arrow-counterclockwise text-purple-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-purple-600" th:text="${'₹' + #numbers.formatDecimal(stats.totalRefunded, 1, 2)}">₹0.00</div>
+                <div class="text-[11px] text-gray-400 mt-0.5" th:text="${stats.refundedCount + ' refunds processed'}">0 refunds</div>
+            </div>
+
+            <!-- Failed / Pending -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-rose-600 uppercase">Failed / Pending</span>
+                    <i class="bi bi-exclamation-octagon text-rose-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-rose-600" th:text="${stats.failedCount + stats.pendingCount}">0</div>
+                <div class="text-[11px] text-gray-400 mt-0.5" th:text="${stats.pendingCount + ' pending, ' + stats.failedCount + ' failed'}">0 pending</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl border border-surface-200 p-4 sm:p-5 mb-6 shadow-sm">
+            <form method="get" action="/admin/payments" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
+                <!-- Search -->
+                <div class="lg:col-span-5 relative">
+                    <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="search" th:value="${search}" placeholder="Search Order ID, Payment ID, student email..." class="w-full pl-9 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                </div>
+
+                <!-- Status Filter -->
+                <div class="lg:col-span-3">
+                    <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                        <option value="">All Statuses</option>
+                        <option value="SUCCESS" th:selected="${statusFilter == 'SUCCESS'}">Success / Settled</option>
+                        <option value="PENDING" th:selected="${statusFilter == 'PENDING'}">Pending</option>
+                        <option value="FAILED" th:selected="${statusFilter == 'FAILED'}">Failed</option>
+                        <option value="REFUNDED" th:selected="${statusFilter == 'REFUNDED'}">Refunded</option>
+                    </select>
+                </div>
+
+                <!-- Method Filter -->
+                <div class="lg:col-span-3">
+                    <select name="method" onchange="this.form.submit()" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                        <option value="">All Payment Methods</option>
+                        <option value="RAZORPAY" th:selected="${methodFilter == 'RAZORPAY'}">Razorpay Online</option>
+                        <option value="UPI" th:selected="${methodFilter == 'UPI'}">Direct UPI</option>
+                        <option value="CARD" th:selected="${methodFilter == 'CARD'}">Credit/Debit Card</option>
+                        <option value="NETBANKING" th:selected="${methodFilter == 'NETBANKING'}">Net Banking</option>
+                        <option value="CASH" th:selected="${methodFilter == 'CASH'}">Cash at Center</option>
+                        <option value="BANK_TRANSFER" th:selected="${methodFilter == 'BANK_TRANSFER'}">Direct Wire / Transfer</option>
+                    </select>
+                </div>
+
+                <!-- Action Button -->
+                <div class="lg:col-span-1 flex items-center gap-2">
+                    <button type="submit" class="w-full px-3 py-2 bg-surface-900 hover:bg-black text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer">
+                        <i class="bi bi-funnel"></i>
+                        <span>Filter</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-surface-100 text-xs text-gray-500" th:if="${search != null or statusFilter != null or methodFilter != null}">
+                <a href="/admin/payments" class="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                </a>
+                <span>Showing <strong class="text-surface-900" th:text="${paymentsPage != null ? paymentsPage.totalElements : 0}">0</strong> payments</span>
+            </div>
+        </div>
+
+        <!-- Payments Table Card -->
+        <div class="bg-white rounded-3xl border border-surface-200 shadow-sm overflow-hidden mb-6">
+            
+            <!-- Empty State -->
+            <div th:if="${paymentsPage == null or #lists.isEmpty(paymentsPage.content)}" class="p-16 text-center">
+                <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                    <i class="bi bi-credit-card-2-front"></i>
+                </div>
+                <h3 class="text-base font-bold text-surface-900 mb-1">No Payments Found</h3>
+                <p class="text-sm text-gray-500 max-w-sm mx-auto mb-5">There are no payment records matching your current criteria.</p>
+                <button type="button" onclick="openManualPaymentModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-sm transition-colors cursor-pointer">
+                    Record Manual Payment
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div th:if="${paymentsPage != null and !#lists.isEmpty(paymentsPage.content)}" class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-3.5">Payment Ref &amp; Order</th>
+                            <th class="px-4 py-3.5">Student</th>
+                            <th class="px-4 py-3.5">Amount</th>
+                            <th class="px-4 py-3.5">Method</th>
+                            <th class="px-4 py-3.5">Status</th>
+                            <th class="px-4 py-3.5">Date</th>
+                            <th class="px-6 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-100">
-                        <tr th:each="item : ${items}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 text-surface-900" th:text="${item.id}">1</td>
-                            <td class="px-6 py-4 text-gray-500">Item Details Here</td>
+                        <tr th:each="p : ${paymentsPage.content}" class="hover:bg-surface-50/80 transition-colors">
+                            
+                            <!-- Payment / Order -->
                             <td class="px-6 py-4">
-                                <button class="text-brand-600 hover:text-brand-800 text-xs font-semibold mr-3">Edit</button>
-                                <button class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+                                <div class="font-bold text-surface-900 font-mono text-xs" th:text="${p.paymentId ?: 'PAY_' + p.id}">pay_xyz</div>
+                                <div class="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
+                                    <span>Order:</span>
+                                    <span class="font-semibold text-surface-700" th:text="${p.orderId}">order_123</span>
+                                </div>
                             </td>
-                        </tr>
-                        <tr th:if="${items == null or items.isEmpty()}">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                <i class="bi bi-inbox text-3xl mb-2 block"></i>
-                                No payments found. Use the Data Seeder to add sample data.
+
+                            <!-- Student -->
+                            <td class="px-4 py-4 text-xs">
+                                <div class="font-medium text-surface-900" th:text="${p.userEmail ?: '-'}">student@example.com</div>
+                                <div class="text-[10px] text-gray-400" th:if="${p.verifiedBy}" th:text="${'Verified by ' + p.verifiedBy}">Verified by Admin</div>
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="px-4 py-4">
+                                <div class="text-sm font-extrabold text-surface-900" th:text="${'₹' + (p.amount ?: '0')}">₹999</div>
+                                <span class="text-[10px] text-gray-400 font-semibold" th:text="${p.currency ?: 'INR'}">INR</span>
+                            </td>
+
+                            <!-- Method -->
+                            <td class="px-4 py-4">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-100 text-surface-800 border border-surface-200">
+                                    <i class="bi bi-credit-card text-brand-600" th:if="${p.paymentMethod == 'CARD'}"></i>
+                                    <i class="bi bi-qr-code text-indigo-600" th:if="${p.paymentMethod == 'UPI'}"></i>
+                                    <i class="bi bi-cash-stack text-emerald-600" th:if="${p.paymentMethod == 'CASH'}"></i>
+                                    <i class="bi bi-bank text-blue-600" th:if="${p.paymentMethod == 'BANK_TRANSFER' or p.paymentMethod == 'NETBANKING'}"></i>
+                                    <i class="bi bi-lightning-charge-fill text-amber-500" th:if="${p.paymentMethod == 'RAZORPAY' or p.paymentMethod == null}"></i>
+                                    <span th:text="${p.paymentMethod ?: 'RAZORPAY'}">RAZORPAY</span>
+                                </span>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="px-4 py-4">
+                                <span th:if="${p.status == 'SUCCESS' or p.status == 'COMPLETED'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Success
+                                </span>
+                                <span th:if="${p.status == 'PENDING'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending
+                                </span>
+                                <span th:if="${p.status == 'FAILED'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Failed
+                                </span>
+                                <span th:if="${p.status == 'REFUNDED'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Refunded
+                                </span>
+                            </td>
+
+                            <!-- Date -->
+                            <td class="px-4 py-4 text-xs text-gray-500">
+                                <div class="font-medium text-surface-900" th:text="${p.paymentDate ?: '-'}">Sep 03, 2026</div>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="px-6 py-4 text-right">
+                                <button type="button" 
+                                        th:data-id="${p.id}"
+                                        th:data-payid="${p.paymentId}"
+                                        th:data-orderid="${p.orderId}"
+                                        th:data-email="${p.userEmail}"
+                                        th:data-amount="${p.amount}"
+                                        th:data-method="${p.paymentMethod}"
+                                        th:data-status="${p.status}"
+                                        th:data-date="${p.paymentDate}"
+                                        th:data-notes="${p.notes}"
+                                        th:data-verified="${p.verifiedBy}"
+                                        onclick="openPaymentDetailsModal(this.getAttribute('data-id'), this.getAttribute('data-payid'), this.getAttribute('data-orderid'), this.getAttribute('data-email'), this.getAttribute('data-amount'), this.getAttribute('data-method'), this.getAttribute('data-status'), this.getAttribute('data-date'), this.getAttribute('data-notes'), this.getAttribute('data-verified'))"
+                                        class="p-2 rounded-xl bg-surface-50 text-surface-700 hover:bg-brand-50 hover:text-brand-600 transition-colors shadow-2xs cursor-pointer" title="View Payment Details">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div th:if="${paymentsPage != null and paymentsPage.totalPages > 1}" class="px-6 py-4 border-t border-surface-100 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4 text-xs text-gray-500">
+                <div>
+                    Showing <strong class="text-surface-900" th:text="${paymentsPage.number * paymentsPage.size + 1}">1</strong> to
+                    <strong class="text-surface-900" th:text="${paymentsPage.isLast() ? paymentsPage.totalElements : (paymentsPage.number + 1) * paymentsPage.size}">15</strong> of
+                    <strong class="text-surface-900" th:text="${paymentsPage.totalElements}">50</strong> results
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${paymentsPage.hasPrevious()}"
+                       th:href="@{/admin/payments(page=${paymentsPage.number - 1}, size=${paymentsPage.size}, search=${search}, status=${statusFilter}, method=${methodFilter})}"
+                       class="px-3 py-1.5 rounded-xl bg-white border border-surface-200 text-surface-700 font-semibold hover:bg-surface-100 transition-colors shadow-2xs flex items-center gap-1">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                    <span class="px-3 py-1.5 font-bold text-surface-900">
+                        Page <span th:text="${paymentsPage.number + 1}">1</span> of <span th:text="${paymentsPage.totalPages}">5</span>
+                    </span>
+                    <a th:if="${paymentsPage.hasNext()}"
+                       th:href="@{/admin/payments(page=${paymentsPage.number + 1}, size=${paymentsPage.size}, search=${search}, status=${statusFilter}, method=${methodFilter})}"
+                       class="px-3 py-1.5 rounded-xl bg-white border border-surface-200 text-surface-700 font-semibold hover:bg-surface-100 transition-colors shadow-2xs flex items-center gap-1">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
+
+        <!-- =================================================================== -->
+        <!-- MODAL: RECORD MANUAL OFFLINE PAYMENT                                -->
+        <!-- =================================================================== -->
+        <div id="manualPaymentModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-xs z-[9999] items-center justify-center p-4" style="display: none;">
+            <div class="bg-white rounded-3xl max-w-lg w-full border border-surface-200 shadow-2xl overflow-hidden animate-scale-up">
+                <div class="p-6 border-b border-surface-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-surface-900">Record Manual Payment</h3>
+                            <p class="text-xs text-gray-500">Record offline cash, bank wire, or direct receipt.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeManualPaymentModal()" class="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 text-gray-500 flex items-center justify-center transition-colors cursor-pointer">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                </div>
+                <form method="post" action="/admin/payments/manual" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Select Student *</label>
+                        <select name="userEmail" required class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                            <option value="">-- Choose Enrolling Student --</option>
+                            <option th:each="s : ${students}" th:value="${s.email}" th:text="${(s.name != null and !s.name.isEmpty() ? s.name : 'Student #' + s.id) + ' (' + s.email + ')'}"></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Target Course *</label>
+                        <select name="courseName" required class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                            <option value="">-- Choose Course --</option>
+                            <option th:each="c : ${courses}" th:value="${c.name}" th:text="${c.name + ' (₹' + c.effectivePrice + ')'}"></option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Amount Paid (₹) *</label>
+                            <input type="number" step="0.01" name="amount" required placeholder="e.g. 1999.00" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Payment Method *</label>
+                            <select name="paymentMethod" required class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                                <option value="CASH">Cash at Center</option>
+                                <option value="UPI">Direct UPI QR / VPA</option>
+                                <option value="BANK_TRANSFER">Direct Wire / NEFT / IMPS</option>
+                                <option value="CARD">POS Card Swipe</option>
+                                <option value="CHEQUE">Cheque Deposit</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Custom Order ID / Receipt Reference (Optional)</label>
+                        <input type="text" name="orderId" placeholder="e.g. RCPT_2026_09_001" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Internal Payment Memo</label>
+                        <textarea name="notes" rows="2" placeholder="Reference number, branch name, or transaction remarks..." class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
+                    </div>
+
+                    <div class="pt-4 border-t border-surface-100 flex items-center justify-end gap-2.5">
+                        <button type="button" onclick="closeManualPaymentModal()" class="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
+                            <i class="bi bi-check-lg"></i>
+                            <span>Confirm &amp; Enroll</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- MODAL: VIEW PAYMENT DETAILS                                         -->
+        <!-- =================================================================== -->
+        <div id="paymentDetailsModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-xs z-[9999] items-center justify-center p-4" style="display: none;">
+            <div class="bg-white rounded-3xl max-w-md w-full border border-surface-200 shadow-2xl overflow-hidden animate-scale-up">
+                <div class="p-6 border-b border-surface-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-surface-900">Payment Transaction</h3>
+                            <p class="text-xs text-gray-500" id="detailPayId">PAY_000</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closePaymentDetailsModal()" class="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 text-gray-500 flex items-center justify-center transition-colors cursor-pointer">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-3.5 text-xs">
+                    <div class="flex justify-between py-1.5 border-b border-surface-100">
+                        <span class="text-gray-400 font-semibold">Order ID</span>
+                        <span class="font-bold text-surface-900" id="detailOrderId">-</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-surface-100">
+                        <span class="text-gray-400 font-semibold">Student Email</span>
+                        <span class="font-bold text-surface-900" id="detailStudentEmail">-</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-surface-100">
+                        <span class="text-gray-400 font-semibold">Amount Paid</span>
+                        <span class="font-extrabold text-brand-600 text-sm" id="detailAmount">₹0</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-surface-100">
+                        <span class="text-gray-400 font-semibold">Payment Method</span>
+                        <span class="font-bold text-surface-900" id="detailMethod">RAZORPAY</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-surface-100">
+                        <span class="text-gray-400 font-semibold">Status</span>
+                        <span class="font-bold text-emerald-600" id="detailStatus">SUCCESS</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-surface-100">
+                        <span class="text-gray-400 font-semibold">Transaction Date</span>
+                        <span class="font-medium text-surface-700" id="detailDate">-</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-surface-100" id="detailVerifiedRow">
+                        <span class="text-gray-400 font-semibold">Verified By</span>
+                        <span class="font-medium text-surface-700" id="detailVerified">-</span>
+                    </div>
+                    <div class="pt-1" id="detailNotesContainer">
+                        <span class="text-gray-400 font-semibold block mb-1">Internal Notes:</span>
+                        <p class="p-2.5 bg-surface-50 rounded-xl text-surface-700 leading-relaxed font-sans" id="detailNotes">None</p>
+                    </div>
+                    <div class="pt-4 border-t border-surface-100 flex items-center justify-end">
+                        <button type="button" onclick="closePaymentDetailsModal()" class="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Scripts -->
+        <script>
+            function openManualPaymentModal() {
+                var modal = document.getElementById('manualPaymentModal');
+                if (modal) modal.style.display = 'flex';
+            }
+            function closeManualPaymentModal() {
+                var modal = document.getElementById('manualPaymentModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            function openPaymentDetailsModal(id, payId, orderId, email, amount, method, status, date, notes, verified) {
+                document.getElementById('detailPayId').innerText = payId || ('PAY_' + id);
+                document.getElementById('detailOrderId').innerText = orderId || '-';
+                document.getElementById('detailStudentEmail').innerText = email || '-';
+                document.getElementById('detailAmount').innerText = '₹' + (amount || '0');
+                document.getElementById('detailMethod').innerText = method || 'DIRECT';
+                document.getElementById('detailStatus').innerText = status || 'SUCCESS';
+                document.getElementById('detailDate').innerText = date || '-';
+                document.getElementById('detailVerified').innerText = verified || 'Automated Gateway';
+                document.getElementById('detailNotes').innerText = notes || 'No remarks recorded.';
+
+                var modal = document.getElementById('paymentDetailsModal');
+                if (modal) modal.style.display = 'flex';
+            }
+            function closePaymentDetailsModal() {
+                var modal = document.getElementById('paymentDetailsModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeManualPaymentModal();
+                    closePaymentDetailsModal();
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

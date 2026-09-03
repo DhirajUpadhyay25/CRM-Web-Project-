@@ -5,21 +5,36 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
-import in.project.main.EducationApplication;
 import in.project.main.dto.BulkEnrollmentDTO;
 import in.project.main.dto.BulkEnrollmentResultDTO;
 import in.project.main.dto.BulkEnrollmentStatusUpdateDTO;
@@ -36,45 +51,90 @@ import in.project.main.entities.User;
 import in.project.main.entities.enums.CourseLevel;
 import in.project.main.entities.enums.CourseStatus;
 import in.project.main.entities.enums.EnrollmentStatus;
-import in.project.main.repositories.CategoryRepository;
+import in.project.main.repositories.AssignmentRepository;
+import in.project.main.repositories.AssignmentSubmissionRepository;
+import in.project.main.repositories.AuditLogRepository;
+import in.project.main.repositories.CertificateRepository;
 import in.project.main.repositories.CourseRepository;
 import in.project.main.repositories.EnrollmentRepository;
+import in.project.main.repositories.LessonProgressRepository;
+import in.project.main.repositories.LessonRepository;
+import in.project.main.repositories.OrdersRepository;
+import in.project.main.repositories.PaymentRepository;
+import in.project.main.repositories.QuizAttemptRepository;
+import in.project.main.repositories.QuizRepository;
 import in.project.main.repositories.UserRepository;
+import in.project.main.services.impl.EnrollmentServiceImpl;
 
-@SpringBootTest(classes = EducationApplication.class)
-@Transactional
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class EnrollmentServiceTest {
 
-    @Autowired
-    private EnrollmentService enrollmentService;
-
-    @Autowired
+    @Mock
     private EnrollmentRepository enrollmentRepository;
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
-    @Autowired
+    @Mock
     private CourseRepository courseRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    @Mock
+    private OrdersRepository ordersRepository;
+
+    @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
+    private LessonProgressRepository lessonProgressRepository;
+
+    @Mock
+    private LessonRepository lessonRepository;
+
+    @Mock
+    private QuizRepository quizRepository;
+
+    @Mock
+    private QuizAttemptRepository quizAttemptRepository;
+
+    @Mock
+    private AssignmentRepository assignmentRepository;
+
+    @Mock
+    private AssignmentSubmissionRepository assignmentSubmissionRepository;
+
+    @Mock
+    private CertificateRepository certificateRepository;
+
+    @Mock
+    private AuditLogRepository auditLogRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
+    @InjectMocks
+    private EnrollmentServiceImpl enrollmentService;
 
     private User testStudent1;
     private User testStudent2;
     private User bannedStudent;
     private Course testCourse;
     private Category testCategory;
+    private Enrollment activeEnrollment;
 
     @BeforeEach
     public void setUp() {
         testCategory = new Category();
-        testCategory.setName("Engineering " + System.currentTimeMillis());
-        testCategory = categoryRepository.save(testCategory);
+        testCategory.setId(1L);
+        testCategory.setName("Engineering");
 
         testCourse = new Course();
-        testCourse.setName("Fullstack Java Bootcamp " + System.currentTimeMillis());
-        testCourse.setSlug("fullstack-java-" + System.currentTimeMillis());
+        testCourse.setId(101L);
+        testCourse.setName("Fullstack Java Bootcamp");
+        testCourse.setSlug("fullstack-java");
         testCourse.setCategory(testCategory);
         testCourse.setLevel(CourseLevel.BEGINNER);
         testCourse.setStatus(CourseStatus.PUBLISHED);
@@ -82,34 +142,39 @@ public class EnrollmentServiceTest {
         testCourse.setDiscountedPrice(BigDecimal.valueOf(1999));
         testCourse.setInstructor("Prof. Alan Turing");
         testCourse.setInstructorEmail("alan.turing@edutake.com");
-        testCourse = courseRepository.save(testCourse);
 
         testStudent1 = new User();
+        testStudent1.setId(1001L);
         testStudent1.setName("Alice Walker");
-        testStudent1.setEmail("alice." + System.currentTimeMillis() + "@example.com");
-        testStudent1.setPassword("password123");
+        testStudent1.setEmail("alice@example.com");
         testStudent1.setPhoneno("9876543210");
         testStudent1.setCity("New York");
         testStudent1.setBanStatus(false);
-        testStudent1 = userRepository.save(testStudent1);
 
         testStudent2 = new User();
+        testStudent2.setId(1002L);
         testStudent2.setName("Bob Smith");
-        testStudent2.setEmail("bob." + System.currentTimeMillis() + "@example.com");
-        testStudent2.setPassword("password123");
+        testStudent2.setEmail("bob@example.com");
         testStudent2.setPhoneno("9876543211");
         testStudent2.setCity("Chicago");
         testStudent2.setBanStatus(false);
-        testStudent2 = userRepository.save(testStudent2);
 
         bannedStudent = new User();
+        bannedStudent.setId(1003L);
         bannedStudent.setName("Charlie Banned");
-        bannedStudent.setEmail("banned." + System.currentTimeMillis() + "@example.com");
-        bannedStudent.setPassword("password123");
+        bannedStudent.setEmail("banned@example.com");
         bannedStudent.setPhoneno("9876543212");
         bannedStudent.setCity("Boston");
         bannedStudent.setBanStatus(true);
-        bannedStudent = userRepository.save(bannedStudent);
+
+        activeEnrollment = new Enrollment();
+        activeEnrollment.setId(5001L);
+        activeEnrollment.setUser(testStudent1);
+        activeEnrollment.setCourse(testCourse);
+        activeEnrollment.setStatus(EnrollmentStatus.ACTIVE);
+        activeEnrollment.setEnrollmentType("MANUAL");
+        activeEnrollment.setEnrollmentSource("ADMIN_PANEL");
+        activeEnrollment.setEnrolledAt(LocalDateTime.now());
     }
 
     @Test
@@ -121,15 +186,26 @@ public class EnrollmentServiceTest {
         dto.setAdminNote("Granted via scholarship");
         dto.setNotifyStudent(false);
 
+        when(userRepository.findById(testStudent1.getId())).thenReturn(Optional.of(testStudent1));
+        when(courseRepository.findById(testCourse.getId())).thenReturn(Optional.of(testCourse));
+        when(enrollmentRepository.findByUserIdAndCourseId(testStudent1.getId(), testCourse.getId())).thenReturn(Optional.empty());
+        when(enrollmentRepository.save(any(Enrollment.class))).thenAnswer(invocation -> {
+            Enrollment e = invocation.getArgument(0);
+            e.setId(5002L);
+            return e;
+        });
+
         EnrollmentDTO result = enrollmentService.manualEnrollStudent(dto, "admin@edutake.com");
 
         assertNotNull(result);
-        assertNotNull(result.getId());
+        assertEquals(5002L, result.getId());
         assertEquals(EnrollmentStatus.ACTIVE, result.getStatus());
         assertEquals("Alice Walker", result.getStudentName());
-        assertEquals(testCourse.getName(), result.getCourseName());
+        assertEquals("Fullstack Java Bootcamp", result.getCourseName());
         assertEquals("ADMIN_ASSIGNED", result.getEnrollmentType());
         assertTrue(result.isAccessAllowed());
+
+        verify(enrollmentRepository, times(1)).save(any(Enrollment.class));
     }
 
     @Test
@@ -138,12 +214,15 @@ public class EnrollmentServiceTest {
         dto.setStudentId(testStudent1.getId());
         dto.setCourseId(testCourse.getId());
 
-        enrollmentService.manualEnrollStudent(dto, "admin@edutake.com");
+        when(userRepository.findById(testStudent1.getId())).thenReturn(Optional.of(testStudent1));
+        when(courseRepository.findById(testCourse.getId())).thenReturn(Optional.of(testCourse));
+        when(enrollmentRepository.findByUserIdAndCourseId(testStudent1.getId(), testCourse.getId())).thenReturn(Optional.of(activeEnrollment));
 
-        // Attempting to enroll again while ACTIVE should throw IllegalStateException
         assertThrows(IllegalStateException.class, () -> {
             enrollmentService.manualEnrollStudent(dto, "admin@edutake.com");
         });
+
+        verify(enrollmentRepository, never()).save(any(Enrollment.class));
     }
 
     @Test
@@ -152,98 +231,103 @@ public class EnrollmentServiceTest {
         dto.setStudentId(bannedStudent.getId());
         dto.setCourseId(testCourse.getId());
 
+        when(userRepository.findById(bannedStudent.getId())).thenReturn(Optional.of(bannedStudent));
+
         assertThrows(IllegalStateException.class, () -> {
             enrollmentService.manualEnrollStudent(dto, "admin@edutake.com");
         });
+
+        verify(enrollmentRepository, never()).save(any(Enrollment.class));
     }
 
     @Test
     public void testUpdateEnrollmentStatus_Suspend_RequiresReason() {
-        ManualEnrollmentDTO enrollDto = new ManualEnrollmentDTO();
-        enrollDto.setStudentId(testStudent1.getId());
-        enrollDto.setCourseId(testCourse.getId());
-        EnrollmentDTO created = enrollmentService.manualEnrollStudent(enrollDto, "admin@edutake.com");
+        when(enrollmentRepository.findByIdWithDetails(activeEnrollment.getId())).thenReturn(Optional.of(activeEnrollment));
 
         EnrollmentStatusUpdateDTO updateDto = new EnrollmentStatusUpdateDTO();
         updateDto.setStatus(EnrollmentStatus.SUSPENDED);
         updateDto.setReason(""); // Empty reason
 
         assertThrows(IllegalArgumentException.class, () -> {
-            enrollmentService.updateEnrollmentStatus(created.getId(), updateDto, "admin@edutake.com");
+            enrollmentService.updateEnrollmentStatus(activeEnrollment.getId(), updateDto, "admin@edutake.com");
         });
     }
 
     @Test
     public void testUpdateEnrollmentStatus_SuspendAndResume() {
-        ManualEnrollmentDTO enrollDto = new ManualEnrollmentDTO();
-        enrollDto.setStudentId(testStudent1.getId());
-        enrollDto.setCourseId(testCourse.getId());
-        EnrollmentDTO created = enrollmentService.manualEnrollStudent(enrollDto, "admin@edutake.com");
+        when(enrollmentRepository.findByIdWithDetails(activeEnrollment.getId())).thenReturn(Optional.of(activeEnrollment));
+        when(enrollmentRepository.save(any(Enrollment.class))).thenAnswer(i -> i.getArgument(0));
 
         // Suspend
         EnrollmentStatusUpdateDTO suspendDto = new EnrollmentStatusUpdateDTO(EnrollmentStatus.SUSPENDED, "Pending verification of credentials");
-        EnrollmentDTO suspended = enrollmentService.updateEnrollmentStatus(created.getId(), suspendDto, "admin@edutake.com");
+        EnrollmentDTO suspended = enrollmentService.updateEnrollmentStatus(activeEnrollment.getId(), suspendDto, "admin@edutake.com");
         assertEquals(EnrollmentStatus.SUSPENDED, suspended.getStatus());
         assertFalse(suspended.isAccessAllowed());
 
         // Resume / Reactivate
         EnrollmentStatusUpdateDTO resumeDto = new EnrollmentStatusUpdateDTO(EnrollmentStatus.ACTIVE, "Verification completed");
-        EnrollmentDTO resumed = enrollmentService.updateEnrollmentStatus(created.getId(), resumeDto, "admin@edutake.com");
+        EnrollmentDTO resumed = enrollmentService.updateEnrollmentStatus(activeEnrollment.getId(), resumeDto, "admin@edutake.com");
         assertEquals(EnrollmentStatus.ACTIVE, resumed.getStatus());
         assertTrue(resumed.isAccessAllowed());
     }
 
     @Test
     public void testUpdateEnrollmentStatus_Complete() {
-        ManualEnrollmentDTO enrollDto = new ManualEnrollmentDTO();
-        enrollDto.setStudentId(testStudent1.getId());
-        enrollDto.setCourseId(testCourse.getId());
-        EnrollmentDTO created = enrollmentService.manualEnrollStudent(enrollDto, "admin@edutake.com");
+        when(enrollmentRepository.findByIdWithDetails(activeEnrollment.getId())).thenReturn(Optional.of(activeEnrollment));
+        when(enrollmentRepository.save(any(Enrollment.class))).thenAnswer(i -> i.getArgument(0));
 
         EnrollmentStatusUpdateDTO completeDto = new EnrollmentStatusUpdateDTO(EnrollmentStatus.COMPLETED, "Completed all curriculum requirements");
-        EnrollmentDTO completed = enrollmentService.updateEnrollmentStatus(created.getId(), completeDto, "admin@edutake.com");
+        EnrollmentDTO completed = enrollmentService.updateEnrollmentStatus(activeEnrollment.getId(), completeDto, "admin@edutake.com");
 
         assertEquals(EnrollmentStatus.COMPLETED, completed.getStatus());
         assertTrue(completed.isAccessAllowed());
+        assertNotNull(activeEnrollment.getCompletedAt());
     }
 
     @Test
     public void testBulkEnrollStudents_SuccessAndSkipped() {
-        // First enroll student 1 manually
-        ManualEnrollmentDTO enrollDto = new ManualEnrollmentDTO();
-        enrollDto.setStudentId(testStudent1.getId());
-        enrollDto.setCourseId(testCourse.getId());
-        enrollmentService.manualEnrollStudent(enrollDto, "admin@edutake.com");
+        when(courseRepository.findById(testCourse.getId())).thenReturn(Optional.of(testCourse));
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(testStudent1);
+        when(userRepository.findByEmail("bob@example.com")).thenReturn(testStudent2);
 
-        // Now run bulk enroll with student1 and student2
+        // Alice is already active
+        when(enrollmentRepository.findByUserIdAndCourseId(testStudent1.getId(), testCourse.getId())).thenReturn(Optional.of(activeEnrollment));
+        // Bob is not enrolled
+        when(enrollmentRepository.findByUserIdAndCourseId(testStudent2.getId(), testCourse.getId())).thenReturn(Optional.empty());
+        when(enrollmentRepository.save(any(Enrollment.class))).thenAnswer(i -> {
+            Enrollment e = i.getArgument(0);
+            e.setId(5003L);
+            return e;
+        });
+
         BulkEnrollmentDTO bulkDto = new BulkEnrollmentDTO();
         bulkDto.setCourseId(testCourse.getId());
-        bulkDto.setStudentEmails(Arrays.asList(testStudent1.getEmail(), testStudent2.getEmail()));
+        bulkDto.setStudentEmails(Arrays.asList("alice@example.com", "bob@example.com"));
         bulkDto.setNotifyStudents(false);
 
         BulkEnrollmentResultDTO result = enrollmentService.bulkEnrollStudents(bulkDto, "admin@edutake.com");
 
         assertNotNull(result);
         assertEquals(2, result.getTotalRequested());
-        assertEquals(1, result.getSuccessCount()); // Student 2 enrolled
-        assertEquals(1, result.getSkippedAlreadyEnrolledCount()); // Student 1 skipped
+        assertEquals(1, result.getSuccessCount()); // Bob enrolled
+        assertEquals(1, result.getSkippedAlreadyEnrolledCount()); // Alice skipped
         assertEquals(0, result.getFailedCount());
     }
 
     @Test
     public void testBulkUpdateStatus() {
-        ManualEnrollmentDTO d1 = new ManualEnrollmentDTO();
-        d1.setStudentId(testStudent1.getId());
-        d1.setCourseId(testCourse.getId());
-        EnrollmentDTO e1 = enrollmentService.manualEnrollStudent(d1, "admin@edutake.com");
+        Enrollment e2 = new Enrollment();
+        e2.setId(5002L);
+        e2.setUser(testStudent2);
+        e2.setCourse(testCourse);
+        e2.setStatus(EnrollmentStatus.ACTIVE);
 
-        ManualEnrollmentDTO d2 = new ManualEnrollmentDTO();
-        d2.setStudentId(testStudent2.getId());
-        d2.setCourseId(testCourse.getId());
-        EnrollmentDTO e2 = enrollmentService.manualEnrollStudent(d2, "admin@edutake.com");
+        when(enrollmentRepository.findByIdWithDetails(5001L)).thenReturn(Optional.of(activeEnrollment));
+        when(enrollmentRepository.findByIdWithDetails(5002L)).thenReturn(Optional.of(e2));
+        when(enrollmentRepository.save(any(Enrollment.class))).thenAnswer(i -> i.getArgument(0));
 
         BulkEnrollmentStatusUpdateDTO bulkStatus = new BulkEnrollmentStatusUpdateDTO();
-        bulkStatus.setEnrollmentIds(Arrays.asList(e1.getId(), e2.getId()));
+        bulkStatus.setEnrollmentIds(Arrays.asList(5001L, 5002L));
         bulkStatus.setStatus(EnrollmentStatus.SUSPENDED);
         bulkStatus.setReason("Batch audit maintenance");
         bulkStatus.setNotifyStudents(false);
@@ -253,44 +337,39 @@ public class EnrollmentServiceTest {
         assertEquals(2, result.getTotalRequested());
         assertEquals(2, result.getSuccessCount());
         assertEquals(0, result.getFailedCount());
-
-        Enrollment updated1 = enrollmentRepository.findById(e1.getId()).orElseThrow();
-        assertEquals(EnrollmentStatus.SUSPENDED, updated1.getStatus());
+        assertEquals(EnrollmentStatus.SUSPENDED, activeEnrollment.getStatus());
+        assertEquals(EnrollmentStatus.SUSPENDED, e2.getStatus());
     }
 
     @Test
     public void testCanAccessCourse_AccessRules() {
-        // 1. Not enrolled
-        assertFalse(enrollmentService.canAccessCourse(testStudent1.getEmail(), testCourse.getId()));
+        // 1. Not enrolled (user not found)
+        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(null);
+        assertFalse(enrollmentService.canAccessCourse("nonexistent@example.com", testCourse.getId()));
 
         // 2. Active enrollment
-        ManualEnrollmentDTO d1 = new ManualEnrollmentDTO();
-        d1.setStudentId(testStudent1.getId());
-        d1.setCourseId(testCourse.getId());
-        EnrollmentDTO e1 = enrollmentService.manualEnrollStudent(d1, "admin@edutake.com");
-        assertTrue(enrollmentService.canAccessCourse(testStudent1.getEmail(), testCourse.getId()));
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(testStudent1);
+        when(enrollmentRepository.findByUserEmailAndCourseId("alice@example.com", testCourse.getId())).thenReturn(Optional.of(activeEnrollment));
+        assertTrue(enrollmentService.canAccessCourse("alice@example.com", testCourse.getId()));
 
         // 3. Suspended enrollment
-        enrollmentService.updateEnrollmentStatus(e1.getId(), new EnrollmentStatusUpdateDTO(EnrollmentStatus.SUSPENDED, "Suspended for test"), "admin@edutake.com");
-        assertFalse(enrollmentService.canAccessCourse(testStudent1.getEmail(), testCourse.getId()));
+        activeEnrollment.setStatus(EnrollmentStatus.SUSPENDED);
+        assertFalse(enrollmentService.canAccessCourse("alice@example.com", testCourse.getId()));
 
         // 4. Completed enrollment
-        enrollmentService.updateEnrollmentStatus(e1.getId(), new EnrollmentStatusUpdateDTO(EnrollmentStatus.COMPLETED, "Completed test"), "admin@edutake.com");
-        assertTrue(enrollmentService.canAccessCourse(testStudent1.getEmail(), testCourse.getId()));
+        activeEnrollment.setStatus(EnrollmentStatus.COMPLETED);
+        assertTrue(enrollmentService.canAccessCourse("alice@example.com", testCourse.getId()));
 
         // 5. Expired enrollment
-        EnrollmentStatusUpdateDTO expireDto = new EnrollmentStatusUpdateDTO(EnrollmentStatus.ACTIVE, "Renewed");
-        expireDto.setExpiryDate(LocalDateTime.now().minusDays(1)); // Expired yesterday
-        enrollmentService.updateEnrollmentStatus(e1.getId(), expireDto, "admin@edutake.com");
-        assertFalse(enrollmentService.canAccessCourse(testStudent1.getEmail(), testCourse.getId()));
+        activeEnrollment.setStatus(EnrollmentStatus.ACTIVE);
+        activeEnrollment.setExpiryDate(LocalDateTime.now().minusDays(1)); // Expired yesterday
+        assertFalse(enrollmentService.canAccessCourse("alice@example.com", testCourse.getId()));
     }
 
     @Test
     public void testExportEnrollmentsToCsv() {
-        ManualEnrollmentDTO d1 = new ManualEnrollmentDTO();
-        d1.setStudentId(testStudent1.getId());
-        d1.setCourseId(testCourse.getId());
-        enrollmentService.manualEnrollStudent(d1, "admin@edutake.com");
+        when(enrollmentRepository.findFilteredForExport(any(), any(), any(), any(), any()))
+                .thenReturn(Collections.singletonList(activeEnrollment));
 
         byte[] csvBytes = enrollmentService.exportEnrollmentsToCsv(null, null, null, null, null);
         assertNotNull(csvBytes);
@@ -299,20 +378,29 @@ public class EnrollmentServiceTest {
         String csvString = new String(csvBytes);
         assertTrue(csvString.contains("Enrollment ID"));
         assertTrue(csvString.contains("Student Name"));
-        assertTrue(csvString.contains(testStudent1.getEmail()));
+        assertTrue(csvString.contains("alice@example.com"));
+        assertTrue(csvString.contains("Fullstack Java Bootcamp"));
     }
 
     @Test
     public void testGetEnrollmentStatsAndAnalytics() {
-        ManualEnrollmentDTO d1 = new ManualEnrollmentDTO();
-        d1.setStudentId(testStudent1.getId());
-        d1.setCourseId(testCourse.getId());
-        enrollmentService.manualEnrollStudent(d1, "admin@edutake.com");
+        when(enrollmentRepository.count()).thenReturn(10L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.ACTIVE)).thenReturn(7L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.COMPLETED)).thenReturn(2L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.SUSPENDED)).thenReturn(1L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.EXPIRED)).thenReturn(0L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.CANCELLED)).thenReturn(0L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.REVOKED)).thenReturn(0L);
+        when(enrollmentRepository.countByStatus(EnrollmentStatus.PENDING)).thenReturn(0L);
+        when(enrollmentRepository.countByEnrolledAtBetween(any(), any())).thenReturn(5L);
+        when(enrollmentRepository.findTopEnrolledCoursesRaw()).thenReturn(Collections.emptyList());
+        when(enrollmentRepository.findDailyEnrollmentCountsSince(any())).thenReturn(Collections.emptyList());
 
         EnrollmentStatsDTO stats = enrollmentService.getEnrollmentStats();
         assertNotNull(stats);
-        assertTrue(stats.getTotalEnrollments() >= 1);
-        assertTrue(stats.getActiveEnrollments() >= 1);
+        assertEquals(10L, stats.getTotalEnrollments());
+        assertEquals(7L, stats.getActiveEnrollments());
+        assertEquals(2L, stats.getCompletedEnrollments());
 
         EnrollmentAnalyticsDTO analytics = enrollmentService.getEnrollmentAnalytics();
         assertNotNull(analytics);

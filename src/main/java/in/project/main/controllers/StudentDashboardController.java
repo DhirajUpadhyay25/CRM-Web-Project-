@@ -54,9 +54,10 @@ import in.project.main.entities.enums.CourseStatus;
 import in.project.main.entities.enums.CourseLevel;
 import in.project.main.security.CustomUserDetails;
 import in.project.main.services.CategoryService;
-import in.project.main.services.CourseService;
 import in.project.main.services.NotificationService;
 import in.project.main.services.LearningService;
+import in.project.main.services.CertificateService;
+import in.project.main.repositories.CertificateRepository;
 
 @Controller
 @RequestMapping("/student")
@@ -68,6 +69,9 @@ public class StudentDashboardController {
     @Autowired private AssignmentSubmissionRepository assignmentSubmissionRepository;
     @Autowired private StudentActivityRepository studentActivityRepository;
     @Autowired private LearningService learningService;
+
+    @Autowired private CertificateService certificateService;
+    @Autowired private CertificateRepository certificateRepository;
 
     @Autowired
     private OrdersRepository ordersRepository;
@@ -89,6 +93,9 @@ public class StudentDashboardController {
 
     @Autowired
     private RefundRepository refundRepository;
+
+    @Autowired
+    private in.project.main.services.RefundService refundService;
 
     @Autowired
     private CourseService courseService;
@@ -362,35 +369,16 @@ public class StudentDashboardController {
     public String requestRefund(
             @PathVariable("id") Long id,
             @RequestParam("reason") String reason,
+            @RequestParam(name = "remarks", required = false) String remarks,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         String email = userDetails.getUsername();
-        Orders order = ordersRepository.findById(id).orElse(null);
-        if (order == null || !email.equals(order.getUserEmail())) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Order not found or access denied.");
-            return "redirect:/student/orders";
+        try {
+            refundService.requestRefundByStudent(email, id, reason, remarks);
+            redirectAttributes.addFlashAttribute("successMsg", "Refund requested successfully. It is now pending admin review.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Failed to request refund: " + e.getMessage());
         }
-
-        if (!"COMPLETED".equals(order.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Only completed orders are eligible for refunds.");
-            return "redirect:/student/orders/" + id;
-        }
-
-        Refund existingRefund = refundRepository.findByOrderId(order.getOrderId());
-        if (existingRefund != null) {
-            redirectAttributes.addFlashAttribute("errorMsg", "A refund has already been requested for this order.");
-            return "redirect:/student/orders/" + id;
-        }
-
-        Refund refund = new Refund();
-        refund.setOrderId(order.getOrderId());
-        refund.setAmount(order.getCourseAmount());
-        refund.setReason(reason);
-        refund.setStatus("PENDING");
-        refund.setRefundDate(DateTimeUtil.getCurrentDateTimeFormatted());
-        refundRepository.save(refund);
-
-        redirectAttributes.addFlashAttribute("successMsg", "Refund requested successfully. It is pending admin approval.");
         return "redirect:/student/orders/" + id;
     }
 
@@ -494,12 +482,86 @@ public class StudentDashboardController {
             Model model) {
         addCommonStudentAttributes(userDetails, model);
         String email = userDetails.getUsername();
-        List<Enrollment> completedEnrollments = enrollmentRepository.findByUserEmailOrderByEnrolledAtDesc(email)
-                .stream()
-                .filter(e -> e.getStatus() == EnrollmentStatus.COMPLETED)
-                .toList();
-        model.addAttribute("completedEnrollments", completedEnrollments);
+
+        List<in.project.main.dto.CertificateDTO> myCertificates = certificateService.getStudentCertificates(email);
+        List<Enrollment> eligibleEnrollments = certificateService.getEligibleEnrollmentsForStudent(email);
+
+        long issuedCount = myCertificates.stream().filter(c -> c.getStatus() == in.project.main.entities.enums.CertificateStatus.ISSUED).count();
+        long pendingCount = myCertificates.stream().filter(c -> c.getStatus() == in.project.main.entities.enums.CertificateStatus.REQUESTED || c.getStatus() == in.project.main.entities.enums.CertificateStatus.UNDER_REVIEW).count();
+        long eligibleCount = eligibleEnrollments.size();
+        long revokedCount = myCertificates.stream().filter(c -> c.getStatus() == in.project.main.entities.enums.CertificateStatus.REVOKED).count();
+
+        model.addAttribute("certificates", myCertificates);
+        model.addAttribute("eligibleEnrollments", eligibleEnrollments);
+        model.addAttribute("issuedCount", issuedCount);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("eligibleCount", eligibleCount);
+        model.addAttribute("revokedCount", revokedCount);
+
         return "student/certificates";
+    }
+
+    @PostMapping("/certificates/request")
+    public String submitCertificateRequest(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("enrollmentId") Long enrollmentId,
+            @RequestParam(value = "studentNote", required = false) String studentNote,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            String email = userDetails.getUsername();
+            in.project.main.dto.CertificateDTO cert = certificateService.requestCertificate(email, enrollmentId, studentNote);
+            ra.addFlashAttribute("successMsg", "Certificate request submitted successfully for '" + cert.getCourseName() + "'. Our academic team will review and issue your certificate.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Failed to submit certificate request: " + e.getMessage());
+        }
+        return "redirect:/student/certificates";
+    }
+
+    @GetMapping("/certificates/{id}/view")
+    public String viewCertificate(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            String email = userDetails.getUsername();
+            in.project.main.dto.CertificateDTO cert = certificateService.getCertificateById(id);
+
+            // IDOR Protection: ensure certificate belongs to requesting student
+            if (!email.equalsIgnoreCase(cert.getStudentEmail())) {
+                ra.addFlashAttribute("errorMsg", "Access denied. You can only view your own certificates.");
+                return "redirect:/student/certificates";
+            }
+
+            model.addAttribute("cert", cert);
+            model.addAttribute("verificationUrl", "http://localhost:8080/verify/certificate/" + cert.getVerificationCode());
+            return "student/certificate-view";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Certificate not found: " + e.getMessage());
+            return "redirect:/student/certificates";
+        }
+    }
+
+    @GetMapping("/certificates/{id}/download")
+    public String downloadCertificate(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            String email = userDetails.getUsername();
+            in.project.main.dto.CertificateDTO cert = certificateService.getCertificateById(id);
+
+            if (!email.equalsIgnoreCase(cert.getStudentEmail())) {
+                ra.addFlashAttribute("errorMsg", "Access denied.");
+                return "redirect:/student/certificates";
+            }
+
+            certificateService.recordDownload(id, email);
+            return "redirect:/student/certificates/" + id + "/view?print=true";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Unable to download certificate: " + e.getMessage());
+            return "redirect:/student/certificates";
+        }
     }
 
     @GetMapping("/profile")

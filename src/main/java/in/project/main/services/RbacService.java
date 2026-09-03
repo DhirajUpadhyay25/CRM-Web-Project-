@@ -523,8 +523,14 @@ public class RbacService {
         seedPermission("curriculum.create", "CURRICULUM", "Create Curriculum", "Add lessons, videos, and attachments", false);
         seedPermission("curriculum.delete", "CURRICULUM", "Delete Curriculum", "Remove lessons or sections", false);
 
-        seedPermission("certificates.view", "CERTIFICATES", "View Certificates", "Browse issued course completion certificates", false);
-        seedPermission("certificates.create", "CERTIFICATES", "Issue Certificates", "Issue manual course completion certificates", false);
+        seedPermission("certificates.view", "CERTIFICATES", "View Certificates", "Browse issued course completion certificates and claims", false);
+        seedPermission("certificates.review", "CERTIFICATES", "Review Requests", "Review pending student certificate claim submissions", false);
+        seedPermission("certificates.approve", "CERTIFICATES", "Approve & Issue", "Approve and officially generate student certificates", true);
+        seedPermission("certificates.reject", "CERTIFICATES", "Reject Requests", "Reject ineligible student certificate claims", true);
+        seedPermission("certificates.revoke", "CERTIFICATES", "Revoke Certificates", "Administratively revoke or nullify issued credentials", true);
+        seedPermission("certificates.reissue", "CERTIFICATES", "Reissue Certificates", "Reissue corrected replacement certificates", true);
+        seedPermission("certificates.export", "CERTIFICATES", "Export Certificates", "Export certificate records to CSV", false);
+        seedPermission("certificates.analytics", "CERTIFICATES", "View Analytics", "Inspect certificate issuance and conversion analytics", false);
 
         seedPermission("assignments.view", "ASSIGNMENTS", "View Submissions", "Browse student assignment submissions", false);
         seedPermission("assignments.grade", "ASSIGNMENTS", "Grade Submissions", "Score assignments and provide feedback", false);

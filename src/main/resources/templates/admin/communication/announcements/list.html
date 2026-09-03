@@ -1,46 +1,519 @@
-﻿<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Announcement Management', ~{::div})}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Announcement Hub', ~{::div})}">
 <body>
-    <div>
-        <div class="mb-6 flex justify-between items-center">
+    <div class="space-y-6">
+
+        <!-- Breadcrumbs & Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-surface-200 pb-4">
             <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Announcement Management</h1>
-                <p class="text-gray-500 text-sm">Manage announcements across the platform.</p>
+                <nav class="flex items-center gap-2 text-xs text-gray-500 mb-1 font-medium">
+                    <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+                    <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+                    <span>Communication</span>
+                    <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+                    <span class="text-surface-900 font-semibold">Announcements</span>
+                </nav>
+                <h1 class="text-2xl font-bold text-surface-900 tracking-tight flex items-center gap-2.5">
+                    <i class="bi bi-megaphone-fill text-brand-600"></i>
+                    <span>Announcement Hub</span>
+                </h1>
+                <p class="text-gray-500 text-sm mt-0.5">Publish targeted bulletins, pin urgent notices, and alert students &amp; staff.</p>
             </div>
-            <button class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors">
-                <i class="bi bi-plus-lg mr-1.5"></i> Add Announcement
-            </button>
+            <div class="flex items-center gap-2.5">
+                <button onclick="openCreateModal()" type="button" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-2 text-xs">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Post New Notice</span>
+                </button>
+            </div>
         </div>
 
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-check-circle-fill text-green-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${successMsg}"></span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-green-600 hover:text-green-800"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${errorMsg}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill text-red-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Notices</p>
+                    <p class="text-2xl font-extrabold text-surface-900 mt-1" th:text="${metrics != null ? metrics['totalAnnouncements'] : 0}">0</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-surface-100 flex items-center justify-center text-surface-600 text-xl">
+                    <i class="bi bi-newspaper"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active &amp; Published</p>
+                    <p class="text-2xl font-extrabold text-emerald-600 mt-1" th:text="${metrics != null ? metrics['activeAnnouncements'] : 0}">0</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-xl">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Pinned &amp; Sticky</p>
+                    <p class="text-2xl font-extrabold text-amber-600 mt-1" th:text="${metrics != null ? metrics['pinnedAnnouncements'] : 0}">0</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 text-xl">
+                    <i class="bi bi-pin-angle"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Urgent Alerts</p>
+                    <p class="text-2xl font-extrabold text-rose-600 mt-1" th:text="${metrics != null ? metrics['urgentAnnouncements'] : 0}">0</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600 text-xl">
+                    <i class="bi bi-exclamation-diamond"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl border border-surface-200 p-4 shadow-sm">
+            <form th:action="@{/admin/announcements}" method="get" class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <!-- Target Audience Filter -->
+                    <select name="targetAudience" onchange="this.form.submit()" class="px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs font-medium text-surface-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <option value="" th:selected="${targetAudience == null || targetAudience == ''}">All Audiences</option>
+                        <option value="ALL" th:selected="${targetAudience == 'ALL'}">🌍 Everyone</option>
+                        <option value="STUDENTS" th:selected="${targetAudience == 'STUDENTS'}">🎓 Students Only</option>
+                        <option value="INSTRUCTORS" th:selected="${targetAudience == 'INSTRUCTORS'}">👨‍🏫 Instructors Only</option>
+                        <option value="COURSE_SPECIFIC" th:selected="${targetAudience == 'COURSE_SPECIFIC'}">📚 Course Specific</option>
+                    </select>
+
+                    <!-- Priority Filter -->
+                    <select name="priority" onchange="this.form.submit()" class="px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs font-medium text-surface-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <option value="" th:selected="${priority == null || priority == ''}">All Priorities</option>
+                        <option value="NORMAL" th:selected="${priority == 'NORMAL'}">Normal</option>
+                        <option value="HIGH" th:selected="${priority == 'HIGH'}">High</option>
+                        <option value="URGENT" th:selected="${priority == 'URGENT'}">Urgent</option>
+                    </select>
+
+                    <!-- Active Status Filter -->
+                    <select name="isActive" onchange="this.form.submit()" class="px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs font-medium text-surface-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <option value="" th:selected="${isActive == null}">All Statuses</option>
+                        <option value="true" th:selected="${isActive == true}">Published Only</option>
+                        <option value="false" th:selected="${isActive == false}">Draft / Hidden</option>
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-64">
+                        <input type="text" name="search" th:value="${search}" placeholder="Search notice title..." 
+                               class="w-full pl-9 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                        <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    </div>
+
+                    <button type="submit" class="px-4 py-2 bg-surface-900 text-white rounded-xl text-xs font-semibold hover:bg-surface-800 transition-all shadow-sm">
+                        Filter
+                    </button>
+                    <a th:href="@{/admin/announcements}" class="p-2 text-gray-400 hover:text-surface-900 transition-colors" title="Reset Filters">
+                        <i class="bi bi-arrow-counterclockwise text-sm"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Announcements Table / Cards -->
         <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+            
+            <div th:if="${#lists.isEmpty(announcements)}" class="py-16 text-center text-gray-400">
+                <i class="bi bi-megaphone-slash text-4xl block mb-2 opacity-50"></i>
+                <p class="text-base font-semibold text-surface-800">No announcements found</p>
+                <p class="text-xs text-gray-400 mt-1">Click "Post New Notice" to broadcast your first announcement.</p>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(announcements)}" class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-surface-50 text-left text-xs text-gray-400 uppercase tracking-wider border-b border-surface-200">
-                            <th class="px-6 py-3 font-semibold">ID</th>
-                            <th class="px-6 py-3 font-semibold">Details</th>
-                            <th class="px-6 py-3 font-semibold">Actions</th>
+                        <tr class="border-b border-surface-200 bg-surface-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                            <th class="py-3.5 px-4">Notice &amp; Content</th>
+                            <th class="py-3.5 px-4">Target Audience</th>
+                            <th class="py-3.5 px-4">Category &amp; Priority</th>
+                            <th class="py-3.5 px-4">Published Date</th>
+                            <th class="py-3.5 px-4 text-center">Status</th>
+                            <th class="py-3.5 px-4 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-surface-100">
-                        <tr th:each="item : ${items}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 text-surface-900" th:text="${item.id}">1</td>
-                            <td class="px-6 py-4 text-gray-500">Item Details Here</td>
-                            <td class="px-6 py-4">
-                                <button class="text-brand-600 hover:text-brand-800 text-xs font-semibold mr-3">Edit</button>
-                                <button class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+                    <tbody class="divide-y divide-surface-100 text-xs">
+                        <tr th:each="a : ${announcements}" class="hover:bg-surface-50/80 transition-colors">
+                            
+                            <!-- Notice Details -->
+                            <td class="py-4 px-4 max-w-sm">
+                                <div class="flex items-start gap-2.5">
+                                    <span th:if="${a.pinned}" class="p-1 rounded bg-amber-100 text-amber-700 text-xs flex-shrink-0" title="Sticky / Pinned Notice">
+                                        <i class="bi bi-pin-angle-fill"></i>
+                                    </span>
+                                    <div>
+                                        <div class="font-bold text-surface-900 text-sm flex items-center gap-2">
+                                            <span th:text="${a.title}">Title</span>
+                                            <span th:if="${a.courseName != null && !a.courseName.isBlank()}" 
+                                                  class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold"
+                                                  th:text="${a.courseName}">Course</span>
+                                        </div>
+                                        <p class="text-gray-500 text-xs mt-1 line-clamp-2" th:text="${a.content}">Content preview...</p>
+                                    </div>
+                                </div>
                             </td>
-                        </tr>
-                        <tr th:if="${items == null or items.isEmpty()}">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                <i class="bi bi-inbox text-3xl mb-2 block"></i>
-                                No announcements found. Use the Data Seeder to add sample data.
+
+                            <!-- Target Audience -->
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <span th:if="${a.targetAudience == 'ALL'}" class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-[11px]">🌍 Everyone</span>
+                                <span th:if="${a.targetAudience == 'STUDENTS'}" class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-[11px]">🎓 Students</span>
+                                <span th:if="${a.targetAudience == 'INSTRUCTORS'}" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold text-[11px]">👨‍🏫 Instructors</span>
+                                <span th:if="${a.targetAudience == 'COURSE_SPECIFIC'}" class="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 font-semibold text-[11px]">📚 Cohort</span>
                             </td>
+
+                            <!-- Category & Priority -->
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded bg-surface-100 text-surface-700 text-[10px] font-medium uppercase tracking-wider" 
+                                          th:text="${a.category != null ? a.category : 'GENERAL'}">Category</span>
+                                    <span th:if="${a.priority == 'URGENT'}" class="px-2 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold">URGENT</span>
+                                    <span th:if="${a.priority == 'HIGH'}" class="px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">HIGH</span>
+                                    <span th:if="${a.priority == 'NORMAL' || a.priority == null}" class="px-2 py-0.5 rounded bg-surface-100 text-gray-500 text-[10px]">NORMAL</span>
+                                </div>
+                            </td>
+
+                            <!-- Published Date -->
+                            <td class="py-4 px-4 whitespace-nowrap text-gray-500">
+                                <div class="flex items-center gap-1">
+                                    <i class="bi bi-calendar3 text-gray-400"></i>
+                                    <span th:text="${a.publishDate != null ? a.publishDate : 'Draft'}">Date</span>
+                                </div>
+                            </td>
+
+                            <!-- Status Toggle -->
+                            <td class="py-4 px-4 text-center whitespace-nowrap">
+                                <form th:action="@{/admin/announcements/{id}/toggle-active(id=${a.id})}" method="post" class="inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="px-2.5 py-1 rounded-full font-bold text-[10px] uppercase transition-colors"
+                                            th:classappend="${a.isActive} ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'">
+                                        <span th:text="${a.isActive ? 'Published' : 'Hidden'}">Active</span>
+                                    </button>
+                                </form>
+                            </td>
+
+                            <!-- Action Buttons -->
+                            <td class="py-4 px-4 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    
+                                    <!-- Pin Toggle -->
+                                    <form th:action="@{/admin/announcements/{id}/toggle-pinned(id=${a.id})}" method="post" class="inline">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="p-1.5 rounded-lg border border-surface-200 text-surface-600 hover:text-amber-600 hover:bg-amber-50 transition-colors" th:title="${a.pinned ? 'Unpin Notice' : 'Pin to Top'}">
+                                            <i class="bi" th:classappend="${a.pinned ? 'bi-pin-angle-fill text-amber-600' : 'bi-pin-angle'}"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Edit Trigger Button -->
+                                    <button type="button" 
+                                            th:data-id="${a.id}"
+                                            th:data-title="${a.title}"
+                                            th:data-content="${a.content}"
+                                            th:data-audience="${a.targetAudience}"
+                                            th:data-category="${a.category}"
+                                            th:data-priority="${a.priority}"
+                                            th:data-pinned="${a.pinned}"
+                                            th:data-active="${a.isActive}"
+                                            th:data-courseid="${a.courseId}"
+                                            onclick="openEditModal(this)"
+                                            class="p-1.5 rounded-lg border border-surface-200 text-surface-600 hover:text-brand-600 hover:bg-brand-50 transition-colors" title="Edit Announcement">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <!-- Delete Button -->
+                                    <form th:action="@{/admin/announcements/{id}/delete(id=${a.id})}" method="post" class="inline" onsubmit="return confirm('Permanently delete this announcement?');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="p-1.5 rounded-lg border border-surface-200 text-surface-600 hover:text-red-600 hover:bg-red-50 transition-colors" title="Delete Announcement">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Bar -->
+            <div th:if="${announcementPage != null && announcementPage.totalPages > 1}" 
+                 class="px-6 py-4 border-t border-surface-200 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4">
+                <div class="text-xs text-gray-500">
+                    Showing <span class="font-bold text-surface-900" th:text="${announcementPage.number * announcementPage.size + 1}">1</span> to
+                    <span class="font-bold text-surface-900" th:text="${announcementPage.isLast() ? announcementPage.totalElements : (announcementPage.number + 1) * announcementPage.size}">10</span> of
+                    <span class="font-bold text-surface-900" th:text="${announcementPage.totalElements}">25</span> announcements
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <a th:if="${announcementPage.hasPrevious()}"
+                       th:href="@{/admin/announcements(page=${announcementPage.number - 1}, size=${announcementPage.size}, search=${search}, targetAudience=${targetAudience}, priority=${priority}, isActive=${isActive})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-xs font-semibold hover:bg-surface-100 text-surface-700 transition-colors shadow-sm">
+                        <i class="bi bi-chevron-left mr-1"></i> Previous
+                    </a>
+                    <span class="px-3 py-1.5 text-xs text-gray-500 font-medium">Page <span class="font-bold text-surface-900" th:text="${announcementPage.number + 1}">1</span> of <span th:text="${announcementPage.totalPages}">1</span></span>
+                    <a th:if="${announcementPage.hasNext()}"
+                       th:href="@{/admin/announcements(page=${announcementPage.number + 1}, size=${announcementPage.size}, search=${search}, targetAudience=${targetAudience}, priority=${priority}, isActive=${isActive})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-xs font-semibold hover:bg-surface-100 text-surface-700 transition-colors shadow-sm">
+                        Next <i class="bi bi-chevron-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
         </div>
+
+        <!-- ============================================ -->
+        <!-- CREATE ANNOUNCEMENT MODAL -->
+        <!-- ============================================ -->
+        <div id="createModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-2xl w-full border border-surface-200 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                            <i class="bi bi-megaphone-fill text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-surface-900">Post New Announcement</h3>
+                            <p class="text-xs text-gray-500">Publish a notice across student &amp; instructor portals</p>
+                        </div>
+                    </div>
+                    <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <form th:action="@{/admin/announcements/create}" method="POST" class="space-y-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Announcement Title *</label>
+                        <input type="text" name="title" required placeholder="e.g. End of Semester Final Examination Schedule"
+                               class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Target Audience *</label>
+                            <select name="targetAudience" id="createAudienceSelect" onchange="toggleCourseSelect('createAudienceSelect', 'createCourseWrapper')" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="ALL">🌍 Everyone</option>
+                                <option value="STUDENTS">🎓 Students Only</option>
+                                <option value="INSTRUCTORS">👨‍🏫 Instructors Only</option>
+                                <option value="COURSE_SPECIFIC">📚 Course Cohort</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Category</label>
+                            <select name="category" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="GENERAL">General Notice</option>
+                                <option value="ACADEMIC">Academic / Exam</option>
+                                <option value="EVENT">Event / Workshop</option>
+                                <option value="MAINTENANCE">System Upgrade</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Priority</label>
+                            <select name="priority" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="NORMAL">Normal</option>
+                                <option value="HIGH">High Priority</option>
+                                <option value="URGENT">Urgent Alert</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Course Selector (Hidden unless COURSE_SPECIFIC) -->
+                    <div id="createCourseWrapper" class="hidden">
+                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Select Course</label>
+                        <select name="courseId" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option value="">-- Choose Course --</option>
+                            <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Announcement Content *</label>
+                        <textarea name="content" required rows="5" placeholder="Write the full announcement bulletin here..."
+                                  class="w-full p-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+                    </div>
+
+                    <!-- Options: Pin, Active, Broadcast -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-surface-50 rounded-xl border border-surface-200">
+                        <label class="flex items-center gap-2 text-xs font-medium text-surface-700 cursor-pointer">
+                            <input type="checkbox" name="pinned" value="true" class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+                            <span>Pin to Top</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-medium text-surface-700 cursor-pointer">
+                            <input type="checkbox" name="isActive" value="true" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+                            <span>Publish Immediately</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-medium text-brand-700 cursor-pointer">
+                            <input type="checkbox" name="broadcastNotification" value="true" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+                            <span>Send Notification</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-surface-100">
+                        <button type="button" onclick="closeCreateModal()" class="px-4 py-2 rounded-xl bg-surface-100 text-gray-600 hover:bg-surface-200 text-sm font-semibold transition-colors">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                            <i class="bi bi-send-fill"></i>
+                            <span>Publish Announcement</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- EDIT ANNOUNCEMENT MODAL -->
+        <!-- ============================================ -->
+        <div id="editModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-2xl w-full border border-surface-200 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                            <i class="bi bi-pencil-square text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-surface-900">Edit Announcement</h3>
+                            <p class="text-xs text-gray-500">Update announcement details and audience</p>
+                        </div>
+                    </div>
+                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg text-lg"></i></button>
+                </div>
+
+                <form id="editForm" method="POST" class="space-y-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Announcement Title *</label>
+                        <input type="text" id="editTitle" name="title" required
+                               class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Target Audience *</label>
+                            <select name="targetAudience" id="editAudienceSelect" onchange="toggleCourseSelect('editAudienceSelect', 'editCourseWrapper')" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="ALL">🌍 Everyone</option>
+                                <option value="STUDENTS">🎓 Students Only</option>
+                                <option value="INSTRUCTORS">👨‍🏫 Instructors Only</option>
+                                <option value="COURSE_SPECIFIC">📚 Course Cohort</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Category</label>
+                            <select name="category" id="editCategory" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="GENERAL">General Notice</option>
+                                <option value="ACADEMIC">Academic / Exam</option>
+                                <option value="EVENT">Event / Workshop</option>
+                                <option value="MAINTENANCE">System Upgrade</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Priority</label>
+                            <select name="priority" id="editPriority" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option value="NORMAL">Normal</option>
+                                <option value="HIGH">High Priority</option>
+                                <option value="URGENT">Urgent Alert</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Course Selector for Edit -->
+                    <div id="editCourseWrapper" class="hidden">
+                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Select Course</label>
+                        <select name="courseId" id="editCourseId" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option value="">-- Choose Course --</option>
+                            <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Announcement Content *</label>
+                        <textarea id="editContent" name="content" required rows="5"
+                                  class="w-full p-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-surface-50 rounded-xl border border-surface-200">
+                        <label class="flex items-center gap-2 text-xs font-medium text-surface-700 cursor-pointer">
+                            <input type="checkbox" id="editPinned" name="pinned" value="true" class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+                            <span>Pin to Top</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-xs font-medium text-surface-700 cursor-pointer">
+                            <input type="checkbox" id="editIsActive" name="isActive" value="true" class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+                            <span>Published Active</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-surface-100">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl bg-surface-100 text-gray-600 hover:bg-surface-200 text-sm font-semibold transition-colors">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                            <i class="bi bi-check2"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
+
+    <!-- Page Scripts -->
+    <script>
+        function openCreateModal() {
+            document.getElementById('createModal').classList.remove('hidden');
+        }
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.add('hidden');
+        }
+        function openEditModal(btn) {
+            const id = btn.getAttribute('data-id');
+            document.getElementById('editForm').action = '/admin/announcements/' + id + '/update';
+            document.getElementById('editTitle').value = btn.getAttribute('data-title') || '';
+            document.getElementById('editContent').value = btn.getAttribute('data-content') || '';
+            document.getElementById('editAudienceSelect').value = btn.getAttribute('data-audience') || 'ALL';
+            document.getElementById('editCategory').value = btn.getAttribute('data-category') || 'GENERAL';
+            document.getElementById('editPriority').value = btn.getAttribute('data-priority') || 'NORMAL';
+            document.getElementById('editPinned').checked = (btn.getAttribute('data-pinned') === 'true');
+            document.getElementById('editIsActive').checked = (btn.getAttribute('data-active') === 'true');
+            
+            const courseId = btn.getAttribute('data-courseid');
+            if (courseId) {
+                document.getElementById('editCourseId').value = courseId;
+            }
+            toggleCourseSelect('editAudienceSelect', 'editCourseWrapper');
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+        function toggleCourseSelect(selectId, wrapperId) {
+            const val = document.getElementById(selectId).value;
+            const wrap = document.getElementById(wrapperId);
+            if (val === 'COURSE_SPECIFIC') {
+                wrap.classList.remove('hidden');
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 </html>

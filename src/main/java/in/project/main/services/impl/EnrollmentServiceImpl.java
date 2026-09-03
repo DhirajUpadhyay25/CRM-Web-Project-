@@ -284,10 +284,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             dto.setAssignmentsSubmittedCount(submittedAssignments);
 
             // Certificate
-            Certificate cert = certificateRepository.findByEnrollmentId(String.valueOf(enrollment.getId())).orElse(null);
+            Certificate cert = certificateRepository.findByEnrollmentId(enrollment.getId()).orElse(null);
             if (cert != null) {
-                dto.setCertificateCode(cert.getCertificateCode());
-                dto.setCertificateIssuedDate(cert.getIssueDate());
+                dto.setCertificateCode(cert.getCertificateNumber() != null ? cert.getCertificateNumber() : cert.getVerificationCode());
+                dto.setCertificateIssuedDate(cert.getIssueDate() != null ? cert.getIssueDate().toString() : null);
             }
         }
 

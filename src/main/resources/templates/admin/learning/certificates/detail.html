@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Certificate Dossier', ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-4 font-medium">
+            <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <a href="/admin/certificates" class="hover:text-brand-600 transition-colors">Certificates</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold" th:text="${cert.certificateNumber}">EDU-2026-000101</span>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-check-circle-fill text-emerald-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}">Action completed successfully.</span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-exclamation-triangle-fill text-red-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}">An error occurred.</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl font-bold shadow-xs">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight" th:text="${cert.certificateNumber}">EDU-2026-000101</h1>
+                        <span th:class="${'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ' + cert.status.badgeClasses}">
+                            <i th:class="${'bi ' + cert.status.icon + ' text-xs'}"></i>
+                            <span th:text="${cert.status.displayName}">Status</span>
+                        </span>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-0.5">
+                        Verification Code: <strong class="font-mono text-brand-600" th:text="${cert.verificationCode}">8F7K2M9P</strong> • UUID: <span class="font-mono text-gray-400" th:text="${cert.certificateUuid}">uuid</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <a th:href="@{'/verify/certificate/' + ${cert.verificationCode}}" target="_blank" class="px-3.5 py-2 bg-white text-surface-700 font-medium rounded-xl border border-surface-200 shadow-xs hover:bg-surface-50 text-xs flex items-center gap-1.5 transition-all">
+                    <i class="bi bi-shield-check text-emerald-600"></i>
+                    <span>Public Verification</span>
+                </a>
+                <a href="/admin/certificates" class="px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 font-medium rounded-xl text-xs transition-all flex items-center gap-1">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to List</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2-Column Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left 2 Cols: Main Dossier Details -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Recipient & Course Card -->
+                <div class="bg-white rounded-3xl border border-surface-200 p-6 shadow-sm">
+                    <h2 class="text-sm font-bold text-surface-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="bi bi-mortarboard text-brand-600"></i>
+                        <span>Recipient & Curriculum Profile</span>
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Student Info -->
+                        <div class="bg-surface-50 p-4 rounded-2xl border border-surface-200">
+                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Student Recipient</div>
+                            <div class="text-sm font-bold text-surface-900" th:text="${cert.studentName}">Student Name</div>
+                            <div class="text-xs text-gray-500 mt-0.5" th:text="${cert.studentEmail}">student@example.com</div>
+                            <div class="mt-3 pt-3 border-t border-surface-200/60 text-[11px] text-gray-400 flex items-center justify-between">
+                                <span>Student ID:</span>
+                                <span class="font-mono text-surface-700" th:text="${cert.studentId != null ? '#' + cert.studentId : 'Registered'}">#101</span>
+                            </div>
+                        </div>
+
+                        <!-- Course Info -->
+                        <div class="bg-surface-50 p-4 rounded-2xl border border-surface-200">
+                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Certified Course</div>
+                            <div class="text-sm font-bold text-surface-900" th:text="${cert.courseName}">Course Name</div>
+                            <div class="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                <i class="bi bi-person-badge"></i>
+                                <span th:text="${cert.instructorName}">Instructor Name</span>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-surface-200/60 text-[11px] text-gray-400 flex items-center justify-between">
+                                <span>Category:</span>
+                                <span class="font-semibold text-brand-600" th:text="${cert.courseCategory}">Web Development</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Claim Note -->
+                    <div th:if="${cert.studentRequestNote != null and !cert.studentRequestNote.isBlank()}" class="mt-4 p-4 rounded-2xl bg-amber-50/50 border border-amber-200 text-xs">
+                        <div class="font-bold text-amber-800 mb-1 flex items-center gap-1.5">
+                            <i class="bi bi-chat-quote-fill"></i>
+                            <span>Student Note with Claim</span>
+                        </div>
+                        <p class="text-amber-900 leading-relaxed" th:text="${cert.studentRequestNote}">Note</p>
+                    </div>
+                </div>
+
+                <!-- Credential Specifications -->
+                <div class="bg-white rounded-3xl border border-surface-200 p-6 shadow-sm">
+                    <h2 class="text-sm font-bold text-surface-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="bi bi-sliders text-brand-600"></i>
+                        <span>Credential Specifications</span>
+                    </h2>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                        <div class="p-3 bg-surface-50 rounded-xl border border-surface-200">
+                            <div class="text-gray-400 text-[10px] uppercase font-bold">Certificate Title</div>
+                            <div class="font-semibold text-surface-900 mt-1" th:text="${cert.certificateTitle}">Certificate of Completion</div>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-xl border border-surface-200">
+                            <div class="text-gray-400 text-[10px] uppercase font-bold">Designation</div>
+                            <div class="font-semibold text-surface-900 mt-1" th:text="${cert.certificateType}">COMPLETION</div>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-xl border border-surface-200">
+                            <div class="text-gray-400 text-[10px] uppercase font-bold">Visual Template</div>
+                            <div class="font-semibold text-brand-600 mt-1" th:text="${cert.templateCode}">CLASSIC_GOLD</div>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-xl border border-surface-200">
+                            <div class="text-gray-400 text-[10px] uppercase font-bold">Issue Date</div>
+                            <div class="font-semibold text-surface-900 mt-1" th:text="${cert.formattedIssueDate}">12 May 2026</div>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-xl border border-surface-200">
+                            <div class="text-gray-400 text-[10px] uppercase font-bold">Completion Date</div>
+                            <div class="font-semibold text-surface-900 mt-1" th:text="${cert.formattedCompletionDate}">10 May 2026</div>
+                        </div>
+                        <div class="p-3 bg-surface-50 rounded-xl border border-surface-200">
+                            <div class="text-gray-400 text-[10px] uppercase font-bold">Download Count</div>
+                            <div class="font-semibold text-surface-900 mt-1" th:text="${cert.downloadCount + ' times'}">0 times</div>
+                        </div>
+                    </div>
+
+                    <div th:if="${cert.adminNotes != null and !cert.adminNotes.isBlank()}" class="mt-4 p-4 rounded-2xl bg-surface-50 border border-surface-200 text-xs">
+                        <div class="font-bold text-surface-800 mb-1">Administrative Notes:</div>
+                        <p class="text-surface-700 leading-relaxed" th:text="${cert.adminNotes}">Notes</p>
+                    </div>
+                </div>
+
+                <!-- Rejection / Revocation Alert if Applicable -->
+                <div th:if="${cert.status.name() == 'REJECTED'}" class="p-5 rounded-3xl bg-rose-50 border border-rose-200 text-rose-900">
+                    <div class="flex items-center gap-2 font-bold text-sm mb-1 text-rose-800">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <span>Claim Rejection Details</span>
+                    </div>
+                    <p class="text-xs text-rose-800 leading-relaxed" th:text="${cert.rejectionReason}">Reason</p>
+                    <div class="text-[11px] text-rose-600 mt-2 font-medium" th:text="${'Reviewed by: ' + cert.reviewedByAdmin}">Admin</div>
+                </div>
+
+                <div th:if="${cert.status.name() == 'REVOKED'}" class="p-5 rounded-3xl bg-red-50 border border-red-200 text-red-900">
+                    <div class="flex items-center gap-2 font-bold text-sm mb-1 text-red-800">
+                        <i class="bi bi-slash-circle-fill"></i>
+                        <span>Credential Revocation Notice</span>
+                    </div>
+                    <p class="text-xs text-red-800 leading-relaxed" th:text="${cert.revocationReason}">Reason</p>
+                    <div class="text-[11px] text-red-600 mt-2 font-medium" th:text="${'Revoked by: ' + cert.revokedByAdmin + (cert.revokedAt != null ? ' on ' + cert.revokedAt : '')}">Admin</div>
+                </div>
+
+            </div>
+
+            <!-- Right 1 Col: Actions & Lifecycle Timeline -->
+            <div class="space-y-6">
+
+                <!-- Admin Action Card -->
+                <div class="bg-white rounded-3xl border border-surface-200 p-6 shadow-sm">
+                    <h2 class="text-sm font-bold text-surface-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="bi bi-lightning-charge-fill text-amber-500"></i>
+                        <span>Administrative Actions</span>
+                    </h2>
+
+                    <div class="space-y-3">
+                        <!-- If Pending/Under Review: Approve & Issue -->
+                        <div th:if="${cert.status.canBeApproved()}">
+                            <form th:action="@{'/admin/certificates/' + ${cert.id} + '/approve'}" method="post" class="space-y-3">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Select Template</label>
+                                    <select name="templateCode" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                                        <option value="CLASSIC_GOLD">Classic Gold</option>
+                                        <option value="MODERN_EMERALD">Modern Emerald</option>
+                                        <option value="TECH_INDIGO">Tech Indigo</option>
+                                    </select>
+                                </div>
+
+                                <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2">
+                                    <i class="bi bi-patch-check-fill"></i>
+                                    <span>Approve & Issue Certificate</span>
+                                </button>
+                            </form>
+
+                            <hr class="my-3 border-surface-100">
+
+                            <!-- Reject Form -->
+                            <form th:action="@{'/admin/certificates/' + ${cert.id} + '/reject'}" method="post" class="space-y-2">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <input type="text" name="rejectionReason" required placeholder="Reason for rejection..." class="w-full px-3 py-1.5 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none">
+                                <button type="submit" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-semibold border border-rose-200 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>Reject Request</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- If Issued: Revoke or Reissue -->
+                        <div th:if="${cert.status.name() == 'ISSUED'}" class="space-y-3">
+                            <form th:action="@{'/admin/certificates/' + ${cert.id} + '/revoke'}" method="post" onsubmit="return confirm('Are you sure you want to revoke this certificate?');" class="space-y-2">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <input type="text" name="revocationReason" required placeholder="Reason for revocation..." class="w-full px-3 py-1.5 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none">
+                                <button type="submit" class="w-full py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-semibold border border-red-200 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="bi bi-slash-circle"></i>
+                                    <span>Revoke Certificate</span>
+                                </button>
+                            </form>
+
+                            <form th:action="@{'/admin/certificates/' + ${cert.id} + '/reissue'}" method="post" onsubmit="return confirm('This will revoke the current record and create a new superseded certificate. Continue?');">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="w-full py-2 bg-surface-100 hover:bg-surface-200 text-surface-800 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    <span>Reissue Corrected Certificate</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- If Rejected / Revoked: Re-approve option -->
+                        <div th:if="${cert.status.name() == 'REJECTED' or cert.status.name() == 'REVOKED'}">
+                            <form th:action="@{'/admin/certificates/' + ${cert.id} + '/approve'}" method="post">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    <span>Restore & Issue</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR Code & Public Verification Widget -->
+                <div class="bg-white rounded-3xl border border-surface-200 p-6 shadow-sm text-center">
+                    <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Verification QR Code</h2>
+                    
+                    <div th:if="${cert.qrCodeData}" class="bg-surface-50 p-4 rounded-2xl border border-surface-200 inline-block mb-3">
+                        <img th:src="${cert.qrCodeData}" alt="QR Verification Code" class="w-36 h-36 mx-auto rounded-lg">
+                    </div>
+                    
+                    <div class="text-[11px] text-gray-500 font-mono break-all" th:text="${cert.verificationCode}">8F7K2M9P</div>
+                    
+                    <a th:href="@{'/verify/certificate/' + ${cert.verificationCode}}" target="_blank" class="mt-3 inline-flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 font-semibold">
+                        <span>Open Public Verifier</span>
+                        <i class="bi bi-box-arrow-up-right text-[10px]"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${cert.studentName + ' - ' + cert.certificateTitle + ' | EduTake'}">Certificate | EduTake</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        .font-cinzel { font-family: 'Cinzel', Georgia, serif; }
+        .font-playfair { font-family: 'Playfair Display', Georgia, serif; }
+        .font-signature { font-family: 'Great Vibes', cursive; }
+
+        @media print {
+            body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
+            .no-print { display: none !important; }
+            .cert-container { box-shadow: none !important; border: 4px solid #b45309 !important; width: 100% !important; max-width: 100% !important; height: 100vh !important; page-break-inside: avoid; }
+            @page { size: landscape; margin: 0; }
+        }
+    </style>
+</head>
+<body class="bg-surface-950 text-surface-900 min-h-screen py-8 px-4 flex flex-col items-center justify-center font-sans antialiased">
+
+    <!-- Action Bar (Hidden on Print) -->
+    <div class="no-print max-w-4xl w-full mb-6 flex flex-wrap items-center justify-between gap-3 bg-surface-900/80 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl">
+        <a href="/student/certificates" class="px-4 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+            <i class="bi bi-arrow-left"></i>
+            <span>My Certificates</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+            <button onclick="copyVerificationLink()" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+                <i class="bi bi-link-45deg text-brand-400 text-sm"></i>
+                <span id="copyBtnText">Copy Link</span>
+            </button>
+            <a th:href="@{'/verify/certificate/' + ${cert.verificationCode}}" target="_blank" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+                <i class="bi bi-shield-check text-emerald-400"></i>
+                <span>Verify Publicly</span>
+            </a>
+            <button onclick="window.print()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 flex items-center gap-1.5 transition-all cursor-pointer">
+                <i class="bi bi-printer-fill"></i>
+                <span>Print / Save as PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- CERTIFICATE CANVAS CONTAINER -->
+    <div class="cert-container max-w-4xl w-full bg-[#fdfcfa] rounded-3xl border-8 border-amber-800/80 shadow-2xl p-8 sm:p-12 relative overflow-hidden text-surface-900 animate-scale-up">
+        
+        <!-- Ornate Double Inset Border -->
+        <div class="absolute inset-3 border-2 border-amber-600/40 rounded-2xl pointer-events-none"></div>
+        <div class="absolute inset-5 border border-amber-500/20 rounded-xl pointer-events-none"></div>
+
+        <!-- Corner Ornaments -->
+        <div class="absolute top-6 left-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
+        <div class="absolute top-6 right-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
+        <div class="absolute bottom-6 left-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
+        <div class="absolute bottom-6 right-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
+
+        <!-- Watermark Background Crest -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+            <i class="bi bi-award text-[360px] text-amber-900"></i>
+        </div>
+
+        <!-- Certificate Header -->
+        <div class="text-center relative z-10 mb-6">
+            <div class="inline-flex items-center gap-2 mb-2">
+                <div class="w-9 h-9 rounded-xl bg-amber-700 text-amber-100 flex items-center justify-center text-lg font-black shadow-sm">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <span class="font-cinzel text-lg font-black tracking-widest text-surface-900 uppercase">EduTake Academy</span>
+            </div>
+            <p class="font-cinzel text-xs font-bold text-amber-800 uppercase tracking-widest mb-4">Official Institutional Credential</p>
+            <h1 class="font-cinzel text-2xl sm:text-4xl font-extrabold text-amber-950 tracking-tight uppercase" th:text="${cert.certificateTitle}">Certificate of Completion</h1>
+            <div class="w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-3"></div>
+        </div>
+
+        <!-- Presentation Statement -->
+        <div class="text-center relative z-10 my-6">
+            <p class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 font-cinzel">This is proudly awarded to</p>
+            <h2 class="font-playfair text-3xl sm:text-5xl font-black text-amber-950 italic tracking-tight py-2" th:text="${cert.studentName}">Student Full Name</h2>
+            <div class="w-48 h-0.5 bg-amber-400/60 mx-auto my-3"></div>
+            
+            <p class="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto leading-relaxed mt-3">
+                for successfully fulfilling all curriculum requirements, laboratory milestones, and comprehensive evaluations for the certified program:
+            </p>
+            
+            <h3 class="font-cinzel text-lg sm:text-2xl font-black text-brand-900 mt-2 tracking-tight" th:text="${cert.courseName}">Advanced Full-Stack Engineering</h3>
+        </div>
+
+        <!-- Signatures & Verification Row -->
+        <div class="grid grid-cols-3 gap-4 items-end mt-10 pt-6 relative z-10 border-t border-amber-900/10 text-center">
+            
+            <!-- Left Signature (Instructor) -->
+            <div>
+                <div class="font-signature text-3xl sm:text-4xl text-amber-950 mb-1" th:text="${cert.instructorName}">Faculty Member</div>
+                <div class="w-32 h-px bg-surface-400 mx-auto mb-1"></div>
+                <div class="text-[11px] font-bold text-surface-900 uppercase font-cinzel" th:text="${cert.instructorName}">Instructor</div>
+                <div class="text-[9px] text-gray-400 uppercase font-semibold">Lead Academic Faculty</div>
+            </div>
+
+            <!-- Middle Gold Seal & QR Code -->
+            <div class="flex flex-col items-center">
+                <div th:if="${cert.qrCodeData}" class="bg-white p-1.5 rounded-xl border border-amber-400/40 shadow-xs mb-2">
+                    <img th:src="${cert.qrCodeData}" alt="Verification QR Code" class="w-20 h-20 rounded-md">
+                </div>
+                <div class="font-mono text-[10px] font-bold text-amber-900" th:text="${cert.certificateNumber}">EDU-2026-000101</div>
+                <div class="text-[9px] text-gray-400 font-mono" th:text="${'Code: ' + cert.verificationCode}">Code: 8F7K2M9P</div>
+            </div>
+
+            <!-- Right Signature (Academic Director) -->
+            <div>
+                <div class="font-signature text-3xl sm:text-4xl text-amber-950 mb-1">Dhiraj Upadhyay</div>
+                <div class="w-32 h-px bg-surface-400 mx-auto mb-1"></div>
+                <div class="text-[11px] font-bold text-surface-900 uppercase font-cinzel">Board Director</div>
+                <div class="text-[9px] text-gray-400 uppercase font-semibold" th:text="${'Issued on ' + cert.formattedIssueDate}">Issued on 12 May 2026</div>
+            </div>
+
+        </div>
+
+        <!-- Footer Verification Link -->
+        <div class="text-center mt-6 relative z-10">
+            <span class="text-[9px] text-gray-400 font-mono" th:text="${'Verify Authenticity Online: http://localhost:8080/verify/certificate/' + cert.verificationCode}">Verify Authenticity Online: http://localhost:8080/verify/certificate/8F7K2M9P</span>
+        </div>
+
+    </div>
+
+    <!-- Script for link copying and auto-print query -->
+    <script th:inline="javascript">
+        function copyVerificationLink() {
+            var url = /*[[${verificationUrl}]]*/ 'http://localhost:8080/verify/certificate/' + /*[[${cert.verificationCode}]]*/ '';
+            navigator.clipboard.writeText(url).then(function() {
+                var btn = document.getElementById('copyBtnText');
+                if (btn) btn.innerText = 'Copied!';
+                setTimeout(function() {
+                    if (btn) btn.innerText = 'Copy Link';
+                }, 2000);
+            });
+        }
+
+        // Trigger print if query parameter ?print=true is present
+        window.addEventListener('load', function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('print') === 'true') {
+                setTimeout(function() { window.print(); }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

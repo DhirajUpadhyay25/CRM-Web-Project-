@@ -12,15 +12,21 @@
         </nav>
 
         <!-- Page Header -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-surface-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-surface-200">
             <div class="flex items-center gap-3">
                 <a href="/admin/orders" class="w-9 h-9 rounded-xl bg-white border border-surface-200 shadow-sm flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-surface-100 transition-colors">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div>
-                    <h1 class="text-2xl font-bold text-surface-900 tracking-tight" th:text="${'Inspect Order #' + order.id}">Order Details</h1>
-                    <p class="text-gray-500 text-xs mt-0.5" th:text="${'Registered on: ' + order.dateOfPurchase}"></p>
+                    <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight" th:text="${'Inspect Order #' + order.id}">Order Details</h1>
+                    <p class="text-gray-500 text-xs mt-0.5" th:text="${'Registered on: ' + (order.dateOfPurchase ?: '-')}"></p>
                 </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a th:href="@{/student/orders/{id}/invoice(id=${order.id})}" target="_blank" class="px-3.5 py-2 bg-white text-surface-700 font-medium rounded-xl border border-surface-200 shadow-sm hover:bg-surface-50 transition-all flex items-center gap-2 text-xs">
+                    <i class="bi bi-printer"></i>
+                    <span>Print Invoice</span>
+                </a>
             </div>
         </div>
 
@@ -50,7 +56,7 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 text-xs block">Student / Customer Account</span>
-                                <p class="font-bold text-surface-900 text-sm" th:text="${user != null ? user.name : 'Unknown Student'}">Name</p>
+                                <p class="font-bold text-surface-900 text-sm" th:text="${user != null ? user.name : 'Registered Student'}">Name</p>
                                 <p class="text-xs text-gray-500 font-mono mt-0.5" th:text="${order.userEmail}">email@domain.com</p>
                             </div>
                         </div>
@@ -60,9 +66,9 @@
                                 <i class="bi bi-journal-code"></i>
                             </div>
                             <div>
-                                <span class="text-gray-400 text-xs block">Course Target Item</span>
+                                <span class="text-gray-400 text-xs block">Target Course</span>
                                 <p class="font-bold text-surface-900 text-sm" th:text="${order.courseName}">Course Name</p>
-                                <p class="text-xs text-gray-500 mt-0.5" th:text="${course != null ? course.duration : 'Standard course'}"></p>
+                                <p class="text-xs text-gray-500 mt-0.5" th:text="${course != null ? (course.level + ' • ' + (course.duration ?: 'Self-Paced')) : 'Standard Course'}"></p>
                             </div>
                         </div>
                     </div>
@@ -74,28 +80,28 @@
                     
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm">
                         <div>
-                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Razorpay Order ID</span>
-                            <span class="font-mono text-surface-900 font-bold" th:text="${order.orderId}">order_abc</span>
+                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Order Ref ID</span>
+                            <span class="font-mono text-surface-900 font-bold text-xs" th:text="${order.orderId}">order_abc</span>
                         </div>
                         <div>
-                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Razorpay Payment ID</span>
-                            <span class="font-mono text-surface-900 font-bold" th:text="${order.paymentId != null ? order.paymentId : '—'}">pay_abc</span>
+                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Payment Ref ID</span>
+                            <span class="font-mono text-surface-900 font-bold text-xs" th:text="${order.paymentId != null ? order.paymentId : '—'}">pay_abc</span>
                         </div>
                         <div>
                             <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Coupon Applied</span>
-                            <span class="text-surface-900 font-bold" th:text="${order.couponCode != null ? order.couponCode : 'None'}">None</span>
+                            <span class="text-surface-900 font-bold font-mono text-xs" th:text="${order.couponCode != null ? order.couponCode : 'None'}">None</span>
                         </div>
                         <div>
                             <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Discount Amount</span>
-                            <span class="text-surface-900 font-bold" th:text="${order.discountAmount != null ? '₹' + order.discountAmount : '₹0.00'}">₹0.00</span>
+                            <span class="text-emerald-600 font-bold" th:text="${order.discountAmount != null ? '₹' + order.discountAmount : '₹0.00'}">₹0.00</span>
                         </div>
                         <div>
-                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Tax Charged</span>
-                            <span class="text-surface-900 font-bold">₹0.00 (0% IGST)</span>
+                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Payment Method</span>
+                            <span class="font-bold text-surface-900" th:text="${payment != null ? payment.paymentMethod : 'RAZORPAY'}">RAZORPAY</span>
                         </div>
                         <div>
-                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Authoritative Net Price</span>
-                            <span class="text-brand-600 font-extrabold text-base" th:text="${'₹' + order.courseAmount}">₹0</span>
+                            <span class="text-gray-400 block text-xs font-semibold uppercase tracking-wider mb-1">Net Payable Amount</span>
+                            <span class="text-brand-600 font-black text-lg" th:text="${'₹' + order.courseAmount}">₹0</span>
                         </div>
                     </div>
                 </div>
@@ -111,17 +117,17 @@
                         <!-- Order Status -->
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-500">Order Status</span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold"
-                                  th:classappend="${order.status == 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (order.status == 'PENDING' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200')}"
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold"
+                                  th:classappend="${order.status == 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (order.status == 'PENDING' ? 'bg-amber-50 text-amber-700 border border-amber-200' : (order.status == 'REFUNDED' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-rose-50 text-rose-700 border border-rose-200'))}"
                                   th:text="${order.status}">COMPLETED</span>
                         </div>
 
                         <!-- Enrollment Access -->
                         <div class="flex items-center justify-between border-t border-surface-100 pt-3">
-                            <span class="text-sm font-medium text-gray-500">Enrollment / Access</span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold"
-                                  th:classappend="${enrollment != null and enrollment.status == 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}"
-                                  th:text="${enrollment != null ? enrollment.status : 'INACTIVE'}">INACTIVE</span>
+                            <span class="text-sm font-medium text-gray-500">Course Enrollment</span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold"
+                                  th:classappend="${enrollment != null and enrollment.status.name() == 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-600 border border-gray-200'}"
+                                  th:text="${enrollment != null ? enrollment.status : 'NOT ENROLLED'}">INACTIVE</span>
                         </div>
                     </div>
                 </div>
@@ -132,32 +138,39 @@
                     
                     <div class="space-y-4">
                         <div class="p-3 bg-surface-50 border border-surface-200 rounded-xl text-xs space-y-2">
-                            <p class="text-gray-500 font-medium">Reason supplied by student:</p>
+                            <p class="text-gray-500 font-medium">Student Reason:</p>
                             <p class="text-surface-900 font-bold leading-relaxed whitespace-pre-line" th:text="${refund.reason}">Reason details...</p>
                         </div>
 
                         <div class="flex items-center justify-between text-xs py-1">
-                            <span class="text-gray-400">Request Date:</span>
-                            <strong th:text="${refund.refundDate}">30 Aug</strong>
+                            <span class="text-gray-400">Claim Amount:</span>
+                            <strong class="text-rose-600" th:text="${'₹' + refund.amount}">₹0</strong>
                         </div>
 
                         <div class="flex items-center justify-between text-xs py-1">
-                            <span class="text-gray-400">Ticket Status:</span>
+                            <span class="text-gray-400">Request Date:</span>
+                            <strong th:text="${refund.refundDate ?: refund.requestedAt}">30 Aug</strong>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs py-1">
+                            <span class="text-gray-400">Dispute Status:</span>
                             <span class="px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px]"
-                                  th:classappend="${refund.status == 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (refund.status == 'REJECTED' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200')}"
+                                  th:classappend="${refund.status == 'APPROVED' or refund.status == 'PROCESSED' ? 'bg-purple-50 text-purple-700 border border-purple-200' : (refund.status == 'REJECTED' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200')}"
                                   th:text="${refund.status}">PENDING</span>
                         </div>
 
                         <!-- Ticket Actions -->
-                        <div th:if="${refund.status == 'PENDING'}" class="flex gap-2 border-t border-surface-100 pt-4">
+                        <div th:if="${refund.status == 'PENDING' or refund.status == 'PENDING_REVIEW'}" class="flex gap-2 border-t border-surface-100 pt-4">
                             <form th:action="@{/admin/orders/refunds/{id}/reject(id=${refund.id})}" method="post" class="flex-1">
-                                <button type="submit" class="w-full py-2.5 bg-white border border-surface-200 text-surface-700 hover:bg-surface-100 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-sm">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" onclick="return confirm('Reject this refund request?');" class="w-full py-2.5 bg-white border border-surface-200 text-surface-700 hover:bg-surface-100 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer">
                                     <i class="bi bi-x-circle"></i>
                                     <span>Reject</span>
                                 </button>
                             </form>
                             <form th:action="@{/admin/orders/refunds/{id}/approve(id=${refund.id})}" method="post" class="flex-1">
-                                <button type="submit" class="w-full py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-md shadow-red-500/10">
+                                <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" onclick="return confirm('Approve refund? Student course access will be revoked.');" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer">
                                     <i class="bi bi-check-circle"></i>
                                     <span>Approve</span>
                                 </button>

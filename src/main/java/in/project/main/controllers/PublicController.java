@@ -72,6 +72,9 @@ public class PublicController {
     private CertificateRepository certificateRepository;
 
     @Autowired
+    private in.project.main.services.CertificateService certificateService;
+
+    @Autowired
     private NotificationService notificationService;
 
     @Autowired(required = false)
@@ -366,32 +369,11 @@ public class PublicController {
     // ==========================================
     // 5. PUBLIC CERTIFICATE VERIFICATION
     // ==========================================
-    @GetMapping("/verify/certificate/{code}")
+    @GetMapping({"/verify/certificate/{code}", "/verify-certificate/{code}"})
     public String verifyCertificate(@PathVariable("code") String code, Model model) {
-        Certificate certificate = certificateRepository.findByCertificateCode(code).orElse(null);
-        if (certificate == null) {
-            certificate = certificateRepository.findByEnrollmentId(code).orElse(null);
-        }
-
-        if (certificate != null) {
-            try {
-                Enrollment enrollment = enrollmentRepository.findById(Long.parseLong(certificate.getEnrollmentId())).orElse(null);
-                if (enrollment != null) {
-                    model.addAttribute("verified", true);
-                    model.addAttribute("certificate", certificate);
-                    model.addAttribute("enrollment", enrollment);
-                    model.addAttribute("student", enrollment.getUser());
-                    model.addAttribute("course", enrollment.getCourse());
-                } else {
-                    model.addAttribute("verified", false);
-                }
-            } catch (Exception e) {
-                model.addAttribute("verified", false);
-            }
-        } else {
-            model.addAttribute("verified", false);
-        }
-
+        in.project.main.dto.PublicCertificateVerificationDTO verification = certificateService.verifyCertificatePublicly(code);
+        model.addAttribute("verification", verification);
+        model.addAttribute("verified", verification.isValid());
         model.addAttribute("certificateCode", code);
         return "public/verify-certificate";
     }

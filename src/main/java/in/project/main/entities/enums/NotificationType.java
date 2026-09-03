@@ -33,8 +33,13 @@ public enum NotificationType {
     COURSE_UPDATE("Course Content Updated", NotificationCategory.COURSE, NotificationPriority.LOW, "bi-info-circle"),
     NEW_LESSON("New Lesson Available", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-play-circle"),
     NEW_LESSON_ADDED("New Lesson Added", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-play-circle-fill"),
-    NEW_COURSE_AVAILABLE("New Course Available", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-collection-play"),
     CERTIFICATE_READY("Certificate Ready", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-award-fill"),
+    CERTIFICATE_ELIGIBLE("Certificate Eligible", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-award"),
+    CERTIFICATE_REQUESTED("Certificate Requested", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-file-earmark-arrow-up"),
+    CERTIFICATE_APPROVED("Certificate Approved", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-patch-check-fill"),
+    CERTIFICATE_REJECTED("Certificate Request Rejected", NotificationCategory.COURSE, NotificationPriority.HIGH, "bi-shield-x"),
+    CERTIFICATE_ISSUED("Certificate Issued", NotificationCategory.COURSE, NotificationPriority.NORMAL, "bi-award-fill"),
+    CERTIFICATE_REVOKED("Certificate Revoked", NotificationCategory.COURSE, NotificationPriority.HIGH, "bi-slash-circle"),
 
     // 5. Enrollment & Orders
     ORDER_PLACED("Order Placed", NotificationCategory.ENROLLMENT, NotificationPriority.NORMAL, "bi-bag-check"),

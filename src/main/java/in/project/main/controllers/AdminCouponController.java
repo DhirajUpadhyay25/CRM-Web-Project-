@@ -1,75 +1,51 @@
 package in.project.main.controllers;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import in.project.main.entities.Coupon;
-import in.project.main.entities.enums.AuditEventType;
-import in.project.main.entities.enums.AuditSeverity;
-import in.project.main.entities.enums.AuditStatus;
-import in.project.main.events.PlatformAuditEvent;
-import in.project.main.repositories.CouponRepository;
-import in.project.main.services.AuditLogService;
+import in.project.main.entities.Course;
+import in.project.main.repositories.CourseRepository;
+import in.project.main.services.CouponService;
 
 @Controller
 @RequestMapping("/admin/coupons")
 public class AdminCouponController {
 
     @Autowired
-    private CouponRepository repository;
+    private CouponService couponService;
 
-    @Autowired(required = false)
-    private AuditLogService auditLogService;
+    @Autowired
+    private CourseRepository courseRepository;
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("items", repository.findAll());
+        List<Coupon> coupons = couponService.getAllCoupons();
+        Map<String, Object> stats = couponService.getCouponStats();
+        List<Course> courses = courseRepository.findAll();
+
+        model.addAttribute("items", coupons);
+        model.addAttribute("stats", stats);
+        model.addAttribute("courses", courses);
         return "admin/commerce/coupons/list";
     }
 
     @PostMapping("/add")
-    public String add(@RequestParam String code,
-                      @RequestParam String discountType,
-                      @RequestParam String discountValue,
-                      @RequestParam String expiryDate,
-                      @RequestParam Boolean isActive,
-                      Principal principal,
-                      RedirectAttributes ra) {
+    public String add(
+            @ModelAttribute Coupon coupon,
+            Principal principal,
+            RedirectAttributes ra) {
         String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
-            Coupon coupon = new Coupon();
-            coupon.setCode(code);
-            coupon.setDiscountType(discountType);
-            coupon.setDiscountValue(discountValue);
-            coupon.setExpiryDate(expiryDate);
-            coupon.setIsActive(isActive);
-            Coupon saved = repository.save(coupon);
-
-            if (auditLogService != null) {
-                PlatformAuditEvent audit = PlatformAuditEvent.of(
-                    actorEmail,
-                    AuditEventType.SETTINGS_CHANGED,
-                    "COUPON_CREATED",
-                    "Admin created coupon code '" + code + "' (" + discountValue + " " + discountType + ")."
-                )
-                .withActor(null, actorEmail, "Admin", "ADMIN")
-                .withEntity("COUPON", String.valueOf(saved.getId()), code)
-                .withStatus(AuditStatus.SUCCESS)
-                .withSeverity(AuditSeverity.INFO);
-
-                auditLogService.record(audit);
-            }
-
-            ra.addFlashAttribute("success", "Coupon created successfully.");
+            Coupon created = couponService.createCoupon(coupon, actorEmail);
+            ra.addFlashAttribute("success", "Coupon '" + created.getCode() + "' created successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to create coupon: " + e.getMessage());
         }
@@ -77,67 +53,44 @@ public class AdminCouponController {
     }
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable Long id,
-                         @RequestParam String code,
-                         @RequestParam String discountType,
-                         @RequestParam String discountValue,
-                         @RequestParam String expiryDate,
-                         @RequestParam Boolean isActive,
-                         Principal principal,
-                         RedirectAttributes ra) {
+    public String update(
+            @PathVariable Long id,
+            @ModelAttribute Coupon coupon,
+            Principal principal,
+            RedirectAttributes ra) {
         String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
-            Coupon coupon = repository.findById(id).orElseThrow(() -> new RuntimeException("Coupon not found"));
-            coupon.setCode(code);
-            coupon.setDiscountType(discountType);
-            coupon.setDiscountValue(discountValue);
-            coupon.setExpiryDate(expiryDate);
-            coupon.setIsActive(isActive);
-            repository.save(coupon);
-
-            if (auditLogService != null) {
-                PlatformAuditEvent audit = PlatformAuditEvent.of(
-                    actorEmail,
-                    AuditEventType.SETTINGS_CHANGED,
-                    "COUPON_UPDATED",
-                    "Admin updated coupon code '" + code + "'."
-                )
-                .withActor(null, actorEmail, "Admin", "ADMIN")
-                .withEntity("COUPON", String.valueOf(id), code)
-                .withStatus(AuditStatus.SUCCESS)
-                .withSeverity(AuditSeverity.INFO);
-
-                auditLogService.record(audit);
-            }
-
-            ra.addFlashAttribute("success", "Coupon updated successfully.");
+            Coupon updated = couponService.updateCoupon(id, coupon, actorEmail);
+            ra.addFlashAttribute("success", "Coupon '" + updated.getCode() + "' updated successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to update coupon: " + e.getMessage());
         }
         return "redirect:/admin/coupons";
     }
 
-    @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, Principal principal, RedirectAttributes ra) {
+    @PostMapping("/{id}/toggle")
+    public String toggleStatus(
+            @PathVariable Long id,
+            Principal principal,
+            RedirectAttributes ra) {
         String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
         try {
-            repository.deleteById(id);
+            boolean active = couponService.toggleCouponStatus(id, actorEmail);
+            ra.addFlashAttribute("success", "Coupon status updated to " + (active ? "ACTIVE" : "INACTIVE") + ".");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to toggle status: " + e.getMessage());
+        }
+        return "redirect:/admin/coupons";
+    }
 
-            if (auditLogService != null) {
-                PlatformAuditEvent audit = PlatformAuditEvent.of(
-                    actorEmail,
-                    AuditEventType.SETTINGS_CHANGED,
-                    "COUPON_DELETED",
-                    "Admin deleted coupon ID #" + id + "."
-                )
-                .withActor(null, actorEmail, "Admin", "ADMIN")
-                .withEntity("COUPON", String.valueOf(id), "Coupon #" + id)
-                .withStatus(AuditStatus.SUCCESS)
-                .withSeverity(AuditSeverity.LOW);
-
-                auditLogService.record(audit);
-            }
-
+    @PostMapping("/{id}/delete")
+    public String delete(
+            @PathVariable Long id,
+            Principal principal,
+            RedirectAttributes ra) {
+        String actorEmail = principal != null ? principal.getName() : "admin@edutake.com";
+        try {
+            couponService.deleteCoupon(id, actorEmail);
             ra.addFlashAttribute("success", "Coupon deleted successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to delete coupon: " + e.getMessage());

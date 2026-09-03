@@ -44,6 +44,9 @@ public class OrderService
 	@Autowired
 	private NotificationService notificationService;
 
+	@Autowired
+	private CouponService couponService;
+
 	@Autowired(required = false)
 	private AuditLogService auditLogService;
 
@@ -95,15 +98,24 @@ public class OrderService
 		order.setStatus("COMPLETED");
 		ordersRepository.save(order);
 
-		if (paymentRepository.findByOrderId(order.getOrderId()) == null)
+		Payment payment = paymentRepository.findByOrderId(order.getOrderId());
+		if (payment == null)
 		{
-			Payment payment = new Payment();
+			payment = new Payment();
 			payment.setOrderId(order.getOrderId());
-			payment.setAmount(order.getCourseAmount());
-			payment.setStatus("SUCCESS");
-			payment.setPaymentMethod("RAZORPAY");
-			payment.setPaymentDate(DateTimeUtil.getCurrentDateTimeFormatted());
-			paymentRepository.save(payment);
+		}
+		payment.setPaymentId(paymentId);
+		payment.setUserEmail(order.getUserEmail());
+		payment.setAmount(order.getCourseAmount());
+		payment.setStatus("SUCCESS");
+		payment.setPaymentMethod("RAZORPAY");
+		payment.setPaymentDate(DateTimeUtil.getCurrentDateTimeFormatted());
+		paymentRepository.save(payment);
+
+		// Increment coupon usage if applied
+		if (order.getCouponCode() != null && !order.getCouponCode().trim().isEmpty())
+		{
+			couponService.incrementCouponUsage(order.getCouponCode().trim());
 		}
 
 		User user = userRepository.findByEmail(order.getUserEmail());

@@ -1,46 +1,438 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Refund Management', ~{::div})}">
 <body>
     <div>
-        <div class="mb-6 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Refund Management</h1>
-                <p class="text-gray-500 text-sm">Manage refunds across the platform.</p>
-            </div>
-            <button class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors">
-                <i class="bi bi-plus-lg mr-1.5"></i> Add Refund
-            </button>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span>Commerce</span>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">Refund Requests</span>
+        </nav>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-check-circle-fill text-emerald-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${success}">Refund action completed successfully.</span>
+        </div>
+        <div th:if="${error}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 shadow-sm animate-fade-in">
+            <i class="bi bi-exclamation-triangle-fill text-red-600 text-lg flex-shrink-0"></i>
+            <span class="text-sm font-medium" th:text="${error}">An error occurred.</span>
         </div>
 
-        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-surface-50 text-left text-xs text-gray-400 uppercase tracking-wider border-b border-surface-200">
-                            <th class="px-6 py-3 font-semibold">ID</th>
-                            <th class="px-6 py-3 font-semibold">Details</th>
-                            <th class="px-6 py-3 font-semibold">Actions</th>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Refund Management</h1>
+                <p class="text-gray-500 text-sm mt-0.5">Review student refund disputes, process reversals, automate course access revocations, and issue direct refunds.</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <button type="button" onclick="openDirectRefundModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-2 text-sm cursor-pointer">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <span>Issue Direct Refund</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6" th:if="${stats != null}">
+            <!-- Total Requests -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-gray-500 uppercase">Total Requests</span>
+                    <i class="bi bi-receipt-cutoff text-brand-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-surface-900" th:text="${stats.totalRefunds}">0</div>
+                <div class="text-[11px] text-gray-400 mt-0.5">All customer claims</div>
+            </div>
+
+            <!-- Pending Review -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-amber-600 uppercase">Pending Review</span>
+                    <i class="bi bi-hourglass-split text-amber-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-amber-600" th:text="${stats.pendingRefunds}">0</div>
+                <div class="text-[11px] text-gray-400 mt-0.5">Awaiting admin review</div>
+            </div>
+
+            <!-- Approved & Processed -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-purple-600 uppercase">Approved / Processed</span>
+                    <i class="bi bi-check2-all text-purple-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-purple-600" th:text="${stats.approvedRefunds}">0</div>
+                <div class="text-[11px] text-gray-400 mt-0.5">Access cancelled</div>
+            </div>
+
+            <!-- Total Amount Refunded -->
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-rose-600 uppercase">Total Refunded (₹)</span>
+                    <i class="bi bi-currency-rupee text-rose-600"></i>
+                </div>
+                <div class="text-2xl font-bold text-rose-600" th:text="${'₹' + #numbers.formatDecimal(stats.totalRefundedAmount, 1, 2)}">₹0.00</div>
+                <div class="text-[11px] text-gray-400 mt-0.5">Reversed revenue</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl border border-surface-200 p-4 sm:p-5 mb-6 shadow-sm">
+            <form method="get" action="/admin/refunds" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
+                <!-- Search -->
+                <div class="lg:col-span-6 relative">
+                    <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="search" th:value="${search}" placeholder="Search Order ID, student email, course name..." class="w-full pl-9 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                </div>
+
+                <!-- Status Filter -->
+                <div class="lg:col-span-4">
+                    <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING_REVIEW" th:selected="${statusFilter == 'PENDING_REVIEW' or statusFilter == 'PENDING'}">Pending Review</option>
+                        <option value="PROCESSED" th:selected="${statusFilter == 'PROCESSED' or statusFilter == 'APPROVED'}">Approved &amp; Processed</option>
+                        <option value="REJECTED" th:selected="${statusFilter == 'REJECTED'}">Rejected</option>
+                    </select>
+                </div>
+
+                <!-- Button -->
+                <div class="lg:col-span-2 flex items-center gap-2">
+                    <button type="submit" class="w-full px-3 py-2 bg-surface-900 hover:bg-black text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer">
+                        <i class="bi bi-funnel"></i>
+                        <span>Filter</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-surface-100 text-xs text-gray-500" th:if="${search != null or statusFilter != null}">
+                <a href="/admin/refunds" class="text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                </a>
+                <span>Showing <strong class="text-surface-900" th:text="${refundsPage != null ? refundsPage.totalElements : 0}">0</strong> refund records</span>
+            </div>
+        </div>
+
+        <!-- Refunds Table Card -->
+        <div class="bg-white rounded-3xl border border-surface-200 shadow-sm overflow-hidden mb-6">
+            
+            <!-- Empty State -->
+            <div th:if="${refundsPage == null or #lists.isEmpty(refundsPage.content)}" class="p-16 text-center">
+                <div class="w-16 h-16 bg-surface-100 rounded-2xl flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                    <i class="bi bi-check-circle text-emerald-500"></i>
+                </div>
+                <h3 class="text-base font-bold text-surface-900 mb-1">No Refund Requests</h3>
+                <p class="text-sm text-gray-500 max-w-sm mx-auto mb-5">There are no pending refund requests or dispute claims at this time.</p>
+            </div>
+
+            <!-- Table -->
+            <div th:if="${refundsPage != null and !#lists.isEmpty(refundsPage.content)}" class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-3.5">Order &amp; Course</th>
+                            <th class="px-4 py-3.5">Student</th>
+                            <th class="px-4 py-3.5">Amount</th>
+                            <th class="px-4 py-3.5">Reason</th>
+                            <th class="px-4 py-3.5">Status</th>
+                            <th class="px-4 py-3.5">Date</th>
+                            <th class="px-6 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-100">
-                        <tr th:each="item : ${items}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 text-surface-900" th:text="${item.id}">1</td>
-                            <td class="px-6 py-4 text-gray-500">Item Details Here</td>
+                        <tr th:each="r : ${refundsPage.content}" class="hover:bg-surface-50/80 transition-colors">
+                            
+                            <!-- Order / Course -->
                             <td class="px-6 py-4">
-                                <button class="text-brand-600 hover:text-brand-800 text-xs font-semibold mr-3">Edit</button>
-                                <button class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+                                <div class="font-bold text-surface-900 font-mono text-xs" th:text="${'#' + r.orderId}">#ORDER_123</div>
+                                <span class="text-xs text-gray-500 block truncate max-w-[200px]" th:text="${r.courseName ?: 'Course'}">Full Stack Development</span>
                             </td>
-                        </tr>
-                        <tr th:if="${items == null or items.isEmpty()}">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                <i class="bi bi-inbox text-3xl mb-2 block"></i>
-                                No refunds found. Use the Data Seeder to add sample data.
+
+                            <!-- Student -->
+                            <td class="px-4 py-4 text-xs">
+                                <div class="font-medium text-surface-900" th:text="${r.userEmail ?: '-'}">student@example.com</div>
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="px-4 py-4">
+                                <div class="text-sm font-extrabold text-rose-600" th:text="${'₹' + (r.amount ?: '0')}">₹999</div>
+                            </td>
+
+                            <!-- Reason -->
+                            <td class="px-4 py-4 text-xs max-w-[220px]">
+                                <span class="text-surface-700 block truncate" th:text="${r.reason ?: 'No reason specified'}" th:title="${r.reason}">Reason text</span>
+                                <span class="text-[10px] text-red-500 font-semibold block" th:if="${r.rejectionReason}" th:text="${'Declined: ' + r.rejectionReason}"></span>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="px-4 py-4">
+                                <span th:if="${r.status == 'PROCESSED' or r.status == 'APPROVED'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Processed
+                                </span>
+                                <span th:if="${r.status == 'PENDING_REVIEW' or r.status == 'PENDING'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pending Review
+                                </span>
+                                <span th:if="${r.status == 'REJECTED'}" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Rejected
+                                </span>
+                            </td>
+
+                            <!-- Date -->
+                            <td class="px-4 py-4 text-xs text-gray-500">
+                                <span th:text="${r.refundDate ?: (r.requestedAt ?: '-')}">Sep 03, 2026</span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="px-6 py-4 text-right">
+                                <button type="button" 
+                                        th:data-id="${r.id}"
+                                        th:data-orderid="${r.orderId}"
+                                        th:data-email="${r.userEmail}"
+                                        th:data-course="${r.courseName}"
+                                        th:data-amount="${r.amount}"
+                                        th:data-reason="${r.reason}"
+                                        th:data-status="${r.status}"
+                                        th:data-note="${r.adminNote}"
+                                        th:data-rejection="${r.rejectionReason}"
+                                        onclick="openReviewRefundModal(this.getAttribute('data-id'), this.getAttribute('data-orderid'), this.getAttribute('data-email'), this.getAttribute('data-course'), this.getAttribute('data-amount'), this.getAttribute('data-reason'), this.getAttribute('data-status'), this.getAttribute('data-note'), this.getAttribute('data-rejection'))"
+                                        class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer inline-flex items-center gap-1"
+                                        th:classappend="${r.status == 'PENDING_REVIEW' or r.status == 'PENDING'} ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-surface-50 text-surface-700 hover:bg-surface-100 border border-surface-200'">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span th:text="${r.status == 'PENDING_REVIEW' or r.status == 'PENDING' ? 'Review Dispute' : 'View Details'}">Review</span>
+                                </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div th:if="${refundsPage != null and refundsPage.totalPages > 1}" class="px-6 py-4 border-t border-surface-100 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4 text-xs text-gray-500">
+                <div>
+                    Showing <strong class="text-surface-900" th:text="${refundsPage.number * refundsPage.size + 1}">1</strong> to
+                    <strong class="text-surface-900" th:text="${refundsPage.isLast() ? refundsPage.totalElements : (refundsPage.number + 1) * refundsPage.size}">15</strong> of
+                    <strong class="text-surface-900" th:text="${refundsPage.totalElements}">50</strong> results
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${refundsPage.hasPrevious()}"
+                       th:href="@{/admin/refunds(page=${refundsPage.number - 1}, size=${refundsPage.size}, search=${search}, status=${statusFilter})}"
+                       class="px-3 py-1.5 rounded-xl bg-white border border-surface-200 text-surface-700 font-semibold hover:bg-surface-100 transition-colors shadow-2xs flex items-center gap-1">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                    <span class="px-3 py-1.5 font-bold text-surface-900">
+                        Page <span th:text="${refundsPage.number + 1}">1</span> of <span th:text="${refundsPage.totalPages}">5</span>
+                    </span>
+                    <a th:if="${refundsPage.hasNext()}"
+                       th:href="@{/admin/refunds(page=${refundsPage.number + 1}, size=${refundsPage.size}, search=${search}, status=${statusFilter})}"
+                       class="px-3 py-1.5 rounded-xl bg-white border border-surface-200 text-surface-700 font-semibold hover:bg-surface-100 transition-colors shadow-2xs flex items-center gap-1">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
+
+        <!-- =================================================================== -->
+        <!-- MODAL: REVIEW REFUND REQUEST                                        -->
+        <!-- =================================================================== -->
+        <div id="reviewRefundModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-xs z-[9999] items-center justify-center p-4" style="display: none;">
+            <div class="bg-white rounded-3xl max-w-lg w-full border border-surface-200 shadow-2xl overflow-hidden animate-scale-up">
+                <div class="p-6 border-b border-surface-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-surface-900">Refund Dispute Review</h3>
+                            <p class="text-xs text-gray-500" id="reviewOrderId">Order #0</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeReviewRefundModal()" class="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 text-gray-500 flex items-center justify-center transition-colors cursor-pointer">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 space-y-4 text-xs">
+                    <!-- Dispute Overview -->
+                    <div class="bg-surface-50 p-4 rounded-2xl border border-surface-200 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 font-medium">Student:</span>
+                            <span class="font-bold text-surface-900" id="reviewEmail">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 font-medium">Course:</span>
+                            <span class="font-bold text-surface-900 truncate max-w-[240px]" id="reviewCourse">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500 font-medium">Refund Amount:</span>
+                            <span class="font-extrabold text-rose-600 text-sm" id="reviewAmount">₹0</span>
+                        </div>
+                        <div class="pt-2 border-t border-surface-200/60">
+                            <span class="text-gray-500 font-medium block mb-1">Student Reason:</span>
+                            <p class="text-surface-800 leading-relaxed font-sans" id="reviewReason">Reason</p>
+                        </div>
+                    </div>
+
+                    <!-- Pending Actions Form (Approve / Reject) -->
+                    <div id="pendingActionContainer" class="space-y-4">
+                        <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
+                            <i class="bi bi-info-circle-fill text-amber-600 text-sm shrink-0"></i>
+                            <span>Approving this refund will immediately reverse the order, update the payment state, automatically <strong>cancel &amp; revoke student course access</strong>, and revoke any issued certificate.</span>
+                        </div>
+
+                        <!-- Approve Form -->
+                        <form id="approveRefundForm" method="post" action="" class="space-y-3">
+                            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <div>
+                                <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Admin Approval Note (Optional)</label>
+                                <textarea name="adminNote" rows="2" placeholder="Audit remarks or bank reference..." class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="submit" onclick="return confirm('Confirm approval? Course access will be immediately revoked for this student.');" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="bi bi-check2-circle"></i>
+                                    <span>Approve &amp; Revoke Access</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="relative flex py-1 items-center">
+                            <div class="flex-grow border-t border-surface-200"></div>
+                            <span class="flex-shrink mx-3 text-gray-400 text-[10px] uppercase font-bold tracking-wider">or decline</span>
+                            <div class="flex-grow border-t border-surface-200"></div>
+                        </div>
+
+                        <!-- Reject Form -->
+                        <form id="rejectRefundForm" method="post" action="" class="space-y-3">
+                            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <div>
+                                <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Decline Reason (Sent to Student) *</label>
+                                <textarea name="rejectionReason" required rows="2" placeholder="e.g. Course was completed beyond the 14-day refund window policy..." class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
+                            </div>
+                            <button type="submit" onclick="return confirm('Decline this refund request?');" class="w-full py-2 bg-surface-100 hover:bg-red-50 text-red-600 font-bold rounded-xl border border-surface-200 hover:border-red-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="bi bi-x-circle"></i>
+                                <span>Decline Request</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Already Processed State Message -->
+                    <div id="processedMessageContainer" class="hidden p-4 rounded-xl bg-surface-100 text-surface-700 text-center">
+                        <span class="font-bold block text-sm" id="processedStatusTitle">Request Processed</span>
+                        <p class="text-xs text-gray-500 mt-1" id="processedStatusSubtitle">This refund dispute has already been concluded.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- MODAL: DIRECT ADMIN REFUND                                          -->
+        <!-- =================================================================== -->
+        <div id="directRefundModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-xs z-[9999] items-center justify-center p-4" style="display: none;">
+            <div class="bg-white rounded-3xl max-w-md w-full border border-surface-200 shadow-2xl overflow-hidden animate-scale-up">
+                <div class="p-6 border-b border-surface-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-surface-900">Direct Admin Refund</h3>
+                            <p class="text-xs text-gray-500">Reverse an order and cancel student course access.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeDirectRefundModal()" class="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 text-gray-500 flex items-center justify-center transition-colors cursor-pointer">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                </div>
+                <form method="post" action="/admin/refunds/direct" class="p-6 space-y-4">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Target Order ID *</label>
+                        <input type="text" name="orderId" required placeholder="e.g. order_xyz or RCPT_123" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Refund Amount (₹)</label>
+                        <input type="number" step="0.01" name="amount" placeholder="Leave blank for full order amount" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1">Reason for Reversal *</label>
+                        <textarea name="reason" required rows="2" placeholder="Administrative reason for reversing this transaction..." class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
+                    </div>
+
+                    <div class="pt-4 border-t border-surface-100 flex items-center justify-end gap-2.5">
+                        <button type="button" onclick="closeDirectRefundModal()" class="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" onclick="return confirm('Process direct refund? The student enrollment will be immediately cancelled.');" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            <span>Process Direct Refund</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Page Scripts -->
+        <script>
+            function openDirectRefundModal() {
+                var modal = document.getElementById('directRefundModal');
+                if (modal) modal.style.display = 'flex';
+            }
+            function closeDirectRefundModal() {
+                var modal = document.getElementById('directRefundModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            function openReviewRefundModal(id, orderId, email, course, amount, reason, status, note, rejection) {
+                document.getElementById('reviewOrderId').innerText = 'Order #' + (orderId || '-');
+                document.getElementById('reviewEmail').innerText = email || '-';
+                document.getElementById('reviewCourse').innerText = course || 'Course';
+                document.getElementById('reviewAmount').innerText = '₹' + (amount || '0');
+                document.getElementById('reviewReason').innerText = reason || 'No reason provided.';
+
+                var approveForm = document.getElementById('approveRefundForm');
+                if (approveForm) approveForm.action = '/admin/refunds/' + id + '/approve';
+
+                var rejectForm = document.getElementById('rejectRefundForm');
+                if (rejectForm) rejectForm.action = '/admin/refunds/' + id + '/reject';
+
+                var pendingContainer = document.getElementById('pendingActionContainer');
+                var msgContainer = document.getElementById('processedMessageContainer');
+                var title = document.getElementById('processedStatusTitle');
+                var subtitle = document.getElementById('processedStatusSubtitle');
+
+                if (status === 'PROCESSED' || status === 'APPROVED') {
+                    if (pendingContainer) pendingContainer.classList.add('hidden');
+                    if (msgContainer) msgContainer.classList.remove('hidden');
+                    if (title) title.innerText = 'Refund Approved & Processed';
+                    if (subtitle) subtitle.innerText = 'Admin Note: ' + (note || 'Access revoked.');
+                } else if (status === 'REJECTED') {
+                    if (pendingContainer) pendingContainer.classList.add('hidden');
+                    if (msgContainer) msgContainer.classList.remove('hidden');
+                    if (title) title.innerText = 'Refund Request Rejected';
+                    if (subtitle) subtitle.innerText = 'Decline Reason: ' + (rejection || 'Declined by administration.');
+                } else {
+                    if (pendingContainer) pendingContainer.classList.remove('hidden');
+                    if (msgContainer) msgContainer.classList.add('hidden');
+                }
+
+                var modal = document.getElementById('reviewRefundModal');
+                if (modal) modal.style.display = 'flex';
+            }
+            function closeReviewRefundModal() {
+                var modal = document.getElementById('reviewRefundModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeDirectRefundModal();
+                    closeReviewRefundModal();
+                }
+            });
+        </script>
     </div>
 </body>
 </html>
