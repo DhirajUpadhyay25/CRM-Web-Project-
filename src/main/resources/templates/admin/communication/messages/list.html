@@ -201,7 +201,7 @@
                                         <p class="text-[11px] text-gray-400 font-mono" th:text="${tm.senderEmail}">email@domain.com</p>
                                     </div>
                                 </div>
-                                <span class="text-[11px] text-gray-400" th:text="${tm.sentAt != null ? #temporals.format(tm.sentAt, 'MMM dd, yyyy HH:mm') : ''}">Time</span>
+                                <span class="text-[11px] text-gray-400" th:text="${tm.sentAt != null ? tm.sentAt : ''}">Time</span>
                             </div>
 
                             <div class="text-xs text-surface-800 whitespace-pre-line leading-relaxed" th:text="${tm.body}">
@@ -240,7 +240,7 @@
         <!-- ============================================ -->
         <!-- COMPOSE MESSAGE MODAL -->
         <!-- ============================================ -->
-        <div id="composeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="composeModal" style="display:none" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl max-w-xl w-full border border-surface-200 p-6 shadow-2xl relative">
                 
                 <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
@@ -312,11 +312,21 @@
     <!-- Scripts -->
     <script>
         function openComposeModal() {
-            document.getElementById('composeModal').classList.remove('hidden');
+            document.getElementById('composeModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
         function closeComposeModal() {
-            document.getElementById('composeModal').classList.add('hidden');
+            document.getElementById('composeModal').style.display = 'none';
+            document.body.style.overflow = '';
         }
+        // Close on backdrop click or ESC key
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('composeModal');
+            if (e.target === modal) closeComposeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeComposeModal();
+        });
     </script>
 </body>
 </html>
