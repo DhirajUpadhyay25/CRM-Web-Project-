@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('My Feedback', ~{::div})}">
+<body>
+    <div>
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+            <a href="/student/dashboard" class="hover:text-brand-600 transition-colors">Student</a>
+            <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
+            <span class="text-surface-900 font-semibold">My Feedback</span>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">My Feedback</h1>
+                <p class="text-gray-500 text-sm mt-0.5">View and manage your submitted feedback.</p>
+            </div>
+            <a href="/student/feedback/give" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">
+                <i class="bi bi-plus-lg"></i> Give Feedback
+            </a>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${successMsg}"></span>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(feedbackPage.content)}" class="bg-white border border-surface-200 rounded-2xl shadow-sm p-12 text-center">
+            <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                <i class="bi bi-chat-quote"></i>
+            </div>
+            <h3 class="font-semibold text-surface-900 mb-1">No Feedback Yet</h3>
+            <p class="text-sm text-gray-500 mb-4">You haven't submitted any feedback yet. Share your experience!</p>
+            <a href="/student/feedback/give" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all">
+                <i class="bi bi-plus-lg"></i> Give Feedback
+            </a>
+        </div>
+
+        <!-- Feedback List -->
+        <div th:if="${!#lists.isEmpty(feedbackPage.content)}" class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-gray-500">
+                        <tr>
+                            <th class="px-6 py-4 font-semibold">Course</th>
+                            <th class="px-6 py-4 font-semibold">Rating</th>
+                            <th class="px-6 py-4 font-semibold">Category</th>
+                            <th class="px-6 py-4 font-semibold">Status</th>
+                            <th class="px-6 py-4 font-semibold">Submitted</th>
+                            <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-200">
+                        <tr th:each="fb : ${feedbackPage.content}" class="hover:bg-surface-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-surface-900">
+                                <span th:if="${fb.course != null}" th:text="${fb.course.name}">Course Name</span>
+                                <span th:unless="${fb.course != null}" class="text-gray-400">General</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1">
+                                    <template th:each="i : ${#numbers.sequence(1,5)}">
+                                        <i th:if="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star-fill text-amber-400 text-xs"></i>
+                                        <i th:unless="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star text-gray-300 text-xs"></i>
+                                    </template>
+                                    <span class="text-xs text-gray-500 ml-1" th:text="'(' + ${fb.rating} + ')'"></span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500">
+                                <span th:if="${fb.category != null}" th:text="${fb.category}" class="px-2 py-0.5 bg-surface-100 rounded-full text-xs font-medium"></span>
+                                <span th:unless="${fb.category != null}" class="text-gray-400">-</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span th:text="${fb.status != null ? fb.status.displayName : 'New'}"
+                                      th:classappend="${fb.status != null ? fb.status.badgeClass : 'bg-blue-100 text-blue-700'}"
+                                      class="px-2.5 py-1 rounded-full text-xs font-semibold inline-block"></span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500 text-xs" th:text="${fb.createdAt != null ? #temporals.format(fb.createdAt, 'dd MMM yyyy') : '-'}"></td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a th:href="@{/student/feedback/{id}(id=${fb.id})}"
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-semibold hover:bg-brand-100 transition-colors">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <a th:if="${fb.status != null and fb.status.isEditable()}"
+                                       th:href="@{/student/feedback/{id}/edit(id=${fb.id})}"
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 bg-surface-100 text-surface-700 rounded-lg text-xs font-semibold hover:bg-surface-200 transition-colors">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${feedbackPage.totalPages > 1}" class="px-6 py-4 border-t border-surface-200 flex flex-col sm:flex-row items-center justify-between bg-surface-50 gap-4">
+                <div class="text-sm text-gray-500">
+                    Showing <span class="font-medium text-surface-900" th:text="${feedbackPage.number * feedbackPage.size + 1}"></span> to
+                    <span class="font-medium text-surface-900" th:text="${feedbackPage.isLast() ? feedbackPage.totalElements : (feedbackPage.number + 1) * feedbackPage.size}"></span> of
+                    <span class="font-medium text-surface-900" th:text="${feedbackPage.totalElements}"></span> results
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${feedbackPage.hasPrevious()}"
+                       th:href="@{/student/feedback(page=${feedbackPage.number - 1}, size=${feedbackPage.size})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Previous
+                    </a>
+                    <a th:if="${feedbackPage.hasNext()}"
+                       th:href="@{/student/feedback(page=${feedbackPage.number + 1}, size=${feedbackPage.size})}"
+                       class="px-3 py-1.5 rounded-lg bg-white border border-surface-200 text-sm font-medium hover:bg-surface-50 text-surface-700 transition-colors">
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
