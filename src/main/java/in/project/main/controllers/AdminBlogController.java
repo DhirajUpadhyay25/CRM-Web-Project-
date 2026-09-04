@@ -29,13 +29,17 @@ public class AdminBlogController {
     public String add(@RequestParam String title,
                       @RequestParam String author,
                       @RequestParam String status,
-                      @RequestParam String publishDate,
+                      @RequestParam(required = false) String publishDate,
                       RedirectAttributes ra) {
         try {
             Blog blog = new Blog();
             blog.setTitle(title);
             blog.setAuthor(author);
-            blog.setStatus(status);
+            try {
+                blog.setStatus(in.project.main.entities.enums.ContentStatus.valueOf(status.toUpperCase()));
+            } catch (Exception e) {
+                blog.setStatus(in.project.main.entities.enums.ContentStatus.DRAFT);
+            }
             blog.setPublishDate(publishDate);
             repository.save(blog);
             ra.addFlashAttribute("success", "Blog created successfully.");
@@ -50,13 +54,17 @@ public class AdminBlogController {
                          @RequestParam String title,
                          @RequestParam String author,
                          @RequestParam String status,
-                         @RequestParam String publishDate,
+                         @RequestParam(required = false) String publishDate,
                          RedirectAttributes ra) {
         try {
             Blog blog = repository.findById(id).orElseThrow(() -> new RuntimeException("Blog not found"));
             blog.setTitle(title);
             blog.setAuthor(author);
-            blog.setStatus(status);
+            try {
+                blog.setStatus(in.project.main.entities.enums.ContentStatus.valueOf(status.toUpperCase()));
+            } catch (Exception e) {
+                blog.setStatus(in.project.main.entities.enums.ContentStatus.DRAFT);
+            }
             blog.setPublishDate(publishDate);
             repository.save(blog);
             ra.addFlashAttribute("success", "Blog updated successfully.");

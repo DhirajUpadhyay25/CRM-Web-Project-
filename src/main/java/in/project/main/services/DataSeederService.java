@@ -520,8 +520,8 @@ public class DataSeederService {
 
     private void seedPages() {
         if (pageRepo.count() > 0) return;
-        Page p1 = new Page(); p1.setTitle("About Us"); p1.setSlug("about-us"); p1.setStatus("Published");
-        Page p2 = new Page(); p2.setTitle("Terms of Service"); p2.setSlug("terms"); p2.setStatus("Published");
+        Page p1 = new Page(); p1.setTitle("About Us"); p1.setSlug("about-us"); p1.setStatus(in.project.main.entities.enums.ContentStatus.PUBLISHED);
+        Page p2 = new Page(); p2.setTitle("Terms of Service"); p2.setSlug("terms"); p2.setStatus(in.project.main.entities.enums.ContentStatus.PUBLISHED);
         pageRepo.saveAll(Arrays.asList(p1, p2));
     }
 
@@ -530,7 +530,7 @@ public class DataSeederService {
         Blog b = new Blog();
         b.setTitle("Top 10 Java Features in 2024");
         b.setAuthor("Admin");
-        b.setStatus("Published");
+        b.setStatus(in.project.main.entities.enums.ContentStatus.PUBLISHED);
         b.setPublishDate("2024-08-01");
         blogRepo.save(b);
     }

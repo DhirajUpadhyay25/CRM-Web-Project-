@@ -14,7 +14,8 @@ public enum AuditCategory {
     NOTIFICATION("Notifications"),
     ADMIN("Administration & Settings"),
     SYSTEM("System & Integration"),
-    SECURITY("Security Alerts");
+    SECURITY("Security Alerts"),
+    FEEDBACK("Feedback Management");
 
     private final String displayName;
 

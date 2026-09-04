@@ -77,6 +77,10 @@ public enum NotificationType {
     NEW_ENQUIRY("New Inquiry Received", NotificationCategory.STUDENT, NotificationPriority.NORMAL, "bi-chat-dots"),
     NEW_LEAD("New Lead Generated", NotificationCategory.STUDENT, NotificationPriority.NORMAL, "bi-funnel"),
     NEW_FEEDBACK("New Student Feedback", NotificationCategory.STUDENT, NotificationPriority.NORMAL, "bi-star-fill"),
+    FEEDBACK_RECEIVED("Feedback Received", NotificationCategory.STUDENT, NotificationPriority.NORMAL, "bi-chat-quote"),
+    FEEDBACK_RESPONDED("Feedback Response Available", NotificationCategory.STUDENT, NotificationPriority.NORMAL, "bi-reply"),
+    FEEDBACK_RESOLVED("Feedback Resolved", NotificationCategory.STUDENT, NotificationPriority.LOW, "bi-check-circle"),
+    LOW_RATING_ALERT("Low Rating Alert", NotificationCategory.STUDENT, NotificationPriority.HIGH, "bi-exclamation-triangle"),
 
     // 11. System
     SYSTEM_ANNOUNCEMENT("System Announcement", NotificationCategory.SYSTEM, NotificationPriority.NORMAL, "bi-broadcast"),

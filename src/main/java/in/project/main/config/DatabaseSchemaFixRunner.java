@@ -181,6 +181,57 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 log.warn("Notice on seeding settings and RBAC roles: {}", e.getMessage());
             }
 
+            // 7. Normalize content tables (Page, Blog, Feedback, Testimonial, FAQ, Media)
+            try {
+                jdbcTemplate.execute("UPDATE page SET deleted = FALSE WHERE deleted IS NULL");
+                jdbcTemplate.execute("UPDATE page SET status = 'PUBLISHED' WHERE status IS NULL");
+                jdbcTemplate.execute("UPDATE page SET visibility = 'PUBLIC' WHERE visibility IS NULL");
+                jdbcTemplate.execute("UPDATE page SET created_at = NOW() WHERE created_at IS NULL");
+                jdbcTemplate.execute("UPDATE page SET updated_at = NOW() WHERE updated_at IS NULL");
+
+                jdbcTemplate.execute("UPDATE blog SET deleted = FALSE WHERE deleted IS NULL");
+                jdbcTemplate.execute("UPDATE blog SET is_featured = FALSE WHERE is_featured IS NULL");
+                jdbcTemplate.execute("UPDATE blog SET status = 'PUBLISHED' WHERE status IS NULL");
+                jdbcTemplate.execute("UPDATE blog SET visibility = 'PUBLIC' WHERE visibility IS NULL");
+                jdbcTemplate.execute("UPDATE blog SET view_count = 0 WHERE view_count IS NULL");
+                jdbcTemplate.execute("UPDATE blog SET created_at = NOW() WHERE created_at IS NULL");
+                jdbcTemplate.execute("UPDATE blog SET updated_at = NOW() WHERE updated_at IS NULL");
+
+                jdbcTemplate.execute("UPDATE feedback SET deleted = FALSE WHERE deleted IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET is_anonymous = FALSE WHERE is_anonymous IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET is_public = FALSE WHERE is_public IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET allow_testimonial = FALSE WHERE allow_testimonial IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET contact_me = FALSE WHERE contact_me IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET status = 'NEW' WHERE status IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET priority = 'MEDIUM' WHERE priority IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET created_at = NOW() WHERE created_at IS NULL");
+                jdbcTemplate.execute("UPDATE feedback SET updated_at = NOW() WHERE updated_at IS NULL");
+
+                jdbcTemplate.execute("UPDATE testimonial SET deleted = FALSE WHERE deleted IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET is_featured = FALSE WHERE is_featured IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET consent_name = FALSE WHERE consent_name IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET consent_photo = FALSE WHERE consent_photo IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET consent_publish = FALSE WHERE consent_publish IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET is_approved = TRUE WHERE is_approved IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET status = 'PUBLISHED' WHERE status IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET source = 'ADMIN_CREATED' WHERE source IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET display_order = 0 WHERE display_order IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET created_at = NOW() WHERE created_at IS NULL");
+                jdbcTemplate.execute("UPDATE testimonial SET updated_at = NOW() WHERE updated_at IS NULL");
+
+                jdbcTemplate.execute("UPDATE faq SET is_active = TRUE WHERE is_active IS NULL");
+                jdbcTemplate.execute("UPDATE faq SET sort_order = 0 WHERE sort_order IS NULL");
+                jdbcTemplate.execute("UPDATE faq SET view_count = 0 WHERE view_count IS NULL");
+                jdbcTemplate.execute("UPDATE faq SET helpful_count = 0 WHERE helpful_count IS NULL");
+                jdbcTemplate.execute("UPDATE faq SET not_helpful_count = 0 WHERE not_helpful_count IS NULL");
+                jdbcTemplate.execute("UPDATE faq SET created_at = NOW() WHERE created_at IS NULL");
+                jdbcTemplate.execute("UPDATE faq SET updated_at = NOW() WHERE updated_at IS NULL");
+
+                log.info("Successfully normalized Content tables columns.");
+            } catch (Exception e) {
+                log.debug("Notice on normalizing content tables: {}", e.getMessage());
+            }
+
         } catch (Exception e) {
             log.warn("Database schema fix runner completed with note: {}", e.getMessage());
         }

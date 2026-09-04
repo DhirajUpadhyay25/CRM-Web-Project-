@@ -21,6 +21,7 @@ import in.project.main.entities.Feedback;
 import in.project.main.entities.FeedbackResponse;
 import in.project.main.security.CustomUserDetails;
 import in.project.main.services.FeedbackService;
+import in.project.main.repositories.UserRepository;
 
 @Controller
 @RequestMapping("/student/feedback")
@@ -29,13 +30,14 @@ public class StudentFeedbackController {
     @Autowired
     private FeedbackService feedbackService;
 
-    private Long getStudentId(CustomUserDetails userDetails) {
-        return userRepository.findByEmail(userDetails.getUsername()) != null
-                ? userRepository.findByEmail(userDetails.getUsername()).getId() : null;
-    }
-
     @Autowired
-    private in.project.main.repositories.UserRepository userRepository;
+    private UserRepository userRepository;
+
+    private Long getStudentId(CustomUserDetails userDetails) {
+        if (userDetails == null) return null;
+        var user = userRepository.findByEmail(userDetails.getUsername());
+        return user != null ? user.getId() : null;
+    }
 
     @GetMapping({"", "/", "/list"})
     public String listFeedback(
@@ -76,11 +78,11 @@ public class StudentFeedbackController {
 
     @PostMapping("/submit")
     public String submitFeedback(
-            @RequestParam("courseId") Long courseId,
-            @RequestParam("rating") Integer rating,
+            @RequestParam(value = "courseId", required = false) String courseIdStr,
+            @RequestParam(value = "rating", required = false) String ratingStr,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "subject", required = false) String subject,
-            @RequestParam("message") String message,
+            @RequestParam(value = "message", required = false) String message,
             @RequestParam(value = "isAnonymous", required = false) Boolean isAnonymous,
             @RequestParam(value = "isPublic", required = false) Boolean isPublic,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -92,18 +94,47 @@ public class StudentFeedbackController {
         }
 
         try {
+            if (courseIdStr == null || courseIdStr.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Please select a course.");
+                return "redirect:/student/feedback/give";
+            }
+            Long courseId;
+            try {
+                courseId = Long.parseLong(courseIdStr.trim());
+            } catch (NumberFormatException e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Invalid course selection.");
+                return "redirect:/student/feedback/give";
+            }
+
+            if (ratingStr == null || ratingStr.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Please select a rating.");
+                return "redirect:/student/feedback/give?courseId=" + courseId;
+            }
+            Integer rating;
+            try {
+                rating = Integer.parseInt(ratingStr.trim());
+            } catch (NumberFormatException e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Invalid rating value.");
+                return "redirect:/student/feedback/give?courseId=" + courseId;
+            }
+
+            if (message == null || message.trim().length() < 10) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Feedback message must be at least 10 characters.");
+                return "redirect:/student/feedback/give?courseId=" + courseId;
+            }
+
             feedbackService.submitFeedback(studentId, courseId, null,
-                    rating, category, subject, message, isAnonymous, isPublic);
+                    rating, category, subject, message.trim(), isAnonymous, isPublic);
             redirectAttributes.addFlashAttribute("successMsg", "Feedback submitted successfully! Thank you for your input.");
         } catch (IllegalArgumentException | IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
-            return "redirect:/student/feedback/give?courseId=" + courseId;
+            return "redirect:/student/feedback/give";
         } catch (SecurityException e) {
             redirectAttributes.addFlashAttribute("errorMsg", "You are not authorized to submit this feedback.");
             return "redirect:/student/feedback";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Unable to submit feedback. Please try again.");
-            return "redirect:/student/feedback/give?courseId=" + courseId;
+            return "redirect:/student/feedback/give";
         }
 
         return "redirect:/student/feedback";
@@ -165,7 +196,7 @@ public class StudentFeedbackController {
     @PostMapping("/{id}/edit")
     public String editFeedback(
             @PathVariable("id") Long id,
-            @RequestParam(value = "rating", required = false) Integer rating,
+            @RequestParam(value = "rating", required = false) String ratingStr,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "subject", required = false) String subject,
             @RequestParam(value = "message", required = false) String message,
@@ -178,6 +209,10 @@ public class StudentFeedbackController {
         }
 
         try {
+            Integer rating = null;
+            if (ratingStr != null && !ratingStr.trim().isEmpty()) {
+                rating = Integer.parseInt(ratingStr.trim());
+            }
             feedbackService.editFeedback(id, studentId, rating, category, subject, message);
             redirectAttributes.addFlashAttribute("successMsg", "Feedback updated successfully.");
         } catch (Exception e) {

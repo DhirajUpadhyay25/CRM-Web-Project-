@@ -27,8 +27,20 @@
             <span class="text-sm font-medium" th:text="${errorMsg}"></span>
         </div>
 
+        <!-- No courses message -->
+        <div th:if="${#lists.isEmpty(eligibleCourses)}" class="bg-white border border-surface-200 rounded-2xl shadow-sm p-12 text-center">
+            <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
+                <i class="bi bi-book"></i>
+            </div>
+            <h3 class="font-semibold text-surface-900 mb-1">No Enrolled Courses</h3>
+            <p class="text-sm text-gray-500 mb-4">You need to be enrolled in a course to provide feedback.</p>
+            <a href="/student/browse" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all">
+                <i class="bi bi-compass"></i> Browse Courses
+            </a>
+        </div>
+
         <!-- Feedback Form -->
-        <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden max-w-2xl">
+        <div th:unless="${#lists.isEmpty(eligibleCourses)}" class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden max-w-2xl">
             <form th:action="@{/student/feedback/submit}" method="post" id="feedbackForm">
                 <div class="p-6 space-y-5">
 
@@ -48,15 +60,26 @@
                     <!-- Rating -->
                     <div>
                         <label class="block text-sm font-semibold text-surface-800 mb-1.5">Rating <span class="text-red-500">*</span></label>
+                        <input type="hidden" id="ratingInput" name="rating" value="">
                         <div class="flex items-center gap-1" id="ratingContainer">
-                            <button type="button" th:each="i : ${#numbers.sequence(1,5)}" th:data-value="${i}"
-                                    class="rating-star text-2xl text-gray-300 hover:text-amber-400 transition-colors focus:outline-none"
-                                    onclick="setRating(this.getAttribute('data-value'))">
+                            <button type="button" class="rating-star text-2xl text-gray-300 hover:text-amber-400 transition-colors focus:outline-none" data-value="1">
                                 <i class="bi bi-star-fill"></i>
                             </button>
-                            <input type="hidden" id="ratingInput" name="rating" value="">
+                            <button type="button" class="rating-star text-2xl text-gray-300 hover:text-amber-400 transition-colors focus:outline-none" data-value="2">
+                                <i class="bi bi-star-fill"></i>
+                            </button>
+                            <button type="button" class="rating-star text-2xl text-gray-300 hover:text-amber-400 transition-colors focus:outline-none" data-value="3">
+                                <i class="bi bi-star-fill"></i>
+                            </button>
+                            <button type="button" class="rating-star text-2xl text-gray-300 hover:text-amber-400 transition-colors focus:outline-none" data-value="4">
+                                <i class="bi bi-star-fill"></i>
+                            </button>
+                            <button type="button" class="rating-star text-2xl text-gray-300 hover:text-amber-400 transition-colors focus:outline-none" data-value="5">
+                                <i class="bi bi-star-fill"></i>
+                            </button>
                             <span class="ml-2 text-sm text-gray-500" id="ratingText">Select a rating</span>
                         </div>
+                        <p id="ratingError" class="text-xs text-red-500 mt-1 hidden">Please select a rating.</p>
                     </div>
 
                     <!-- Category -->
@@ -124,40 +147,65 @@
                 </div>
             </form>
         </div>
-    </div>
-
-    <script th:inline="javascript">
-        function setRating(value) {
-            document.getElementById('ratingInput').value = value;
+    <script>
+        (function() {
+            var ratingInput = document.getElementById('ratingInput');
+            var ratingText = document.getElementById('ratingText');
+            var ratingError = document.getElementById('ratingError');
             var stars = document.querySelectorAll('.rating-star');
-            stars.forEach(function(star, index) {
-                if (index < value) {
-                    star.classList.remove('text-gray-300');
-                    star.classList.add('text-amber-400');
-                } else {
-                    star.classList.remove('text-amber-400');
-                    star.classList.add('text-gray-300');
-                }
-            });
             var texts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
-            document.getElementById('ratingText').textContent = texts[value] || '';
-        }
 
-        document.getElementById('message').addEventListener('input', function() {
-            document.getElementById('charCount').textContent = this.value.length;
-        });
-
-        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
-            var rating = document.getElementById('ratingInput').value;
-            if (!rating) {
-                e.preventDefault();
-                alert('Please select a rating.');
-                return;
+            function setRating(value) {
+                ratingInput.value = String(value);
+                ratingError.classList.add('hidden');
+                ratingText.classList.remove('text-red-500');
+                for (var i = 0; i < stars.length; i++) {
+                    if (i < value) {
+                        stars[i].classList.remove('text-gray-300');
+                        stars[i].classList.add('text-amber-400');
+                    } else {
+                        stars[i].classList.remove('text-amber-400');
+                        stars[i].classList.add('text-gray-300');
+                    }
+                }
+                ratingText.textContent = texts[value] || '';
             }
-            document.getElementById('submitText').classList.add('hidden');
-            document.getElementById('submitSpinner').classList.remove('hidden');
-            document.getElementById('submitBtn').disabled = true;
-        });
+
+            for (var i = 0; i < stars.length; i++) {
+                stars[i].addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var val = parseInt(this.getAttribute('data-value'), 10);
+                    if (val >= 1 && val <= 5) {
+                        setRating(val);
+                    }
+                });
+            }
+
+            document.getElementById('message').addEventListener('input', function() {
+                document.getElementById('charCount').textContent = this.value.length;
+            });
+
+            document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+                var rating = ratingInput.value;
+                if (!rating || rating === '') {
+                    e.preventDefault();
+                    ratingError.classList.remove('hidden');
+                    ratingText.textContent = 'Please select a rating';
+                    ratingText.classList.add('text-red-500');
+                    return;
+                }
+                var msg = document.getElementById('message').value;
+                if (!msg || msg.trim().length < 10) {
+                    e.preventDefault();
+                    alert('Please enter at least 10 characters for your feedback message.');
+                    return;
+                }
+                document.getElementById('submitText').classList.add('hidden');
+                document.getElementById('submitSpinner').classList.remove('hidden');
+                document.getElementById('submitBtn').disabled = true;
+            });
+        })();
     </script>
+    </div>
 </body>
 </html>

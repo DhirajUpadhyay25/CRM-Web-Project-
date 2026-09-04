@@ -34,7 +34,11 @@ public class AdminPageController {
             Page page = new Page();
             page.setTitle(title);
             page.setSlug(slug);
-            page.setStatus(status);
+            try {
+                page.setStatus(in.project.main.entities.enums.ContentStatus.valueOf(status.toUpperCase()));
+            } catch (Exception e) {
+                page.setStatus(in.project.main.entities.enums.ContentStatus.DRAFT);
+            }
             repository.save(page);
             ra.addFlashAttribute("success", "Page created successfully.");
         } catch (Exception e) {
@@ -53,7 +57,11 @@ public class AdminPageController {
             Page page = repository.findById(id).orElseThrow(() -> new RuntimeException("Page not found"));
             page.setTitle(title);
             page.setSlug(slug);
-            page.setStatus(status);
+            try {
+                page.setStatus(in.project.main.entities.enums.ContentStatus.valueOf(status.toUpperCase()));
+            } catch (Exception e) {
+                page.setStatus(in.project.main.entities.enums.ContentStatus.DRAFT);
+            }
             repository.save(page);
             ra.addFlashAttribute("success", "Page updated successfully.");
         } catch (Exception e) {

@@ -87,7 +87,9 @@ public class SecurityConfig {
 
                 // Student Routes
                 .requestMatchers(
-                    "/userProfile", "/updateUserProfile", "/myCourses", "/provideFeedback", "/feedbackForm"
+                    "/userProfile", "/updateUserProfile", "/myCourses",
+                    "/provideFeedback", "/feedbackForm",
+                    "/student/feedback/**"
                 ).hasAnyRole("STUDENT", "ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/student/**").hasRole("STUDENT")
 

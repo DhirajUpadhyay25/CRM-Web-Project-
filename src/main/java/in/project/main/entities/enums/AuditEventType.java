@@ -98,6 +98,16 @@ public enum AuditEventType {
     CERTIFICATE_VERIFIED(AuditCategory.SYSTEM, AuditSeverity.LOW, "Certificate Verified"),
     CERTIFICATE_EXPORTED(AuditCategory.ADMIN, AuditSeverity.LOW, "Certificates Exported"),
 
+    // Feedback Operations
+    FEEDBACK_CREATED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Submitted"),
+    FEEDBACK_UPDATED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Updated"),
+    FEEDBACK_VIEWED(AuditCategory.FEEDBACK, AuditSeverity.LOW, "Feedback Viewed"),
+    FEEDBACK_RESPONDED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Responded"),
+    FEEDBACK_STATUS_CHANGED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Status Changed"),
+    FEEDBACK_RESOLVED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Resolved"),
+    FEEDBACK_CLOSED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Closed"),
+    FEEDBACK_DELETED(AuditCategory.FEEDBACK, AuditSeverity.MEDIUM, "Feedback Deleted"),
+
     // System & Errors
     SYSTEM_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "System Error Encountered"),
     DATABASE_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "Database Failure"),
