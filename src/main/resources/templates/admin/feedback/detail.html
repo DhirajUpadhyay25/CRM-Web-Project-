@@ -13,6 +13,16 @@
                 </div>
                 <p class="text-gray-500 text-sm ml-8">Submitted <span th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'dd MMMM yyyy \'at\' HH:mm') : '-'}"></span></p>
             </div>
+            <div class="flex items-center gap-2 ml-8 sm:ml-0">
+                <a href="#respond"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">
+                    <i class="bi bi-reply"></i> Respond
+                </a>
+                <a href="/admin/feedback"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-surface-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-surface-50 transition-colors">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
         </div>
 
         <!-- Alerts -->
@@ -116,7 +126,7 @@
                     </div>
 
                     <!-- Respond Form -->
-                    <div class="px-6 py-4 border-t border-surface-200 bg-surface-50">
+                    <div id="respond" class="px-6 py-4 border-t border-surface-200 bg-surface-50">
                         <form th:action="@{/admin/feedback/{id}/respond(id=${feedback.id})}" method="post">
                             <div class="mb-3">
                                 <label class="block text-sm font-semibold text-surface-800 mb-1.5">Your Response</label>

@@ -169,10 +169,17 @@
                             </td>
                             <td class="px-6 py-4 text-gray-500 text-xs" th:text="${fb.createdAt != null ? #temporals.format(fb.createdAt, 'dd MMM yyyy') : '-'}"></td>
                             <td class="px-6 py-4 text-right">
-                                <a th:href="@{/admin/feedback/{id}(id=${fb.id})}"
-                                   class="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-semibold hover:bg-brand-100 transition-colors">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a th:href="@{/admin/feedback/{id}(id=${fb.id})}"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-semibold hover:bg-brand-100 transition-colors">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <a th:href="@{/admin/feedback/{id}(id=${fb.id})}#respond"
+                                       th:if="${fb.status == null or fb.status.name() == 'NEW' or fb.status.name() == 'UNDER_REVIEW'}"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors">
+                                        <i class="bi bi-reply"></i> Respond
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
