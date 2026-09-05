@@ -315,17 +315,21 @@ public class FeedbackService {
         recordStatusChange(feedbackId, oldStatus, FeedbackStatus.RESPONDED, responderEmail);
 
         // Notify student
-        if (feedback.getStudent() != null && feedback.getStudent().getEmail() != null) {
-            String courseName = feedback.getCourse() != null ? feedback.getCourse().getName() : "your course";
-            notificationService.sendToStudent(
-                feedback.getStudent().getEmail(),
-                NotificationType.FEEDBACK_RESPONDED,
-                "Feedback Response Available",
-                "Your feedback for \"" + courseName + "\" has received a response.",
-                "/student/feedback/" + feedbackId,
-                "FEEDBACK",
-                String.valueOf(feedbackId)
-            );
+        try {
+            if (feedback.getStudent() != null && feedback.getStudent().getEmail() != null) {
+                String courseName = feedback.getCourse() != null ? feedback.getCourse().getName() : "your course";
+                notificationService.sendToStudent(
+                    feedback.getStudent().getEmail(),
+                    NotificationType.FEEDBACK_RESPONDED,
+                    "Feedback Response Available",
+                    "Your feedback for \"" + courseName + "\" has received a response.",
+                    "/student/feedback/" + feedbackId,
+                    "FEEDBACK",
+                    String.valueOf(feedbackId)
+                );
+            }
+        } catch (Exception e) {
+            log.warn("Could not send feedback response notification: {}", e.getMessage());
         }
 
         // Audit log
@@ -356,18 +360,22 @@ public class FeedbackService {
         recordStatusChange(feedbackId, oldStatus, newStatus, changedBy);
 
         // Notify student on resolve
-        if (newStatus == FeedbackStatus.RESOLVED && feedback.getStudent() != null
-                && feedback.getStudent().getEmail() != null) {
-            String courseName = feedback.getCourse() != null ? feedback.getCourse().getName() : "your course";
-            notificationService.sendToStudent(
-                feedback.getStudent().getEmail(),
-                NotificationType.FEEDBACK_RESOLVED,
-                "Feedback Resolved",
-                "Your feedback for \"" + courseName + "\" has been resolved.",
-                "/student/feedback/" + feedbackId,
-                "FEEDBACK",
-                String.valueOf(feedbackId)
-            );
+        try {
+            if (newStatus == FeedbackStatus.RESOLVED && feedback.getStudent() != null
+                    && feedback.getStudent().getEmail() != null) {
+                String courseName = feedback.getCourse() != null ? feedback.getCourse().getName() : "your course";
+                notificationService.sendToStudent(
+                    feedback.getStudent().getEmail(),
+                    NotificationType.FEEDBACK_RESOLVED,
+                    "Feedback Resolved",
+                    "Your feedback for \"" + courseName + "\" has been resolved.",
+                    "/student/feedback/" + feedbackId,
+                    "FEEDBACK",
+                    String.valueOf(feedbackId)
+                );
+            }
+        } catch (Exception e) {
+            log.warn("Could not send feedback resolved notification: {}", e.getMessage());
         }
 
         recordAudit(changedBy, changedBy, AuditEventType.FEEDBACK_STATUS_CHANGED,

@@ -1,12 +1,17 @@
 package in.project.main.controllers;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,6 +38,8 @@ import in.project.main.services.InstructorService;
 @Controller
 @RequestMapping("/admin/feedback")
 public class AdminFeedbackController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminFeedbackController.class);
 
     @Autowired private FeedbackService feedbackService;
     @Autowired(required = false) private CourseService courseService;
@@ -68,11 +75,36 @@ public class AdminFeedbackController {
             @RequestParam(name = "sort", defaultValue = "newest") String sort) {
 
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), resolveSort(sort));
-        Page<Feedback> feedbackPage = feedbackService.adminSearchAndFilter(
-                keyword, status, rating, category, courseId, instructorId,
-                minRating, null, null, pageable);
 
-        Map<String, Object> analytics = feedbackService.getAnalytics();
+        Page<Feedback> feedbackPage;
+        try {
+            feedbackPage = feedbackService.adminSearchAndFilter(
+                    keyword, status, rating, category, courseId, instructorId,
+                    minRating, null, null, pageable);
+        } catch (Exception e) {
+            log.error("Error fetching feedback list: {}", e.getMessage(), e);
+            feedbackPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        Map<String, Object> analytics;
+        try {
+            analytics = feedbackService.getAnalytics();
+        } catch (Exception e) {
+            log.error("Error fetching feedback analytics: {}", e.getMessage(), e);
+            analytics = new HashMap<>();
+            analytics.put("totalCount", 0L);
+            analytics.put("averageRating", null);
+            analytics.put("newCount", 0L);
+            analytics.put("underReviewCount", 0L);
+            analytics.put("inProgressCount", 0L);
+            analytics.put("respondedCount", 0L);
+            analytics.put("resolvedCount", 0L);
+            analytics.put("closedCount", 0L);
+            analytics.put("ratingDistribution", Collections.emptyMap());
+            analytics.put("feedbackByType", Collections.emptyMap());
+            analytics.put("feedbackByCategory", Collections.emptyMap());
+            analytics.put("needsAttentionCount", 0L);
+        }
 
         model.addAttribute("feedbackPage", feedbackPage);
         model.addAttribute("analytics", analytics);

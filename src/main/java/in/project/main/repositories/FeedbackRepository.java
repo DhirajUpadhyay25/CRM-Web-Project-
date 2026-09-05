@@ -80,11 +80,32 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long>, JpaSp
     List<Feedback> findTestimonialCandidates(Pageable pageable);
 
     // --- Admin search/filter ---
-    @Query("SELECT f FROM Feedback f " +
+    @Query(value = "SELECT f FROM Feedback f " +
            "JOIN FETCH f.student s " +
            "LEFT JOIN FETCH f.course c " +
            "LEFT JOIN FETCH f.instructor i " +
            "LEFT JOIN FETCH f.enrollment e " +
+           "WHERE f.deleted = false " +
+           "AND (:keyword IS NULL OR :keyword = '' OR " +
+           "  CAST(f.id AS string) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(s.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(f.subject) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(f.message) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(i.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:status IS NULL OR f.status = :status) " +
+           "AND (:rating IS NULL OR f.rating = :rating) " +
+           "AND (:category IS NULL OR :category = '' OR f.category = :category) " +
+           "AND (:courseId IS NULL OR c.id = :courseId) " +
+           "AND (:instructorId IS NULL OR i.id = :instructorId) " +
+           "AND (:minRating IS NULL OR f.rating >= :minRating) " +
+           "AND (:startDate IS NULL OR f.createdAt >= :startDate) " +
+           "AND (:endDate IS NULL OR f.createdAt <= :endDate)",
+    countQuery = "SELECT COUNT(f) FROM Feedback f " +
+           "JOIN f.student s " +
+           "LEFT JOIN f.course c " +
+           "LEFT JOIN f.instructor i " +
            "WHERE f.deleted = false " +
            "AND (:keyword IS NULL OR :keyword = '' OR " +
            "  CAST(f.id AS string) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -115,11 +136,26 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long>, JpaSp
             Pageable pageable);
 
     // --- Instructor search/filter ---
-    @Query("SELECT f FROM Feedback f " +
+    @Query(value = "SELECT f FROM Feedback f " +
            "JOIN FETCH f.student s " +
            "LEFT JOIN FETCH f.course c " +
            "LEFT JOIN FETCH f.instructor i " +
            "LEFT JOIN FETCH f.enrollment e " +
+           "WHERE f.deleted = false " +
+           "AND (i.id = :instructorId OR (i IS NULL AND c.instructorRef.id = :instructorId) OR c.instructorEmail = :instructorEmail) " +
+           "AND (:keyword IS NULL OR :keyword = '' OR " +
+           "  CAST(f.id AS string) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(f.subject) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "  LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:status IS NULL OR f.status = :status) " +
+           "AND (:rating IS NULL OR f.rating = :rating) " +
+           "AND (:category IS NULL OR :category = '' OR f.category = :category) " +
+           "AND (:courseId IS NULL OR c.id = :courseId)",
+    countQuery = "SELECT COUNT(f) FROM Feedback f " +
+           "JOIN f.student s " +
+           "LEFT JOIN f.course c " +
+           "LEFT JOIN f.instructor i " +
            "WHERE f.deleted = false " +
            "AND (i.id = :instructorId OR (i IS NULL AND c.instructorRef.id = :instructorId) OR c.instructorEmail = :instructorEmail) " +
            "AND (:keyword IS NULL OR :keyword = '' OR " +
