@@ -591,6 +591,97 @@
             </div>
         </section>
 
+        <!-- ═══════════════════ LATEST ARTICLES & INSIGHTS ═══════════════════ -->
+        <section id="articles" class="py-20 bg-surface-900/40 border-t border-white/5">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <!-- Section Header -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                    <div class="space-y-2 text-left">
+                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Knowledge Hub</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                            Latest Articles &amp; <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Tech Insights</span>
+                        </h2>
+                        <p class="text-gray-400 text-sm max-w-xl">
+                            Read engineering roadmaps, software architecture guides, and career preparation blueprints curated by verified educators.
+                        </p>
+                    </div>
+                    <a href="/blogs" class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-900 hover:bg-brand-600 border border-white/10 hover:border-brand-500 text-white font-bold rounded-xl text-xs transition-all w-fit shadow-sm">
+                        <span>Explore All Articles</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Articles Grid -->
+                <div th:if="${latestArticles != null and !latestArticles.isEmpty()}" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    <div th:each="art : ${latestArticles}" class="group bg-surface-900 border border-white/5 hover:border-brand-500/30 rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-brand-500/10">
+                        <div>
+                            <!-- Thumbnail -->
+                            <a th:href="@{'/blog/' + ${art.slug}}" class="block relative aspect-video overflow-hidden bg-surface-950">
+                                <img th:if="${art.featuredImage != null and !art.featuredImage.isEmpty()}" th:src="${art.featuredImage}" th:alt="${art.title}"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                     onerror="this.src='https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80'">
+                                <div th:unless="${art.featuredImage != null and !art.featuredImage.isEmpty()}" class="w-full h-full flex items-center justify-center text-brand-400 bg-brand-950/40">
+                                    <i class="bi bi-journal-code text-4xl"></i>
+                                </div>
+                                <div class="absolute top-3 left-3 flex items-center gap-1.5">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-surface-950/80 backdrop-blur-md text-brand-400 border border-white/10" th:text="${art.categoryName}">
+                                        Engineering
+                                    </span>
+                                    <span th:if="${art.isFeatured()}" class="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-surface-950 flex items-center gap-1 shadow-sm">
+                                        <i class="bi bi-star-fill text-[8px]"></i> Featured
+                                    </span>
+                                </div>
+                            </a>
+
+                            <!-- Body -->
+                            <div class="p-6 text-left">
+                                <div class="flex items-center gap-2.5 text-[11px] text-gray-400 font-medium mb-2.5">
+                                    <span th:if="${art.publishedAt != null}" th:text="${#temporals.format(art.publishedAt, 'MMM dd, yyyy')}">Recent</span>
+                                    <span th:unless="${art.publishedAt != null}">Recently updated</span>
+                                    <span>•</span>
+                                    <span class="flex items-center gap-1"><i class="bi bi-eye"></i> <span th:text="${art.viewCount != null ? art.viewCount : 0}">0</span> views</span>
+                                </div>
+
+                                <h3 class="text-base font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug mb-2.5">
+                                    <a th:href="@{'/blog/' + ${art.slug}}" th:text="${art.title}">
+                                        Article Title
+                                    </a>
+                                </h3>
+
+                                <p class="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-4" th:text="${art.getExcerptOrTruncatedContent()}">
+                                    Short snippet of the article content.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="px-6 pb-6 pt-0 flex items-center justify-between border-t border-white/5 pt-4 text-xs">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-brand-600/20 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-[10px]">
+                                    <span th:text="${art.author != null and art.author.length() > 0 ? art.author.substring(0, 1) : 'E'}">E</span>
+                                </div>
+                                <span class="text-gray-300 font-medium text-[11px] truncate max-w-[110px]" th:text="${art.author != null ? art.author : 'EduTake Team'}">EduTake Team</span>
+                            </div>
+                            <a th:href="@{'/blog/' + ${art.slug}}" class="text-brand-400 group-hover:text-brand-300 font-semibold text-xs flex items-center gap-1 transition-colors">
+                                <span>Read Guide</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty state fallback if no articles yet -->
+                <div th:if="${latestArticles == null or latestArticles.isEmpty()}" class="text-center py-12 bg-surface-900/60 border border-white/5 rounded-3xl p-6">
+                    <p class="text-xs text-gray-400 mb-3">Fresh engineering articles are being drafted by our content team.</p>
+                    <a href="/blogs" class="inline-flex px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition-colors">
+                        Browse Articles
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
         <!-- ═══════════════════ LEARN ANYWHERE ═══════════════════ -->
         <section class="py-20 bg-surface-900/80 border-t border-white/5 text-white relative overflow-hidden">
             <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
