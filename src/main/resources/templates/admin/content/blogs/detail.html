@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Article Details: ' + ${blog.title}, ~{::div})}">
+<body>
+    <div>
+        <!-- Top Navigation & Header -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <a th:href="@{/admin/blogs}" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors">
+                        <i class="bi bi-arrow-left"></i> Back to Articles
+                    </a>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <h1 class="text-2xl font-bold text-surface-900" th:text="${blog.title}">Article Title</h1>
+                    
+                    <!-- Featured Badge -->
+                    <span th:if="${blog.isFeatured}" class="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                        <i class="bi bi-star-fill text-amber-500 text-[10px]"></i> Featured
+                    </span>
+
+                    <!-- Status Badge -->
+                    <span th:if="${blog.status != null and blog.status.name() == 'PUBLISHED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                    </span>
+                    <span th:if="${blog.status != null and blog.status.name() == 'DRAFT'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Draft
+                    </span>
+                    <span th:if="${blog.status != null and blog.status.name() == 'SCHEDULED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                        <i class="bi bi-clock-fill text-[10px]"></i> Scheduled
+                    </span>
+                    <span th:if="${blog.status != null and blog.status.name() == 'ARCHIVED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                        <i class="bi bi-archive-fill text-[10px]"></i> Archived
+                    </span>
+                </div>
+                <p class="text-xs font-mono text-gray-400 mt-1" th:text="'/blog/' + ${blog.slug}">/blog/slug</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a th:href="@{'/blog/' + ${blog.slug}}" target="_blank" class="px-4 py-2 bg-white border border-surface-200 hover:bg-surface-50 text-surface-800 font-semibold rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1.5">
+                    <i class="bi bi-box-arrow-up-right text-brand-600"></i> View Public Post
+                </a>
+                <a th:href="@{'/admin/blogs/' + ${blog.id} + '/edit'}" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-sm flex items-center gap-1.5">
+                    <i class="bi bi-pencil"></i> Edit Article
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left 2 Columns: Rendered Content -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Featured Image Banner -->
+                <div th:if="${blog.featuredImage != null and !blog.featuredImage.isEmpty()}" class="rounded-2xl overflow-hidden border border-surface-200 shadow-sm max-h-80 bg-surface-900">
+                    <img th:src="${blog.featuredImage}" alt="Cover" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Excerpt Callout -->
+                <div th:if="${blog.excerpt != null and !blog.excerpt.isEmpty()}" class="p-5 rounded-2xl bg-brand-50/50 border border-brand-100/70 text-surface-800">
+                    <span class="text-[11px] font-bold text-brand-700 uppercase tracking-wider block mb-1">Article Excerpt</span>
+                    <p class="text-sm font-medium leading-relaxed" th:text="${blog.excerpt}">Excerpt summary text</p>
+                </div>
+
+                <!-- Rendered HTML Content Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-surface-100 pb-4 mb-6">
+                        <span class="text-xs font-bold text-surface-700 uppercase tracking-wider">Article Body</span>
+                        <span class="text-xs text-gray-400">Rendered HTML Presentation</span>
+                    </div>
+
+                    <div class="prose max-w-none text-surface-900 leading-relaxed" th:utext="${blog.content}">
+                        <p class="text-gray-400 italic">No content has been authored for this article yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right 1 Column: Metadata, Category & Actions -->
+            <div class="space-y-6">
+
+                <!-- Overview Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2 border-b border-surface-100 pb-3">
+                        <i class="bi bi-info-circle text-brand-600"></i> Article Metadata
+                    </h3>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <span class="text-gray-400 block mb-0.5">Public URL</span>
+                            <div class="flex items-center justify-between bg-surface-50 p-2 rounded-lg border border-surface-200">
+                                <code class="font-mono text-brand-600 truncate" th:text="'/blog/' + ${blog.slug}">/blog/slug</code>
+                                <button type="button" th:data-slug="${blog.slug}" onclick="copySlugFromBtn(this)" class="text-gray-400 hover:text-brand-600 ml-2" title="Copy URL">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between py-1.5 border-b border-surface-100">
+                            <span class="text-gray-400">Category:</span>
+                            <span class="font-semibold text-surface-900" th:text="${blog.categoryName}">Web Development</span>
+                        </div>
+
+                        <div class="flex justify-between py-1.5 border-b border-surface-100">
+                            <span class="text-gray-400">Author:</span>
+                            <span class="font-semibold text-surface-900" th:text="${blog.author != null ? blog.author : 'EduTake Team'}">EduTake Team</span>
+                        </div>
+
+                        <div class="flex justify-between py-1.5 border-b border-surface-100">
+                            <span class="text-gray-400">Total Views:</span>
+                            <span class="font-bold text-blue-600" th:text="${blog.viewCount != null ? blog.viewCount : 0}">0</span>
+                        </div>
+
+                        <div class="flex justify-between py-1.5 border-b border-surface-100">
+                            <span class="text-gray-400">Published Date:</span>
+                            <span class="font-semibold text-surface-900" th:text="${blog.publishedAt != null ? #temporals.format(blog.publishedAt, 'MMM dd, yyyy, hh:mm a') : 'Not yet'}">Sep 06, 2026</span>
+                        </div>
+
+                        <div class="flex justify-between py-1.5">
+                            <span class="text-gray-400">Last Modified:</span>
+                            <span class="font-semibold text-surface-900" th:text="${blog.updatedAt != null ? #temporals.format(blog.updatedAt, 'MMM dd, yyyy, hh:mm a') : 'N/A'}">Sep 06, 2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div th:if="${blog.tags != null and !blog.tags.isEmpty()}" class="pt-3 border-t border-surface-100">
+                        <span class="text-xs text-gray-400 block mb-1.5">Article Tags:</span>
+                        <div class="flex flex-wrap gap-1">
+                            <span th:each="t : ${#strings.arraySplit(blog.tags, ',')}" class="bg-surface-100 text-surface-700 px-2 py-0.5 rounded-md text-[11px] font-medium" th:text="'#' + ${#strings.trim(t)}">#tag</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Status Toggle Buttons -->
+                    <div class="pt-3 border-t border-surface-100 space-y-2">
+                        <form th:action="@{'/admin/blogs/' + ${blog.id} + '/toggle-featured'}" method="post">
+                            <button type="submit" class="w-full py-2 px-3 rounded-xl text-xs font-semibold border transition-colors flex items-center justify-center gap-1.5"
+                                    th:classappend="${blog.isFeatured ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100' : 'bg-surface-100 text-surface-700 border-surface-200 hover:bg-surface-200'}">
+                                <i th:class="${blog.isFeatured ? 'bi bi-star-fill text-amber-500' : 'bi bi-star text-gray-400'}"></i>
+                                <span th:text="${blog.isFeatured ? 'Featured on Homepage (Click to Unfeature)' : 'Feature on Homepage'}"></span>
+                            </button>
+                        </form>
+
+                        <form th:action="@{'/admin/blogs/' + ${blog.id} + '/toggle-status'}" method="post">
+                            <button type="submit" class="w-full py-2 px-3 rounded-xl text-xs font-semibold border transition-colors flex items-center justify-center gap-1.5"
+                                    th:classappend="${blog.status != null and blog.status.name() == 'PUBLISHED' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'}">
+                                <i th:class="${blog.status != null and blog.status.name() == 'PUBLISHED' ? 'bi bi-pause-circle' : 'bi bi-play-circle'}"></i>
+                                <span th:text="${blog.status != null and blog.status.name() == 'PUBLISHED' ? 'Switch to Draft (Unpublish)' : 'Publish Article Now'}"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Google SERP Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2 border-b border-surface-100 pb-3">
+                        <i class="bi bi-google text-blue-500"></i> Google SERP Preview
+                    </h3>
+
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 shadow-sm font-sans space-y-1">
+                        <div class="flex items-center gap-1 text-xs text-slate-600 truncate">
+                            <span class="text-slate-400">https://edutake.com</span>
+                            <span>› blog ›</span>
+                            <span class="text-slate-700 font-medium font-mono" th:text="${blog.slug}">slug</span>
+                        </div>
+                        <h4 class="text-blue-700 font-semibold text-sm leading-snug" th:text="${blog.seoTitle}">
+                            Article Title
+                        </h4>
+                        <p class="text-slate-600 text-xs leading-relaxed line-clamp-2" th:text="${blog.seoDescription}">
+                            Article excerpt description for Google search snippet...
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Client-side helper -->
+    <script>
+        function copySlugFromBtn(btn) {
+            const slug = btn.getAttribute('data-slug');
+            const url = window.location.origin + '/blog/' + slug;
+            navigator.clipboard.writeText(url).then(() => {
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2 text-emerald-600 font-bold"></i>';
+                setTimeout(() => { btn.innerHTML = original; }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>
