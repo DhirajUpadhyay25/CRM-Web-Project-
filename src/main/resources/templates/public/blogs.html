@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/base-head :: head('Blog & Articles | EduTake')}"></head>
+
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 py-16 sm:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Hero Section -->
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-semibold tracking-[0.25em] uppercase text-brand-400">Insights &amp; Guides</span>
+                <h1 class="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+                    Explore <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Articles &amp; Tutorials</span>
+                </h1>
+                <p class="mt-4 text-gray-400 text-sm sm:text-base leading-relaxed">
+                    In-depth engineering guides, software roadmaps, interview preparations, and tech career insights authored by industry leads.
+                </p>
+            </div>
+
+            <!-- Search & Category Filter Bar -->
+            <div class="bg-surface-900 border border-white/10 rounded-2xl p-4 sm:p-5 mb-10 shadow-xl">
+                <form method="get" th:action="@{/blogs}" class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <!-- Search Input -->
+                    <div class="w-full md:w-80 relative">
+                        <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search topics, tags..."
+                               class="w-full pl-9 pr-4 py-2 bg-surface-950 border border-white/10 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 transition-colors">
+                    </div>
+
+                    <!-- Category Pills -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 custom-scrollbar text-xs">
+                        <a th:href="@{/blogs(keyword=${keyword})}"
+                           th:classappend="${selectedCategoryId == null ? 'bg-brand-600 text-white font-semibold' : 'bg-surface-800 text-gray-300 hover:bg-surface-700'}"
+                           class="px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors">
+                            All Topics
+                        </a>
+                        <th:block th:each="cat : ${categories}">
+                            <a th:href="@{/blogs(categoryId=${cat.id}, keyword=${keyword})}"
+                               th:classappend="${selectedCategoryId != null and selectedCategoryId == cat.id ? 'bg-brand-600 text-white font-semibold' : 'bg-surface-800 text-gray-300 hover:bg-surface-700'}"
+                               class="px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors"
+                               th:text="${cat.name}">
+                                Category
+                            </a>
+                        </th:block>
+                    </div>
+
+                    <button type="submit" class="w-full md:w-auto px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm">
+                        Filter
+                    </button>
+                </form>
+            </div>
+
+            <!-- Articles Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12">
+                <th:block th:each="art : ${articles}">
+                    <article class="group bg-surface-900 border border-white/5 hover:border-brand-500/30 rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-brand-500/5">
+                        <!-- Card Image -->
+                        <div>
+                            <a th:href="@{'/blog/' + ${art.slug}}" class="block relative aspect-video overflow-hidden bg-surface-950">
+                                <img th:if="${art.featuredImage != null and !art.featuredImage.isEmpty()}" th:src="${art.featuredImage}" th:alt="${art.title}"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div th:unless="${art.featuredImage != null and !art.featuredImage.isEmpty()}" class="w-full h-full flex items-center justify-center text-brand-400 bg-brand-950/40">
+                                    <i class="bi bi-journal-code text-4xl"></i>
+                                </div>
+                                <div class="absolute top-3 left-3 flex items-center gap-1.5">
+                                    <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-surface-950/80 backdrop-blur-md text-brand-400 border border-white/10" th:text="${art.categoryName}">
+                                        Category
+                                    </span>
+                                    <span th:if="${art.isFeatured}" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-surface-950 flex items-center gap-1">
+                                        <i class="bi bi-star-fill text-[9px]"></i> Featured
+                                    </span>
+                                </div>
+                            </a>
+
+                            <!-- Card Body -->
+                            <div class="p-6">
+                                <div class="flex items-center gap-3 text-xs text-gray-400 mb-2.5">
+                                    <span th:if="${art.publishedAt != null}" th:text="${#temporals.format(art.publishedAt, 'MMM dd, yyyy')}">Sep 06, 2026</span>
+                                    <span>•</span>
+                                    <span class="flex items-center gap-1"><i class="bi bi-eye"></i> <span th:text="${art.viewCount != null ? art.viewCount : 0}">0</span> reads</span>
+                                </div>
+
+                                <h2 class="text-lg font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug mb-2">
+                                    <a th:href="@{'/blog/' + ${art.slug}}" th:text="${art.title}">
+                                        Article Title Goes Here
+                                    </a>
+                                </h2>
+
+                                <p class="text-xs text-gray-400 leading-relaxed line-clamp-3 mb-4" th:text="${art.excerpt}">
+                                    Short excerpt summary of the article content.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="px-6 pb-6 pt-0 flex items-center justify-between border-t border-white/5 pt-4 text-xs">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-brand-600/20 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-xs">
+                                    <span th:text="${art.author != null and art.author.length() > 0 ? art.author.substring(0, 1) : 'E'}">E</span>
+                                </div>
+                                <span class="text-gray-300 font-medium truncate max-w-[120px]" th:text="${art.author != null ? art.author : 'EduTake Team'}">EduTake Team</span>
+                            </div>
+                            <a th:href="@{'/blog/' + ${art.slug}}" class="text-brand-400 group-hover:text-brand-300 font-semibold flex items-center gap-1 transition-colors">
+                                Read <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                </th:block>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${articles == null or articles.isEmpty()}" class="text-center py-16 bg-surface-900 border border-white/5 rounded-3xl p-8 max-w-lg mx-auto">
+                <i class="bi bi-journal-x text-4xl text-gray-500 mb-3 block"></i>
+                <h3 class="text-lg font-bold text-white mb-1">No Articles Found</h3>
+                <p class="text-xs text-gray-400 mb-4">We couldn't find any articles matching your search query. Try clearing the filter.</p>
+                <a th:href="@{/blogs}" class="inline-flex px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition-colors">
+                    View All Articles
+                </a>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div th:if="${totalPages > 1}" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10 text-xs text-gray-400">
+                <p>
+                    Showing Page <span class="text-white font-bold" th:text="${currentPage + 1}">1</span> of <span class="text-white font-bold" th:text="${totalPages}">1</span>
+                    (<span th:text="${totalElements}">0</span> articles)
+                </p>
+                <div class="flex items-center gap-2">
+                    <a th:if="${currentPage > 0}" th:href="@{/blogs(page=${currentPage - 1}, keyword=${keyword}, categoryId=${selectedCategoryId})}" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-700 text-white rounded-xl border border-white/10 transition-colors">
+                        <i class="bi bi-chevron-left mr-1"></i> Previous
+                    </a>
+                    <a th:if="${currentPage + 1 < totalPages}" th:href="@{/blogs(page=${currentPage + 1}, keyword=${keyword}, categoryId=${selectedCategoryId})}" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-700 text-white rounded-xl border border-white/10 transition-colors">
+                        Next <i class="bi bi-chevron-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+</body>
+</html>
