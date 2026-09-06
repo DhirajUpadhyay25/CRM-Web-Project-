@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import in.project.main.entities.EmailTemplate;
 import in.project.main.entities.Message;
 
 public interface MessageService {
@@ -19,6 +20,17 @@ public interface MessageService {
             String senderName,
             String senderRole,
             String recipientEmail,
+            String subject,
+            String body,
+            String priority,
+            String attachmentUrl);
+
+    int sendBroadcastMessage(
+            String senderEmail,
+            String senderName,
+            String senderRole,
+            String targetAudience,
+            Long courseId,
             String subject,
             String body,
             String priority,
@@ -42,4 +54,17 @@ public interface MessageService {
     void restoreFromTrash(Long id, String userEmail);
 
     void deleteMessage(Long id, String userEmail);
+
+    // Email Templates Management
+    List<EmailTemplate> getAllEmailTemplates();
+
+    EmailTemplate getEmailTemplateByKey(String key);
+
+    EmailTemplate saveEmailTemplate(EmailTemplate template);
+
+    void deleteEmailTemplate(Long id);
+
+    void seedDefaultTemplates();
+
+    void seedSampleConversations();
 }

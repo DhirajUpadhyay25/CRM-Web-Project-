@@ -560,6 +560,8 @@ public class RbacService {
         seedPermission("announcements.view", "COMMUNICATION", "View Announcements", "Browse noticeboard announcements", false);
         seedPermission("announcements.create", "COMMUNICATION", "Publish Announcements", "Post public notices", false);
         seedPermission("messages.view", "COMMUNICATION", "View Messages", "Inspect internal message threads", false);
+        seedPermission("messages.send", "COMMUNICATION", "Send Messages", "Compose direct messages and bulk broadcasts", false);
+        seedPermission("messages.delete", "COMMUNICATION", "Delete Messages", "Delete or purge communication messages", true);
 
         // Content
         seedPermission("feedback.view", "CONTENT", "View Feedback", "Inspect course ratings and feedback", false);

@@ -235,9 +235,30 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 jdbcTemplate.execute("UPDATE faq SET created_at = NOW() WHERE created_at IS NULL");
                 jdbcTemplate.execute("UPDATE faq SET updated_at = NOW() WHERE updated_at IS NULL");
 
-                log.info("Successfully normalized Content tables columns.");
+                try {
+                    jdbcTemplate.execute("ALTER TABLE message MODIFY COLUMN body TEXT NULL");
+                    jdbcTemplate.execute("ALTER TABLE message ADD COLUMN IF NOT EXISTS delivery_status VARCHAR(32) DEFAULT 'DELIVERED'");
+                    jdbcTemplate.execute("ALTER TABLE message ADD COLUMN IF NOT EXISTS message_type VARCHAR(32) DEFAULT 'DIRECT'");
+                    jdbcTemplate.execute("ALTER TABLE message ADD COLUMN IF NOT EXISTS target_audience VARCHAR(32) DEFAULT 'INDIVIDUAL'");
+                    jdbcTemplate.execute("ALTER TABLE message ADD COLUMN IF NOT EXISTS course_id BIGINT NULL");
+                    jdbcTemplate.execute("ALTER TABLE message ADD COLUMN IF NOT EXISTS course_title VARCHAR(255) NULL");
+                } catch (Exception e) {
+                    log.debug("Notice on altering message table columns: {}", e.getMessage());
+                }
+
+                jdbcTemplate.execute("UPDATE message SET is_read = FALSE WHERE is_read IS NULL");
+                jdbcTemplate.execute("UPDATE message SET is_starred = FALSE WHERE is_starred IS NULL");
+                jdbcTemplate.execute("UPDATE message SET is_archived = FALSE WHERE is_archived IS NULL");
+                jdbcTemplate.execute("UPDATE message SET folder = 'INBOX' WHERE folder IS NULL");
+                jdbcTemplate.execute("UPDATE message SET priority = 'NORMAL' WHERE priority IS NULL");
+                jdbcTemplate.execute("UPDATE message SET delivery_status = 'DELIVERED' WHERE delivery_status IS NULL");
+                jdbcTemplate.execute("UPDATE message SET message_type = 'DIRECT' WHERE message_type IS NULL");
+                jdbcTemplate.execute("UPDATE message SET target_audience = 'INDIVIDUAL' WHERE target_audience IS NULL");
+                jdbcTemplate.execute("UPDATE message SET is_email_dispatched = TRUE WHERE is_email_dispatched IS NULL");
+
+                log.info("Successfully normalized Content and Communication tables columns.");
             } catch (Exception e) {
-                log.debug("Notice on normalizing content tables: {}", e.getMessage());
+                log.debug("Notice on normalizing content and communication tables: {}", e.getMessage());
             }
 
         } catch (Exception e) {

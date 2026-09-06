@@ -1,117 +1,232 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Messages &amp; Webmail', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Email &amp; Messages Hub', ~{::div})}">
 <body>
     <div class="space-y-6">
 
-        <!-- Breadcrumbs & Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-surface-200 pb-4">
+        <!-- Top Header & Breadcrumbs -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <nav class="flex items-center gap-2 text-xs text-gray-500 mb-1 font-medium">
                     <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
                     <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
                     <span>Communication</span>
                     <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
-                    <span class="text-surface-900 font-semibold">Messages</span>
+                    <span class="text-surface-900 font-semibold">Email &amp; Messages</span>
                 </nav>
-                <h1 class="text-2xl font-bold text-surface-900 tracking-tight flex items-center gap-2.5">
-                    <i class="bi bi-envelope-fill text-brand-600"></i>
-                    <span>Internal Webmail &amp; Support</span>
-                </h1>
-                <p class="text-gray-500 text-sm mt-0.5">Threaded conversations, student inquiries, staff correspondence, and dispatches.</p>
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 text-base">
+                        <i class="bi bi-envelope-fill"></i>
+                    </span>
+                    <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Email &amp; Messages Hub</h1>
+                </div>
+                <p class="text-gray-500 text-xs mt-1">Two-way threaded correspondence, student inquiry helpdesk, and multi-segment bulk email broadcasts.</p>
             </div>
-            <div class="flex items-center gap-2.5">
-                <button onclick="openComposeModal()" type="button" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-2 text-xs">
+
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="openTemplatesModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-700 bg-white hover:bg-surface-50 border border-surface-200 transition-colors shadow-sm">
+                    <i class="bi bi-collection text-brand-600"></i>
+                    <span>Canned Templates (<span th:text="${emailTemplates != null ? emailTemplates.size() : 0}">6</span>)</span>
+                </button>
+                <button onclick="openComposeModal()" type="button" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-sm shadow-brand-500/20 transition-all flex items-center gap-2 text-xs">
                     <i class="bi bi-pencil-square"></i>
                     <span>Compose Message</span>
                 </button>
             </div>
         </div>
 
-        <!-- Flash Messages -->
-        <div th:if="${successMsg}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center justify-between shadow-sm animate-fade-in">
-            <div class="flex items-center gap-3">
-                <i class="bi bi-check-circle-fill text-green-600 text-lg"></i>
-                <span class="text-sm font-medium" th:text="${successMsg}"></span>
+        <!-- 5 KPI Summary Metrics Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            <!-- Unread Inquiries -->
+            <div class="p-4 rounded-2xl bg-white border border-surface-200 shadow-sm relative overflow-hidden group hover:border-brand-300 transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Unread Inbox</span>
+                    <span class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center text-xs">
+                        <i class="bi bi-envelope-exclamation-fill"></i>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-2xl font-black text-surface-900" th:text="${stats != null and stats['unreadInbox'] != null ? stats['unreadInbox'] : 0}">0</span>
+                    <span th:if="${stats != null and stats['unreadInbox'] != null and stats['unreadInbox'] > 0}" class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                    </span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">Pending inquiries</p>
             </div>
-            <button onclick="this.parentElement.remove()" class="text-green-600 hover:text-green-800"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div th:if="${errorMsg}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center justify-between shadow-sm animate-fade-in">
-            <div class="flex items-center gap-3">
-                <i class="bi bi-exclamation-triangle-fill text-red-600 text-lg"></i>
-                <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+
+            <!-- Total Sent -->
+            <div class="p-4 rounded-2xl bg-white border border-surface-200 shadow-sm relative overflow-hidden group hover:border-brand-300 transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Total Sent</span>
+                    <span class="w-7 h-7 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs">
+                        <i class="bi bi-send-fill"></i>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <span class="text-2xl font-black text-surface-900" th:text="${stats != null and stats['totalSent'] != null ? stats['totalSent'] : 0}">0</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">Admin dispatches</p>
             </div>
-            <button onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800"><i class="bi bi-x-lg"></i></button>
+
+            <!-- Starred & Priority -->
+            <div class="p-4 rounded-2xl bg-white border border-surface-200 shadow-sm relative overflow-hidden group hover:border-brand-300 transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Starred</span>
+                    <span class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center text-xs">
+                        <i class="bi bi-star-fill"></i>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <span class="text-2xl font-black text-surface-900" th:text="${stats != null and stats['totalStarred'] != null ? stats['totalStarred'] : 0}">0</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">High priority threads</p>
+            </div>
+
+            <!-- Total Broadcasts -->
+            <div class="p-4 rounded-2xl bg-white border border-surface-200 shadow-sm relative overflow-hidden group hover:border-brand-300 transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Broadcasts</span>
+                    <span class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center text-xs">
+                        <i class="bi bi-broadcast"></i>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <span class="text-2xl font-black text-surface-900" th:text="${stats != null and stats['totalBroadcasts'] != null ? stats['totalBroadcasts'] : 0}">0</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">Segment campaigns</p>
+            </div>
+
+            <!-- Delivery Health Rate -->
+            <div class="p-4 rounded-2xl bg-white border border-surface-200 shadow-sm relative overflow-hidden group hover:border-brand-300 transition-all">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Delivery Rate</span>
+                    <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xs">
+                        <i class="bi bi-shield-check"></i>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <span class="text-2xl font-black text-emerald-600" th:text="${stats != null and stats['deliveryRate'] != null ? stats['deliveryRate'] : '99.8%'}">99.8%</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">SMTP &amp; inbox health</p>
+            </div>
         </div>
 
+        <!-- Flash Messages -->
+        <div th:if="${successMsg != null or success != null}" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 flex items-center justify-between shadow-sm animate-fade-in text-xs">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-check-circle-fill text-emerald-500 text-base"></i>
+                <span class="font-medium" th:text="${successMsg != null ? successMsg : success}">Operation successful.</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${errorMsg != null or error != null}" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 flex items-center justify-between shadow-sm animate-fade-in text-xs">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-exclamation-triangle-fill text-rose-500 text-base"></i>
+                <span class="font-medium" th:text="${errorMsg != null ? errorMsg : error}">An error occurred.</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
         <!-- 2-Pane Webmail Workspace Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden min-h-[680px]">
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white rounded-3xl border border-surface-200 shadow-sm overflow-hidden min-h-[680px]">
 
             <!-- Column 1: Mailbox Folders & Threads List (5 Cols) -->
-            <div class="lg:col-span-5 border-r border-surface-200 flex flex-col h-full bg-surface-50/50">
+            <div class="lg:col-span-5 border-r border-surface-200 flex flex-col h-full bg-surface-50/40">
                 
                 <!-- Folders Header / Tab Navigation -->
                 <div class="p-3.5 border-b border-surface-200 bg-white space-y-3">
                     <div class="grid grid-cols-4 gap-1 bg-surface-100 p-1 rounded-xl text-center text-xs font-semibold">
+                        <!-- Inbox Tab -->
                         <a th:href="@{/admin/messages(folder='INBOX')}" 
-                           class="py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5"
-                           th:classappend="${currentFolder == 'INBOX' || currentFolder == null ? 'bg-white text-surface-900 shadow-sm font-bold' : 'text-gray-500 hover:text-surface-900'}">
+                           class="py-2 px-2 rounded-lg transition-all flex items-center justify-center gap-1.5"
+                           th:classappend="${currentFolder == 'INBOX' ? 'bg-white text-surface-900 shadow-sm font-bold' : 'text-gray-500 hover:text-surface-900'}">
+                            <i class="bi bi-inbox-fill text-xs"></i>
                             <span>Inbox</span>
-                            <span th:if="${stats != null && stats['unreadCount'] > 0}" class="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[10px] font-bold" th:text="${stats['unreadCount']}">0</span>
+                            <span th:if="${stats != null and stats['unreadInbox'] != null and stats['unreadInbox'] > 0}" 
+                                  class="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-bold" 
+                                  th:text="${stats['unreadInbox']}">0</span>
                         </a>
+
+                        <!-- Sent Tab -->
                         <a th:href="@{/admin/messages(folder='SENT')}" 
-                           class="py-1.5 px-2 rounded-lg transition-all"
+                           class="py-2 px-2 rounded-lg transition-all flex items-center justify-center gap-1"
                            th:classappend="${currentFolder == 'SENT' ? 'bg-white text-surface-900 shadow-sm font-bold' : 'text-gray-500 hover:text-surface-900'}">
-                            Sent
+                            <i class="bi bi-send-fill text-xs"></i>
+                            <span>Sent</span>
                         </a>
+
+                        <!-- Starred Tab -->
                         <a th:href="@{/admin/messages(folder='STARRED')}" 
-                           class="py-1.5 px-2 rounded-lg transition-all flex items-center justify-center gap-1"
+                           class="py-2 px-2 rounded-lg transition-all flex items-center justify-center gap-1"
                            th:classappend="${currentFolder == 'STARRED' ? 'bg-white text-amber-600 shadow-sm font-bold' : 'text-gray-500 hover:text-surface-900'}">
                             <i class="bi bi-star-fill text-[11px] text-amber-500"></i>
                             <span>Star</span>
                         </a>
+
+                        <!-- Trash Tab -->
                         <a th:href="@{/admin/messages(folder='TRASH')}" 
-                           class="py-1.5 px-2 rounded-lg transition-all"
-                           th:classappend="${currentFolder == 'TRASH' ? 'bg-white text-red-600 shadow-sm font-bold' : 'text-gray-500 hover:text-surface-900'}">
-                            Trash
+                           class="py-2 px-2 rounded-lg transition-all flex items-center justify-center gap-1"
+                           th:classappend="${currentFolder == 'TRASH' ? 'bg-white text-rose-600 shadow-sm font-bold' : 'text-gray-500 hover:text-surface-900'}">
+                            <i class="bi bi-trash-fill text-xs"></i>
+                            <span>Trash</span>
                         </a>
                     </div>
 
                     <!-- Search Box inside Folder -->
                     <form th:action="@{/admin/messages}" method="get" class="relative">
                         <input type="hidden" name="folder" th:value="${currentFolder}" />
-                        <input type="text" name="search" th:value="${search}" placeholder="Search sender, subject or body..." 
-                               class="w-full pl-8 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                        <input type="text" name="search" th:value="${searchQuery}" placeholder="Search sender, subject or body..." 
+                               class="w-full pl-8 pr-8 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"/>
                         <i class="bi bi-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <a th:if="${searchQuery != null and !searchQuery.isBlank()}" th:href="@{/admin/messages(folder=${currentFolder})}" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="bi bi-x-circle text-xs"></i>
+                        </a>
                     </form>
                 </div>
 
                 <!-- Messages Thread Scrollable List -->
                 <div class="flex-1 overflow-y-auto divide-y divide-surface-100 max-h-[580px]">
                     
-                    <div th:if="${#lists.isEmpty(messages)}" class="py-16 text-center text-gray-400 p-6">
-                        <i class="bi bi-inbox text-4xl block mb-2 opacity-40"></i>
-                        <p class="text-sm font-semibold text-surface-700">No messages in this folder</p>
-                        <p class="text-xs text-gray-400 mt-1">Your mail folder is completely clear.</p>
+                    <div th:if="${#lists.isEmpty(messages)}" class="py-16 text-center text-gray-400 p-6 space-y-2">
+                        <div class="w-12 h-12 rounded-2xl bg-surface-100 text-gray-400 flex items-center justify-center text-xl mx-auto">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                        <p class="text-xs font-bold text-surface-800">No messages in <span th:text="${currentFolder}">INBOX</span></p>
+                        <p class="text-[11px] text-gray-400 max-w-xs mx-auto">Your mail folder is completely clear.</p>
+                        <form th:action="@{/admin/messages/seed-defaults}" method="post" class="pt-2">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 text-[11px] font-semibold transition-colors">
+                                <i class="bi bi-arrow-repeat mr-1"></i> Seed Sample Conversations
+                            </button>
+                        </form>
                     </div>
 
                     <div th:each="m : ${messages}">
-                        <a th:href="@{/admin/messages(folder=${currentFolder}, messageId=${m.id}, search=${search})}" 
-                           class="block p-3.5 transition-all hover:bg-surface-100/80 border-l-4"
-                           th:classappend="${activeMessage != null && activeMessage.id == m.id ? 'bg-brand-50/40 border-brand-600' : (!m.isRead && currentFolder == 'INBOX' ? 'bg-white border-brand-500 font-semibold' : 'border-transparent')}">
+                        <a th:href="@{/admin/messages(folder=${currentFolder}, messageId=${m.id}, search=${searchQuery})}" 
+                           class="block p-3.5 transition-all hover:bg-surface-100/70 border-l-4"
+                           th:classappend="${activeMessage != null && activeMessage.id == m.id ? 'bg-brand-50/50 border-brand-600' : (!m.isRead && currentFolder == 'INBOX' ? 'bg-white border-brand-500 font-semibold' : 'border-transparent')}">
                             
                             <div class="flex items-center justify-between text-xs mb-1">
-                                <span class="font-bold text-surface-900 truncate" th:text="${m.senderName}">Sender Name</span>
-                                <span class="text-[10px] text-gray-400" th:text="${m.sentAt != null ? #temporals.format(m.sentAt, 'MMM dd, HH:mm') : ''}">Date</span>
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[9px] font-bold shrink-0" th:text="${m.getSenderInitials()}">AD</span>
+                                    <span class="font-bold text-surface-900 truncate text-[11px]" th:text="${m.senderName}">Sender Name</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase bg-surface-100 text-surface-600" th:text="${m.senderRole}">STUDENT</span>
+                                </div>
+                                <span class="text-[10px] text-gray-400 shrink-0 font-mono" th:text="${m.sentAt != null ? m.sentAt : ''}">Date</span>
                             </div>
 
-                            <div class="text-xs font-semibold text-surface-800 truncate" th:text="${m.subject}">Subject line</div>
-                            <p class="text-[11px] text-gray-500 line-clamp-1 mt-0.5" th:text="${m.body}">Message content summary goes here...</p>
+                            <div class="text-xs font-bold text-surface-900 truncate" th:text="${m.subject}">Subject line</div>
+                            <p class="text-[11px] text-gray-500 line-clamp-1 mt-0.5" th:text="${m.getShortSnippet()}">Message snippet goes here...</p>
 
-                            <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-surface-100/60 text-[10px]">
-                                <span class="px-2 py-0.5 rounded-full bg-surface-200/80 text-surface-700 font-mono" th:text="${m.senderEmail}">sender@example.com</span>
+                            <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-surface-100/80 text-[10px]">
+                                <span class="px-2 py-0.5 rounded-full bg-surface-100 text-surface-600 font-mono truncate max-w-[180px]" th:text="${m.senderEmail}">sender@example.com</span>
                                 <div class="flex items-center gap-1.5 text-gray-400">
                                     <i th:if="${m.isStarred}" class="bi bi-star-fill text-amber-500"></i>
-                                    <span th:if="${m.priority == 'URGENT'}" class="px-1.5 py-0.2 rounded bg-red-100 text-red-700 font-bold">URGENT</span>
+                                    <span th:if="${m.priority == 'URGENT'}" class="px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-600 font-bold">URGENT</span>
+                                    <span th:if="${m.priority == 'HIGH'}" class="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-600 font-bold">HIGH</span>
+                                    <span th:if="${m.messageType == 'BROADCAST'}" class="px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 font-bold">BROADCAST</span>
                                 </div>
                             </div>
                         </a>
@@ -125,12 +240,15 @@
             <div class="lg:col-span-7 flex flex-col h-full bg-white">
                 
                 <!-- If No Message Selected -->
-                <div th:if="${activeMessage == null}" class="flex-1 flex flex-col items-center justify-center p-12 text-center text-gray-400">
-                    <div class="w-16 h-16 rounded-2xl bg-surface-100 flex items-center justify-center text-surface-400 text-3xl mb-3">
+                <div th:if="${activeMessage == null}" class="flex-1 flex flex-col items-center justify-center p-12 text-center text-gray-400 space-y-3">
+                    <div class="w-16 h-16 rounded-2xl bg-surface-100 flex items-center justify-center text-surface-400 text-3xl mx-auto shadow-inner">
                         <i class="bi bi-envelope-open"></i>
                     </div>
-                    <h3 class="text-base font-bold text-surface-800">Select a Conversation</h3>
-                    <p class="text-xs text-gray-400 max-w-xs mt-1">Choose any message thread from the left pane to view the full dialogue and respond directly.</p>
+                    <h3 class="text-base font-bold text-surface-900">Select a Conversation</h3>
+                    <p class="text-xs text-gray-400 max-w-xs mx-auto">Choose any message thread from the left pane to view the full dialogue and respond directly, or compose a new email.</p>
+                    <button onclick="openComposeModal()" type="button" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition-all">
+                        <i class="bi bi-pencil-square mr-1"></i> Compose Message
+                    </button>
                 </div>
 
                 <!-- If Message Selected: Show Complete Thread -->
@@ -139,30 +257,38 @@
                     <!-- Reading Pane Top Header Toolbar -->
                     <div class="p-4 border-b border-surface-200 flex flex-wrap items-center justify-between gap-3 bg-surface-50/50">
                         <div class="min-w-0">
-                            <h2 class="text-base font-bold text-surface-900 truncate" th:text="${activeMessage.subject}">Subject</h2>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-base font-bold text-surface-900 truncate" th:text="${activeMessage.subject}">Subject</h2>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold border" th:classappend="${activeMessage.getPriorityBadgeClass()}" th:text="${activeMessage.priority}">NORMAL</span>
+                            </div>
                             <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                                <span>Thread ID: <code class="font-mono text-gray-600 text-[11px]" th:text="${activeMessage.threadId}">thr_123</code></span>
+                                <span>Thread: <code class="font-mono text-gray-600 text-[11px] font-bold" th:text="${activeMessage.threadId}">thr_123</code></span>
+                                <span>&bull;</span>
+                                <span th:text="${activeMessage.sentAt}">01 Sep 2026</span>
                             </div>
                         </div>
 
-                        <!-- Top Actions (Star, Trash, Delete) -->
+                        <!-- Top Actions (Star, Trash, Restore, Delete) -->
                         <div class="flex items-center gap-1.5">
+                            <!-- Star Toggle -->
                             <form th:action="@{/admin/messages/{id}/star(id=${activeMessage.id})}" method="post" class="inline">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <input type="hidden" name="folder" th:value="${currentFolder}" />
-                                <button type="submit" class="p-2 rounded-xl border border-surface-200 text-surface-600 hover:bg-amber-50 hover:text-amber-600 transition-colors" title="Star Message">
+                                <button type="submit" class="p-2 rounded-xl border border-surface-200 text-surface-600 hover:bg-amber-50 hover:text-amber-600 transition-colors" title="Toggle Star">
                                     <i class="bi" th:classappend="${activeMessage.isStarred ? 'bi-star-fill text-amber-500' : 'bi-star'}"></i>
                                 </button>
                             </form>
 
+                            <!-- Move to Trash -->
                             <form th:if="${currentFolder != 'TRASH'}" th:action="@{/admin/messages/{id}/trash(id=${activeMessage.id})}" method="post" class="inline">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <input type="hidden" name="folder" th:value="${currentFolder}" />
-                                <button type="submit" class="p-2 rounded-xl border border-surface-200 text-surface-600 hover:bg-red-50 hover:text-red-600 transition-colors" title="Move to Trash">
+                                <button type="submit" class="p-2 rounded-xl border border-surface-200 text-surface-600 hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Move to Trash">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
 
+                            <!-- Restore from Trash -->
                             <form th:if="${currentFolder == 'TRASH'}" th:action="@{/admin/messages/{id}/restore(id=${activeMessage.id})}" method="post" class="inline">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <button type="submit" class="px-3 py-1.5 rounded-xl border border-surface-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold transition-colors flex items-center gap-1">
@@ -171,9 +297,10 @@
                                 </button>
                             </form>
 
-                            <form th:if="${currentFolder == 'TRASH'}" th:action="@{/admin/messages/{id}/permanent-delete(id=${activeMessage.id})}" method="post" class="inline" onsubmit="return confirm('Permanently delete this message thread?');">
+                            <!-- Delete Permanently -->
+                            <form th:if="${currentFolder == 'TRASH'}" th:action="@{/admin/messages/{id}/delete(id=${activeMessage.id})}" method="post" class="inline" onsubmit="return confirm('Permanently delete this message thread?');">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors" title="Delete Permanently">
+                                <button type="submit" class="p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors" title="Delete Permanently">
                                     <i class="bi bi-x-circle-fill"></i>
                                 </button>
                             </form>
@@ -183,29 +310,35 @@
                     <!-- Thread Conversation Messages -->
                     <div class="flex-1 p-5 space-y-4 overflow-y-auto max-h-[460px]">
                         <div th:each="tm : ${threadMessages}" 
-                             class="p-4 rounded-2xl border transition-all"
-                             th:classappend="${tm.senderRole == 'ADMIN' ? 'bg-brand-50/30 border-brand-200/80 ml-6' : 'bg-surface-50 border-surface-200 mr-6'}">
+                             class="p-4 rounded-2xl border transition-all shadow-sm"
+                             th:classappend="${tm.isFromAdmin() ? 'bg-brand-50/40 border-brand-200/80 ml-6' : 'bg-surface-50 border-surface-200 mr-6'}">
                             
                             <div class="flex items-center justify-between pb-2 border-b border-surface-100 mb-2.5">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs"
-                                         th:classappend="${tm.senderRole == 'ADMIN' ? 'bg-brand-600 text-white' : 'bg-surface-200 text-surface-800'}"
-                                         th:text="${#strings.substring(tm.senderName, 0, 1)}">A</div>
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-sm"
+                                         th:classappend="${tm.isFromAdmin() ? 'bg-brand-600 text-white' : 'bg-surface-200 text-surface-800'}"
+                                         th:text="${tm.getSenderInitials()}">A</div>
                                     <div>
                                         <div class="font-bold text-xs text-surface-900 flex items-center gap-1.5">
                                             <span th:text="${tm.senderName}">Name</span>
-                                            <span class="px-2 py-0.2 rounded-full text-[10px] font-semibold uppercase"
-                                                  th:classappend="${tm.senderRole == 'ADMIN' ? 'bg-brand-100 text-brand-700' : 'bg-surface-200 text-surface-700'}"
+                                            <span class="px-2 py-0.2 rounded-full text-[9px] font-semibold uppercase"
+                                                  th:classappend="${tm.isFromAdmin() ? 'bg-brand-100 text-brand-700' : 'bg-surface-200 text-surface-700'}"
                                                   th:text="${tm.senderRole}">ROLE</span>
                                         </div>
                                         <p class="text-[11px] text-gray-400 font-mono" th:text="${tm.senderEmail}">email@domain.com</p>
                                     </div>
                                 </div>
-                                <span class="text-[11px] text-gray-400" th:text="${tm.sentAt != null ? tm.sentAt : ''}">Time</span>
+                                <span class="text-[10px] text-gray-400 font-mono" th:text="${tm.sentAt != null ? tm.sentAt : ''}">Time</span>
                             </div>
 
                             <div class="text-xs text-surface-800 whitespace-pre-line leading-relaxed" th:text="${tm.body}">
                                 Message body paragraph...
+                            </div>
+
+                            <!-- Attachment Preview (if any) -->
+                            <div th:if="${tm.attachmentUrl != null and !tm.attachmentUrl.isBlank()}" class="mt-3 pt-2 border-t border-surface-100/80 flex items-center gap-2 text-xs">
+                                <i class="bi bi-paperclip text-brand-600"></i>
+                                <a th:href="${tm.attachmentUrl}" target="_blank" class="text-brand-600 hover:underline font-mono text-[11px]" th:text="${tm.attachmentUrl}">/uploads/attachment.pdf</a>
                             </div>
                         </div>
                     </div>
@@ -217,11 +350,11 @@
                             <input type="hidden" name="parentMessageId" th:value="${activeMessage.id}" />
 
                             <textarea name="body" required rows="3" placeholder="Type a quick reply to this conversation..."
-                                      class="w-full p-3 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+                                      class="w-full p-3 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
 
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] text-gray-400">
-                                    Replying as <strong class="text-surface-700">Administrator</strong>
+                                    Replying as <strong class="text-surface-700">EduTake Administration</strong>
                                 </span>
                                 <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
                                     <i class="bi bi-reply-fill"></i>
@@ -237,95 +370,409 @@
 
         </div>
 
-        <!-- ============================================ -->
-        <!-- COMPOSE MESSAGE MODAL -->
-        <!-- ============================================ -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- COMPOSE MESSAGE / BROADCAST MODAL -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
         <div id="composeModal" style="display:none" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl max-w-xl w-full border border-surface-200 p-6 shadow-2xl relative">
+            <div class="bg-white rounded-3xl max-w-2xl w-full border border-surface-200 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                 
-                <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-5">
+                <div class="flex items-center justify-between pb-4 border-b border-surface-100 mb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
-                            <i class="bi bi-pencil-square text-lg"></i>
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg">
+                            <i class="bi bi-pencil-square"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-surface-900">Compose New Message</h3>
-                            <p class="text-xs text-gray-500">Send an internal message or support correspondence</p>
+                            <h3 class="text-base font-bold text-surface-900">Compose Message / Broadcast</h3>
+                            <p class="text-xs text-gray-400">Direct student support or multi-segment email campaign</p>
                         </div>
                     </div>
-                    <button onclick="closeComposeModal()" class="text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg text-lg"></i></button>
+                    <button type="button" onclick="closeComposeModal()" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-surface-100 transition-colors" title="Close"><i class="bi bi-x-lg text-base"></i></button>
                 </div>
 
-                <form th:action="@{/admin/messages/send}" method="POST" class="space-y-4">
+                <form id="composeForm" th:action="@{/admin/messages/send}" method="POST" class="space-y-4">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Recipient Role *</label>
-                            <select name="recipientRole" required class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="STUDENT">🎓 Student</option>
-                                <option value="INSTRUCTOR">👨‍🏫 Instructor / Staff</option>
-                                <option value="ADMIN">🛡️ Admin / Super Admin</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Priority</label>
-                            <select name="priority" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="NORMAL">Normal</option>
-                                <option value="HIGH">High Priority</option>
-                                <option value="URGENT">Urgent</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Recipient Email Address *</label>
-                        <input type="email" name="recipientEmail" required placeholder="e.g. student@example.com"
-                               class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Subject *</label>
-                        <input type="text" name="subject" required placeholder="Subject title..."
-                               class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-surface-700 tracking-wider mb-1.5">Message Content *</label>
-                        <textarea name="body" required rows="5" placeholder="Write message body here..."
-                                  class="w-full p-3.5 bg-surface-50 border border-surface-200 rounded-xl text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
-                    </div>
-
-                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-surface-100">
-                        <button type="button" onclick="closeComposeModal()" class="px-4 py-2 rounded-xl bg-surface-100 text-gray-600 hover:bg-surface-200 text-sm font-semibold transition-colors">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
-                            <i class="bi bi-send-fill"></i>
-                            <span>Send Message</span>
+                    <!-- Mode Selector: Individual vs Broadcast -->
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-surface-100 rounded-xl text-xs font-semibold">
+                        <button type="button" onclick="setComposeMode('INDIVIDUAL')" id="btn-mode-indiv" class="py-2 px-3 rounded-lg transition-all bg-white text-surface-900 shadow-sm font-bold flex items-center justify-center gap-1.5">
+                            <i class="bi bi-person-fill"></i>
+                            <span>Direct Recipient</span>
                         </button>
+                        <button type="button" onclick="setComposeMode('BROADCAST')" id="btn-mode-broad" class="py-2 px-3 rounded-lg transition-all text-gray-500 hover:text-surface-900 flex items-center justify-center gap-1.5">
+                            <i class="bi bi-broadcast"></i>
+                            <span>Bulk Broadcast</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="composeModeInput" name="composeMode" value="INDIVIDUAL" />
+
+                    <!-- Canned Template Auto-Filler Picker -->
+                    <div class="p-3 bg-brand-50/50 border border-brand-100 rounded-xl flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <i class="bi bi-magic text-brand-600 text-sm shrink-0"></i>
+                            <span class="text-xs font-semibold text-brand-900 truncate">Insert Canned Template:</span>
+                        </div>
+                        <select id="templateSelector" onchange="applyCannedTemplate(this.value)" class="px-2.5 py-1.5 text-xs rounded-lg border border-brand-200 bg-white text-surface-900 focus:outline-none focus:ring-1 focus:ring-brand-500 max-w-[220px]">
+                            <option value="">-- Choose Template --</option>
+                            <option th:each="tpl : ${emailTemplates}" th:value="${tpl.templateKey}" th:text="${tpl.name}">Welcome &amp; Onboarding</option>
+                        </select>
+                    </div>
+
+                    <!-- Individual Fields -->
+                    <div id="individual-fields" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Recipient Role</label>
+                                <select id="composeRecipientRole" name="recipientRole" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                                    <option value="STUDENT">🎓 Student</option>
+                                    <option value="INSTRUCTOR">👨‍🏫 Instructor / Mentor</option>
+                                    <option value="STAFF">💼 Staff / Employee</option>
+                                    <option value="ADMIN">🛡️ Admin / Super Admin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Priority</label>
+                                <select name="priority" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                                    <option value="NORMAL">Normal</option>
+                                    <option value="HIGH">High Priority</option>
+                                    <option value="URGENT">Urgent Alert</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Recipient Email Address *</label>
+                            <input type="email" id="composeRecipientEmail" name="recipientEmail" list="studentEmailsList" placeholder="e.g. priya.patel@gmail.com"
+                                   class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"/>
+                            <datalist id="studentEmailsList">
+                                <option th:each="st : ${students}" th:value="${st.email}" th:text="${st.name} + ' (' + ${st.email} + ')'"></option>
+                                <option th:each="emp : ${staff}" th:value="${emp.email}" th:text="${emp.name} + ' (' + ${emp.email} + ')'"></option>
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <!-- Broadcast Fields (Hidden by default) -->
+                    <div id="broadcast-fields" class="space-y-4 hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Target Audience Segment *</label>
+                                <select id="targetAudienceSelect" name="targetAudience" onchange="toggleCourseSelection(this.value)" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                                    <option value="ALL_STUDENTS">👥 All Enrolled Students</option>
+                                    <option value="COURSE_STUDENTS">📚 Students in Specific Course</option>
+                                    <option value="ALL_INSTRUCTORS">👨‍🏫 All Instructors &amp; Mentors</option>
+                                    <option value="ALL_STAFF">💼 All Administrative Staff</option>
+                                </select>
+                            </div>
+
+                            <!-- Course Dropdown -->
+                            <div id="course-selector-container" class="hidden">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Select Course *</label>
+                                <select name="courseId" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                                    <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}">Full Stack Java Development</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Subject Header *</label>
+                        <input type="text" id="composeSubject" name="subject" required placeholder="Subject title..."
+                               class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"/>
+                    </div>
+
+                    <!-- Message Body -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-gray-700">Message Content *</label>
+                            <span id="bodyCharCount" class="text-[10px] text-gray-400 font-mono">0 chars</span>
+                        </div>
+                        <textarea id="composeBody" name="body" required rows="5" placeholder="Write message body here..." oninput="updateCharCount(this.value)"
+                                  class="w-full p-3.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></textarea>
+                    </div>
+
+                    <!-- Attachment URL -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Attachment File URL (Optional)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="composeAttachment" name="attachmentUrl" placeholder="/uploads/syllabus_guide.pdf"
+                                   class="flex-1 px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs font-mono text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"/>
+                            <a href="/admin/media" target="_blank" class="px-3 py-2 rounded-xl bg-surface-100 hover:bg-surface-200 text-xs font-semibold text-gray-700 border border-surface-200 transition-colors flex items-center gap-1">
+                                <i class="bi bi-images text-brand-600"></i> Media Library
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-surface-100">
+                        <button type="button" onclick="clearComposeForm()" class="px-3 py-1.5 text-xs text-gray-400 hover:text-gray-600 font-semibold transition-colors flex items-center gap-1">
+                            <i class="bi bi-eraser"></i> Clear
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="closeComposeModal()" class="px-4 py-2 rounded-xl bg-surface-100 text-gray-600 hover:bg-surface-200 text-xs font-semibold transition-colors">Cancel</button>
+                            <button type="submit" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-sm shadow-brand-500/20 transition-all flex items-center gap-2">
+                                <i class="bi bi-send-fill"></i>
+                                <span id="submit-btn-text">Send Message</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- CANNED TEMPLATES MODAL -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div id="templatesModal" style="display:none" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-3xl w-full border border-surface-200 p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-4">
+                
+                <div class="flex items-center justify-between pb-4 border-b border-surface-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                            <i class="bi bi-collection"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-surface-900">Canned Email Templates</h3>
+                            <p class="text-xs text-gray-400">Predefined reusable templates for student onboarding, milestones, and receipts</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="toggleCreateTemplateCard()" class="px-3 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-brand-200">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            <span>Create Template</span>
+                        </button>
+                        <button type="button" onclick="closeTemplatesModal()" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-surface-100 transition-colors" title="Close"><i class="bi bi-x-lg text-base"></i></button>
+                    </div>
+                </div>
+
+                <!-- Expandable Create Custom Template Card -->
+                <div id="createTemplateCard" class="hidden p-4 rounded-2xl bg-surface-50 border border-surface-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-surface-900 flex items-center gap-1.5">
+                            <i class="bi bi-pencil-square text-brand-600"></i> New Canned Template
+                        </h4>
+                        <button type="button" onclick="toggleCreateTemplateCard()" class="text-gray-400 hover:text-gray-600 text-xs"><i class="bi bi-x"></i></button>
+                    </div>
+                    <form th:action="@{/admin/messages/templates/save}" method="POST" class="space-y-3">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-700 mb-1">Template Name *</label>
+                                <input type="text" name="name" required placeholder="e.g. Exam Schedule Release" class="w-full px-3 py-1.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:ring-1 focus:ring-brand-500 focus:outline-none"/>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-700 mb-1">Template Key</label>
+                                <input type="text" name="templateKey" placeholder="e.g. exam_schedule" class="w-full px-3 py-1.5 bg-white border border-surface-200 rounded-xl text-xs font-mono text-surface-900 focus:ring-1 focus:ring-brand-500 focus:outline-none"/>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-700 mb-1">Category</label>
+                                <select name="category" class="w-full px-3 py-1.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:ring-1 focus:ring-brand-500 focus:outline-none">
+                                    <option value="GENERAL">GENERAL</option>
+                                    <option value="ONBOARDING">ONBOARDING</option>
+                                    <option value="ACADEMIC">ACADEMIC</option>
+                                    <option value="BILLING">BILLING</option>
+                                    <option value="SUPPORT">SUPPORT</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">Subject Template *</label>
+                            <input type="text" name="subjectTemplate" required placeholder="e.g. Final Examination Timetable Released" class="w-full px-3 py-1.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:ring-1 focus:ring-brand-500 focus:outline-none"/>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">Body Template *</label>
+                            <textarea name="bodyTemplate" required rows="3" placeholder="Dear {{student_name}}, ..." class="w-full p-2.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:ring-1 focus:ring-brand-500 focus:outline-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-gray-700 mb-1">Description</label>
+                            <input type="text" name="description" placeholder="Brief note about when to use this template..." class="w-full px-3 py-1.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:ring-1 focus:ring-brand-500 focus:outline-none"/>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-1">
+                            <button type="button" onclick="toggleCreateTemplateCard()" class="px-3 py-1.5 rounded-lg bg-surface-200 text-gray-600 text-xs font-semibold hover:bg-surface-300 transition-colors">Cancel</button>
+                            <button type="submit" class="px-4 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold hover:bg-brand-500 transition-colors">Save Template</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Template Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div th:each="tpl : ${emailTemplates}" class="p-4 rounded-2xl border border-surface-200 hover:border-brand-300 transition-all space-y-2 bg-surface-50/50 relative group">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-surface-900 truncate" th:text="${tpl.name}">Welcome Email</h4>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold border uppercase" th:classappend="${tpl.getCategoryBadgeClass()}" th:text="${tpl.category}">ONBOARDING</span>
+                                <form th:if="${!tpl.isSystemTemplate}" th:action="@{/admin/messages/templates/{id}/delete(id=${tpl.id})}" method="post" class="inline" onsubmit="return confirm('Delete this custom template?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="text-gray-400 hover:text-rose-600 p-0.5" title="Delete Template"><i class="bi bi-trash text-xs"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <p class="text-[11px] font-semibold text-gray-700 truncate" th:text="${tpl.subjectTemplate}">Subject...</p>
+                        <p class="text-[10px] text-gray-400 line-clamp-2" th:text="${tpl.description}">Description...</p>
+                        <button type="button" 
+                                th:data-template-key="${tpl.templateKey}"
+                                th:data-subject="${tpl.subjectTemplate}"
+                                th:data-body="${tpl.bodyTemplate}"
+                                onclick="useTemplateDirectly(this.getAttribute('data-template-key'), this.getAttribute('data-subject'), this.getAttribute('data-body'))" 
+                                class="w-full py-1.5 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-[11px] font-semibold transition-colors flex items-center justify-center gap-1">
+                            <i class="bi bi-box-arrow-in-down-right"></i> Use in Composer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Scripts -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- JAVASCRIPT LOGIC & TEMPLATE DATA INJECTION -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
     <script>
+        let cannedTemplatesData = [];
+
+        // Pre-fetch canned templates from API
+        fetch('/admin/messages/api/templates')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (Array.isArray(data)) {
+                    cannedTemplatesData = data;
+                }
+            })
+            .catch(function(err) {
+                console.warn('Canned templates prefetch notice:', err);
+            });
+
+        function setComposeMode(mode) {
+            const indBtn = document.getElementById('btn-mode-indiv');
+            const brdBtn = document.getElementById('btn-mode-broad');
+            const indFields = document.getElementById('individual-fields');
+            const brdFields = document.getElementById('broadcast-fields');
+            const modeInput = document.getElementById('composeModeInput');
+            const submitBtnText = document.getElementById('submit-btn-text');
+
+            if (mode === 'BROADCAST') {
+                modeInput.value = 'BROADCAST';
+                brdBtn.className = 'py-2 px-3 rounded-lg transition-all bg-white text-purple-700 shadow-sm font-bold flex items-center justify-center gap-1.5';
+                indBtn.className = 'py-2 px-3 rounded-lg transition-all text-gray-500 hover:text-surface-900 flex items-center justify-center gap-1.5';
+                indFields.classList.add('hidden');
+                brdFields.classList.remove('hidden');
+                document.getElementById('composeRecipientEmail').removeAttribute('required');
+                submitBtnText.textContent = 'Dispatch Bulk Broadcast';
+            } else {
+                modeInput.value = 'INDIVIDUAL';
+                indBtn.className = 'py-2 px-3 rounded-lg transition-all bg-white text-surface-900 shadow-sm font-bold flex items-center justify-center gap-1.5';
+                brdBtn.className = 'py-2 px-3 rounded-lg transition-all text-gray-500 hover:text-surface-900 flex items-center justify-center gap-1.5';
+                brdFields.classList.add('hidden');
+                indFields.classList.remove('hidden');
+                document.getElementById('composeRecipientEmail').setAttribute('required', 'required');
+                submitBtnText.textContent = 'Send Message';
+            }
+        }
+
+        function toggleCourseSelection(val) {
+            const cContainer = document.getElementById('course-selector-container');
+            if (val === 'COURSE_STUDENTS') {
+                cContainer.classList.remove('hidden');
+            } else {
+                cContainer.classList.add('hidden');
+            }
+        }
+
+        function applyCannedTemplate(key) {
+            if (!key) return;
+            const tpl = cannedTemplatesData.find(function(t) { return t.templateKey === key; });
+            if (tpl) {
+                document.getElementById('composeSubject').value = tpl.subjectTemplate || '';
+                document.getElementById('composeBody').value = tpl.bodyTemplate || '';
+                updateCharCount(tpl.bodyTemplate || '');
+            }
+        }
+
+        function useTemplateDirectly(key, subject, body) {
+            closeTemplatesModal();
+            openComposeModal();
+            
+            const selector = document.getElementById('templateSelector');
+            if (selector && key) {
+                selector.value = key;
+            }
+            
+            if (subject) {
+                document.getElementById('composeSubject').value = subject;
+            }
+            if (body) {
+                document.getElementById('composeBody').value = body;
+                updateCharCount(body);
+            } else {
+                applyCannedTemplate(key);
+            }
+        }
+
+        function updateCharCount(text) {
+            const el = document.getElementById('bodyCharCount');
+            if (el) {
+                el.textContent = (text ? text.length : 0) + ' chars';
+            }
+        }
+
+        function clearComposeForm() {
+            document.getElementById('composeSubject').value = '';
+            document.getElementById('composeBody').value = '';
+            document.getElementById('composeRecipientEmail').value = '';
+            document.getElementById('composeAttachment').value = '';
+            const selector = document.getElementById('templateSelector');
+            if (selector) selector.value = '';
+            updateCharCount('');
+        }
+
+        function toggleCreateTemplateCard() {
+            const card = document.getElementById('createTemplateCard');
+            if (card) {
+                card.classList.toggle('hidden');
+            }
+        }
+
         function openComposeModal() {
             document.getElementById('composeModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
+
         function closeComposeModal() {
             document.getElementById('composeModal').style.display = 'none';
             document.body.style.overflow = '';
         }
-        // Close on backdrop click or ESC key
+
+        function openTemplatesModal() {
+            document.getElementById('templatesModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTemplatesModal() {
+            document.getElementById('templatesModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        // Close on backdrop click
         document.addEventListener('click', function(e) {
-            const modal = document.getElementById('composeModal');
-            if (e.target === modal) closeComposeModal();
+            const cModal = document.getElementById('composeModal');
+            const tModal = document.getElementById('templatesModal');
+            if (e.target === cModal) closeComposeModal();
+            if (e.target === tModal) closeTemplatesModal();
         });
+
+        // Keyboard shortcuts: ESC to close, Ctrl+Enter to submit
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeComposeModal();
+            if (e.key === 'Escape') {
+                closeComposeModal();
+                closeTemplatesModal();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const cModal = document.getElementById('composeModal');
+                if (cModal && cModal.style.display === 'flex') {
+                    const form = document.getElementById('composeForm');
+                    if (form && form.checkValidity()) {
+                        form.submit();
+                    }
+                }
+            }
         });
     </script>
 </body>

@@ -151,12 +151,66 @@ public class Media {
         return false;
     }
 
+    public boolean isAudio() {
+        if (mimeType != null) return mimeType.startsWith("audio/");
+        if (extension != null) {
+            String ext = extension.toLowerCase();
+            return ext.equals("mp3") || ext.equals("wav") || ext.equals("ogg") || ext.equals("m4a");
+        }
+        return false;
+    }
+
+    public boolean isSvg() {
+        if (mimeType != null) return "image/svg+xml".equalsIgnoreCase(mimeType);
+        return extension != null && extension.equalsIgnoreCase("svg");
+    }
+
+    public String getTypeCategory() {
+        if (isImage()) return "IMAGE";
+        if (isVideo()) return "VIDEO";
+        if (isPdf()) return "PDF";
+        if (isDocument()) return "DOCUMENT";
+        if (isAudio()) return "AUDIO";
+        return "OTHER";
+    }
+
+    public String getFormattedDimensions() {
+        if (width != null && height != null && width > 0 && height > 0) {
+            return width + " × " + height + " px";
+        }
+        return "";
+    }
+
+    public String getEffectiveAltText() {
+        if (altText != null && !altText.isBlank()) return altText;
+        if (originalName != null && !originalName.isBlank()) return originalName;
+        return fileName;
+    }
+
+    public String getFolderSafe() {
+        if (folder != null && !folder.isBlank()) return folder;
+        return "general";
+    }
+
     public String getIconClass() {
-        if (isImage()) return "bi-file-earmark-image";
-        if (isVideo()) return "bi-file-earmark-play";
-        if (isPdf()) return "bi-file-earmark-pdf";
-        if (isDocument()) return "bi-file-earmark-word";
-        return "bi-file-earmark";
+        if (isImage()) return "bi-image";
+        if (isVideo()) return "bi-film";
+        if (isPdf()) return "bi-file-earmark-pdf-fill";
+        if (isDocument()) return "bi-file-earmark-richtext-fill";
+        if (isAudio()) return "bi-file-earmark-music-fill";
+        return "bi-file-earmark-fill";
+    }
+
+    public String getBadgeClass() {
+        String cat = getTypeCategory();
+        switch (cat) {
+            case "IMAGE": return "bg-emerald-50 text-emerald-700 border-emerald-200";
+            case "VIDEO": return "bg-purple-50 text-purple-700 border-purple-200";
+            case "PDF": return "bg-rose-50 text-rose-700 border-rose-200";
+            case "DOCUMENT": return "bg-blue-50 text-blue-700 border-blue-200";
+            case "AUDIO": return "bg-amber-50 text-amber-700 border-amber-200";
+            default: return "bg-gray-100 text-gray-700 border-gray-200";
+        }
     }
 
     // --- Getters and Setters ---

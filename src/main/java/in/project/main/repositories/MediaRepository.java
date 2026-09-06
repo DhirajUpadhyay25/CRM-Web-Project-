@@ -31,8 +31,17 @@ public interface MediaRepository extends JpaRepository<Media, Long>, JpaSpecific
     @Query("SELECT m FROM Media m WHERE LOWER(m.fileName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR LOWER(m.originalName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR LOWER(m.altText) LIKE LOWER(CONCAT('%',:keyword,'%')) ORDER BY m.createdAt DESC")
     Page<Media> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT SUM(m.fileSize) FROM Media m WHERE m.fileSize IS NOT NULL")
-    Long getTotalStorageUsed();
+    boolean existsByFileName(String fileName);
+
+    boolean existsByPublicUrl(String publicUrl);
+
+    long countByMimeTypeStartingWith(String mimeTypePrefix);
+
+    @Query("SELECT COUNT(m) FROM Media m WHERE m.mimeType = 'application/pdf' OR LOWER(m.extension) = 'pdf' OR m.mimeType LIKE '%word%' OR m.mimeType LIKE '%document%' OR LOWER(m.extension) IN ('doc','docx','xls','xlsx','ppt','pptx')")
+    long countDocuments();
+
+    @Query("SELECT COUNT(m) FROM Media m WHERE m.mimeType LIKE 'video/%' OR LOWER(m.extension) IN ('mp4','webm','mov','avi')")
+    long countVideos();
 
     long count();
 }

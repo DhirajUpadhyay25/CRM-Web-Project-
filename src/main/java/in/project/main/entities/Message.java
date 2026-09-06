@@ -39,7 +39,7 @@ public class Message {
     @Column(nullable = false)
     private String subject;
 
-    @Column(length = 4000, nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 
     @Column
@@ -68,6 +68,21 @@ public class Message {
 
     @Column
     private Boolean isEmailDispatched = true;
+
+    @Column(length = 32)
+    private String deliveryStatus = "DELIVERED"; // DELIVERED, SENT, FAILED, PENDING
+
+    @Column(length = 32)
+    private String messageType = "DIRECT"; // DIRECT, BROADCAST, SYSTEM_ALERT, COURSE_NOTICE, SUPPORT_REPLY
+
+    @Column(length = 32)
+    private String targetAudience = "INDIVIDUAL"; // INDIVIDUAL, ALL_STUDENTS, COURSE_STUDENTS, ALL_INSTRUCTORS, ALL_STAFF
+
+    @Column
+    private Long courseId;
+
+    @Column
+    private String courseTitle;
 
     public Message() {
         this.sentAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -129,4 +144,65 @@ public class Message {
 
     public Boolean getIsEmailDispatched() { return isEmailDispatched != null ? isEmailDispatched : true; }
     public void setIsEmailDispatched(Boolean isEmailDispatched) { this.isEmailDispatched = isEmailDispatched; }
+
+    public String getDeliveryStatus() { return deliveryStatus != null ? deliveryStatus : "DELIVERED"; }
+    public void setDeliveryStatus(String deliveryStatus) { this.deliveryStatus = deliveryStatus; }
+
+    public String getMessageType() { return messageType != null ? messageType : "DIRECT"; }
+    public void setMessageType(String messageType) { this.messageType = messageType; }
+
+    public String getTargetAudience() { return targetAudience != null ? targetAudience : "INDIVIDUAL"; }
+    public void setTargetAudience(String targetAudience) { this.targetAudience = targetAudience; }
+
+    public Long getCourseId() { return courseId; }
+    public void setCourseId(Long courseId) { this.courseId = courseId; }
+
+    public String getCourseTitle() { return courseTitle; }
+    public void setCourseTitle(String courseTitle) { this.courseTitle = courseTitle; }
+
+    // ==========================================
+    // UI & Helper Methods
+    // ==========================================
+
+    public String getSenderInitials() {
+        if (senderName != null && !senderName.isBlank()) {
+            String[] parts = senderName.trim().split("\\s+");
+            if (parts.length >= 2) {
+                return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+            }
+            return senderName.substring(0, Math.min(2, senderName.length())).toUpperCase();
+        }
+        return "AD";
+    }
+
+    public String getRecipientInitials() {
+        if (recipientName != null && !recipientName.isBlank()) {
+            String[] parts = recipientName.trim().split("\\s+");
+            if (parts.length >= 2) {
+                return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+            }
+            return recipientName.substring(0, Math.min(2, recipientName.length())).toUpperCase();
+        }
+        return "ST";
+    }
+
+    public boolean isFromAdmin() {
+        return "ADMIN".equalsIgnoreCase(getSenderRole()) || "SUPER_ADMIN".equalsIgnoreCase(getSenderRole());
+    }
+
+    public String getPriorityBadgeClass() {
+        if ("URGENT".equalsIgnoreCase(priority)) {
+            return "bg-rose-500/10 text-rose-600 border-rose-500/20";
+        }
+        if ("HIGH".equalsIgnoreCase(priority)) {
+            return "bg-amber-500/10 text-amber-600 border-amber-500/20";
+        }
+        return "bg-surface-100 text-surface-600 border-surface-200";
+    }
+
+    public String getShortSnippet() {
+        if (body == null || body.isBlank()) return "";
+        String plain = body.replaceAll("<[^>]*>", "").trim();
+        return plain.length() > 90 ? plain.substring(0, 87) + "..." : plain;
+    }
 }

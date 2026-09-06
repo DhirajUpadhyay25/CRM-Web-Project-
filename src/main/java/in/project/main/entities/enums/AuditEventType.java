@@ -78,6 +78,12 @@ public enum AuditEventType {
     ANNOUNCEMENT_DELETED(AuditCategory.ADMIN, AuditSeverity.LOW, "Announcement Deleted"),
     ENQUIRY_CREATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Enquiry Created"),
     ENQUIRY_UPDATED(AuditCategory.ADMIN, AuditSeverity.INFO, "Enquiry Updated"),
+    MESSAGE_SENT(AuditCategory.ADMIN, AuditSeverity.INFO, "Message Sent"),
+    MESSAGE_REPLIED(AuditCategory.ADMIN, AuditSeverity.INFO, "Message Reply Sent"),
+    MESSAGE_DELETED(AuditCategory.ADMIN, AuditSeverity.LOW, "Message Deleted"),
+    MESSAGE_RESTORED(AuditCategory.ADMIN, AuditSeverity.LOW, "Message Restored"),
+    EMAIL_BROADCAST_SENT(AuditCategory.ADMIN, AuditSeverity.MEDIUM, "Bulk Email Broadcast Sent"),
+    EMAIL_TEMPLATE_SAVED(AuditCategory.ADMIN, AuditSeverity.LOW, "Email Template Saved"),
     SETTINGS_CHANGED(AuditCategory.ADMIN, AuditSeverity.HIGH, "System Settings Changed"),
     SETTING_UPDATED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Platform Setting Updated"),
     MAINTENANCE_MODE_ENABLED(AuditCategory.SYSTEM, AuditSeverity.HIGH, "Maintenance Mode Enabled"),
@@ -121,6 +127,10 @@ public enum AuditEventType {
     TESTIMONIAL_CREATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Testimonial Created"),
     TESTIMONIAL_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Testimonial Updated"),
     TESTIMONIAL_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Testimonial Deleted"),
+    MEDIA_UPLOADED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Media File Uploaded"),
+    MEDIA_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Media Metadata Updated"),
+    MEDIA_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Media File Deleted"),
+    MEDIA_SYNCED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Media Storage Synced"),
 
     // System & Errors
     SYSTEM_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "System Error Encountered"),

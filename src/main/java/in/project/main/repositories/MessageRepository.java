@@ -29,6 +29,12 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("SELECT COUNT(m) FROM Message m WHERE (LOWER(m.recipientEmail) = LOWER(:email) OR LOWER(m.senderEmail) = LOWER(:email) OR (:isAdmin = true AND (m.recipientRole = 'ADMIN' OR m.senderRole = 'ADMIN'))) AND m.folder = 'TRASH'")
     long countTotalTrash(@Param("email") String email, @Param("isAdmin") boolean isAdmin);
 
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.isEmailDispatched = true")
+    long countTotalEmailDispatched();
+
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.messageType = 'BROADCAST'")
+    long countTotalBroadcasts();
+
     @Query("SELECT m FROM Message m WHERE " +
            "((:folder = 'INBOX' AND (LOWER(m.recipientEmail) = LOWER(:email) OR (:isAdmin = true AND m.recipientRole = 'ADMIN')) AND m.folder = 'INBOX') OR " +
            " (:folder = 'SENT' AND (LOWER(m.senderEmail) = LOWER(:email) OR (:isAdmin = true AND m.senderRole = 'ADMIN')) AND m.folder = 'SENT') OR " +

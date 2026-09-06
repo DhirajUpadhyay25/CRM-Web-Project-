@@ -1,46 +1,450 @@
-﻿<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Media Management', ~{::div})}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Media Library', ~{::div})}">
 <body>
-    <div>
-        <div class="mb-6 flex justify-between items-center">
+    <div class="space-y-6">
+
+        <!-- Top Header & Actions -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Media Management</h1>
-                <p class="text-gray-500 text-sm">Manage media across the platform.</p>
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-blue-500/20 text-indigo-600 text-lg border border-indigo-500/20 shadow-sm">
+                        <i class="bi bi-images"></i>
+                    </span>
+                    <div>
+                        <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Media Library &amp; Assets</h1>
+                    </div>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">Upload, organize, and manage course graphics, blog images, PDF brochures, and digital assets.</p>
             </div>
-            <button class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors">
-                <i class="bi bi-plus-lg mr-1.5"></i> Add Media
+            
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Sync Disk Storage -->
+                <form th:action="@{/admin/media/sync-disk}" method="post" class="inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" onclick="return confirm('Scan local storage and index all static upload files into the database?');" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors" title="Index unrecorded files from disk">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span>Sync Disk Files</span>
+                    </button>
+                </form>
+
+                <!-- Upload Media -->
+                <a th:href="@{/admin/media/upload}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm shadow-brand-500/20 transition-all">
+                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                    <span>Upload Assets</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-sm flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-check-circle-fill text-emerald-500 text-base"></i>
+                <span th:text="${success}">Operation completed successfully.</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-xs">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div th:if="${error}" class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-sm flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-exclamation-triangle-fill text-rose-500 text-base"></i>
+                <span th:text="${error}">An error occurred.</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 text-xs">
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
 
-        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+            <!-- Total Assets -->
+            <div class="bg-white p-4 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Assets</span>
+                    <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-base">
+                        <i class="bi bi-folder-symlink-fill"></i>
+                    </span>
+                </div>
+                <div class="text-2xl font-bold text-surface-900" th:text="${kpis.totalAssets}">0</div>
+                <p class="text-xs text-gray-400 mt-0.5">Database media</p>
+            </div>
+
+            <!-- Storage Used -->
+            <div class="bg-white p-4 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Storage Used</span>
+                    <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                        <i class="bi bi-hdd-fill"></i>
+                    </span>
+                </div>
+                <div class="text-2xl font-bold text-emerald-600" th:text="${kpis.totalStorageFormatted}">0 B</div>
+                <p class="text-xs text-gray-400 mt-0.5">Physical disk usage</p>
+            </div>
+
+            <!-- Images -->
+            <div class="bg-white p-4 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Images</span>
+                    <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base">
+                        <i class="bi bi-image-fill"></i>
+                    </span>
+                </div>
+                <div class="text-2xl font-bold text-amber-600" th:text="${kpis.imageCount}">0</div>
+                <p class="text-xs text-gray-400 mt-0.5">JPG, PNG, WebP, SVG</p>
+            </div>
+
+            <!-- Documents & PDFs -->
+            <div class="bg-white p-4 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Documents</span>
+                    <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-base">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </span>
+                </div>
+                <div class="text-2xl font-bold text-blue-600" th:text="${kpis.documentCount}">0</div>
+                <p class="text-xs text-gray-400 mt-0.5">PDFs, Docs, Sheets</p>
+            </div>
+
+            <!-- Folders -->
+            <div class="bg-white p-4 rounded-2xl border border-surface-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Folders</span>
+                    <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-base">
+                        <i class="bi bi-collection-fill"></i>
+                    </span>
+                </div>
+                <div class="text-2xl font-bold text-purple-600" th:text="${kpis.folderCount}">0</div>
+                <p class="text-xs text-gray-400 mt-0.5">Categorized buckets</p>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white p-4 rounded-2xl border border-surface-200 shadow-sm space-y-3">
+            <form th:action="@{/admin/media}" method="get" class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <input type="hidden" name="viewMode" th:value="${viewMode}"/>
+                <input type="hidden" name="typeCategory" th:value="${typeCategory}"/>
+
+                <!-- Search & Folder Dropdown -->
+                <div class="flex flex-1 flex-wrap items-center gap-2.5">
+                    <div class="relative flex-1 min-w-[200px] max-w-md">
+                        <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" name="search" th:value="${search}" placeholder="Search by name, alt-text, or caption..." 
+                               class="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"/>
+                    </div>
+
+                    <!-- Folder Filter -->
+                    <select name="folder" onchange="this.form.submit()" class="px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all bg-white">
+                        <option value="">📁 All Folders</option>
+                        <option th:each="f : ${folders}" th:value="${f}" th:text="'/' + ${f}" th:selected="${folder == f}">/general</option>
+                    </select>
+
+                    <button type="submit" class="px-4 py-2 bg-surface-900 text-white rounded-xl text-xs font-semibold hover:bg-surface-800 transition-colors">
+                        Filter
+                    </button>
+
+                    <a th:href="@{/admin/media}" class="p-2 rounded-xl border border-surface-200 text-gray-500 hover:text-gray-700 hover:bg-surface-100 transition-colors" title="Reset Filters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+
+                <!-- View Switcher -->
+                <div class="flex items-center gap-1 p-1 bg-surface-100 rounded-xl border border-surface-200">
+                    <a th:href="@{/admin/media(viewMode='grid', search=${search}, folder=${folder}, typeCategory=${typeCategory})}" 
+                       th:classappend="${viewMode == 'grid' or viewMode == null} ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'"
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" title="Grid Thumbnail View">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Grid</span>
+                    </a>
+                    <a th:href="@{/admin/media(viewMode='table', search=${search}, folder=${folder}, typeCategory=${typeCategory})}" 
+                       th:classappend="${viewMode == 'table'} ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'"
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all" title="Tabular Spec View">
+                        <i class="bi bi-list-ul"></i>
+                        <span>Table</span>
+                    </a>
+                </div>
+            </form>
+
+            <!-- Type Category Quick Filter Chips -->
+            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-surface-100 text-xs">
+                <span class="text-gray-400 font-medium mr-1">Filter Type:</span>
+                <a th:href="@{/admin/media(viewMode=${viewMode}, search=${search}, folder=${folder}, typeCategory='')}" 
+                   th:classappend="${typeCategory == null or typeCategory == ''} ? 'bg-surface-900 text-white font-semibold' : 'bg-surface-100 text-gray-600 hover:bg-surface-200'"
+                   class="px-2.5 py-1 rounded-lg transition-colors">
+                    All Files
+                </a>
+                <a th:href="@{/admin/media(viewMode=${viewMode}, search=${search}, folder=${folder}, typeCategory='IMAGES')}" 
+                   th:classappend="${typeCategory == 'IMAGES'} ? 'bg-emerald-600 text-white font-semibold' : 'bg-surface-100 text-gray-600 hover:bg-surface-200'"
+                   class="px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                    <i class="bi bi-image"></i> Images
+                </a>
+                <a th:href="@{/admin/media(viewMode=${viewMode}, search=${search}, folder=${folder}, typeCategory='DOCUMENTS')}" 
+                   th:classappend="${typeCategory == 'DOCUMENTS'} ? 'bg-blue-600 text-white font-semibold' : 'bg-surface-100 text-gray-600 hover:bg-surface-200'"
+                   class="px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                    <i class="bi bi-file-earmark-pdf"></i> Documents / PDFs
+                </a>
+                <a th:href="@{/admin/media(viewMode=${viewMode}, search=${search}, folder=${folder}, typeCategory='VIDEOS')}" 
+                   th:classappend="${typeCategory == 'VIDEOS'} ? 'bg-purple-600 text-white font-semibold' : 'bg-surface-100 text-gray-600 hover:bg-surface-200'"
+                   class="px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                    <i class="bi bi-film"></i> Videos
+                </a>
+                <a th:href="@{/admin/media(viewMode=${viewMode}, search=${search}, folder=${folder}, typeCategory='AUDIO')}" 
+                   th:classappend="${typeCategory == 'AUDIO'} ? 'bg-amber-600 text-white font-semibold' : 'bg-surface-100 text-gray-600 hover:bg-surface-200'"
+                   class="px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                    <i class="bi bi-music-note"></i> Audio
+                </a>
+            </div>
+        </div>
+
+        <!-- ═══════════════════ 1. GRID VIEW ═══════════════════ -->
+        <div th:if="${viewMode == 'grid' or viewMode == null}">
+            <div th:if="${mediaPage != null and mediaPage.hasContent()}" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div th:each="m : ${mediaPage.content}" class="group bg-white rounded-2xl border border-surface-200 overflow-hidden shadow-sm hover:shadow-md hover:border-brand-300 transition-all flex flex-col relative">
+                    
+                    <!-- Top Media Thumbnail Container -->
+                    <div class="aspect-square w-full bg-surface-100 relative flex items-center justify-center overflow-hidden border-b border-surface-100">
+                        <!-- Image Preview -->
+                        <img th:if="${m.isImage()}" 
+                             th:src="${m.getEffectiveUrl()}" 
+                             th:alt="${m.getEffectiveAltText()}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             loading="lazy"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+                        <!-- Icon Fallback for non-images or broken images -->
+                        <div th:classappend="${m.isImage()} ? 'hidden' : 'flex'" class="w-full h-full items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 text-gray-400">
+                            <i th:class="'bi ' + ${m.getIconClass()} + ' text-3xl'"></i>
+                        </div>
+
+                        <!-- Badge: Extension / Format -->
+                        <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider shadow-sm"
+                              th:classappend="${m.getBadgeClass()}"
+                              th:text="${m.extension != null and !m.extension.isEmpty()} ? ${m.extension} : ${m.getTypeCategory()}">
+                            JPG
+                        </span>
+
+                        <!-- Dimension Tag if Image -->
+                        <span th:if="${m.width != null and m.width > 0}" class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-surface-950/80 text-white text-[9px] font-mono backdrop-blur-sm"
+                              th:text="${m.width} + '×' + ${m.height}">
+                            1920×1080
+                        </span>
+
+                        <!-- Hover Action Bar Overlay -->
+                        <div class="absolute inset-0 bg-surface-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2 backdrop-blur-[2px]">
+                            <!-- Quick Copy URL -->
+                            <button type="button" 
+                                    th:data-url="${m.getEffectiveUrl()}"
+                                    onclick="copyMediaUrl(this.getAttribute('data-url'))" 
+                                    class="w-8 h-8 rounded-lg bg-white/90 hover:bg-white text-surface-800 flex items-center justify-center text-xs shadow transition-transform hover:scale-110" 
+                                    title="Copy Public URL">
+                                <i class="bi bi-link-45deg text-base"></i>
+                            </button>
+
+                            <!-- Inspect / Edit -->
+                            <a th:href="@{/admin/media/{id}(id=${m.id})}" 
+                               class="w-8 h-8 rounded-lg bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center text-xs shadow transition-transform hover:scale-110" 
+                               title="Inspect & Edit Specs">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <!-- Download -->
+                            <a th:href="@{/admin/media/{id}/download(id=${m.id})}" 
+                               class="w-8 h-8 rounded-lg bg-surface-800 hover:bg-surface-700 text-white flex items-center justify-center text-xs shadow transition-transform hover:scale-110" 
+                               title="Download Asset">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Details -->
+                    <div class="p-3 space-y-1 flex-1 flex flex-col justify-between">
+                        <div>
+                            <a th:href="@{/admin/media/{id}(id=${m.id})}" class="text-xs font-semibold text-surface-900 hover:text-brand-600 truncate block transition-colors" 
+                               th:text="${m.getEffectiveAltText()}" th:title="${m.fileName}">
+                                hero-banner.jpg
+                            </a>
+                            <div class="flex items-center justify-between text-[10px] text-gray-400 mt-1">
+                                <span class="truncate" th:text="'/' + ${m.getFolderSafe()}">/general</span>
+                                <span class="font-medium" th:text="${m.getFileSizeFormatted()}">1.2 MB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${mediaPage == null or !mediaPage.hasContent()}" class="bg-white p-12 rounded-2xl border border-surface-200 text-center shadow-sm">
+                <div class="w-16 h-16 rounded-2xl bg-surface-100 text-gray-400 flex items-center justify-center text-3xl mx-auto mb-3">
+                    <i class="bi bi-images"></i>
+                </div>
+                <h3 class="text-base font-bold text-surface-900">No media assets found</h3>
+                <p class="text-xs text-gray-500 max-w-sm mx-auto mt-1 mb-5">Upload images, graphics, and course documents or click Sync to index existing static uploads.</p>
+                <div class="flex items-center justify-center gap-3">
+                    <form th:action="@{/admin/media/sync-disk}" method="post" class="inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors">
+                            <i class="bi bi-arrow-repeat mr-1"></i> Scan &amp; Sync Disk Files
+                        </button>
+                    </form>
+                    <a th:href="@{/admin/media/upload}" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors">
+                        <i class="bi bi-cloud-arrow-up-fill mr-1"></i> Upload First Asset
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════ 2. TABLE VIEW ═══════════════════ -->
+        <div th:if="${viewMode == 'table'}" class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-left text-xs border-collapse">
                     <thead>
-                        <tr class="bg-surface-50 text-left text-xs text-gray-400 uppercase tracking-wider border-b border-surface-200">
-                            <th class="px-6 py-3 font-semibold">ID</th>
-                            <th class="px-6 py-3 font-semibold">Details</th>
-                            <th class="px-6 py-3 font-semibold">Actions</th>
+                        <tr class="bg-surface-50 border-b border-surface-200 text-gray-500 font-semibold uppercase tracking-wider text-[10px]">
+                            <th class="py-3 px-4">Asset</th>
+                            <th class="py-3 px-4">Folder &amp; Type</th>
+                            <th class="py-3 px-4">Dimensions</th>
+                            <th class="py-3 px-4">File Size</th>
+                            <th class="py-3 px-4">Public URL</th>
+                            <th class="py-3 px-4">Uploaded</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-100">
-                        <tr th:each="item : ${items}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 text-surface-900" th:text="${item.id}">1</td>
-                            <td class="px-6 py-4 text-gray-500">Item Details Here</td>
-                            <td class="px-6 py-4">
-                                <button class="text-brand-600 hover:text-brand-800 text-xs font-semibold mr-3">Edit</button>
-                                <button class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
+                        <tr th:each="m : ${mediaPage.content}" class="hover:bg-surface-50/70 transition-colors">
+                            <!-- Thumbnail & Title -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-surface-100 border border-surface-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+                                        <img th:if="${m.isImage()}" th:src="${m.getEffectiveUrl()}" class="w-full h-full object-cover" loading="lazy"/>
+                                        <i th:if="${!m.isImage()}" th:class="'bi ' + ${m.getIconClass()} + ' text-lg text-gray-400'"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <a th:href="@{/admin/media/{id}(id=${m.id})}" class="font-semibold text-surface-900 hover:text-brand-600 block truncate max-w-xs" th:text="${m.getEffectiveAltText()}">
+                                            hero-banner.jpg
+                                        </a>
+                                        <span class="text-[10px] text-gray-400 font-mono truncate block" th:text="${m.fileName}">
+                                            hero_banner_1623912.jpg
+                                        </span>
+                                    </div>
+                                </div>
                             </td>
-                        </tr>
-                        <tr th:if="${items == null or items.isEmpty()}">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                <i class="bi bi-inbox text-3xl mb-2 block"></i>
-                                No media found. Use the Data Seeder to add sample data.
+
+                            <!-- Folder & Category -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-surface-100 text-surface-700 font-medium" th:text="'/' + ${m.getFolderSafe()}">/general</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold" th:classappend="${m.getBadgeClass()}" th:text="${m.getTypeCategory()}">IMAGE</span>
+                                </div>
+                            </td>
+
+                            <!-- Dimensions -->
+                            <td class="py-3 px-4 text-gray-600 font-mono text-[11px]" th:text="${m.getFormattedDimensions() != null ? m.getFormattedDimensions() : '—'}">
+                                1920 × 1080 px
+                            </td>
+
+                            <!-- File Size -->
+                            <td class="py-3 px-4 text-surface-900 font-semibold" th:text="${m.getFileSizeFormatted()}">
+                                1.2 MB
+                            </td>
+
+                            <!-- Public URL -->
+                            <td class="py-3 px-4 max-w-[200px]">
+                                <div class="flex items-center gap-1">
+                                    <input type="text" readonly th:value="${m.getEffectiveUrl()}" class="w-36 px-2 py-1 bg-surface-50 border border-surface-200 rounded text-[10px] font-mono text-gray-600 truncate select-all"/>
+                                    <button type="button" th:data-url="${m.getEffectiveUrl()}" onclick="copyMediaUrl(this.getAttribute('data-url'))" class="p-1 hover:text-brand-600 text-gray-400" title="Copy URL">
+                                        <i class="bi bi-clipboard text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                            <!-- Upload Date -->
+                            <td class="py-3 px-4 text-gray-400 text-[11px]" th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'dd MMM yyyy') : 'Recent'}">
+                                01 Sep 2026
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="py-3 px-4 text-right">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a th:href="@{/admin/media/{id}(id=${m.id})}" class="p-1.5 rounded-lg text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors" title="Inspect Detail">
+                                        <i class="bi bi-eye text-sm"></i>
+                                    </a>
+                                    <a th:href="@{/admin/media/{id}/download(id=${m.id})}" class="p-1.5 rounded-lg text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="Download">
+                                        <i class="bi bi-download text-sm"></i>
+                                    </a>
+                                    <form th:action="@{/admin/media/{id}/delete(id=${m.id})}" method="post" class="inline" onsubmit="return confirm('Delete this media asset permanently?');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="p-1.5 rounded-lg text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Delete Asset">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <div th:if="${mediaPage != null and mediaPage.totalPages > 1}" class="flex items-center justify-between pt-2">
+            <div class="text-xs text-gray-500">
+                Showing <span class="font-semibold text-surface-900" th:text="${mediaPage.number * mediaPage.size + 1}">1</span>
+                to <span class="font-semibold text-surface-900" th:text="${(mediaPage.number + 1) * mediaPage.size > mediaPage.totalElements ? mediaPage.totalElements : (mediaPage.number + 1) * mediaPage.size}">24</span>
+                of <span class="font-semibold text-surface-900" th:text="${mediaPage.totalElements}">50</span> assets
+            </div>
+
+            <div class="flex items-center gap-1">
+                <a th:if="${mediaPage.hasPrevious()}" 
+                   th:href="@{/admin/media(page=${mediaPage.number - 1}, search=${search}, folder=${folder}, typeCategory=${typeCategory}, viewMode=${viewMode})}" 
+                   class="px-3 py-1.5 rounded-lg border border-surface-200 text-xs font-semibold text-gray-700 hover:bg-surface-50 transition-colors">
+                    <i class="bi bi-chevron-left mr-1"></i> Prev
+                </a>
+                
+                <th:block th:each="p : ${#numbers.sequence(0, mediaPage.totalPages - 1)}">
+                    <a th:if="${p >= mediaPage.number - 2 and p <= mediaPage.number + 2}"
+                       th:href="@{/admin/media(page=${p}, search=${search}, folder=${folder}, typeCategory=${typeCategory}, viewMode=${viewMode})}" 
+                       th:text="${p + 1}"
+                       th:classappend="${p == mediaPage.number} ? 'bg-brand-600 text-white border-brand-600' : 'border-surface-200 text-gray-700 hover:bg-surface-50'"
+                       class="w-8 h-8 rounded-lg border text-xs font-semibold flex items-center justify-center transition-colors">
+                        1
+                    </a>
+                </th:block>
+
+                <a th:if="${mediaPage.hasNext()}" 
+                   th:href="@{/admin/media(page=${mediaPage.number + 1}, search=${search}, folder=${folder}, typeCategory=${typeCategory}, viewMode=${viewMode})}" 
+                   class="px-3 py-1.5 rounded-lg border border-surface-200 text-xs font-semibold text-gray-700 hover:bg-surface-50 transition-colors">
+                    Next <i class="bi bi-chevron-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+
     </div>
+
+    <!-- Toast Notification Javascript -->
+    <script>
+        function copyMediaUrl(url) {
+            if (!url) return;
+            const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                showToast('URL copied to clipboard: ' + url);
+            }).catch(err => {
+                // Fallback prompt
+                prompt('Copy Media URL:', fullUrl);
+            });
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('media-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'media-toast';
+                toast.className = 'fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-surface-900 text-white text-xs font-semibold shadow-xl flex items-center gap-2 border border-white/10 transition-all duration-300 opacity-0 translate-y-2';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = '<i class="bi bi-check2-circle text-emerald-400 text-sm"></i> ' + msg;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
