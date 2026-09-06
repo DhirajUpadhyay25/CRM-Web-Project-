@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout(${isNew ? 'Create Article' : 'Edit Article'}, ~{::div})}">
+<body>
+    <div>
+        <!-- Top Navigation & Header -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <a th:href="@{/admin/blogs}" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1 transition-colors">
+                        <i class="bi bi-arrow-left"></i> Back to Articles
+                    </a>
+                </div>
+                <h1 class="text-2xl font-bold text-surface-900" th:text="${isNew ? 'Write New Blog Article' : 'Edit Article: ' + blog.title}">Write New Blog Article</h1>
+                <p class="text-gray-500 text-sm">Author rich educational content, assign categories, optimize SEO metadata, and configure publishing.</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <a th:href="@{/admin/blogs}" class="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 font-semibold rounded-xl text-xs transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" form="blogForm" name="saveAndContinue" value="true" class="px-4 py-2 bg-white border border-surface-200 hover:bg-surface-50 text-surface-800 font-semibold rounded-xl text-xs transition-colors shadow-sm">
+                    Save & Continue
+                </button>
+                <button type="submit" form="blogForm" name="saveAndContinue" value="false" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-sm hover:shadow-md flex items-center gap-1.5">
+                    <i class="bi bi-check-lg text-sm"></i> Save Article
+                </button>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-exclamation-triangle-fill text-rose-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 text-sm"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-check-circle-fill text-emerald-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${successMsg}"></span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Main Form -->
+        <form id="blogForm" th:action="${isNew ? '/admin/blogs/create' : '/admin/blogs/' + blog.id + '/edit'}" th:object="${blog}" method="post">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Left 2 Columns: Main Content -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- Title & Slug Card -->
+                    <div class="bg-white rounded-2xl border border-surface-200 p-5 sm:p-6 shadow-sm space-y-4">
+                        <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2 border-b border-surface-100 pb-3">
+                            <i class="bi bi-card-heading text-brand-600"></i> Article Essentials
+                        </h3>
+
+                        <!-- Title -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Article Title <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" th:field="*{title}" id="blogTitle" placeholder="e.g. Full-Stack Developer Roadmap 2026: From Beginner to Pro" required
+                                   oninput="handleTitleInput(this.value)"
+                                   class="w-full px-4 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-base font-semibold text-surface-900 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+
+                        <!-- Slug / URL Identifier -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider">
+                                    URL Slug <span class="text-rose-500">*</span>
+                                </label>
+                                <button type="button" onclick="generateSlugFromTitle()" class="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors">
+                                    <i class="bi bi-magic mr-1"></i> Auto-Generate Slug
+                                </button>
+                            </div>
+                            <div class="flex rounded-xl shadow-sm">
+                                <span class="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-surface-200 bg-surface-100 text-gray-500 text-xs font-mono">
+                                    /blog/
+                                </span>
+                                <input type="text" th:field="*{slug}" id="blogSlug" placeholder="full-stack-developer-roadmap-2026" required
+                                       oninput="handleSlugInput(this.value)"
+                                       class="flex-1 min-w-0 block w-full px-3.5 py-2 rounded-none rounded-r-xl bg-surface-50 border border-surface-200 text-sm font-mono focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                            </div>
+                            <p class="text-[11px] text-gray-400 mt-1">Permanent public URL for this article.</p>
+                        </div>
+
+                        <!-- Excerpt -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Excerpt / Short Summary
+                            </label>
+                            <textarea th:field="*{excerpt}" id="blogExcerpt" rows="2" placeholder="Compelling 2-sentence summary displayed on cards and search results..."
+                                      class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Rich Content Editor Card -->
+                    <div class="bg-white rounded-2xl border border-surface-200 p-5 sm:p-6 shadow-sm space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-surface-100 pb-3">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-code-square text-brand-600"></i> Article Body (HTML)
+                            </h3>
+                            <span class="text-xs text-gray-400">Supports rich HTML tags & formatting</span>
+                        </div>
+
+                        <!-- Formatting Toolbar -->
+                        <div class="flex flex-wrap items-center gap-1 p-2 bg-surface-50 border border-surface-200 rounded-xl text-xs">
+                            <button type="button" onclick="formatDoc('b')" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 font-bold transition-colors" title="Bold">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" onclick="formatDoc('i')" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 italic transition-colors" title="Italic">
+                                <em>I</em>
+                            </button>
+                            <span class="w-px h-5 bg-surface-200 mx-1"></span>
+                            <button type="button" onclick="insertTag('h2')" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 font-semibold transition-colors" title="Heading 2">
+                                H2
+                            </button>
+                            <button type="button" onclick="insertTag('h3')" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 font-semibold transition-colors" title="Heading 3">
+                                H3
+                            </button>
+                            <button type="button" onclick="insertTag('p')" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 transition-colors" title="Paragraph">
+                                ¶ P
+                            </button>
+                            <span class="w-px h-5 bg-surface-200 mx-1"></span>
+                            <button type="button" onclick="insertList()" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 transition-colors" title="Bullet List">
+                                <i class="bi bi-list-ul"></i> List
+                            </button>
+                            <button type="button" onclick="insertBlockquote()" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 transition-colors" title="Blockquote">
+                                <i class="bi bi-quote"></i> Quote
+                            </button>
+                            <button type="button" onclick="insertLink()" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 transition-colors" title="Insert Link">
+                                <i class="bi bi-link-45deg"></i> Link
+                            </button>
+                            <button type="button" onclick="insertTag('code')" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 font-mono transition-colors" title="Inline Code">
+                                &lt;/&gt;
+                            </button>
+                            <button type="button" onclick="insertHr()" class="p-1.5 px-2 bg-white hover:bg-surface-100 border border-surface-200 rounded-lg text-surface-800 transition-colors" title="Horizontal Divider">
+                                ― Divider
+                            </button>
+                        </div>
+
+                        <!-- Content Textarea -->
+                        <div>
+                            <textarea th:field="*{content}" id="blogContent" rows="18" placeholder="<h2>Your Section Title</h2><p>Start writing your educational article content here...</p>"
+                                      class="w-full font-mono text-sm px-4 py-3 bg-surface-50 border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none leading-relaxed transition-all"></textarea>
+                        </div>
+
+                        <!-- Featured Banner & Tags Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                    <i class="bi bi-image text-gray-400 mr-1"></i> Cover Image URL
+                                </label>
+                                <input type="text" th:field="*{featuredImage}" placeholder="https://images.unsplash.com/photo-..."
+                                       class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                    <i class="bi bi-tags text-gray-400 mr-1"></i> Tags (Comma Separated)
+                                </label>
+                                <input type="text" th:field="*{tags}" placeholder="e.g. java, springboot, webdev, react"
+                                       class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 1 Column: Metadata, Category & SEO -->
+                <div class="space-y-6">
+
+                    <!-- Publishing Settings Card -->
+                    <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm space-y-4">
+                        <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2 border-b border-surface-100 pb-3">
+                            <i class="bi bi-gear-wide-connected text-brand-600"></i> Publishing & Category
+                        </h3>
+
+                        <!-- Category -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Article Category
+                            </label>
+                            <select name="categoryId"
+                                    class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                                <option value="">-- Select Category --</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${blog.blogCategory != null and blog.blogCategory.id == cat.id}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Publication Status
+                            </label>
+                            <select th:field="*{status}" id="statusSelect" onchange="handleStatusChange(this.value)"
+                                    class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                                <option th:each="st : ${contentStatuses}" th:value="${st}" th:text="${st.displayName}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Featured Checkbox Toggle -->
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50/50 border border-amber-200/60">
+                            <input type="checkbox" th:field="*{isFeatured}" id="isFeaturedCheck" class="w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                            <label for="isFeaturedCheck" class="text-xs font-semibold text-amber-900 cursor-pointer">
+                                <i class="bi bi-star-fill text-amber-500 mr-1"></i> Feature on Website Homepage
+                            </label>
+                        </div>
+
+                        <!-- Visibility -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Access Visibility
+                            </label>
+                            <select th:field="*{visibility}"
+                                    class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                                <option th:each="vis : ${contentVisibilities}" th:value="${vis}" th:text="${vis.displayName}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Author Display Name -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Author Name
+                            </label>
+                            <input type="text" th:field="*{author}" placeholder="e.g. EduTake Editorial Team"
+                                   class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+
+                        <!-- Related Course (CTA link) -->
+                        <div>
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Related Course Link (Optional)
+                            </label>
+                            <select th:field="*{relatedCourse}"
+                                    class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                                <option value="">-- None (No course CTA) --</option>
+                                <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Scheduled At (conditional) -->
+                        <div id="scheduledAtContainer" class="hidden">
+                            <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                                Scheduled Release Date & Time
+                            </label>
+                            <input type="datetime-local" th:field="*{scheduledAt}"
+                                   class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                        </div>
+
+                        <!-- Timestamps Info -->
+                        <div class="pt-3 border-t border-surface-100 text-xs space-y-2 text-gray-500">
+                            <div class="flex justify-between">
+                                <span>Total Views:</span>
+                                <span class="font-semibold text-blue-600" th:text="${blog.viewCount != null ? blog.viewCount : 0}">0</span>
+                            </div>
+                            <div th:if="${blog.publishedAt != null}" class="flex justify-between">
+                                <span>Published:</span>
+                                <span class="font-medium text-surface-900" th:text="${#temporals.format(blog.publishedAt, 'MMM dd, yyyy, hh:mm a')}">Sep 06, 2026</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEO & SERP Optimization Card -->
+                    <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-surface-100 pb-3">
+                            <h3 class="text-sm font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-search text-brand-600"></i> SEO Optimization
+                            </h3>
+                            <span class="text-[11px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">Search Ready</span>
+                        </div>
+
+                        <!-- SEO Meta Title -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider">
+                                    SEO Meta Title
+                                </label>
+                                <span id="seoTitleCount" class="text-[11px] text-gray-400">0 / 60</span>
+                            </div>
+                            <input type="text" th:field="*{seoTitle}" id="seoTitle" placeholder="Search engine title (default: Article Title)"
+                                   oninput="updateSeoPreview()"
+                                   class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+
+                        <!-- SEO Meta Description -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider">
+                                    SEO Meta Description
+                                </label>
+                                <span id="seoDescCount" class="text-[11px] text-gray-400">0 / 160</span>
+                            </div>
+                            <textarea th:field="*{seoDescription}" id="seoDescription" rows="3" placeholder="Compelling summary for Google search snippet (150-160 chars)..."
+                                      oninput="updateSeoPreview()"
+                                      class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Live Google SERP Mockup Card -->
+                    <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-2">
+                        <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <i class="bi bi-google text-blue-500"></i> Live Search Snippet Mockup
+                        </span>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm font-sans space-y-1">
+                            <div class="flex items-center gap-1 text-xs text-slate-600 truncate">
+                                <span class="text-slate-400">https://edutake.com</span>
+                                <span>› blog ›</span>
+                                <span id="serpSlug" class="text-slate-700 font-medium font-mono">slug</span>
+                            </div>
+                            <h4 id="serpTitle" class="text-blue-700 font-semibold text-sm leading-snug line-clamp-1">
+                                Article Title
+                            </h4>
+                            <p id="serpDesc" class="text-slate-600 text-xs leading-relaxed line-clamp-2">
+                                Brief summary of the article shown in search results...
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Client Scripts -->
+    <script>
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-]+/g, '')
+                .replace(/\-\-+/g, '-')
+                .replace(/^-+/, '')
+                .replace(/-+$/, '');
+        }
+
+        function handleTitleInput(title) {
+            const slugInput = document.getElementById('blogSlug');
+            if (!slugInput.value || slugInput.getAttribute('data-auto') === 'true') {
+                slugInput.value = slugify(title);
+                slugInput.setAttribute('data-auto', 'true');
+            }
+            updateSeoPreview();
+        }
+
+        function handleSlugInput(slug) {
+            document.getElementById('blogSlug').setAttribute('data-auto', 'false');
+            updateSeoPreview();
+        }
+
+        function generateSlugFromTitle() {
+            const title = document.getElementById('blogTitle').value;
+            if (title) {
+                document.getElementById('blogSlug').value = slugify(title);
+                updateSeoPreview();
+            }
+        }
+
+        function handleStatusChange(status) {
+            const container = document.getElementById('scheduledAtContainer');
+            if (status === 'SCHEDULED') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function updateSeoPreview() {
+            const titleVal = document.getElementById('blogTitle').value || 'Article Title';
+            const slugVal = document.getElementById('blogSlug').value || 'slug';
+            const excerptVal = document.getElementById('blogExcerpt').value || '';
+            const seoTitleVal = document.getElementById('seoTitle').value || titleVal;
+            const seoDescVal = document.getElementById('seoDescription').value || excerptVal || 'No excerpt provided yet.';
+
+            document.getElementById('seoTitleCount').textContent = seoTitleVal.length + ' / 60';
+            document.getElementById('seoDescCount').textContent = seoDescVal.length + ' / 160';
+
+            document.getElementById('serpSlug').textContent = slugVal;
+            document.getElementById('serpTitle').textContent = seoTitleVal;
+            document.getElementById('serpDesc').textContent = seoDescVal;
+        }
+
+        // Toolbar Helpers
+        function formatDoc(tag) {
+            const textarea = document.getElementById('blogContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end) || 'text';
+            const replacement = `<${tag}>${selected}</${tag}>`;
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + tag.length + 2, start + tag.length + 2 + selected.length);
+        }
+
+        function insertTag(tag) {
+            const textarea = document.getElementById('blogContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end) || 'Heading Text';
+            const replacement = `\n<${tag}>${selected}</${tag}>\n`;
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+        }
+
+        function insertList() {
+            const textarea = document.getElementById('blogContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const replacement = `\n<ul>\n    <li>Key takeaway 1</li>\n    <li>Key takeaway 2</li>\n    <li>Key takeaway 3</li>\n</ul>\n`;
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+        }
+
+        function insertBlockquote() {
+            const textarea = document.getElementById('blogContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end) || 'Author quote or important takeaway...';
+            const replacement = `\n<blockquote>${selected}</blockquote>\n`;
+            textarea.value = text.substring(0, start) + replacement + text.substring(end);
+            textarea.focus();
+        }
+
+        function insertLink() {
+            const url = prompt('Enter URL link:', 'https://');
+            if (url) {
+                const textarea = document.getElementById('blogContent');
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const selected = text.substring(start, end) || 'Link Text';
+                const replacement = `<a href="${url}">${selected}</a>`;
+                textarea.value = text.substring(0, start) + replacement + text.substring(end);
+                textarea.focus();
+            }
+        }
+
+        function insertHr() {
+            const textarea = document.getElementById('blogContent');
+            const start = textarea.selectionStart;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + '\n<hr class="my-6 border-surface-200">\n' + text.substring(start);
+            textarea.focus();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusSelect = document.getElementById('statusSelect');
+            if (statusSelect) handleStatusChange(statusSelect.value);
+            updateSeoPreview();
+        });
+    </script>
+</body>
+</html>
