@@ -108,6 +108,17 @@ public enum AuditEventType {
     FEEDBACK_CLOSED(AuditCategory.FEEDBACK, AuditSeverity.INFO, "Feedback Closed"),
     FEEDBACK_DELETED(AuditCategory.FEEDBACK, AuditSeverity.MEDIUM, "Feedback Deleted"),
 
+    // Content Operations
+    PAGE_CREATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Page Created"),
+    PAGE_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Page Updated"),
+    PAGE_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Page Deleted"),
+    BLOG_CREATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Blog Created"),
+    BLOG_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Blog Updated"),
+    BLOG_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Blog Deleted"),
+    FAQ_CREATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "FAQ Created"),
+    FAQ_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "FAQ Updated"),
+    FAQ_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "FAQ Deleted"),
+
     // System & Errors
     SYSTEM_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "System Error Encountered"),
     DATABASE_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "Database Failure"),

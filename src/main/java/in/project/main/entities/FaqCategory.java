@@ -75,8 +75,16 @@ public class FaqCategory {
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
 
+    public String getIconClassSafe() {
+        if (iconClass != null && !iconClass.isBlank()) return iconClass;
+        return "bi-question-circle";
+    }
+
     public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public void setActive(boolean active) { this.isActive = active; }
+
+    public boolean getIsActive() { return isActive; }
+    public void setIsActive(boolean active) { this.isActive = active; }
 
     public String getContextTag() { return contextTag; }
     public void setContextTag(String contextTag) { this.contextTag = contextTag; }

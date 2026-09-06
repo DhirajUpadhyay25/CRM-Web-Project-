@@ -92,8 +92,38 @@ public class Faq {
 
     // --- Convenience Methods ---
     public String getCategoryName() {
-        if (faqCategory != null) return faqCategory.getName();
-        return category;
+        if (faqCategory != null && faqCategory.getName() != null) return faqCategory.getName();
+        if (category != null && !category.isBlank()) return category;
+        return "General";
+    }
+
+    public String getContextTag() {
+        if (faqCategory != null && faqCategory.getContextTag() != null) {
+            return faqCategory.getContextTag();
+        }
+        return "GENERAL";
+    }
+
+    public int getHelpfulnessRate() {
+        long total = (helpfulCount != null ? helpfulCount : 0L) + (notHelpfulCount != null ? notHelpfulCount : 0L);
+        if (total == 0) return 100;
+        long h = helpfulCount != null ? helpfulCount : 0L;
+        return (int) Math.round(((double) h / total) * 100);
+    }
+
+    public String getAnswerSnippet() {
+        if (answer == null) return "";
+        String clean = answer.replaceAll("<[^>]*>", "").trim();
+        if (clean.length() <= 120) return clean;
+        return clean.substring(0, 117) + "...";
+    }
+
+    public boolean isIsActive() {
+        return isActive != null && isActive;
+    }
+
+    public int getSortOrderSafe() {
+        return sortOrder != null ? sortOrder : 0;
     }
 
     // --- Getters and Setters ---

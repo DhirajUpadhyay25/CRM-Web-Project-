@@ -168,7 +168,7 @@
             </div>
 
             <!-- CONTENT Section -->
-            <div class="mt-3" th:if="${@rbac.can('pages.view') or @rbac.can('blogs.view') or @rbac.can('media.view')}">
+            <div class="mt-3" th:if="${@rbac.can('pages.view') or @rbac.can('blogs.view') or @rbac.can('faqs.view') or @rbac.can('feedback.view') or @rbac.can('testimonials.view') or @rbac.can('media.view')}">
                 <button onclick="toggleSection('content')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
                     <span>Content</span>
                     <i id="content-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>

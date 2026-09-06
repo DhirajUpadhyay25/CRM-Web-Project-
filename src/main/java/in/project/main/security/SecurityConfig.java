@@ -53,6 +53,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         
         http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/faq/api/**", "/api/**"))
             .addFilterBefore(maintenanceModeFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authz -> authz
                 // Student-specific Enrollment Routes (must come before generic /courses/** permitAll)
@@ -66,7 +67,7 @@ public class SecurityConfig {
                 // Public Routes
                 .requestMatchers(
                     "/", "/index", "/login", "/register", "/regForm", "/health", "/maintenance",
-                    "/courses", "/courses/**", "/services", "/about", "/contact", "/faq",
+                    "/courses", "/courses/**", "/services", "/about", "/contact", "/faq", "/faq/**", "/faqs", "/faqs/**",
                     "/page/**", "/p/**",
                     "/blogs", "/blogs/**", "/blog/**", "/articles", "/articles/**",
                     "/api/coupons/validate",

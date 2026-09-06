@@ -1,84 +1,181 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/base-head :: head('FAQ | EduTake')}"></head>
+<head th:replace="~{fragments/base-head :: head('FAQ & Help Center | EduTake')}"></head>
 
-<body class="bg-surface-950 text-white antialiased">
+<body class="bg-surface-950 text-white antialiased selection:bg-brand-500 selection:text-white">
 
     <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
 
-    <main class="py-24 min-h-screen">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main class="py-20 lg:py-28 min-h-screen relative overflow-hidden">
+        
+        <!-- Background Gradient Glows -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-brand-600/15 via-indigo-600/10 to-transparent blur-[140px] pointer-events-none -z-10"></div>
+        <div class="absolute bottom-10 right-10 w-[400px] h-[300px] bg-brand-500/10 blur-[120px] pointer-events-none -z-10"></div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="text-center mb-16">
-                <span class="text-xs font-semibold tracking-[0.25em] uppercase text-brand-400">Support</span>
-                <h1 class="mt-4 text-4xl font-extrabold tracking-tight">
-                    Frequently Asked <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Questions</span>
+            <!-- Hero Header -->
+            <div class="text-center mb-12">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-xs font-semibold tracking-wide text-brand-400 mb-4">
+                    <i class="bi bi-question-diamond-fill"></i>
+                    <span>EduTake Support & Knowledge Base</span>
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                    Frequently Asked <span class="bg-gradient-to-r from-brand-400 via-indigo-300 to-brand-500 bg-clip-text text-transparent">Questions</span>
                 </h1>
+                <p class="mt-4 text-gray-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                    Have questions regarding course access, live mentorship batches, certification validation, refunds, or technical setups? We've got you covered.
+                </p>
+
+                <!-- Live Search Bar -->
+                <div class="mt-8 max-w-xl mx-auto relative">
+                    <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-base"></i>
+                    <input type="text" id="faqSearchInput" placeholder="Search keywords (e.g., certificates, refund, assignments, live classes)..."
+                           th:value="${search}"
+                           class="w-full pl-11 pr-10 py-3.5 rounded-2xl bg-surface-900/90 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 shadow-xl backdrop-blur-md transition-all"/>
+                    <button type="button" id="clearSearchBtn" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-sm">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- FAQ Accordion using Bootstrap JS since it's already included in the project, combined with Tailwind CSS -->
-            <div class="space-y-4" id="faqAccordion">
-                
-                <!-- FAQ 1 -->
-                <div class="bg-surface-900 border border-white/5 rounded-2xl overflow-hidden">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1">
-                        <span class="font-semibold text-lg">How do I access my purchased courses?</span>
-                        <i class="bi bi-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div id="faq1" class="collapse show" data-bs-parent="#faqAccordion">
-                        <div class="px-6 pb-6 pt-2 text-gray-400 leading-relaxed text-sm">
-                            Once you complete your purchase, log in to your account and navigate to the "My Courses" section from your profile dashboard. All your active courses will be listed there for immediate access.
+            <!-- Category Filter Pills -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-12" id="categoryFilterContainer">
+                <button type="button" data-category="all"
+                        class="category-pill active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all border bg-brand-600 text-white border-brand-500 shadow-sm shadow-brand-500/20">
+                    <i class="bi bi-grid-fill mr-1.5"></i> All Questions
+                </button>
+                <button type="button" th:each="cat : ${categories}"
+                        th:data-category="${cat.slug}"
+                        class="category-pill px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all border bg-surface-900/70 hover:bg-surface-800 text-gray-300 hover:text-white border-white/5">
+                    <i class="bi mr-1.5 text-brand-400" th:classappend="${cat.getIconClassSafe()}"></i>
+                    <span th:text="${cat.name}">General</span>
+                </button>
+            </div>
+
+            <!-- Grouped FAQ Categories Container -->
+            <div class="space-y-10" id="faqsContainer">
+
+                <div th:each="entry : ${groupedFaqs}"
+                     th:data-category-slug="${entry.key.slug}"
+                     class="faq-category-section space-y-4">
+                    
+                    <!-- Category Header -->
+                    <div class="flex items-center gap-3 pb-2 border-b border-white/10">
+                        <span class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center text-base">
+                            <i class="bi" th:classappend="${entry.key.getIconClassSafe()}"></i>
+                        </span>
+                        <div>
+                            <h2 class="text-lg font-bold text-white" th:text="${entry.key.name}">Category Name</h2>
+                            <p class="text-xs text-gray-400" th:if="${entry.key.description != null}" th:text="${entry.key.description}">Category description</p>
                         </div>
                     </div>
+
+                    <!-- Accordion List for this Category -->
+                    <div class="space-y-3">
+                        <div th:each="faq, iterStat : ${entry.value}"
+                             th:id="'faq-card-' + ${faq.id}"
+                             th:data-faq-id="${faq.id}"
+                             class="faq-item bg-surface-900/80 border border-white/5 hover:border-white/15 rounded-2xl overflow-hidden transition-all duration-200">
+                            
+                            <!-- Accordion Header Button -->
+                            <button type="button"
+                                    th:data-target-id="'faq-body-' + ${faq.id}"
+                                    th:data-faq-id="${faq.id}"
+                                    class="faq-toggle-btn w-full px-5 py-4 sm:px-6 sm:py-5 text-left flex justify-between items-center gap-4 focus:outline-none transition-colors">
+                                <span class="font-semibold text-sm sm:text-base text-gray-100 faq-question-text" th:text="${faq.question}">
+                                    Question title here?
+                                </span>
+                                <span class="w-7 h-7 rounded-lg bg-white/5 text-gray-400 flex items-center justify-center text-xs shrink-0 transition-transform duration-200 faq-icon">
+                                    <i class="bi bi-chevron-down"></i>
+                                </span>
+                            </button>
+
+                            <!-- Accordion Body -->
+                            <div th:id="'faq-body-' + ${faq.id}" class="faq-collapse hidden px-5 sm:px-6 pb-5 pt-1 text-gray-300 text-xs sm:text-sm leading-relaxed border-t border-white/5 space-y-4">
+                                <div class="faq-answer-text prose prose-invert max-w-none text-gray-300" th:utext="${faq.answer}">
+                                    Answer rich content here...
+                                </div>
+
+                                <!-- Helpful Feedback Bar -->
+                                <div class="pt-3 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-gray-400">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400">Was this article helpful?</span>
+                                        <div class="feedback-actions flex items-center gap-1.5" th:id="'feedback-box-' + ${faq.id}">
+                                            <button type="button"
+                                                    th:data-faq-id="${faq.id}"
+                                                    th:data-helpful="true"
+                                                    onclick="submitFaqFeedback(this)"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 border border-white/10 transition-colors">
+                                                <i class="bi bi-hand-thumbs-up"></i>
+                                                <span>Yes</span>
+                                                <span class="text-[11px] opacity-70 font-mono" th:text="'(' + ${faq.helpfulCount} + ')'"></span>
+                                            </button>
+                                            <button type="button"
+                                                    th:data-faq-id="${faq.id}"
+                                                    th:data-helpful="false"
+                                                    onclick="submitFaqFeedback(this)"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 border border-white/10 transition-colors">
+                                                <i class="bi bi-hand-thumbs-down"></i>
+                                                <span>No</span>
+                                            </button>
+                                        </div>
+                                        <div class="feedback-thankyou hidden text-emerald-400 font-medium" th:id="'feedback-thanks-' + ${faq.id}">
+                                            <i class="bi bi-check-circle-fill mr-1"></i> Thank you for your feedback!
+                                        </div>
+                                    </div>
+
+                                    <div class="text-[11px] text-gray-500">
+                                        <span><i class="bi bi-eye mr-1"></i> <strong th:text="${faq.viewCount}">0</strong> views</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- FAQ 2 -->
-                <div class="bg-surface-900 border border-white/5 rounded-2xl overflow-hidden">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
-                        <span class="font-semibold text-lg">Do you provide certificates upon completion?</span>
-                        <i class="bi bi-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div id="faq2" class="collapse" data-bs-parent="#faqAccordion">
-                        <div class="px-6 pb-6 pt-2 text-gray-400 leading-relaxed text-sm">
-                            Yes! After successfully completing 100% of the course modules and passing any required assessments, you will automatically receive a verifiable digital certificate of completion.
-                        </div>
+                <!-- Empty Search Result Card -->
+                <div id="noResultsCard" class="hidden text-center py-16 px-4 bg-surface-900/40 rounded-3xl border border-white/5">
+                    <div class="w-16 h-16 rounded-2xl bg-white/5 text-gray-400 flex items-center justify-center text-3xl mx-auto mb-3">
+                        <i class="bi bi-search"></i>
                     </div>
-                </div>
-
-                <!-- FAQ 3 -->
-                <div class="bg-surface-900 border border-white/5 rounded-2xl overflow-hidden">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
-                        <span class="font-semibold text-lg">Can I get a refund if I'm not satisfied?</span>
-                        <i class="bi bi-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div id="faq3" class="collapse" data-bs-parent="#faqAccordion">
-                        <div class="px-6 pb-6 pt-2 text-gray-400 leading-relaxed text-sm">
-                            We offer a 7-day money-back guarantee on all our online courses. If you are not completely satisfied with the content, simply contact our support team within 7 days of purchase for a full refund.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FAQ 4 -->
-                <div class="bg-surface-900 border border-white/5 rounded-2xl overflow-hidden">
-                    <button class="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
-                        <span class="font-semibold text-lg">Are the live classes recorded?</span>
-                        <i class="bi bi-chevron-down text-gray-400 transition-transform duration-300"></i>
-                    </button>
-                    <div id="faq4" class="collapse" data-bs-parent="#faqAccordion">
-                        <div class="px-6 pb-6 pt-2 text-gray-400 leading-relaxed text-sm">
-                            Yes, all live workshops and classes are recorded and made available to enrolled students within 24 hours of the session ending. You will have lifetime access to these recordings.
-                        </div>
-                    </div>
+                    <h3 class="text-base font-bold text-white mb-1">No Matching FAQs Found</h3>
+                    <p class="text-xs text-gray-400 mb-5 max-w-sm mx-auto">
+                        We couldn't find any questions matching your search term. Feel free to contact our student support team directly.
+                    </p>
+                    <a href="/contact" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-sm transition-all">
+                        <i class="bi bi-headset"></i>
+                        <span>Contact Support</span>
+                    </a>
                 </div>
 
             </div>
-            
-            <div class="text-center mt-12">
-                <p class="text-gray-500 mb-4">Still have questions?</p>
-                <a href="/contact" class="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl transition-all border border-white/10">
-                    Contact Support
-                </a>
+
+            <!-- "Still Have Questions?" CTA Section -->
+            <div class="mt-20 p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-surface-900/90 to-surface-900/50 border border-white/10 text-center relative overflow-hidden backdrop-blur-xl">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="max-w-xl mx-auto relative z-10">
+                    <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-400 text-2xl mb-4">
+                        <i class="bi bi-chat-dots-fill"></i>
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Still Have Questions?</h2>
+                    <p class="text-xs sm:text-sm text-gray-400 mb-6 leading-relaxed">
+                        Can't find the answers you're looking for? Our dedicated admissions counselors and technical mentors are available 24/7.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <a href="/contact" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition-all">
+                            <i class="bi bi-envelope-fill"></i>
+                            <span>Contact Support</span>
+                        </a>
+                        <a href="/courses" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-semibold text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all">
+                            <i class="bi bi-collection-play-fill"></i>
+                            <span>Explore Courses</span>
+                        </a>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -86,19 +183,140 @@
 
     <div th:replace="~{fragments/tw-footer :: footer}"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Interactive Search, Accordion, and Feedback Script -->
     <script>
-        // Simple JS to rotate the chevron icon when accordion opens/closes
-        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
-            button.addEventListener('click', () => {
-                const icon = button.querySelector('.bi-chevron-down');
-                if (button.classList.contains('collapsed')) {
-                    icon.style.transform = 'rotate(0deg)';
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('faqSearchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const categoryPills = document.querySelectorAll('.category-pill');
+            const categorySections = document.querySelectorAll('.faq-category-section');
+            const faqItems = document.querySelectorAll('.faq-item');
+            const noResultsCard = document.getElementById('noResultsCard');
+
+            // --- 1. Accordion Toggle Logic ---
+            document.querySelectorAll('.faq-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target-id');
+                    const faqId = this.getAttribute('data-faq-id');
+                    const body = document.getElementById(targetId);
+                    const icon = this.querySelector('.faq-icon');
+
+                    if (body.classList.contains('hidden')) {
+                        body.classList.remove('hidden');
+                        icon.style.transform = 'rotate(180deg)';
+                        icon.classList.add('text-brand-400');
+
+                        // Increment view counter once on expand
+                        if (!btn.hasAttribute('data-viewed')) {
+                            btn.setAttribute('data-viewed', 'true');
+                            fetch('/faq/api/' + faqId + '/view', { method: 'POST' }).catch(() => {});
+                        }
+                    } else {
+                        body.classList.add('hidden');
+                        icon.style.transform = 'rotate(0deg)';
+                        icon.classList.remove('text-brand-400');
+                    }
+                });
+            });
+
+            // --- 2. Live Search Filter ---
+            function filterFaqs() {
+                const term = searchInput.value.trim().toLowerCase();
+                const activeCatBtn = document.querySelector('.category-pill.active');
+                const selectedCategory = activeCatBtn ? activeCatBtn.getAttribute('data-category') : 'all';
+
+                if (term.length > 0) {
+                    clearBtn.classList.remove('hidden');
                 } else {
-                    icon.style.transform = 'rotate(180deg)';
+                    clearBtn.classList.add('hidden');
                 }
+
+                let totalVisible = 0;
+
+                categorySections.forEach(section => {
+                    const sectionCategory = section.getAttribute('data-category-slug');
+                    const matchesCategory = (selectedCategory === 'all' || selectedCategory === sectionCategory);
+
+                    let visibleInSection = 0;
+                    const itemsInSection = section.querySelectorAll('.faq-item');
+
+                    itemsInSection.forEach(item => {
+                        const question = item.querySelector('.faq-question-text').innerText.toLowerCase();
+                        const answer = item.querySelector('.faq-answer-text').innerText.toLowerCase();
+                        const matchesSearch = term === '' || question.includes(term) || answer.includes(term);
+
+                        if (matchesCategory && matchesSearch) {
+                            item.classList.remove('hidden');
+                            visibleInSection++;
+                            totalVisible++;
+
+                            // Auto-expand on search match if user typed 3+ chars
+                            if (term.length >= 3) {
+                                const body = item.querySelector('.faq-collapse');
+                                const icon = item.querySelector('.faq-icon');
+                                body.classList.remove('hidden');
+                                icon.style.transform = 'rotate(180deg)';
+                            }
+                        } else {
+                            item.classList.add('hidden');
+                        }
+                    });
+
+                    if (visibleInSection > 0) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+
+                if (totalVisible === 0) {
+                    noResultsCard.classList.remove('hidden');
+                } else {
+                    noResultsCard.classList.add('hidden');
+                }
+            }
+
+            searchInput.addEventListener('input', filterFaqs);
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                filterFaqs();
+                searchInput.focus();
+            });
+
+            // --- 3. Category Filter Pills ---
+            categoryPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    categoryPills.forEach(p => {
+                        p.classList.remove('active', 'bg-brand-600', 'text-white', 'border-brand-500', 'shadow-sm', 'shadow-brand-500/20');
+                        p.classList.add('bg-surface-900/70', 'text-gray-300', 'border-white/5');
+                    });
+
+                    this.classList.add('active', 'bg-brand-600', 'text-white', 'border-brand-500', 'shadow-sm', 'shadow-brand-500/20');
+                    this.classList.remove('bg-surface-900/70', 'text-gray-300', 'border-white/5');
+
+                    filterFaqs();
+                });
             });
         });
+
+        // --- 4. Submit Feedback (Was this helpful?) ---
+        function submitFaqFeedback(btn) {
+            const faqId = btn.getAttribute('data-faq-id');
+            const helpful = btn.getAttribute('data-helpful') === 'true';
+
+            fetch('/faq/api/' + faqId + '/feedback?helpful=' + helpful, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                const box = document.getElementById('feedback-box-' + faqId);
+                const thanks = document.getElementById('feedback-thanks-' + faqId);
+                if (box) box.classList.add('hidden');
+                if (thanks) thanks.classList.remove('hidden');
+            })
+            .catch(err => console.error('Feedback error:', err));
+        }
     </script>
 </body>
 </html>

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import in.project.main.entities.Course;
@@ -85,6 +86,9 @@ public class PublicController {
 
     @Autowired
     private in.project.main.services.BlogService blogService;
+
+    @Autowired
+    private in.project.main.services.FaqService faqService;
 
     @Value("${app.razorpay.key-id}")
     private String razorpayKeyId;
@@ -358,9 +362,40 @@ public class PublicController {
         return "public/contact";
     }
 
-    @GetMapping("/faq")
-    public String openFaqPage() {
+    @GetMapping({"/faq", "/faqs"})
+    public String openFaqPage(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
+            Model model) {
+
+        List<in.project.main.entities.FaqCategory> categories = faqService.getActiveCategories();
+        Map<in.project.main.entities.FaqCategory, List<in.project.main.entities.Faq>> groupedFaqs = faqService.getPublicFaqsGroupedByCategory(search);
+        List<in.project.main.entities.Faq> allActiveFaqs = faqService.searchActiveFaqs(search);
+
+        model.addAttribute("categories", categories);
+        model.addAttribute("groupedFaqs", groupedFaqs);
+        model.addAttribute("allFaqs", allActiveFaqs);
+        model.addAttribute("search", search);
+        model.addAttribute("selectedCategory", category);
+
         return "public/faq";
+    }
+
+    @PostMapping("/faq/api/{id}/feedback")
+    @ResponseBody
+    public Map<String, Object> voteFaqFeedback(
+            @PathVariable Long id,
+            @RequestParam boolean helpful) {
+        return faqService.voteHelpful(id, helpful);
+    }
+
+    @PostMapping("/faq/api/{id}/view")
+    @ResponseBody
+    public Map<String, Object> recordFaqView(@PathVariable Long id) {
+        faqService.incrementView(id);
+        Map<String, Object> res = new HashMap<>();
+        res.put("success", true);
+        return res;
     }
 
     /**

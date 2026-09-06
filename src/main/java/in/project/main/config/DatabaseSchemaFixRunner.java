@@ -219,6 +219,14 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 jdbcTemplate.execute("UPDATE testimonial SET created_at = NOW() WHERE created_at IS NULL");
                 jdbcTemplate.execute("UPDATE testimonial SET updated_at = NOW() WHERE updated_at IS NULL");
 
+                try {
+                    jdbcTemplate.execute("ALTER TABLE faq MODIFY COLUMN answer TEXT NULL");
+                    jdbcTemplate.execute("ALTER TABLE faq MODIFY COLUMN question VARCHAR(500) NOT NULL");
+                    jdbcTemplate.execute("ALTER TABLE faq MODIFY COLUMN category VARCHAR(64) NULL");
+                } catch (Exception e) {
+                    log.debug("Notice on altering faq table columns: {}", e.getMessage());
+                }
+
                 jdbcTemplate.execute("UPDATE faq SET is_active = TRUE WHERE is_active IS NULL");
                 jdbcTemplate.execute("UPDATE faq SET sort_order = 0 WHERE sort_order IS NULL");
                 jdbcTemplate.execute("UPDATE faq SET view_count = 0 WHERE view_count IS NULL");
