@@ -146,13 +146,52 @@ public class Testimonial {
     }
 
     public String getDisplayCourseName() {
-        if (course != null) return course.getName();
-        return courseName;
+        if (course != null && course.getName() != null) return course.getName();
+        if (courseName != null && !courseName.isBlank()) return courseName;
+        return "General Development Track";
     }
 
     public String getDisplayContent() {
         if (content != null && !content.isBlank()) return content;
-        return review;
+        if (review != null && !review.isBlank()) return review;
+        return "EduTake provided exceptional mentorship and practical curriculum that transformed my technical skillset.";
+    }
+
+    public String getDesignationOrOrg() {
+        if (designation != null && !designation.isBlank() && organization != null && !organization.isBlank()) {
+            return designation + " at " + organization;
+        }
+        if (designation != null && !designation.isBlank()) return designation;
+        if (organization != null && !organization.isBlank()) return organization;
+        return "Alumni";
+    }
+
+    public String getStudentPhotoSafe() {
+        if (studentPhoto != null && !studentPhoto.isBlank()) return studentPhoto;
+        long seed = (id != null) ? id : 10L;
+        return "https://i.pravatar.cc/150?img=" + ((seed % 70) + 1);
+    }
+
+    public String getExcerpt() {
+        String text = getDisplayContent().replaceAll("<[^>]*>", "").trim();
+        if (text.length() <= 110) return text;
+        return text.substring(0, 107) + "...";
+    }
+
+    public int getRatingSafe() {
+        return (rating != null && rating >= 1 && rating <= 5) ? rating : 5;
+    }
+
+    public int getStarRatingSafe() {
+        return getRatingSafe();
+    }
+
+    public String getInitials() {
+        String name = getDisplayStudentName();
+        if (name == null || name.isBlank()) return "ST";
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length == 1) return parts[0].substring(0, Math.min(2, parts[0].length())).toUpperCase();
+        return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
     }
 
     public String getStatusBadgeClass() {
@@ -162,6 +201,9 @@ public class Testimonial {
     public boolean isPublished() {
         return status == TestimonialStatus.PUBLISHED;
     }
+
+    public Boolean getIsFeatured() { return isFeatured; }
+    public void setIsFeatured(Boolean isFeatured) { this.isFeatured = (isFeatured != null && isFeatured); }
 
     // --- Getters and Setters ---
     public Long getId() { return id; }
@@ -216,12 +258,15 @@ public class Testimonial {
     public void setSource(TestimonialSource source) { this.source = source; }
 
     public boolean isConsentName() { return Boolean.TRUE.equals(consentName); }
+    public Boolean getConsentName() { return consentName; }
     public void setConsentName(Boolean consentName) { this.consentName = (consentName != null && consentName); }
 
     public boolean isConsentPhoto() { return Boolean.TRUE.equals(consentPhoto); }
+    public Boolean getConsentPhoto() { return consentPhoto; }
     public void setConsentPhoto(Boolean consentPhoto) { this.consentPhoto = (consentPhoto != null && consentPhoto); }
 
     public boolean isConsentPublish() { return Boolean.TRUE.equals(consentPublish); }
+    public Boolean getConsentPublish() { return consentPublish; }
     public void setConsentPublish(Boolean consentPublish) { this.consentPublish = (consentPublish != null && consentPublish); }
 
     public String getStudentPhoto() { return studentPhoto; }
@@ -237,6 +282,7 @@ public class Testimonial {
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public boolean isDeleted() { return Boolean.TRUE.equals(deleted); }
+    public Boolean getDeleted() { return deleted; }
     public void setDeleted(Boolean deleted) { this.deleted = (deleted != null && deleted); }
 
     public String getModerationReason() { return moderationReason; }

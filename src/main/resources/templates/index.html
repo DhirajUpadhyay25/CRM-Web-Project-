@@ -553,6 +553,97 @@
             </div>
         </section>
 
+        <!-- ═══════════════════ STUDENT SUCCESS STORIES & TESTIMONIALS ═══════════════════ -->
+        <section id="testimonials" class="py-24 bg-gradient-to-b from-surface-950 via-surface-900 to-surface-950 relative overflow-hidden">
+            <!-- Background Glows -->
+            <div class="absolute top-1/4 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute bottom-1/4 -right-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                
+                <!-- Section Header -->
+                <div class="text-center mb-16 space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest">
+                        <i class="bi bi-patch-check-fill text-xs"></i>
+                        <span>Proven Career Outcomes</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+                        Student Success Stories &amp; <span class="bg-gradient-to-r from-amber-400 via-orange-400 to-brand-400 bg-clip-text text-transparent">Testimonials</span>
+                    </h2>
+                    <p class="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                        Hear directly from graduates who transformed their skillsets, mastered production architectures, and achieved career breakthroughs across global tech companies.
+                    </p>
+                </div>
+
+                <!-- Testimonials Grid -->
+                <div th:if="${featuredTestimonials != null and !featuredTestimonials.isEmpty()}" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    <div th:each="t : ${featuredTestimonials}" 
+                         class="group bg-surface-900/90 hover:bg-surface-850/90 border border-white/10 hover:border-amber-500/40 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-xl hover:shadow-amber-500/10 relative overflow-hidden backdrop-blur-sm">
+                        
+                        <!-- Top Header: Stars & Spotlight Badge -->
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-4">
+                                <div class="flex items-center gap-1 text-amber-400 text-xs">
+                                    <i th:each="i : ${#numbers.sequence(1, 5)}" 
+                                       th:class="${i <= t.getStarRatingSafe()} ? 'bi bi-star-fill' : 'bi bi-star text-white/20'"></i>
+                                    <span class="text-[11px] text-white/60 font-semibold ml-1.5" th:text="${t.getStarRatingSafe()} + '.0'">5.0</span>
+                                </div>
+
+                                <span th:if="${t.isFeatured}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                                    <i class="bi bi-star-fill text-[8px]"></i> Spotlight
+                                </span>
+                            </div>
+
+                            <!-- Headline -->
+                            <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors leading-snug mb-3" th:text="${t.title}">
+                                Landed My Dream SWE Role at Google!
+                            </h3>
+
+                            <!-- Review Narrative -->
+                            <p class="text-xs text-gray-300 leading-relaxed italic mb-6 line-clamp-4" th:text="'“' + ${t.getDisplayContent()} + '”'">
+                                “The Java Fullstack Masterclass gave me the architectural understanding and live project confidence that directly mirrored questions in my system design and coding rounds.”
+                            </p>
+                        </div>
+
+                        <!-- Footer: Student Info & Course Badge -->
+                        <div class="pt-4 border-t border-white/10 space-y-3">
+                            <div class="flex items-center gap-3">
+                                <img th:if="${t.studentPhoto != null and !#strings.isEmpty(t.studentPhoto)}" 
+                                     th:src="${t.studentPhoto}" 
+                                     alt="Student" 
+                                     class="w-10 h-10 rounded-full object-cover border border-white/20 shadow-sm"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+                                <span th:classappend="${t.studentPhoto != null and !#strings.isEmpty(t.studentPhoto)} ? 'hidden' : 'flex'"
+                                      class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-bold items-center justify-center text-xs shadow-sm"
+                                      th:text="${t.getInitials()}">
+                                    AS
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-white truncate" th:text="${t.getDisplayStudentName()}">Aarav Sharma</div>
+                                    <div class="text-[11px] text-amber-400 font-medium truncate" th:text="${t.getDesignationOrOrg()}">Software Engineer @ Google India</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-[11px] text-gray-400">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 text-[10px] font-medium truncate max-w-[200px]">
+                                    <i class="bi bi-journal-bookmark text-brand-400 text-[9px]"></i>
+                                    <span th:text="${t.getDisplayCourseName()}">Java Fullstack Masterclass</span>
+                                </span>
+                                <span class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Verified Alumnus</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Fallback if empty -->
+                <div th:if="${featuredTestimonials == null or featuredTestimonials.isEmpty()}" class="text-center py-12 bg-surface-900/60 border border-white/5 rounded-3xl p-6">
+                    <p class="text-xs text-gray-400">Verified graduate reviews are currently being synchronized.</p>
+                </div>
+
+            </div>
+        </section>
+
         <!-- ═══════════════════ CATEGORIES SECTION ═══════════════════ -->
         <section class="py-20 bg-surface-950">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

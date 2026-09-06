@@ -34,9 +34,17 @@ public interface TestimonialRepository extends JpaRepository<Testimonial, Long>,
     @Query("SELECT t FROM Testimonial t WHERE t.deleted = false AND t.status = in.project.main.entities.enums.TestimonialStatus.PUBLISHED ORDER BY t.publishedAt DESC")
     Page<Testimonial> findPublishedPaginated(Pageable pageable);
 
+    @Query("SELECT t FROM Testimonial t WHERE t.deleted = false AND t.status = in.project.main.entities.enums.TestimonialStatus.PUBLISHED ORDER BY t.isFeatured DESC, t.displayOrder ASC, t.publishedAt DESC")
+    List<Testimonial> findFeaturedOrPublished(Pageable pageable);
+
     long countByDeletedFalse();
 
     long countByStatusAndDeletedFalse(TestimonialStatus status);
+
+    long countByIsFeaturedTrueAndDeletedFalse();
+
+    @Query("SELECT COALESCE(AVG(t.rating), 5.0) FROM Testimonial t WHERE t.deleted = false AND t.status = in.project.main.entities.enums.TestimonialStatus.PUBLISHED")
+    double getAverageRating();
 
     boolean existsByFeedbackIdAndDeletedFalse(Long feedbackId);
 }

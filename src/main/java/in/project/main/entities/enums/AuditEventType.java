@@ -118,6 +118,9 @@ public enum AuditEventType {
     FAQ_CREATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "FAQ Created"),
     FAQ_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "FAQ Updated"),
     FAQ_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "FAQ Deleted"),
+    TESTIMONIAL_CREATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Testimonial Created"),
+    TESTIMONIAL_UPDATED(AuditCategory.SYSTEM, AuditSeverity.INFO, "Testimonial Updated"),
+    TESTIMONIAL_DELETED(AuditCategory.SYSTEM, AuditSeverity.MEDIUM, "Testimonial Deleted"),
 
     // System & Errors
     SYSTEM_ERROR(AuditCategory.SYSTEM, AuditSeverity.CRITICAL, "System Error Encountered"),

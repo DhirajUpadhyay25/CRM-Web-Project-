@@ -67,6 +67,9 @@ public class UserController
 
 	@Autowired
 	private in.project.main.services.BlogService blogService;
+
+	@Autowired
+	private in.project.main.services.TestimonialService testimonialService;
 	
 	@Value("${app.razorpay.key-id}")
 	private String razorpayKeyId;
@@ -108,6 +111,10 @@ public class UserController
 		// Supply top 3 articles for Homepage Blog Section
 		List<in.project.main.entities.Blog> latestArticles = blogService.getFeaturedOrLatestPublished(3);
 		model.addAttribute("latestArticles", latestArticles);
+
+		// Supply featured & published testimonials for Homepage Success Stories Section
+		List<in.project.main.entities.Testimonial> featuredTestimonials = testimonialService.getFeaturedOrPublished(6);
+		model.addAttribute("featuredTestimonials", featuredTestimonials);
 		
 		if(userDetails != null && userDetails.getRole() == Role.STUDENT)
 		{
