@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Certificate Analytics', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Certificate Analytics', ~{::#certAnalyticsContent})}">
 <body>
-    <div>
+    <div id="certAnalyticsContent">
         <!-- Breadcrumbs -->
         <nav class="flex items-center gap-2 text-xs text-gray-500 mb-4 font-medium">
             <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>

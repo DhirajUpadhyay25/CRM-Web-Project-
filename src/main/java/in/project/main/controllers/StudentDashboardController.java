@@ -484,14 +484,16 @@ public class StudentDashboardController {
         String email = userDetails.getUsername();
 
         List<in.project.main.dto.CertificateDTO> myCertificates = certificateService.getStudentCertificates(email);
+        List<in.project.main.dto.StudentCourseCertificateItemDTO> studentCourses = certificateService.getStudentPurchasedCoursesWithCertificateStatus(email);
         List<Enrollment> eligibleEnrollments = certificateService.getEligibleEnrollmentsForStudent(email);
 
         long issuedCount = myCertificates.stream().filter(c -> c.getStatus() == in.project.main.entities.enums.CertificateStatus.ISSUED).count();
         long pendingCount = myCertificates.stream().filter(c -> c.getStatus() == in.project.main.entities.enums.CertificateStatus.REQUESTED || c.getStatus() == in.project.main.entities.enums.CertificateStatus.UNDER_REVIEW).count();
-        long eligibleCount = eligibleEnrollments.size();
+        long eligibleCount = studentCourses.stream().filter(in.project.main.dto.StudentCourseCertificateItemDTO::isCanApply).count();
         long revokedCount = myCertificates.stream().filter(c -> c.getStatus() == in.project.main.entities.enums.CertificateStatus.REVOKED).count();
 
         model.addAttribute("certificates", myCertificates);
+        model.addAttribute("studentCourses", studentCourses);
         model.addAttribute("eligibleEnrollments", eligibleEnrollments);
         model.addAttribute("issuedCount", issuedCount);
         model.addAttribute("pendingCount", pendingCount);
@@ -505,14 +507,24 @@ public class StudentDashboardController {
     public String submitCertificateRequest(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("enrollmentId") Long enrollmentId,
+            @RequestParam(value = "studentLegalName", required = false) String studentLegalName,
             @RequestParam(value = "studentNote", required = false) String studentNote,
+            @RequestParam(value = "projectUrl", required = false) String projectUrl,
+            @RequestParam(value = "certificateType", required = false, defaultValue = "COMPLETION") String certificateType,
             org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         try {
             String email = userDetails.getUsername();
-            in.project.main.dto.CertificateDTO cert = certificateService.requestCertificate(email, enrollmentId, studentNote);
-            ra.addFlashAttribute("successMsg", "Certificate request submitted successfully for '" + cert.getCourseName() + "'. Our academic team will review and issue your certificate.");
+            in.project.main.dto.StudentCertificateApplyDTO applyDTO = new in.project.main.dto.StudentCertificateApplyDTO();
+            applyDTO.setEnrollmentId(enrollmentId);
+            applyDTO.setStudentLegalName(studentLegalName);
+            applyDTO.setStudentNote(studentNote);
+            applyDTO.setProjectUrl(projectUrl);
+            applyDTO.setCertificateType(certificateType);
+
+            in.project.main.dto.CertificateDTO cert = certificateService.applyForCertificate(email, applyDTO);
+            ra.addFlashAttribute("successMsg", "Certificate application submitted successfully for '" + cert.getCourseName() + "'. Our academic review board will inspect your submission and issue your verified credential.");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMsg", "Failed to submit certificate request: " + e.getMessage());
+            ra.addFlashAttribute("errorMsg", "Unable to submit certificate application: " + e.getMessage());
         }
         return "redirect:/student/certificates";
     }
@@ -562,6 +574,17 @@ public class StudentDashboardController {
             ra.addFlashAttribute("errorMsg", "Unable to download certificate: " + e.getMessage());
             return "redirect:/student/certificates";
         }
+    }
+
+    @PostMapping("/certificates/{id}/record-download")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Map<String, Object>> recordDownloadAjax(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails != null) {
+            certificateService.recordDownload(id, userDetails.getUsername());
+        }
+        return org.springframework.http.ResponseEntity.ok(Map.of("status", "recorded"));
     }
 
     @GetMapping("/profile")

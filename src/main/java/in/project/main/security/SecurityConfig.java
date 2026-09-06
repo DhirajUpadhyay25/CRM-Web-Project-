@@ -70,6 +70,7 @@ public class SecurityConfig {
                     "/courses", "/courses/**", "/services", "/about", "/contact", "/faq", "/faq/**", "/faqs", "/faqs/**",
                     "/page/**", "/p/**",
                     "/blogs", "/blogs/**", "/blog/**", "/articles", "/articles/**",
+                    "/verify/**", "/verify/certificate/**", "/verify-certificate/**",
                     "/api/coupons/validate",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/uploads/**",
                     "/error", "/error/**"

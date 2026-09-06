@@ -2,8 +2,10 @@ package in.project.main.controllers;
 
 import in.project.main.dto.*;
 import in.project.main.entities.Course;
+import in.project.main.entities.User;
 import in.project.main.entities.enums.CertificateStatus;
 import in.project.main.repositories.CourseRepository;
+import in.project.main.repositories.UserRepository;
 import in.project.main.services.CertificateService;
 import in.project.main.services.RbacService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ public class AdminCertificateController {
 
     @Autowired private CertificateService certificateService;
     @Autowired private CourseRepository courseRepository;
+    @Autowired private UserRepository userRepository;
     @Autowired private RbacService rbacService;
 
     @GetMapping
@@ -56,11 +59,13 @@ public class AdminCertificateController {
         Page<CertificateDTO> certificatesPage = certificateService.getAdminCertificatesPage(search, status, courseId, pageable);
         CertificateStatsDTO stats = certificateService.getAdminCertificateStats();
         List<Course> courses = courseRepository.findAll();
+        List<User> students = userRepository.findAll();
 
         model.addAttribute("certificatesPage", certificatesPage);
         model.addAttribute("certificates", certificatesPage.getContent());
         model.addAttribute("stats", stats);
         model.addAttribute("courses", courses);
+        model.addAttribute("students", students);
         model.addAttribute("search", search != null ? search : "");
         model.addAttribute("statusFilter", statusStr != null ? statusStr : "ALL");
         model.addAttribute("courseIdFilter", courseId);
@@ -68,6 +73,22 @@ public class AdminCertificateController {
         model.addAttribute("statuses", CertificateStatus.values());
 
         return "admin/learning/certificates/list";
+    }
+
+    @PostMapping("/direct-issue")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN') or @rbac.can('certificates.approve')")
+    public String directIssueCertificate(
+            @ModelAttribute DirectCertificateIssueDTO dto,
+            Principal principal,
+            RedirectAttributes ra) {
+        try {
+            String adminEmail = principal != null ? principal.getName() : "admin@edutake.com";
+            CertificateDTO cert = certificateService.issueCertificateDirectly(dto, adminEmail);
+            ra.addFlashAttribute("successMsg", "Certificate " + cert.getCertificateNumber() + " successfully awarded and issued to " + cert.getStudentName() + " (" + cert.getStudentEmail() + ")!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Failed to issue certificate: " + e.getMessage());
+        }
+        return "redirect:/admin/certificates";
     }
 
     @GetMapping("/{id}")

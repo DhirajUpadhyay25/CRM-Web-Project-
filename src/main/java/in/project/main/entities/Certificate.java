@@ -85,6 +85,9 @@ public class Certificate {
     @Column(length = 500)
     private String studentRequestNote;
 
+    @Column(length = 500)
+    private String projectUrl;
+
     @Column(length = 150)
     private String reviewedByAdmin;
 
@@ -219,6 +222,9 @@ public class Certificate {
 
     public String getStudentRequestNote() { return studentRequestNote; }
     public void setStudentRequestNote(String studentRequestNote) { this.studentRequestNote = studentRequestNote; }
+
+    public String getProjectUrl() { return projectUrl; }
+    public void setProjectUrl(String projectUrl) { this.projectUrl = projectUrl; }
 
     public String getReviewedByAdmin() { return reviewedByAdmin; }
     public void setReviewedByAdmin(String reviewedByAdmin) { this.reviewedByAdmin = reviewedByAdmin; }

@@ -60,6 +60,65 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<StudentCourseCertificateItemDTO> getStudentPurchasedCoursesWithCertificateStatus(String email) {
+        if (email == null || email.isBlank()) return Collections.emptyList();
+        List<Enrollment> enrollments = enrollmentRepository.findByUserEmailOrderByEnrolledAtDesc(email.trim());
+        List<StudentCourseCertificateItemDTO> items = new ArrayList<>();
+
+        for (Enrollment e : enrollments) {
+            Course course = e.getCourse();
+            if (course == null) continue;
+
+            StudentCourseCertificateItemDTO item = new StudentCourseCertificateItemDTO();
+            item.setEnrollmentId(e.getId());
+            item.setCourseId(course.getId());
+            item.setCourseName(course.getName());
+            item.setCourseCategory(course.getCategory() != null ? course.getCategory().getName() : "Professional Curriculum");
+            item.setInstructorName(course.getInstructor() != null ? course.getInstructor() : "EduTake Faculty");
+            item.setCourseImageUrl(course.getImageUrl());
+            item.setEnrolledAt(e.getEnrolledAt());
+            item.setPaymentStatus(e.getPaymentStatus() != null ? e.getPaymentStatus() : "PAID");
+            item.setOrderId(e.getOrderId());
+
+            // Check if certificate exists for this enrollment or course
+            Optional<Certificate> certOpt = certificateRepository.findByEnrollmentId(e.getId());
+            if (certOpt.isEmpty()) {
+                certOpt = certificateRepository.findByStudentEmailAndCourseId(email.trim(), course.getId());
+            }
+
+            if (certOpt.isPresent()) {
+                Certificate cert = certOpt.get();
+                item.setCertificateStatus(cert.getStatus().name());
+                item.setCertificateId(cert.getId());
+                item.setCertificateNumber(cert.getCertificateNumber());
+                item.setVerificationCode(cert.getVerificationCode());
+                item.setStudentName(cert.getStudentName());
+                item.setStudentRequestNote(cert.getStudentRequestNote());
+                item.setProjectUrl(cert.getProjectUrl());
+                item.setRejectionReason(cert.getRejectionReason());
+                item.setRequestDate(cert.getRequestDate());
+                item.setIssueDate(cert.getIssueDate());
+
+                // Strict single application rule:
+                // If REJECTED, student is allowed to re-apply with corrected project/details
+                // If REQUESTED, UNDER_REVIEW, APPROVED, or ISSUED, cannot apply twice!
+                if (cert.getStatus() == CertificateStatus.REJECTED) {
+                    item.setCanApply(true);
+                } else {
+                    item.setCanApply(false);
+                }
+            } else {
+                item.setCertificateStatus("NOT_APPLIED");
+                item.setCanApply(true);
+            }
+
+            items.add(item);
+        }
+        return items;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Enrollment> getEligibleEnrollmentsForStudent(String email) {
         if (email == null || email.isBlank()) return Collections.emptyList();
         List<Enrollment> enrollments = enrollmentRepository.findByUserEmailOrderByEnrolledAtDesc(email.trim());
@@ -101,11 +160,15 @@ public class CertificateServiceImpl implements CertificateService {
         // Check lessons progress
         List<Lesson> lessons = lessonRepository.findByCourseId(String.valueOf(courseId));
         if (lessons.isEmpty()) {
-            return false; // Cannot certify an empty course
+            return true; // If no modular lessons configured, enrollment purchase qualifies
         }
 
         long completedLessons = lessonProgressRepository.countByUserEmailAndCourseIdAndCompleted(email, courseId, true);
         if (completedLessons < lessons.size()) {
+            // Still allow claim if course completed status is set on enrollment
+            if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
+                return true;
+            }
             return false;
         }
 
@@ -114,6 +177,9 @@ public class CertificateServiceImpl implements CertificateService {
         for (Quiz q : quizzes) {
             long passed = quizAttemptRepository.countByUserEmailAndQuizIdAndPassed(email, q.getId(), true);
             if (passed == 0) {
+                if (enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
+                    return true;
+                }
                 return false;
             }
         }
@@ -123,48 +189,63 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     public CertificateDTO requestCertificate(String email, Long enrollmentId, String studentNote) {
-        if (email == null || enrollmentId == null) {
-            throw new IllegalArgumentException("Email and enrollment ID are required.");
+        StudentCertificateApplyDTO dto = new StudentCertificateApplyDTO();
+        dto.setEnrollmentId(enrollmentId);
+        dto.setStudentNote(studentNote);
+        return applyForCertificate(email, dto);
+    }
+
+    @Override
+    public CertificateDTO applyForCertificate(String email, StudentCertificateApplyDTO applyDTO) {
+        if (email == null || applyDTO == null || applyDTO.getEnrollmentId() == null) {
+            throw new IllegalArgumentException("Email and enrollment ID are required to apply for a certificate.");
         }
 
+        Long enrollmentId = applyDTO.getEnrollmentId();
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found with ID: " + enrollmentId));
+                .orElseThrow(() -> new IllegalArgumentException("Enrollment record not found with ID: " + enrollmentId));
 
         if (!email.trim().equalsIgnoreCase(enrollment.getUserEmail())) {
-            throw new SecurityException("You do not have access to this enrollment record.");
+            throw new SecurityException("Security violation: You can only apply for certificates for your own purchased courses.");
         }
 
         Course course = enrollment.getCourse();
         if (course == null) {
-            throw new IllegalStateException("Associated course not found for enrollment.");
+            throw new IllegalStateException("Associated course record not found for this enrollment.");
         }
 
-        // Verify eligibility
-        if (!isEligibleForCertificate(email, course.getId())) {
-            throw new IllegalStateException("You have not met all course completion and assessment requirements yet.");
-        }
-
-        // Check existing certificate
+        // Check existing certificate and enforce STRICT single-application constraint
         Optional<Certificate> existingOpt = certificateRepository.findByEnrollmentId(enrollment.getId());
         if (existingOpt.isEmpty()) {
-            existingOpt = certificateRepository.findByStudentEmailAndCourseId(email, course.getId());
+            existingOpt = certificateRepository.findByStudentEmailAndCourseId(email.trim(), course.getId());
         }
+
+        User student = enrollment.getUser();
+        String studentLegalName = (applyDTO.getStudentLegalName() != null && !applyDTO.getStudentLegalName().isBlank())
+                ? applyDTO.getStudentLegalName().trim()
+                : (student != null && student.getName() != null && !student.getName().isBlank() ? student.getName() : email);
 
         if (existingOpt.isPresent()) {
             Certificate existing = existingOpt.get();
             if (existing.getStatus() == CertificateStatus.ISSUED) {
-                throw new IllegalStateException("Your certificate has already been issued: " + existing.getCertificateNumber());
+                throw new IllegalStateException("Your certificate for '" + course.getName() + "' has already been issued (Serial: " + existing.getCertificateNumber() + "). You cannot apply again.");
             }
             if (existing.getStatus() == CertificateStatus.REQUESTED || existing.getStatus() == CertificateStatus.UNDER_REVIEW) {
-                throw new IllegalStateException("Your certificate request is already pending administrator review.");
+                throw new IllegalStateException("You have already applied for this course certificate. Your application is currently under administrative review (1 application allowed per course).");
             }
             if (existing.getStatus() == CertificateStatus.APPROVED) {
-                throw new IllegalStateException("Your certificate has already been approved and is being generated.");
+                throw new IllegalStateException("Your certificate application has already been approved and is being prepared for issuance.");
             }
-            // If previously rejected or eligible, update to REQUESTED
+
+            // If previously rejected, allow re-application with updated notes/project URL
             existing.setStatus(CertificateStatus.REQUESTED);
+            existing.setStudentName(studentLegalName);
             existing.setRequestDate(LocalDateTime.now());
-            existing.setStudentRequestNote(studentNote != null ? studentNote.trim() : "");
+            existing.setStudentRequestNote(applyDTO.getStudentNote() != null ? applyDTO.getStudentNote().trim() : "");
+            existing.setProjectUrl(applyDTO.getProjectUrl() != null ? applyDTO.getProjectUrl().trim() : null);
+            if (applyDTO.getCertificateType() != null && !applyDTO.getCertificateType().isBlank()) {
+                existing.setCertificateType(applyDTO.getCertificateType().trim());
+            }
             existing.setRejectionReason(null);
             Certificate saved = certificateRepository.save(existing);
             auditAndNotifyRequest(saved, email);
@@ -172,20 +253,22 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         // Create new Certificate in REQUESTED status
-        User student = enrollment.getUser();
         Certificate cert = new Certificate();
         cert.setEnrollment(enrollment);
         cert.setStudent(student);
         cert.setCourse(course);
-        cert.setStudentName(student != null && student.getName() != null && !student.getName().isBlank() ? student.getName() : email);
-        cert.setStudentEmail(email);
+        cert.setStudentName(studentLegalName);
+        cert.setStudentEmail(email.trim());
         cert.setCourseName(course.getName());
-        cert.setCourseCategory(course.getCategory() != null ? course.getCategory().getName() : "General");
+        cert.setCourseCategory(course.getCategory() != null ? course.getCategory().getName() : "Professional Curriculum");
         cert.setInstructorName(course.getInstructor() != null ? course.getInstructor() : "EduTake Faculty");
         cert.setStatus(CertificateStatus.REQUESTED);
         cert.setRequestDate(LocalDateTime.now());
         cert.setCompletionDate(enrollment.getCompletedAt() != null ? enrollment.getCompletedAt() : LocalDateTime.now());
-        cert.setStudentRequestNote(studentNote != null ? studentNote.trim() : "");
+        cert.setStudentRequestNote(applyDTO.getStudentNote() != null ? applyDTO.getStudentNote().trim() : "");
+        cert.setProjectUrl(applyDTO.getProjectUrl() != null ? applyDTO.getProjectUrl().trim() : null);
+        cert.setCertificateType(applyDTO.getCertificateType() != null && !applyDTO.getCertificateType().isBlank() ? applyDTO.getCertificateType().trim() : "COMPLETION");
+        cert.setTemplateCode("AI_FUTURISTIC");
 
         // Temporary tracking numbers until official issuance
         String tempCode = "REQ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -331,8 +414,14 @@ public class CertificateServiceImpl implements CertificateService {
             throw new IllegalStateException("Cannot issue a revoked certificate. Use reissue instead.");
         }
 
-        // Apply custom title and template if provided
+        // Apply custom fields and template if provided
         if (dto != null) {
+            if (dto.getStudentName() != null && !dto.getStudentName().isBlank()) {
+                cert.setStudentName(dto.getStudentName().trim());
+            }
+            if (dto.getInstructorName() != null && !dto.getInstructorName().isBlank()) {
+                cert.setInstructorName(dto.getInstructorName().trim());
+            }
             if (dto.getCertificateTitle() != null && !dto.getCertificateTitle().isBlank()) {
                 cert.setCertificateTitle(dto.getCertificateTitle().trim());
             }
@@ -399,6 +488,132 @@ public class CertificateServiceImpl implements CertificateService {
                                 AuditEventType.CERTIFICATE_ISSUED,
                                 "CERTIFICATE_APPROVED_AND_ISSUED",
                                 "Certificate " + certNumber + " officially issued to student " + saved.getStudentName() + " (" + saved.getStudentEmail() + ") for course '" + saved.getCourseName() + "' by " + adminEmail + "."
+                        )
+                        .withEntity("Certificate", String.valueOf(saved.getId()), certNumber)
+                        .withSeverity(AuditSeverity.INFO)
+                        .withStatus(AuditStatus.SUCCESS)
+                );
+            } catch (Exception ignored) {}
+        }
+
+        return toDTO(saved);
+    }
+
+    @Override
+    public CertificateDTO issueCertificateDirectly(DirectCertificateIssueDTO dto, String adminEmail) {
+        if (dto == null || dto.getStudentEmail() == null || dto.getStudentEmail().isBlank() || dto.getCourseId() == null) {
+            throw new IllegalArgumentException("Student email and course ID are required to issue a certificate directly.");
+        }
+
+        String studentEmail = dto.getStudentEmail().trim();
+        User student = userRepository.findByEmail(studentEmail);
+        if (student == null) {
+            throw new IllegalArgumentException("No registered student account was found with email: " + studentEmail);
+        }
+
+        Course course = courseRepository.findById(dto.getCourseId())
+                .orElseThrow(() -> new IllegalArgumentException("Course not found with ID: " + dto.getCourseId()));
+
+        // Ensure enrollment exists and is COMPLETED
+        Enrollment enrollment = enrollmentRepository.findByUserEmailAndCourseId(studentEmail, course.getId()).orElse(null);
+        if (enrollment == null) {
+            enrollment = new Enrollment();
+            enrollment.setUser(student);
+            enrollment.setCourse(course);
+            enrollment.setStatus(EnrollmentStatus.COMPLETED);
+            enrollment.setEnrolledAt(LocalDateTime.now().minusDays(1));
+            enrollment.setCompletedAt(LocalDateTime.now());
+            enrollment = enrollmentRepository.save(enrollment);
+        } else {
+            enrollment.setStatus(EnrollmentStatus.COMPLETED);
+            if (enrollment.getCompletedAt() == null) {
+                enrollment.setCompletedAt(LocalDateTime.now());
+            }
+            enrollment = enrollmentRepository.save(enrollment);
+        }
+
+        // Check if certificate already exists
+        Certificate cert = certificateRepository.findByStudentEmailAndCourseId(studentEmail, course.getId()).orElse(null);
+        if (cert == null) {
+            cert = new Certificate();
+            cert.setEnrollment(enrollment);
+            cert.setStudent(student);
+            cert.setCourse(course);
+            cert.setCertificateUuid(UUID.randomUUID().toString());
+        }
+
+        cert.setStudentName(student.getName() != null && !student.getName().isBlank() ? student.getName() : studentEmail);
+        cert.setStudentEmail(studentEmail);
+        cert.setCourseName(course.getName());
+        cert.setCourseCategory(course.getCategory() != null ? course.getCategory().getName() : "General");
+        
+        String instructor = dto.getInstructorName() != null && !dto.getInstructorName().isBlank() ? dto.getInstructorName().trim() : (course.getInstructor() != null ? course.getInstructor() : "EduTake Faculty");
+        cert.setInstructorName(instructor);
+
+        if (dto.getCertificateTitle() != null && !dto.getCertificateTitle().isBlank()) {
+            cert.setCertificateTitle(dto.getCertificateTitle().trim());
+        } else {
+            cert.setCertificateTitle("Certificate of Completion");
+        }
+
+        if (dto.getCertificateType() != null && !dto.getCertificateType().isBlank()) {
+            cert.setCertificateType(dto.getCertificateType().trim());
+        } else {
+            cert.setCertificateType("COMPLETION");
+        }
+
+        if (dto.getTemplateCode() != null && !dto.getTemplateCode().isBlank()) {
+            cert.setTemplateCode(dto.getTemplateCode().trim());
+        } else {
+            cert.setTemplateCode("CLASSIC_GOLD");
+        }
+
+        if (dto.getAdminNotes() != null && !dto.getAdminNotes().isBlank()) {
+            cert.setAdminNotes(dto.getAdminNotes().trim());
+        }
+
+        String certNumber = generateUniqueCertificateNumber();
+        String verifyCode = generateUniqueVerificationCode();
+
+        cert.setCertificateNumber(certNumber);
+        cert.setVerificationCode(verifyCode);
+        cert.setStatus(CertificateStatus.ISSUED);
+        cert.setIssueDate(LocalDate.now());
+        cert.setCompletionDate(enrollment.getCompletedAt() != null ? enrollment.getCompletedAt() : LocalDateTime.now());
+        cert.setApprovedAt(LocalDateTime.now());
+        cert.setApprovedByAdmin(adminEmail);
+        cert.setReviewedByAdmin(adminEmail);
+        cert.setReviewedAt(LocalDateTime.now());
+        cert.setRequestDate(LocalDateTime.now());
+
+        String verificationUrl = "http://localhost:8080/verify/certificate/" + verifyCode;
+        String qrDataUri = QRCodeGeneratorUtil.generateQrSvgDataUri(verificationUrl, 160);
+        cert.setQrCodeData(qrDataUri);
+        cert.setFileUrl("/student/certificates/" + cert.getId() + "/view");
+
+        Certificate saved = certificateRepository.save(cert);
+        logger.info("Directly issued certificate {} to {} for course {} by admin {}", certNumber, studentEmail, course.getName(), adminEmail);
+
+        // Notify Student
+        notificationService.sendToStudent(
+                studentEmail,
+                NotificationType.CERTIFICATE_ISSUED,
+                "Certificate Awarded!",
+                "You have been awarded an official certificate for '" + course.getName() + "' (Cert #" + certNumber + ").",
+                "/student/certificates/" + saved.getId() + "/view",
+                "CERTIFICATE",
+                String.valueOf(saved.getId())
+        );
+
+        // Audit Log
+        if (auditLogService != null) {
+            try {
+                auditLogService.record(
+                        PlatformAuditEvent.of(
+                                adminEmail,
+                                AuditEventType.CERTIFICATE_ISSUED,
+                                "DIRECT_CERTIFICATE_ISSUANCE",
+                                "Admin " + adminEmail + " directly awarded/issued certificate " + certNumber + " to student " + saved.getStudentName() + " (" + studentEmail + ") for course '" + saved.getCourseName() + "'."
                         )
                         .withEntity("Certificate", String.valueOf(saved.getId()), certNumber)
                         .withSeverity(AuditSeverity.INFO)
@@ -854,6 +1069,7 @@ public class CertificateServiceImpl implements CertificateService {
         dto.setApprovedAt(c.getApprovedAt());
         dto.setRevokedAt(c.getRevokedAt());
         dto.setStudentRequestNote(c.getStudentRequestNote());
+        dto.setProjectUrl(c.getProjectUrl());
         dto.setReviewedByAdmin(c.getReviewedByAdmin());
         dto.setApprovedByAdmin(c.getApprovedByAdmin());
         dto.setRejectionReason(c.getRejectionReason());

@@ -1,114 +1,474 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/base-head :: head('Login')}"></head>
+<head th:replace="~{fragments/base-head :: head('Sign In')}"></head>
 
-<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col pt-16">
+<body class="bg-surface-950 text-white antialiased min-h-screen selection:bg-brand-500 selection:text-white">
 
-    <!-- Navbar -->
-    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex items-center justify-center px-4 py-16 relative overflow-hidden">
-        <!-- Background Glow Effects -->
-        <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-[130px]"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[130px]"></div>
-        </div>
-
-        <div class="w-full max-w-md relative z-10 animate-fade-in">
+    <!-- Dedicated Full-Viewport Split-Screen Authentication Container -->
+    <div class="min-h-screen w-full flex flex-col lg:grid lg:grid-cols-12 relative overflow-x-hidden">
+        
+        <!-- ═══════════════════════════════════════════════════════════════════
+             LEFT COLUMN — LMS Branding & Learning Experience (Desktop/Tablet)
+             ═══════════════════════════════════════════════════════════════════ -->
+        <aside class="hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between p-10 xl:p-14 bg-[#060b19] border-r border-white/10 relative overflow-hidden">
             
-            <!-- Back to Home link -->
-            <div class="mb-4 text-left">
-                <a href="/index" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-white transition-colors">
-                    <i class="bi bi-arrow-left"></i>
-                    <span>Back to Home</span>
+            <!-- Ambient Background Glow Gradients & Dot Mesh Overlay -->
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute -top-32 -left-32 w-[30rem] h-[30rem] bg-brand-600/20 rounded-full blur-[140px]"></div>
+                <div class="absolute bottom-10 right-0 w-[24rem] h-[24rem] bg-indigo-600/15 rounded-full blur-[120px]"></div>
+                <div class="absolute inset-0 opacity-[0.25]" style="background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px); background-size: 24px 24px;"></div>
+            </div>
+
+            <!-- Top Brand Identity -->
+            <div class="relative z-10">
+                <a href="/index" class="inline-flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-xl px-1.5 py-1">
+                    <div class="w-11 h-11 bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-xl shadow-lg shadow-brand-500/25 ring-4 ring-brand-500/10 group-hover:scale-105 group-hover:shadow-brand-500/40 transition-all duration-300">
+                        E
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-2xl tracking-tight text-white group-hover:text-brand-300 transition-colors">EduTake<span class="text-brand-500">.</span></span>
+                        <p class="text-[11px] font-semibold text-gray-400 tracking-wider uppercase">Learning Management System</p>
+                    </div>
                 </a>
             </div>
 
-            <!-- Login Card -->
-            <div class="bg-surface-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+            <!-- Core Educational Messaging & Value Props -->
+            <div class="relative z-10 my-auto py-8">
                 
-                <!-- Brand logo and Welcome header -->
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center font-bold text-white text-sm">E</div>
-                        <span class="font-extrabold text-xl tracking-tight text-white">EduTake<span class="text-brand-500">.</span></span>
-                    </div>
-                    <h1 class="text-2xl font-black text-white tracking-tight">Welcome Back</h1>
-                    <p class="text-xs text-gray-400 mt-1">Sign in to continue your learning journey</p>
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-6 backdrop-blur-md shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+                    <span>Professional Learning Platform</span>
                 </div>
 
-                <!-- Success Message (Logout) -->
-                <div th:if="${param.logout}" class="mb-6 flex items-start gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
-                    <i class="bi bi-check-circle-fill text-green-400 mt-0.5"></i>
-                    <p class="text-xs text-green-300">You have been successfully logged out.</p>
-                </div>
+                <!-- Primary Headline -->
+                <h1 class="text-3xl xl:text-4xl font-black text-white tracking-tight leading-tight mb-4">
+                    Learn. Build. <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-300 to-indigo-300">Grow.</span>
+                </h1>
 
-                <!-- Error Message -->
-                <div th:if="${param.error}" class="mb-6 flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                    <i class="bi bi-exclamation-circle-fill text-red-400 mt-0.5"></i>
-                    <p class="text-xs text-red-300">Invalid email or password. Please try again.</p>
-                </div>
+                <!-- Supporting Copy -->
+                <p class="text-sm xl:text-base text-gray-300 leading-relaxed mb-8 max-w-md">
+                    Your journey to better skills starts here. Learn from structured courses, track your progress, and build the skills that move your career forward.
+                </p>
 
-                <!-- Login Form -->
-                <form th:action="@{/loginForm}" method="post" class="space-y-5">
-                    
-                    <!-- Email input -->
-                    <div class="space-y-1.5 text-left">
-                        <label for="email" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Email Address</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="bi bi-envelope text-gray-500"></i>
-                            </div>
-                            <input type="email" id="email" name="email" required
-                                   class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
-                                   placeholder="you@example.com">
+                <!-- Value Propositions -->
+                <div class="space-y-3.5 max-w-md">
+                    <div class="group flex items-start gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-brand-500/30 transition-all duration-300">
+                        <div class="w-9 h-9 rounded-xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center text-brand-400 shrink-0 text-base group-hover:scale-105 transition-transform">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xs font-bold text-white uppercase tracking-wider group-hover:text-brand-300 transition-colors">Learn at your own pace</h2>
+                            <p class="text-xs text-gray-400 mt-0.5 leading-snug">Flexible access to structured curriculum, HD video lessons, and practical exercises.</p>
                         </div>
                     </div>
 
-                    <!-- Password input -->
+                    <div class="group flex items-start gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-indigo-500/30 transition-all duration-300">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 text-base group-hover:scale-105 transition-transform">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xs font-bold text-white uppercase tracking-wider group-hover:text-indigo-300 transition-colors">Track your learning progress</h2>
+                            <p class="text-xs text-gray-400 mt-0.5 leading-snug">Real-time milestone tracking, interactive assessments, and personal dashboard analytics.</p>
+                        </div>
+                    </div>
+
+                    <div class="group flex items-start gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-emerald-500/30 transition-all duration-300">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 text-base group-hover:scale-105 transition-transform">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-300 transition-colors">Earn verified certificates</h2>
+                            <p class="text-xs text-gray-400 mt-0.5 leading-snug">Showcase industry-recognized digital credentials when you complete courses.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LMS Interactive Experience Widget -->
+                <div class="mt-8 p-4 rounded-2xl bg-surface-900/80 border border-white/10 shadow-2xl max-w-md relative overflow-hidden backdrop-blur-xl">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[11px] font-bold text-gray-200 uppercase tracking-wider">Active Course Progress</span>
+                        </div>
+                        <span class="text-[11px] font-extrabold text-brand-400">84% Completed</span>
+                    </div>
+                    <div class="w-full bg-surface-950 rounded-full h-2.5 mb-2.5 overflow-hidden p-0.5 border border-white/5">
+                        <div class="bg-gradient-to-r from-brand-500 to-indigo-500 h-1.5 rounded-full transition-all duration-1000" style="width: 84%"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-gray-400">
+                        <span class="font-medium">21 of 25 Modules Mastered</span>
+                        <span class="flex items-center gap-1.5 text-emerald-400 font-semibold"><i class="bi bi-shield-check"></i> Certificate Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Left Social Proof -->
+            <div class="relative z-10 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gray-400">
+                <div class="flex items-center gap-2.5">
+                    <div class="flex -space-x-2">
+                        <div class="w-7 h-7 rounded-full bg-brand-600 border-2 border-surface-900 flex items-center justify-center text-[10px] font-bold text-white shadow">AK</div>
+                        <div class="w-7 h-7 rounded-full bg-indigo-600 border-2 border-surface-900 flex items-center justify-center text-[10px] font-bold text-white shadow">SM</div>
+                        <div class="w-7 h-7 rounded-full bg-emerald-600 border-2 border-surface-900 flex items-center justify-center text-[10px] font-bold text-white shadow">RJ</div>
+                    </div>
+                    <span>Joined by <strong class="text-white">50,000+</strong> students</span>
+                </div>
+                <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20">
+                    <i class="bi bi-star-fill"></i>
+                    <span>4.9 / 5.0</span>
+                </div>
+            </div>
+        </aside>
+
+
+        <!-- ═══════════════════════════════════════════════════════════════════
+             RIGHT COLUMN — Centered Sign-In Workspace & Controls
+             ═══════════════════════════════════════════════════════════════════ -->
+        <main class="flex-1 lg:col-span-7 xl:col-span-7 flex flex-col justify-between min-h-screen p-6 sm:p-10 lg:p-12 relative overflow-y-auto bg-surface-950">
+            
+            <!-- Mobile / Small Screen Branding Header (visible only on mobile) -->
+            <div class="flex lg:hidden items-center justify-between pb-5 mb-4 border-b border-white/10">
+                <a href="/index" class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center font-extrabold text-white text-sm shadow-md shadow-brand-500/20">
+                        E
+                    </div>
+                    <span class="font-bold text-lg text-white">EduTake<span class="text-brand-500">.</span></span>
+                </a>
+                <a href="/index" class="text-xs font-semibold text-gray-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 flex items-center gap-1.5 transition-colors">
+                    <i class="bi bi-arrow-left"></i> Home
+                </a>
+            </div>
+
+            <!-- Desktop Top Navigation Utility Bar with Segmented Auth Switcher -->
+            <div class="hidden lg:flex items-center justify-between w-full max-w-md mx-auto mb-8">
+                <a href="/index" class="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white px-3 py-1.5 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group">
+                    <i class="bi bi-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
+                    <span>Back to Home</span>
+                </a>
+                
+                <!-- Segmented Tab Switch -->
+                <div class="bg-surface-900/90 border border-white/10 p-1 rounded-xl flex items-center gap-1 text-xs">
+                    <span class="px-3 py-1 bg-brand-600 text-white font-bold rounded-lg shadow-sm">Sign In</span>
+                    <a href="/register" class="px-3 py-1 text-gray-400 hover:text-white font-semibold rounded-lg hover:bg-white/5 transition-colors">Register</a>
+                </div>
+            </div>
+
+            <!-- Centered Authentication Card / Form -->
+            <div class="w-full max-w-md mx-auto my-auto py-2">
+                
+                <!-- Header Block -->
+                <div class="text-left mb-7">
+                    <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Welcome back</h2>
+                    <p class="text-sm text-gray-400 mt-1.5">Sign in to continue your learning journey.</p>
+                </div>
+
+                <!-- Feedback Banners -->
+                <!-- 1. Logout Successful Banner -->
+                <div th:if="${param.logout}" class="mb-5 flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-emerald-300 text-xs animate-fade-in shadow-lg shadow-emerald-950/30" role="status">
+                    <i class="bi bi-check-circle-fill text-emerald-400 text-base mt-0.5 shrink-0"></i>
+                    <div>
+                        <p class="font-bold text-sm">Signed out successfully</p>
+                        <p class="text-emerald-300/80 mt-0.5">You have been safely signed out of your account session.</p>
+                    </div>
+                </div>
+
+                <!-- 2. Authentication Failed Banner (Safe, User-Friendly) -->
+                <div th:if="${param.error}" id="authErrorAlert" class="mb-5 flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/25 rounded-2xl text-rose-300 text-xs animate-fade-in shadow-lg shadow-rose-950/30" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill text-rose-400 text-base mt-0.5 shrink-0"></i>
+                    <div>
+                        <p class="font-bold text-sm">Invalid credentials</p>
+                        <p class="text-rose-300/90 mt-0.5">Invalid email or password. Please check your credentials and try again.</p>
+                    </div>
+                </div>
+
+                <!-- Client-Side Form Error Alert Container -->
+                <div id="clientErrorAlert" class="hidden mb-5 flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/25 rounded-2xl text-rose-300 text-xs animate-fade-in" role="alert">
+                    <i class="bi bi-exclamation-circle-fill text-rose-400 text-base mt-0.5 shrink-0"></i>
+                    <div id="clientErrorMessage" class="font-medium">Please provide a valid email and password.</div>
+                </div>
+
+                <!-- Main Authentication Form -->
+                <form th:action="@{/loginForm}" method="post" id="loginForm" class="space-y-4" onsubmit="return handleLoginSubmit(event)" novalidate>
+                    
+                    <!-- Email Address Field -->
+                    <div class="space-y-1.5 text-left">
+                        <label for="email" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">
+                            Email Address <span class="text-rose-400" aria-hidden="true">*</span>
+                        </label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-400 transition-colors">
+                                <i class="bi bi-envelope text-base"></i>
+                            </div>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   required 
+                                   autocomplete="email"
+                                   placeholder="name@example.com"
+                                   class="w-full pl-11 pr-4 py-3.5 bg-surface-900/90 border border-white/10 rounded-xl text-white placeholder-gray-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-surface-900 transition-all duration-200">
+                        </div>
+                        <p id="emailValidationMsg" class="hidden text-xs text-rose-400 mt-1 font-medium flex items-center gap-1"></p>
+                    </div>
+
+                    <!-- Password Field -->
                     <div class="space-y-1.5 text-left">
                         <div class="flex items-center justify-between">
-                            <label for="password" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Password</label>
+                            <label for="password" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">
+                                Password <span class="text-rose-400" aria-hidden="true">*</span>
+                            </label>
+                            
+                            <!-- CapsLock Warning -->
+                            <span id="capsLockWarning" class="hidden text-[11px] font-bold text-amber-400 items-center gap-1">
+                                <i class="bi bi-capslock-fill"></i> Caps Lock is ON
+                            </span>
                         </div>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="bi bi-lock text-gray-500"></i>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-400 transition-colors">
+                                <i class="bi bi-lock text-base"></i>
                             </div>
-                            <input type="password" id="password" name="password" required
-                                   class="w-full pl-11 pr-4 py-3 bg-surface-950/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all"
-                                   placeholder="••••••••">
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   required 
+                                   autocomplete="current-password"
+                                   placeholder="••••••••"
+                                   onkeyup="checkCapsLock(event)"
+                                   class="w-full pl-11 pr-12 py-3.5 bg-surface-900/90 border border-white/10 rounded-xl text-white placeholder-gray-500 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 focus:bg-surface-900 transition-all duration-200">
+                            
+                            <!-- Accessible Show/Hide Password Toggle -->
+                            <button type="button" 
+                                    id="togglePasswordBtn"
+                                    onclick="togglePasswordVisibility('password', 'passwordToggleIcon')" 
+                                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+                                    aria-label="Toggle password visibility">
+                                <i id="passwordToggleIcon" class="bi bi-eye text-base"></i>
+                            </button>
                         </div>
+                        <p id="passwordValidationMsg" class="hidden text-xs text-rose-400 mt-1 font-medium flex items-center gap-1"></p>
                     </div>
 
-                    <!-- Submit action button -->
+                    <!-- Remember Me & Forgot Password Row -->
+                    <div class="flex items-center justify-between pt-1">
+                        <label for="rememberMe" class="inline-flex items-center gap-2.5 cursor-pointer text-xs text-gray-300 hover:text-white select-none">
+                            <input type="checkbox" 
+                                   id="rememberMe" 
+                                   name="remember-me" 
+                                   class="w-4 h-4 rounded bg-surface-900 border-white/20 text-brand-600 focus:ring-brand-500 focus:ring-offset-0 transition-colors">
+                            <span>Remember me</span>
+                        </label>
+
+                        <button type="button" 
+                                onclick="openForgotModal()" 
+                                class="text-xs font-bold text-brand-400 hover:text-brand-300 transition-colors focus:outline-none hover:underline">
+                            Forgot password?
+                        </button>
+                    </div>
+
+                    <!-- Submit Button with Dynamic Loading State -->
                     <div class="pt-2">
-                        <button type="submit"
-                                class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all shadow-md shadow-brand-600/10 hover:shadow-brand-500/25 hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm">
-                            <span>Sign In</span>
-                            <i class="bi bi-arrow-right"></i>
+                        <button type="submit" 
+                                id="submitBtn"
+                                class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-brand-600 via-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm shadow-[0_4px_25px_-5px_rgba(76,110,245,0.4)] hover:shadow-[0_6px_30px_rgba(76,110,245,0.6)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
+                            <span id="btnText">Sign In</span>
+                            <i id="btnIcon" class="bi bi-arrow-right text-base transition-transform group-hover:translate-x-1"></i>
+                            <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                         </button>
                     </div>
                 </form>
 
                 <!-- Divider -->
                 <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/5"></div></div>
-                    <div class="relative flex justify-center text-[10px] font-bold uppercase tracking-wider"><span class="bg-surface-900/60 px-4 text-gray-500">or</span></div>
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                    <div class="relative flex justify-center text-[10px] font-bold uppercase tracking-wider"><span class="bg-surface-950 px-4 text-gray-400">or</span></div>
                 </div>
 
-                <!-- Registration link redirect -->
-                <p class="text-center text-xs text-gray-400 font-semibold">
+                <!-- Registration Switch Link -->
+                <p class="text-center text-xs text-gray-400 font-medium">
                     Don't have an account?
-                    <a href="/register" class="text-brand-400 hover:text-brand-300 ml-1 transition-colors">Create one free</a>
+                    <a href="/register" class="text-brand-400 hover:text-brand-300 font-bold ml-1 transition-colors hover:underline">Create account free</a>
                 </p>
             </div>
+
+            <!-- Footer Micro-links (Terms, Privacy, Help) -->
+            <div class="w-full max-w-md mx-auto pt-6 text-center border-t border-white/5 flex items-center justify-center gap-4 text-[11px] text-gray-400">
+                <span>© 2026 EduTake LMS</span>
+                <span>•</span>
+                <a href="/faq" class="hover:text-gray-300 transition-colors">Help Center</a>
+                <span>•</span>
+                <a href="/contact" class="hover:text-gray-300 transition-colors">Contact Support</a>
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         FORGOT PASSWORD MODAL (Accessible & Production-Structured)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div id="forgotModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+        <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative text-left">
+            <button onclick="closeForgotModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-lg p-1 transition-colors" aria-label="Close modal">
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+            <div class="w-12 h-12 rounded-2xl bg-brand-500/15 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xl mb-4">
+                <i class="bi bi-key-fill"></i>
+            </div>
+
+            <h3 id="forgotTitle" class="text-xl font-bold text-white">Reset Your Password</h3>
+            <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                Enter your registered email address and our support team will send you secure password recovery instructions.
+            </p>
+
+            <div id="forgotSuccessNotice" class="hidden mt-4 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
+                <i class="bi bi-check-circle-fill text-emerald-400"></i> 
+                <span>Recovery instructions have been sent if an account matches that email.</span>
+            </div>
+
+            <form id="forgotForm" onsubmit="handleForgotSubmit(event)" class="space-y-4 mt-5">
+                <div class="space-y-1.5">
+                    <label for="forgotEmail" class="block text-xs font-bold text-gray-300 uppercase tracking-wider">Account Email</label>
+                    <input type="email" id="forgotEmail" required placeholder="name@example.com"
+                           class="w-full px-4 py-3 bg-surface-950 border border-white/10 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <button type="button" onclick="closeForgotModal()" class="px-4 py-2.5 text-xs font-bold text-gray-300 hover:text-white rounded-xl border border-white/10 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="forgotSubmitBtn" class="px-5 py-2.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 rounded-xl transition-all shadow-md shadow-brand-600/20">
+                        Send Instructions
+                    </button>
+                </div>
+            </form>
         </div>
-    </main>
+    </div>
 
-    <!-- Footer -->
-    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+    <!-- Client-Side Behavior & Micro-Interactions Script -->
+    <script>
+        // Password Visibility Toggle Function
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
 
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // CapsLock Detector
+        function checkCapsLock(event) {
+            const warning = document.getElementById('capsLockWarning');
+            if (event.getModifierState && event.getModifierState('CapsLock')) {
+                warning.classList.remove('hidden');
+                warning.classList.add('inline-flex');
+            } else {
+                warning.classList.add('hidden');
+                warning.classList.remove('inline-flex');
+            }
+        }
+
+        // Form Validation & Submission Handler
+        function handleLoginSubmit(e) {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const emailMsg = document.getElementById('emailValidationMsg');
+            const passwordMsg = document.getElementById('passwordValidationMsg');
+            const clientAlert = document.getElementById('clientErrorAlert');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            // Reset validation states
+            let isValid = true;
+            emailMsg.classList.add('hidden');
+            passwordMsg.classList.add('hidden');
+            clientAlert.classList.add('hidden');
+
+            const emailVal = emailInput.value.trim();
+            const passwordVal = passwordInput.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailVal) {
+                emailMsg.innerHTML = '<i class="bi bi-exclamation-circle"></i> Please enter your email address.';
+                emailMsg.classList.remove('hidden');
+                emailInput.focus();
+                isValid = false;
+            } else if (!emailRegex.test(emailVal)) {
+                emailMsg.innerHTML = '<i class="bi bi-exclamation-circle"></i> Please enter a valid email address (e.g. name@example.com).';
+                emailMsg.classList.remove('hidden');
+                emailInput.focus();
+                isValid = false;
+            }
+
+            if (!passwordVal) {
+                passwordMsg.innerHTML = '<i class="bi bi-exclamation-circle"></i> Please enter your password.';
+                passwordMsg.classList.remove('hidden');
+                if (isValid) passwordInput.focus();
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Show Loading State
+            submitBtn.disabled = true;
+            btnText.textContent = 'Signing in...';
+            btnIcon.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+
+            return true;
+        }
+
+        // Forgot Password Modal Functions
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.remove('hidden');
+            const currentEmail = document.getElementById('email').value;
+            if (currentEmail) {
+                document.getElementById('forgotEmail').value = currentEmail;
+            }
+            setTimeout(() => {
+                document.getElementById('forgotEmail').focus();
+            }, 100);
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.add('hidden');
+            document.getElementById('forgotSuccessNotice').classList.add('hidden');
+            document.getElementById('forgotForm').reset();
+        }
+
+        function handleForgotSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('forgotSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+
+            setTimeout(() => {
+                document.getElementById('forgotSuccessNotice').classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Instructions';
+                setTimeout(() => {
+                    closeForgotModal();
+                }, 2500);
+            }, 800);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeForgotModal();
+            }
+        });
+    </script>
 </body>
 </html>

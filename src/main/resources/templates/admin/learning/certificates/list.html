@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Certificate Management', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Certificate Management', ~{::#certMainContent})}">
 <body>
-    <div>
+    <div id="certMainContent">
         <!-- Breadcrumbs -->
         <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
             <a href="/admin/dashboard" class="hover:text-brand-600 transition-colors">Admin</a>
@@ -18,6 +18,10 @@
                 <p class="text-gray-500 text-sm mt-0.5">Manage digital certificates, review student claims, authorize credentials, and oversee verification.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
+                <button th:if="${@rbac.can('certificates.approve')}" type="button" onclick="openDirectIssueModal()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-sm transition-all flex items-center gap-2 text-sm cursor-pointer">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Award Certificate</span>
+                </button>
                 <a th:if="${@rbac.can('certificates.analytics')}" href="/admin/certificates/analytics" class="px-3.5 py-2 bg-white text-surface-700 font-medium rounded-xl border border-surface-200 shadow-sm hover:bg-surface-50 transition-all flex items-center gap-2 text-sm">
                     <i class="bi bi-graph-up-arrow text-brand-600"></i>
                     <span>Analytics</span>
@@ -239,7 +243,10 @@
                                 <div class="flex items-center justify-end gap-1.5">
                                     <!-- Pending Review / Approve Button -->
                                     <button th:if="${cert.status.canBeApproved() and @rbac.can('certificates.approve')}" type="button" 
-                                            th:onclick="'openApproveModal(' + ${cert.id} + ', \'' + ${cert.studentName} + '\', \'' + ${cert.courseName} + '\')'"
+                                            th:data-id="${cert.id}"
+                                            th:data-student-name="${cert.studentName}"
+                                            th:data-course-name="${cert.courseName}"
+                                            onclick="openApproveModalFromBtn(this)"
                                             class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1" title="Approve and Issue Certificate">
                                         <i class="bi bi-patch-check"></i>
                                         <span>Issue</span>
@@ -247,7 +254,10 @@
 
                                     <!-- Pending Reject Button -->
                                     <button th:if="${cert.status.canBeApproved() and @rbac.can('certificates.reject')}" type="button" 
-                                            th:onclick="'openRejectModal(' + ${cert.id} + ', \'' + ${cert.studentName} + '\', \'' + ${cert.courseName} + '\')'"
+                                            th:data-id="${cert.id}"
+                                            th:data-student-name="${cert.studentName}"
+                                            th:data-course-name="${cert.courseName}"
+                                            onclick="openRejectModalFromBtn(this)"
                                             class="px-2.5 py-1 bg-surface-100 hover:bg-rose-50 text-gray-700 hover:text-rose-600 rounded-lg text-xs font-medium border border-surface-200 transition-all flex items-center gap-1" title="Reject Claim">
                                         <i class="bi bi-x-circle"></i>
                                         <span>Reject</span>
@@ -260,7 +270,7 @@
 
                                     <!-- Action Dropdown for Issued -->
                                     <div class="relative inline-block text-left" th:if="${cert.status.name() == 'ISSUED'}">
-                                        <button type="button" th:onclick="'toggleCertDropdown(' + ${cert.id} + ', event)'" class="p-1.5 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-lg text-xs transition-all">
+                                        <button type="button" th:data-id="${cert.id}" onclick="toggleCertDropdown(this.getAttribute('data-id'), event)" class="p-1.5 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-lg text-xs transition-all">
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <div th:id="'certDropdown-' + ${cert.id}" class="cert-dropdown hidden absolute right-0 mt-1 w-44 bg-white rounded-2xl shadow-xl border border-surface-200 z-50 py-1.5 text-left animate-scale-up">
@@ -273,7 +283,10 @@
                                                 <span>Certificate Dossier</span>
                                             </a>
                                             <button th:if="${@rbac.can('certificates.revoke')}" type="button" 
-                                                    th:onclick="'openRevokeModal(' + ${cert.id} + ', \'' + ${cert.certificateNumber} + '\', \'' + ${cert.studentName} + '\')'"
+                                                    th:data-id="${cert.id}"
+                                                    th:data-cert-number="${cert.certificateNumber}"
+                                                    th:data-student-name="${cert.studentName}"
+                                                    onclick="openRevokeModalFromBtn(this)"
                                                     class="w-full flex items-center gap-2 px-3.5 py-2 text-xs text-red-600 hover:bg-red-50 font-medium transition-colors">
                                                 <i class="bi bi-slash-circle"></i>
                                                 <span>Revoke Credential</span>
@@ -340,6 +353,7 @@
                     <div>
                         <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Certificate Template *</label>
                         <select name="templateCode" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                            <option value="AI_FUTURISTIC">AI Futuristic & Tech Academy (Recommended)</option>
                             <option value="CLASSIC_GOLD">Classic Gold (Traditional Academic Crest & Ornate Seal)</option>
                             <option value="MODERN_EMERALD">Modern Emerald (Clean Contemporary Design)</option>
                             <option value="TECH_INDIGO">Tech Indigo (Modern Tech & Engineering Aesthetic)</option>
@@ -459,9 +473,126 @@
             </div>
         </div>
 
+        <!-- =================================================================== -->
+        <!-- MODAL 4: DIRECT AWARD / ISSUE CERTIFICATE                           -->
+        <!-- =================================================================== -->
+        <div id="directIssueModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-xs z-[9999] items-center justify-center p-4" style="display: none;">
+            <div class="bg-white rounded-3xl max-w-lg w-full border border-surface-200 shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] flex flex-col">
+                <div class="p-5 sm:p-6 border-b border-surface-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg font-bold">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-surface-900">Award Certificate Directly</h3>
+                            <p class="text-xs text-gray-500">Issue official credential directly to a student</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeDirectIssueModal()" class="w-8 h-8 rounded-full bg-surface-100 hover:bg-surface-200 text-gray-500 flex items-center justify-center transition-colors">
+                        <i class="bi bi-x-lg text-xs"></i>
+                    </button>
+                </div>
+                
+                <form th:action="@{/admin/certificates/direct-issue}" method="post" class="p-6 space-y-4 overflow-y-auto">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <!-- Student Selection / Email -->
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Student Email or Selection *</label>
+                        <div class="space-y-1.5">
+                            <select id="directStudentSelect" onchange="if(this.value) document.getElementById('directStudentEmailInput').value = this.value;" class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                                <option value="">-- Choose from Registered Users --</option>
+                                <option th:each="s : ${students}" th:value="${s.email}" th:text="${s.name != null ? s.name + ' (' + s.email + ')' : s.email}">Student</option>
+                            </select>
+                            <input type="email" id="directStudentEmailInput" name="studentEmail" required placeholder="Or type student email address..." class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Course Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Select Course *</label>
+                        <select name="courseId" required class="w-full px-3.5 py-2.5 bg-surface-50 border border-surface-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all">
+                            <option value="">-- Select Course --</option>
+                            <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}">Course</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Template -->
+                        <div>
+                            <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Template *</label>
+                            <select name="templateCode" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none">
+                                <option value="AI_FUTURISTIC">AI Futuristic & Tech Academy (Recommended)</option>
+                                <option value="CLASSIC_GOLD">Classic Gold (Academic)</option>
+                                <option value="MODERN_EMERALD">Modern Emerald</option>
+                                <option value="TECH_INDIGO">Tech Indigo</option>
+                            </select>
+                        </div>
+
+                        <!-- Designation -->
+                        <div>
+                            <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Designation</label>
+                            <select name="certificateType" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none">
+                                <option value="COMPLETION">Completion</option>
+                                <option value="HONORS">Completion with Honors</option>
+                                <option value="PROFESSIONAL">Professional Certification</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Title -->
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Certificate Title</label>
+                        <input type="text" name="certificateTitle" value="Certificate of Completion" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none">
+                    </div>
+
+                    <!-- Instructor Name Override -->
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Instructor Name (Optional)</label>
+                        <input type="text" name="instructorName" placeholder="Defaults to course faculty if empty" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none">
+                    </div>
+
+                    <!-- Admin Notes -->
+                    <div>
+                        <label class="block text-xs font-bold text-surface-800 uppercase tracking-wider mb-1.5">Admin Note (Optional)</label>
+                        <textarea name="adminNotes" rows="2" placeholder="Administrative issuance reason..." class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-xs focus:bg-white focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="pt-4 border-t border-surface-100 flex items-center justify-end gap-2.5">
+                        <button type="button" onclick="closeDirectIssueModal()" class="px-4 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
+                            <i class="bi bi-award-fill"></i>
+                            <span>Award Certificate</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Page Specific Scripts Placed Inside Layout Div -->
         <script th:inline="javascript">
             // Modal Open & Close Functions
+            function openApproveModalFromBtn(btn) {
+                var id = btn.getAttribute('data-id');
+                var studentName = btn.getAttribute('data-student-name') || '';
+                var courseName = btn.getAttribute('data-course-name') || '';
+                openApproveModal(id, studentName, courseName);
+            }
+            function openRejectModalFromBtn(btn) {
+                var id = btn.getAttribute('data-id');
+                var studentName = btn.getAttribute('data-student-name') || '';
+                var courseName = btn.getAttribute('data-course-name') || '';
+                openRejectModal(id, studentName, courseName);
+            }
+            function openRevokeModalFromBtn(btn) {
+                var id = btn.getAttribute('data-id');
+                var certNumber = btn.getAttribute('data-cert-number') || '';
+                var studentName = btn.getAttribute('data-student-name') || '';
+                openRevokeModal(id, certNumber, studentName);
+            }
+
             function openApproveModal(id, studentName, courseName) {
                 var form = document.getElementById('approveForm');
                 if (form) form.action = '/admin/certificates/' + id + '/approve';
@@ -501,6 +632,15 @@
                 if (modal) modal.style.display = 'none';
             }
 
+            function openDirectIssueModal() {
+                var modal = document.getElementById('directIssueModal');
+                if (modal) modal.style.display = 'flex';
+            }
+            function closeDirectIssueModal() {
+                var modal = document.getElementById('directIssueModal');
+                if (modal) modal.style.display = 'none';
+            }
+
             // Dropdown controls
             function toggleCertDropdown(id, event) {
                 if (event) event.stopPropagation();
@@ -522,9 +662,10 @@
                     closeApproveModal();
                     closeRejectModal();
                     closeRevokeModal();
+                    closeDirectIssueModal();
                 }
             });
-            ['approveModal', 'rejectModal', 'revokeModal'].forEach(function(id) {
+            ['approveModal', 'rejectModal', 'revokeModal', 'directIssueModal'].forEach(function(id) {
                 var modal = document.getElementById(id);
                 if (modal) {
                     modal.addEventListener('click', function(e) {
@@ -532,6 +673,7 @@
                             if (id === 'approveModal') closeApproveModal();
                             if (id === 'rejectModal') closeRejectModal();
                             if (id === 'revokeModal') closeRevokeModal();
+                            if (id === 'directIssueModal') closeDirectIssueModal();
                         }
                     });
                 }

@@ -3,140 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${cert.studentName + ' - ' + cert.certificateTitle + ' | EduTake'}">Certificate | EduTake</title>
+    <title th:text="${cert.studentName + ' - ' + cert.certificateTitle + ' | EduTake'}">Certificate of Completion | EduTake</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=Great+Vibes&family=Alex+Brush&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- html2pdf.js for 1-click high quality PDF download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        cinzel: ['Cinzel', 'serif'],
+                        playfair: ['Playfair Display', 'serif'],
+                        signature: ['Great Vibes', 'Alex Brush', 'cursive'],
+                        space: ['Space Grotesk', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                            950: '#1e1b4b'
+                        },
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         .font-cinzel { font-family: 'Cinzel', Georgia, serif; }
         .font-playfair { font-family: 'Playfair Display', Georgia, serif; }
-        .font-signature { font-family: 'Great Vibes', cursive; }
+        .font-signature { font-family: 'Great Vibes', 'Alex Brush', cursive; }
+        .font-space { font-family: 'Space Grotesk', sans-serif; }
+
+        /* Exact A4 Landscape Certificate Canvas */
+        .cert-canvas {
+            width: 1050px;
+            min-height: 742px;
+            box-sizing: border-box;
+            background: #ffffff;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
 
         @media print {
             body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
             .no-print { display: none !important; }
-            .cert-container { box-shadow: none !important; border: 4px solid #b45309 !important; width: 100% !important; max-width: 100% !important; height: 100vh !important; page-break-inside: avoid; }
-            @page { size: landscape; margin: 0; }
+            .cert-canvas {
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: 100vh !important;
+                page-break-inside: avoid;
+            }
+            @page { size: A4 landscape; margin: 0; }
         }
     </style>
 </head>
 <body class="bg-surface-950 text-surface-900 min-h-screen py-8 px-4 flex flex-col items-center justify-center font-sans antialiased">
 
-    <!-- Action Bar (Hidden on Print) -->
-    <div class="no-print max-w-4xl w-full mb-6 flex flex-wrap items-center justify-between gap-3 bg-surface-900/80 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl">
+    <!-- Hidden CSRF token for ajax download recording -->
+    <input type="hidden" id="csrfToken" th:if="${_csrf}" th:value="${_csrf.token}" />
+    <input type="hidden" id="csrfHeader" th:if="${_csrf}" th:value="${_csrf.headerName}" />
+
+    <!-- Action Bar (Hidden on Print / PDF export) -->
+    <div class="no-print max-w-[1050px] w-full mb-6 flex flex-wrap items-center justify-between gap-3 bg-surface-900/95 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl">
         <a href="/student/certificates" class="px-4 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
             <i class="bi bi-arrow-left"></i>
-            <span>My Certificates</span>
+            <span>My Certificates & Credentials</span>
         </a>
 
-        <div class="flex items-center gap-2">
-            <button onclick="copyVerificationLink()" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+        <!-- Middle: Certificate Meta Badge -->
+        <div class="hidden sm:flex items-center gap-2 text-xs text-gray-300">
+            <span class="font-mono text-brand-400 font-bold" th:text="${cert.certificateNumber}">EDU-2026-000101</span>
+            <span class="text-gray-500">•</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <i class="bi bi-patch-check-fill"></i> AI Verified Credential
+            </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="copyVerificationLink()" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer" title="Copy public verification link">
                 <i class="bi bi-link-45deg text-brand-400 text-sm"></i>
                 <span id="copyBtnText">Copy Link</span>
             </button>
-            <a th:href="@{'/verify/certificate/' + ${cert.verificationCode}}" target="_blank" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+            
+            <a th:href="@{'/verify/certificate/' + ${cert.verificationCode}}" target="_blank" class="px-3.5 py-2 bg-surface-800 hover:bg-surface-750 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all" title="View official ledger record">
                 <i class="bi bi-shield-check text-emerald-400"></i>
                 <span>Verify Publicly</span>
             </a>
-            <button onclick="window.print()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 flex items-center gap-1.5 transition-all cursor-pointer">
+
+            <!-- 1-Click PDF Download Button -->
+            <button type="button" id="downloadPdfBtn" onclick="downloadCertificatePdf()" class="px-4 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition-all cursor-pointer">
+                <i id="downloadPdfIcon" class="bi bi-file-earmark-pdf-fill text-sm"></i>
+                <span id="downloadPdfText">Download PDF</span>
+            </button>
+
+            <!-- Standard Print Button -->
+            <button type="button" onclick="window.print()" class="px-4 py-2 bg-surface-800 hover:bg-surface-700 text-white rounded-xl text-xs font-bold border border-white/10 shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
                 <i class="bi bi-printer-fill"></i>
-                <span>Print / Save as PDF</span>
+                <span>Print</span>
             </button>
         </div>
     </div>
 
-    <!-- CERTIFICATE CANVAS CONTAINER -->
-    <div class="cert-container max-w-4xl w-full bg-[#fdfcfa] rounded-3xl border-8 border-amber-800/80 shadow-2xl p-8 sm:p-12 relative overflow-hidden text-surface-900 animate-scale-up">
-        
-        <!-- Ornate Double Inset Border -->
-        <div class="absolute inset-3 border-2 border-amber-600/40 rounded-2xl pointer-events-none"></div>
-        <div class="absolute inset-5 border border-amber-500/20 rounded-xl pointer-events-none"></div>
+    <!-- ======================================================================= -->
+    <!-- CERTIFICATE CANVAS (Modern AI & High-Tech Academy Geometric Layout)      -->
+    <!-- ======================================================================= -->
+    <div id="certificateElement" class="cert-canvas rounded-2xl overflow-hidden relative text-surface-900 select-none border border-slate-200">
 
-        <!-- Corner Ornaments -->
-        <div class="absolute top-6 left-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
-        <div class="absolute top-6 right-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
-        <div class="absolute bottom-6 left-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
-        <div class="absolute bottom-6 right-6 text-amber-600/60 text-2xl font-cinzel">❖</div>
+        <!-- 1. VECTOR BACKGROUND & CYBERNETIC GEOMETRIC WINGS -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 742" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="aiGradientPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3b82f6" />
+                    <stop offset="50%" stop-color="#4f46e5" />
+                    <stop offset="100%" stop-color="#2563eb" />
+                </linearGradient>
+                <linearGradient id="aiGradientAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#60a5fa" />
+                    <stop offset="100%" stop-color="#3b82f6" />
+                </linearGradient>
+                <linearGradient id="slateGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#090d16" />
+                    <stop offset="100%" stop-color="#1e293b" />
+                </linearGradient>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f59e0b" />
+                    <stop offset="100%" stop-color="#d97706" />
+                </linearGradient>
+                <!-- Security Guilloche Pattern Pattern -->
+                <pattern id="securityGuilloche" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 0 20 Q 10 0 20 20 T 40 20" fill="none" stroke="#f1f5f9" stroke-width="0.8" opacity="0.6"/>
+                    <path d="M 20 0 Q 30 20 40 0" fill="none" stroke="#f1f5f9" stroke-width="0.8" opacity="0.6"/>
+                </pattern>
+            </defs>
 
-        <!-- Watermark Background Crest -->
-        <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-            <i class="bi bi-award text-[360px] text-amber-900"></i>
+            <!-- Subtle Security Mesh Background -->
+            <rect width="1050" height="742" fill="#ffffff" />
+            <rect width="1050" height="742" fill="url(#securityGuilloche)" />
+
+            <!-- Elegant Inner Border Line -->
+            <rect x="24" y="24" width="1002" height="694" rx="12" fill="none" stroke="#e2e8f0" stroke-width="1.2" stroke-dasharray="6 3" />
+            <rect x="28" y="28" width="994" height="686" rx="10" fill="none" stroke="#cbd5e1" stroke-width="0.6" />
+
+            <!-- ================= TOP-LEFT CORNER GEOMETRIC MOTIF ================= -->
+            <!-- 1. Deep Midnight Slate Triangle -->
+            <polygon points="0,0 175,0 0,175" fill="url(#slateGradientDark)" />
+            <!-- 2. Light Slate Gray Accent Strip -->
+            <polygon points="175,0 215,0 0,215 0,175" fill="#f1f5f9" />
+            <!-- 3. Cyan Neon Accent Line -->
+            <polygon points="215,0 222,0 0,222 0,215" fill="#06b6d4" />
+            <!-- 4. Main Left Royal Blue Chevron Wing -->
+            <polygon points="0,210 160,340 0,470" fill="url(#aiGradientPrimary)" />
+            <!-- Inner Chevron Accent Glow -->
+            <polygon points="0,225 140,340 0,455" fill="url(#aiGradientAccent)" opacity="0.4" />
+
+            <!-- Bottom-Left Soft Gray Accent -->
+            <polygon points="0,600 130,742 0,742" fill="#f1f5f9" />
+            <polygon points="0,670 70,742 0,742" fill="url(#slateGradientDark)" />
+
+            <!-- ================= TOP-RIGHT CORNER GEOMETRIC MOTIF ================= -->
+            <polygon points="760,0 1050,0 1050,110" fill="#f8fafc" />
+            <polygon points="860,0 1050,0 1050,90" fill="#f1f5f9" />
+            <line x1="880" y1="0" x2="1050" y2="85" stroke="#3b82f6" stroke-width="1.5" opacity="0.4" />
+
+            <!-- ================= BOTTOM-RIGHT CORNER GEOMETRIC MOTIF ================= -->
+            <!-- 1. Right Vibrant Royal Blue Chevron Wing -->
+            <polygon points="1050,260 890,390 1050,520" fill="url(#aiGradientPrimary)" />
+            <!-- Inner Chevron Accent Glow -->
+            <polygon points="1050,275 910,390 1050,505" fill="url(#aiGradientAccent)" opacity="0.4" />
+            <!-- 2. Bottom-Right Soft Gray Facet -->
+            <polygon points="820,742 1050,510 1050,550 860,742" fill="#f1f5f9" />
+            <!-- 3. Cyan Accent Stripe -->
+            <polygon points="850,742 1050,540 1050,546 856,742" fill="#06b6d4" />
+            <!-- 4. Bottom-Right Deep Midnight Slate Polygon -->
+            <polygon points="860,742 1050,550 1050,742" fill="url(#slateGradientDark)" />
+        </svg>
+
+        <!-- 2. TOP RIGHT: OFFICIAL ROSETTE RIBBON BADGE -->
+        <div class="absolute top-6 right-8 z-20 flex flex-col items-center drop-shadow-lg pointer-events-none">
+            <svg width="102" height="132" viewBox="0 0 96 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Ribbon Tails (Back) -->
+                <path d="M34 56L22 118L40 106L48 116L42 56H34Z" fill="#1e3a8a" />
+                <path d="M62 56L74 118L56 106L48 116L54 56H62Z" fill="#1e40af" />
+                <path d="M30 60L20 114L36 104L42 60H30Z" fill="#2563eb" />
+                <path d="M66 60L76 114L60 104L54 60H66Z" fill="#3b82f6" />
+
+                <!-- Scalloped Rosette Flower (24 Petals) -->
+                <g filter="drop-shadow(0px 4px 8px rgba(37,99,235,0.35))">
+                    <!-- Fluted Circular Base -->
+                    <circle cx="48" cy="48" r="38" fill="#2563eb" />
+                    <!-- Fluted Edge Ring -->
+                    <path d="M48 6 C50 6, 52 9, 54 10 C56 11, 60 11, 62 13 C64 15, 65 18, 67 20 C69 22, 73 24, 74 27 C75 30, 75 33, 76 36 C77 39, 79 42, 79 45 C79 48, 78 51, 77 54 C76 57, 76 60, 74 63 C72 66, 70 68, 68 70 C66 72, 64 75, 61 77 C58 79, 55 79, 52 80 C49 81, 46 82, 43 82 C40 82, 37 81, 34 80 C31 79, 28 79, 25 77 C22 75, 20 72, 18 70 C16 68, 14 66, 12 63 C10 60, 10 57, 9 54 C8 51, 7 48, 7 45 C7 42, 9 39, 10 36 C11 33, 11 30, 12 27 C13 24, 17 22, 19 20 C21 18, 22 15, 24 13 C26 11, 30 11, 32 10 C34 9, 36 6, 38 6 Z" fill="#3b82f6" />
+                    
+                    <!-- Concentric Gold & White Rings -->
+                    <circle cx="48" cy="48" r="32" fill="#1d4ed8" stroke="#fef08a" stroke-width="1.5" />
+                    <circle cx="48" cy="48" r="28" fill="#ffffff" />
+                    <circle cx="48" cy="48" r="26" fill="#f8fafc" stroke="#3b82f6" stroke-width="1" stroke-dasharray="2 2" />
+
+                    <!-- Center Gold Crest -->
+                    <path d="M48 34L51.5 42.5H60.5L53.2 47.8L56 56.5L48 51.2L40 56.5L42.8 47.8L35.5 42.5H44.5L48 34Z" fill="#eab308" />
+                    <circle cx="48" cy="46" r="3" fill="#ca8a04" />
+                </g>
+            </svg>
         </div>
 
-        <!-- Certificate Header -->
-        <div class="text-center relative z-10 mb-6">
-            <div class="inline-flex items-center gap-2 mb-2">
-                <div class="w-9 h-9 rounded-xl bg-amber-700 text-amber-100 flex items-center justify-center text-lg font-black shadow-sm">
-                    <i class="bi bi-mortarboard-fill"></i>
-                </div>
-                <span class="font-cinzel text-lg font-black tracking-widest text-surface-900 uppercase">EduTake Academy</span>
-            </div>
-            <p class="font-cinzel text-xs font-bold text-amber-800 uppercase tracking-widest mb-4">Official Institutional Credential</p>
-            <h1 class="font-cinzel text-2xl sm:text-4xl font-extrabold text-amber-950 tracking-tight uppercase" th:text="${cert.certificateTitle}">Certificate of Completion</h1>
-            <div class="w-32 h-0.5 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mt-3"></div>
-        </div>
-
-        <!-- Presentation Statement -->
-        <div class="text-center relative z-10 my-6">
-            <p class="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 font-cinzel">This is proudly awarded to</p>
-            <h2 class="font-playfair text-3xl sm:text-5xl font-black text-amber-950 italic tracking-tight py-2" th:text="${cert.studentName}">Student Full Name</h2>
-            <div class="w-48 h-0.5 bg-amber-400/60 mx-auto my-3"></div>
+        <!-- 3. TOP BRANDING & INSTITUTIONAL HEADER -->
+        <div class="pt-8 px-16 text-center relative z-10">
             
-            <p class="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto leading-relaxed mt-3">
-                for successfully fulfilling all curriculum requirements, laboratory milestones, and comprehensive evaluations for the certified program:
+            <!-- EduTake Emblem Logo -->
+            <div class="inline-flex items-center gap-2.5 mb-1">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-blue-600/30">
+                    E
+                </div>
+                <span class="font-extrabold text-xl tracking-tight text-slate-900 font-sans">
+                    EduTake<span class="text-blue-600">.</span>
+                </span>
+                <span class="text-[11px] font-bold text-slate-400 tracking-widest uppercase font-cinzel ml-1 pl-2.5 border-l border-slate-300">
+                    Academy
+                </span>
+            </div>
+
+            <!-- Main Heading: CERTIFICATE OF COMPLETION -->
+            <div class="mt-1.5">
+                <h1 class="text-4xl sm:text-5xl font-black text-[#2563eb] tracking-[0.14em] uppercase font-sans leading-tight">
+                    CERTIFICATE
+                </h1>
+                <p class="font-playfair text-xl sm:text-2xl font-bold text-slate-800 italic mt-0.5 tracking-wide">
+                    of Completion
+                </p>
+            </div>
+
+        </div>
+
+        <!-- 4. RECIPIENT & COURSE AWARD BODY -->
+        <div class="px-20 text-center relative z-10 mt-5 mb-3">
+            
+            <!-- "This Certificate is awarded to :" -->
+            <p class="text-xs sm:text-sm font-semibold text-slate-600 tracking-widest uppercase font-cinzel">
+                This Certificate is awarded to :
             </p>
-            
-            <h3 class="font-cinzel text-lg sm:text-2xl font-black text-brand-900 mt-2 tracking-tight" th:text="${cert.courseName}">Advanced Full-Stack Engineering</h3>
-        </div>
 
-        <!-- Signatures & Verification Row -->
-        <div class="grid grid-cols-3 gap-4 items-end mt-10 pt-6 relative z-10 border-t border-amber-900/10 text-center">
-            
-            <!-- Left Signature (Instructor) -->
-            <div>
-                <div class="font-signature text-3xl sm:text-4xl text-amber-950 mb-1" th:text="${cert.instructorName}">Faculty Member</div>
-                <div class="w-32 h-px bg-surface-400 mx-auto mb-1"></div>
-                <div class="text-[11px] font-bold text-surface-900 uppercase font-cinzel" th:text="${cert.instructorName}">Instructor</div>
-                <div class="text-[9px] text-gray-400 uppercase font-semibold">Lead Academic Faculty</div>
-            </div>
-
-            <!-- Middle Gold Seal & QR Code -->
-            <div class="flex flex-col items-center">
-                <div th:if="${cert.qrCodeData}" class="bg-white p-1.5 rounded-xl border border-amber-400/40 shadow-xs mb-2">
-                    <img th:src="${cert.qrCodeData}" alt="Verification QR Code" class="w-20 h-20 rounded-md">
+            <!-- Student Full Name -->
+            <div class="my-3 inline-block min-w-[500px] max-w-2xl px-6">
+                <h2 class="font-playfair text-4xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight py-1" th:text="${cert.studentName}">
+                    Student Full Name
+                </h2>
+                <!-- Authentic Solid Underline with Diamond Center -->
+                <div class="relative flex items-center justify-center mt-1">
+                    <div class="w-full h-[1.5px] bg-slate-900"></div>
+                    <div class="absolute w-2.5 h-2.5 bg-blue-600 rotate-45 border border-white"></div>
                 </div>
-                <div class="font-mono text-[10px] font-bold text-amber-900" th:text="${cert.certificateNumber}">EDU-2026-000101</div>
-                <div class="text-[9px] text-gray-400 font-mono" th:text="${'Code: ' + cert.verificationCode}">Code: 8F7K2M9P</div>
             </div>
 
-            <!-- Right Signature (Academic Director) -->
-            <div>
-                <div class="font-signature text-3xl sm:text-4xl text-amber-950 mb-1">Dhiraj Upadhyay</div>
-                <div class="w-32 h-px bg-surface-400 mx-auto mb-1"></div>
-                <div class="text-[11px] font-bold text-surface-900 uppercase font-cinzel">Board Director</div>
-                <div class="text-[9px] text-gray-400 uppercase font-semibold" th:text="${'Issued on ' + cert.formattedIssueDate}">Issued on 12 May 2026</div>
+            <!-- "for successfully completing the curriculum" -->
+            <p class="text-xs sm:text-sm text-slate-600 font-medium max-w-xl mx-auto leading-relaxed mt-0.5">
+                for successfully completing the curriculum, laboratory milestones, and assessments for
+            </p>
+
+            <!-- Certified Course Title -->
+            <div class="mt-1.5 mb-1">
+                <h3 class="font-sans text-xl sm:text-2xl font-black text-slate-900 tracking-tight" th:text="${cert.courseName}">
+                    Advanced Full-Stack Web Development
+                </h3>
+            </div>
+
+            <!-- Award Designation & Category Meta -->
+            <div class="inline-flex items-center gap-2 text-xs text-slate-600 font-semibold mt-0.5">
+                <span class="text-blue-700 font-bold uppercase font-cinzel" th:text="${'Designation: ' + (cert.certificateType != null ? cert.certificateType : 'COMPLETION')}">Designation: COMPLETION</span>
+                <span>•</span>
+                <span class="text-slate-600" th:text="${'Category: ' + (cert.courseCategory != null ? cert.courseCategory : 'Professional Curriculum')}">Web Development</span>
             </div>
 
         </div>
 
-        <!-- Footer Verification Link -->
-        <div class="text-center mt-6 relative z-10">
-            <span class="text-[9px] text-gray-400 font-mono" th:text="${'Verify Authenticity Online: http://localhost:8080/verify/certificate/' + cert.verificationCode}">Verify Authenticity Online: http://localhost:8080/verify/certificate/8F7K2M9P</span>
+        <!-- 5. SIGNATURES & VERIFICATION QR CODE ROW -->
+        <div class="px-20 pt-3 pb-3 relative z-10 mt-3">
+            <div class="grid grid-cols-3 gap-6 items-end text-center">
+                
+                <!-- LEFT: INSTRUCTOR SIGNATURE -->
+                <div class="flex flex-col items-center">
+                    <div class="font-signature text-3xl sm:text-4xl text-slate-900 h-10 flex items-end justify-center mb-1" th:text="${cert.instructorName}">
+                        Dr. Robert Vance
+                    </div>
+                    <div class="w-44 h-[1.5px] bg-slate-900 mb-1.5"></div>
+                    <div class="text-xs font-bold text-slate-900 uppercase font-cinzel tracking-wider" th:text="${cert.instructorName}">
+                        Dr. Robert Vance
+                    </div>
+                    <div class="text-[10px] text-slate-600 font-semibold uppercase tracking-wider">
+                        Lead Instructor & Faculty
+                    </div>
+                </div>
+
+                <!-- MIDDLE: SCANNABLE QR CODE & CREDENTIAL SERIAL -->
+                <div class="flex flex-col items-center justify-center">
+                    <div class="bg-white p-1.5 rounded-xl border border-slate-300 shadow-sm mb-1.5 flex items-center justify-center">
+                        <img th:if="${cert.qrCodeData}" th:src="${cert.qrCodeData}" alt="Verification QR Code" class="w-[72px] h-[72px] rounded-md" />
+                        <div th:unless="${cert.qrCodeData}" class="w-[72px] h-[72px] bg-slate-100 rounded-md flex items-center justify-center text-slate-400">
+                            <i class="bi bi-qr-code text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="font-mono text-[10px] font-extrabold text-slate-900 tracking-tight" th:text="${cert.certificateNumber}">
+                        EDU-2026-000101
+                    </div>
+                    <div class="text-[9px] text-blue-600 font-mono font-bold" th:text="${'Code: ' + cert.verificationCode}">
+                        Code: 8F7K2M9P
+                    </div>
+                </div>
+
+                <!-- RIGHT: FOUNDER & CEO SIGNATURE & DATE -->
+                <div class="flex flex-col items-center">
+                    <div class="font-signature text-3xl sm:text-4xl text-slate-900 h-10 flex items-end justify-center mb-1">
+                        Dhiraj Upadhyay
+                    </div>
+                    <div class="w-44 h-[1.5px] bg-slate-900 mb-1.5"></div>
+                    <div class="text-xs font-bold text-slate-900 uppercase font-cinzel tracking-wider">
+                        Dhiraj Upadhyay
+                    </div>
+                    <div class="text-[10px] text-slate-600 font-semibold uppercase tracking-wider">
+                        Founder & CEO, EduTake
+                    </div>
+                    <div class="text-[10px] text-blue-800 font-medium mt-0.5" th:text="${'Issued on ' + cert.formattedIssueDate}">
+                        Issued on 12 May 2026
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 6. BOTTOM ANTI-COUNTERFEIT LEDGER LINE -->
+        <div class="text-center pb-4 pt-1 relative z-10 border-t border-slate-200 mx-20">
+            <p class="text-[9px] text-slate-600 font-mono">
+                Official Credential Ledger • Scan QR or Verify Authenticity Online at: <span class="font-semibold text-blue-700" th:text="${'http://localhost:8080/verify/certificate/' + cert.verificationCode}">http://localhost:8080/verify/certificate/8F7K2M9P</span>
+            </p>
         </div>
 
     </div>
 
-    <!-- Script for link copying and auto-print query -->
+    <!-- SCRIPT: 1-Click PDF Generation, Clipboard Copy, and Print Parameter -->
     <script th:inline="javascript">
+        var certId = /*[[${cert.id}]]*/ 0;
+        var certNumber = /*[[${cert.certificateNumber}]]*/ 'EDU-2026';
+        var studentName = /*[[${cert.studentName}]]*/ 'Student';
+
         function copyVerificationLink() {
             var url = /*[[${verificationUrl}]]*/ 'http://localhost:8080/verify/certificate/' + /*[[${cert.verificationCode}]]*/ '';
             navigator.clipboard.writeText(url).then(function() {
@@ -148,7 +385,60 @@
             });
         }
 
-        // Trigger print if query parameter ?print=true is present
+        // 1-Click Client-side PDF Generation & Download
+        function downloadCertificatePdf() {
+            var element = document.getElementById('certificateElement');
+            var btn = document.getElementById('downloadPdfBtn');
+            var icon = document.getElementById('downloadPdfIcon');
+            var text = document.getElementById('downloadPdfText');
+
+            if (!element) return;
+
+            // Visual loading feedback
+            if (btn) btn.disabled = true;
+            if (icon) icon.className = 'bi bi-arrow-repeat animate-spin text-sm';
+            if (text) text.innerText = 'Generating PDF...';
+
+            var opt = {
+                margin:       0,
+                filename:     'EduTake_Certificate_' + certNumber + '.pdf',
+                image:        { type: 'jpeg', quality: 0.99 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
+                jsPDF:        { unit: 'px', format: [1050, 742], orientation: 'landscape', hotfixes: ['px_scaling'] }
+            };
+
+            // Generate and save
+            html2pdf().set(opt).from(element).save().then(function() {
+                if (btn) btn.disabled = false;
+                if (icon) icon.className = 'bi bi-file-earmark-pdf-fill text-sm';
+                if (text) text.innerText = 'Download PDF';
+
+                // Record download audit event asynchronously
+                recordDownloadAudit();
+            }).catch(function(err) {
+                console.error('PDF export error:', err);
+                if (btn) btn.disabled = false;
+                if (icon) icon.className = 'bi bi-file-earmark-pdf-fill text-sm';
+                if (text) text.innerText = 'Download PDF';
+                // Fallback to native print
+                window.print();
+            });
+        }
+
+        function recordDownloadAudit() {
+            var token = document.getElementById('csrfToken') ? document.getElementById('csrfToken').value : '';
+            var header = document.getElementById('csrfHeader') ? document.getElementById('csrfHeader').value : 'X-CSRF-TOKEN';
+            
+            var headers = { 'Content-Type': 'application/json' };
+            if (token && header) headers[header] = token;
+
+            fetch('/student/certificates/' + certId + '/record-download', {
+                method: 'POST',
+                headers: headers
+            }).catch(function(e) { console.log('Audit log record status:', e); });
+        }
+
+        // Auto print trigger if ?print=true is present
         window.addEventListener('load', function() {
             var params = new URLSearchParams(window.location.search);
             if (params.get('print') === 'true') {

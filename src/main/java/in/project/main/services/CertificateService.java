@@ -13,11 +13,15 @@ public interface CertificateService {
 
     List<CertificateDTO> getStudentCertificates(String email);
 
+    List<StudentCourseCertificateItemDTO> getStudentPurchasedCoursesWithCertificateStatus(String email);
+
     List<Enrollment> getEligibleEnrollmentsForStudent(String email);
 
     boolean isEligibleForCertificate(String email, Long courseId);
 
     CertificateDTO requestCertificate(String email, Long enrollmentId, String studentNote);
+
+    CertificateDTO applyForCertificate(String email, StudentCertificateApplyDTO applyDTO);
 
     Page<CertificateDTO> getAdminCertificatesPage(String search, CertificateStatus status, Long courseId, Pageable pageable);
 
@@ -32,6 +36,8 @@ public interface CertificateService {
     CertificateDTO reviewCertificateRequest(Long id, String adminEmail, CertificateReviewDTO dto);
 
     CertificateDTO approveAndIssueCertificate(Long id, String adminEmail, CertificateIssueDTO dto);
+
+    CertificateDTO issueCertificateDirectly(DirectCertificateIssueDTO dto, String adminEmail);
 
     CertificateDTO rejectCertificateRequest(Long id, String adminEmail, String rejectionReason);
 

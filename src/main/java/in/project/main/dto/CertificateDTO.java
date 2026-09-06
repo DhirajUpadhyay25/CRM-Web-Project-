@@ -29,6 +29,7 @@ public class CertificateDTO {
     private LocalDateTime approvedAt;
     private LocalDateTime revokedAt;
     private String studentRequestNote;
+    private String projectUrl;
     private String reviewedByAdmin;
     private String approvedByAdmin;
     private String rejectionReason;
@@ -128,6 +129,9 @@ public class CertificateDTO {
 
     public String getStudentRequestNote() { return studentRequestNote; }
     public void setStudentRequestNote(String studentRequestNote) { this.studentRequestNote = studentRequestNote; }
+
+    public String getProjectUrl() { return projectUrl; }
+    public void setProjectUrl(String projectUrl) { this.projectUrl = projectUrl; }
 
     public String getReviewedByAdmin() { return reviewedByAdmin; }
     public void setReviewedByAdmin(String reviewedByAdmin) { this.reviewedByAdmin = reviewedByAdmin; }
