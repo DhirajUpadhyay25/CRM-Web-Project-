@@ -64,6 +64,9 @@ public class UserController
 
 	@Autowired
 	private in.project.main.services.AuditLogService auditLogService;
+
+	@Autowired
+	private in.project.main.services.BlogService blogService;
 	
 	@Value("${app.razorpay.key-id}")
 	private String razorpayKeyId;
@@ -72,6 +75,11 @@ public class UserController
 	public String openIndexPage(Model model, @AuthenticationPrincipal CustomUserDetails userDetails, jakarta.servlet.http.HttpServletRequest request)
 	{
 		request.getSession(true); // Force session creation for CSRF token
+
+		// Auto-seed default blogs if database has 0 blogs
+		try {
+			blogService.seedDefaultBlogsIfEmpty("admin@edutake.com");
+		} catch (Exception ignored) {}
 		
 		// Query featured & published courses directly from database
 		org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 8);
@@ -96,6 +104,10 @@ public class UserController
 		model.addAttribute("totalCoursesCount", totalCoursesCount);
 		model.addAttribute("totalInstructorsCount", totalInstructorsCount);
 		model.addAttribute("categories", categoryService.getActiveCategories());
+
+		// Supply top 3 articles for Homepage Blog Section
+		List<in.project.main.entities.Blog> latestArticles = blogService.getFeaturedOrLatestPublished(3);
+		model.addAttribute("latestArticles", latestArticles);
 		
 		if(userDetails != null && userDetails.getRole() == Role.STUDENT)
 		{

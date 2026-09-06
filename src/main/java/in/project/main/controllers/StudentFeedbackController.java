@@ -47,16 +47,74 @@ public class StudentFeedbackController {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         Long studentId = getStudentId(userDetails);
-        if (studentId == null) {
+        String studentEmail = userDetails != null ? userDetails.getUsername() : null;
+        if (studentId == null && studentEmail == null) {
             return "redirect:/login";
         }
 
         Page<Feedback> feedbackPage = feedbackService.getStudentFeedback(
-                studentId, PageRequest.of(Math.max(0, page), Math.max(1, size),
+                studentId, studentEmail, PageRequest.of(Math.max(0, page), Math.max(1, size),
                 Sort.by(Sort.Direction.DESC, "createdAt")));
 
         model.addAttribute("feedbackPage", feedbackPage);
+        model.addAttribute("stats", feedbackService.getStudentFeedbackStats(studentId, studentEmail));
         return "student/feedback/list";
+    }
+
+    @GetMapping("/api/{id}")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> getFeedbackApi(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        Long studentId = getStudentId(userDetails);
+        String studentEmail = userDetails != null ? userDetails.getUsername() : null;
+        if (studentId == null && studentEmail == null) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body(java.util.Map.of("error", "Unauthorized"));
+        }
+
+        Optional<Feedback> feedbackOpt = feedbackService.getStudentFeedbackById(id, studentId, studentEmail);
+        if (feedbackOpt.isEmpty()) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND).body(java.util.Map.of("error", "Feedback not found"));
+        }
+
+        Feedback fb = feedbackOpt.get();
+        List<FeedbackResponse> responses = feedbackService.getFeedbackResponses(id);
+
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("id", fb.getId());
+        data.put("courseName", fb.getCourse() != null ? fb.getCourse().getName() : "General");
+        data.put("instructorName", fb.getInstructor() != null ? fb.getInstructor().getName() : (fb.getCourse() != null && fb.getCourse().getInstructorRef() != null ? fb.getCourse().getInstructorRef().getName() : "N/A"));
+        data.put("rating", fb.getRating() != null ? fb.getRating() : 0);
+        data.put("category", fb.getCategory() != null ? fb.getCategory() : "General");
+        data.put("subject", fb.getSubject() != null ? fb.getSubject() : "");
+        data.put("message", fb.getMessage() != null ? fb.getMessage() : "");
+        data.put("status", fb.getStatus() != null ? fb.getStatus().name() : "NEW");
+        data.put("statusDisplayName", fb.getStatus() != null ? fb.getStatus().getDisplayName() : "New");
+        data.put("statusBadgeClass", fb.getStatus() != null ? fb.getStatus().getBadgeClass() : "bg-blue-100 text-blue-700");
+        data.put("isEditable", fb.getStatus() != null && fb.getStatus().isEditable());
+        data.put("isAnonymous", fb.isAnonymous());
+        data.put("isPublic", fb.isPublic());
+        data.put("adminResponse", fb.getAdminResponse());
+        data.put("createdAt", fb.getCreatedAt() != null ? fb.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")) : "");
+        data.put("resolvedAt", fb.getResolvedAt() != null ? fb.getResolvedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")) : null);
+
+        List<java.util.Map<String, Object>> respList = new java.util.ArrayList<>();
+        if (responses != null) {
+            for (FeedbackResponse r : responses) {
+                java.util.Map<String, Object> rMap = new java.util.HashMap<>();
+                rMap.put("id", r.getId());
+                rMap.put("responderName", r.getResponderName() != null ? r.getResponderName() : "EduTake Team");
+                rMap.put("responderRole", r.getResponderRole() != null ? r.getResponderRole() : "ADMIN");
+                rMap.put("responderEmail", r.getResponderEmail());
+                rMap.put("message", r.getMessage());
+                rMap.put("createdAt", r.getCreatedAt() != null ? r.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")) : "");
+                respList.add(rMap);
+            }
+        }
+        data.put("responses", respList);
+
+        return org.springframework.http.ResponseEntity.ok(data);
     }
 
     @GetMapping("/give")
@@ -147,11 +205,12 @@ public class StudentFeedbackController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         Long studentId = getStudentId(userDetails);
-        if (studentId == null) {
+        String studentEmail = userDetails != null ? userDetails.getUsername() : null;
+        if (studentId == null && studentEmail == null) {
             return "redirect:/login";
         }
 
-        Optional<Feedback> feedbackOpt = feedbackService.getStudentFeedbackById(id, studentId);
+        Optional<Feedback> feedbackOpt = feedbackService.getStudentFeedbackById(id, studentId, studentEmail);
         if (feedbackOpt.isEmpty()) {
             model.addAttribute("errorMsg", "Feedback not found or access denied.");
             return "redirect:/student/feedback";
@@ -173,11 +232,12 @@ public class StudentFeedbackController {
             RedirectAttributes redirectAttributes) {
 
         Long studentId = getStudentId(userDetails);
-        if (studentId == null) {
+        String studentEmail = userDetails != null ? userDetails.getUsername() : null;
+        if (studentId == null && studentEmail == null) {
             return "redirect:/login";
         }
 
-        Optional<Feedback> feedbackOpt = feedbackService.getStudentFeedbackById(id, studentId);
+        Optional<Feedback> feedbackOpt = feedbackService.getStudentFeedbackById(id, studentId, studentEmail);
         if (feedbackOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMsg", "Feedback not found or access denied.");
             return "redirect:/student/feedback";
@@ -204,7 +264,8 @@ public class StudentFeedbackController {
             RedirectAttributes redirectAttributes) {
 
         Long studentId = getStudentId(userDetails);
-        if (studentId == null) {
+        String studentEmail = userDetails != null ? userDetails.getUsername() : null;
+        if (studentId == null && studentEmail == null) {
             return "redirect:/login";
         }
 
@@ -213,7 +274,13 @@ public class StudentFeedbackController {
             if (ratingStr != null && !ratingStr.trim().isEmpty()) {
                 rating = Integer.parseInt(ratingStr.trim());
             }
-            feedbackService.editFeedback(id, studentId, rating, category, subject, message);
+            // Ensure studentId is available or load from feedback
+            Optional<Feedback> fbOpt = feedbackService.getStudentFeedbackById(id, studentId, studentEmail);
+            if (fbOpt.isEmpty()) {
+                throw new SecurityException("You are not authorized to edit this feedback.");
+            }
+            Long effectiveStudentId = fbOpt.get().getStudent() != null ? fbOpt.get().getStudent().getId() : studentId;
+            feedbackService.editFeedback(id, effectiveStudentId, rating, category, subject, message);
             redirectAttributes.addFlashAttribute("successMsg", "Feedback updated successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
@@ -229,12 +296,18 @@ public class StudentFeedbackController {
             RedirectAttributes redirectAttributes) {
 
         Long studentId = getStudentId(userDetails);
-        if (studentId == null) {
+        String studentEmail = userDetails != null ? userDetails.getUsername() : null;
+        if (studentId == null && studentEmail == null) {
             return "redirect:/login";
         }
 
         try {
-            feedbackService.deleteFeedback(id, studentId);
+            Optional<Feedback> fbOpt = feedbackService.getStudentFeedbackById(id, studentId, studentEmail);
+            if (fbOpt.isEmpty()) {
+                throw new SecurityException("You are not authorized to withdraw this feedback.");
+            }
+            Long effectiveStudentId = fbOpt.get().getStudent() != null ? fbOpt.get().getStudent().getId() : studentId;
+            feedbackService.deleteFeedback(id, effectiveStudentId);
             redirectAttributes.addFlashAttribute("successMsg", "Feedback withdrawn successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());

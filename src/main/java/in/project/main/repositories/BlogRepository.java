@@ -15,6 +15,8 @@ import in.project.main.entities.enums.ContentStatus;
 
 public interface BlogRepository extends JpaRepository<Blog, Long>, JpaSpecificationExecutor<Blog> {
 
+    Optional<Blog> findBySlug(String slug);
+
     Optional<Blog> findBySlugAndDeletedFalse(String slug);
 
     boolean existsBySlug(String slug);

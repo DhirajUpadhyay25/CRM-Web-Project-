@@ -9,9 +9,12 @@
                     <a href="/admin/feedback" class="text-gray-400 hover:text-brand-600 transition-colors">
                         <i class="bi bi-arrow-left text-lg"></i>
                     </a>
-                    <h1 class="text-2xl font-bold text-surface-900">Feedback #<span th:text="${feedback.id}"></span></h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-surface-900">Feedback #<span th:text="${feedback.id}"></span></h1>
+                    <span th:text="${feedback.status != null ? feedback.status.displayName : 'New'}"
+                          th:classappend="${feedback.statusBadgeClass}"
+                          class="px-2.5 py-1 rounded-full text-xs font-semibold hidden sm:inline-block"></span>
                 </div>
-                <p class="text-gray-500 text-sm ml-8">Submitted <span th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'dd MMMM yyyy \'at\' HH:mm') : '-'}"></span></p>
+                <p class="text-gray-500 text-sm ml-8" th:text="'Submitted ' + (${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'dd MMMM yyyy') : '-'})"></p>
             </div>
             <div class="flex items-center gap-2 ml-8 sm:ml-0">
                 <a href="#respond"
@@ -35,98 +38,115 @@
             <span class="text-sm font-medium" th:text="${errorMsg}"></span>
         </div>
 
+        <!-- Mobile Status Badge -->
+        <div class="sm:hidden mb-4">
+            <span th:text="${feedback.status != null ? feedback.status.displayName : 'New'}"
+                  th:classappend="${feedback.statusBadgeClass}"
+                  class="px-3 py-1 rounded-full text-xs font-semibold inline-block"></span>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Content -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Feedback Details -->
                 <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-surface-200 bg-surface-50 flex items-center justify-between">
-                        <h2 class="font-bold text-surface-900">Feedback Details</h2>
-                        <span th:text="${feedback.status != null ? feedback.status.displayName : 'New'}"
-                              th:classappend="${feedback.status != null ? feedback.status.badgeClass : 'bg-blue-100 text-blue-700'}"
-                              class="px-2.5 py-1 rounded-full text-xs font-semibold"></span>
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50 flex items-center justify-between">
+                        <h2 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-chat-quote text-gray-400"></i> Feedback Details
+                        </h2>
                     </div>
-                    <div class="p-6 space-y-4">
+                    <div class="p-4 sm:p-6 space-y-5">
                         <!-- Student Info -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Student</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Student</p>
                                 <p class="text-surface-900 font-medium" th:text="${feedback.displayName}"></p>
-                                <p class="text-gray-500 text-xs" th:unless="${feedback.anonymous}" th:text="${feedback.studentEmail}"></p>
+                                <p class="text-gray-500 text-xs mt-0.5" th:unless="${feedback.anonymous}" th:text="${feedback.studentEmail}"></p>
                             </div>
                             <div>
-                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Course</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Course</p>
                                 <p class="text-surface-900 font-medium" th:text="${feedback.course != null ? feedback.course.name : 'General'}"></p>
-                                <p class="text-gray-500 text-xs" th:if="${feedback.instructor != null}" th:text="'Instructor: ' + ${feedback.instructor.name}"></p>
+                                <p class="text-gray-500 text-xs mt-0.5" th:if="${feedback.instructor != null}" th:text="'Instructor: ' + ${feedback.instructor.name}"></p>
                             </div>
                         </div>
 
                         <!-- Rating -->
                         <div>
-                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Rating</p>
-                            <div class="flex items-center gap-1">
-                                <template th:each="i : ${#numbers.sequence(1,5)}">
-                                    <i th:if="${i <= (feedback.rating != null ? feedback.rating : 0)}" class="bi bi-star-fill text-amber-400 text-lg"></i>
-                                    <i th:unless="${i <= (feedback.rating != null ? feedback.rating : 0)}" class="bi bi-star text-gray-300 text-lg"></i>
-                                </template>
-                                <span class="text-sm text-gray-500 ml-2" th:text="'(' + ${feedback.rating} + '/5)'"></span>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Rating</p>
+                            <div class="flex items-center gap-1.5">
+                                <div class="flex items-center gap-0.5">
+                                    <th:block th:each="i : ${#numbers.sequence(1,5)}">
+                                        <i th:if="${i <= (feedback.rating != null ? feedback.rating : 0)}" class="bi bi-star-fill text-amber-400 text-lg"></i>
+                                        <i th:unless="${i <= (feedback.rating != null ? feedback.rating : 0)}" class="bi bi-star text-gray-300 text-lg"></i>
+                                    </th:block>
+                                </div>
+                                <span class="text-sm text-gray-500 ml-1" th:text="'(' + (${feedback.rating != null ? feedback.rating : 0}) + '/5)'"></span>
                             </div>
                         </div>
 
-                        <!-- Category & Subject -->
+                        <!-- Category & Type -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Category</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Category</p>
                                 <span th:if="${feedback.category != null}" th:text="${feedback.category}"
                                       class="px-2.5 py-1 bg-surface-100 rounded-full text-xs font-semibold text-surface-700 inline-block"></span>
+                                <span th:unless="${feedback.category != null}" class="text-gray-400 text-sm">Not specified</span>
                             </div>
                             <div>
-                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Type</p>
                                 <span th:if="${feedback.feedbackType != null}" th:text="${feedback.feedbackType.displayName}"
                                       class="px-2.5 py-1 bg-surface-100 rounded-full text-xs font-semibold text-surface-700 inline-block"></span>
+                                <span th:unless="${feedback.feedbackType != null}" class="text-gray-400 text-sm">Not specified</span>
                             </div>
                         </div>
 
                         <!-- Subject -->
-                        <div th:if="${feedback.subject != null}">
-                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Subject</p>
+                        <div th:if="${feedback.subject != null and !feedback.subject.isEmpty()}">
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Subject</p>
                             <p class="text-surface-900 font-medium" th:text="${feedback.subject}"></p>
                         </div>
 
                         <!-- Message -->
                         <div>
-                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Message</p>
-                            <div class="bg-surface-50 p-4 rounded-xl border border-surface-200 text-surface-900 text-sm whitespace-pre-wrap" th:text="${feedback.message}"></div>
+                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Message</p>
+                            <div class="bg-surface-50 p-4 rounded-xl border border-surface-200 text-surface-900 text-sm leading-relaxed whitespace-pre-wrap"
+                                 th:text="${feedback.message != null ? feedback.message : 'No message provided.'}"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Responses -->
                 <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                        <h2 class="font-bold text-surface-900">Responses</h2>
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50">
+                        <h2 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-reply-all text-gray-400"></i> Responses
+                            <span th:if="${responses != null and !responses.isEmpty()}" 
+                                  class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full text-xs font-bold"
+                                  th:text="${#lists.size(responses)}"></span>
+                        </h2>
                     </div>
 
-                    <div th:if="${responses != null and !responses.isEmpty()}" class="p-6 space-y-4">
+                    <div th:if="${responses != null and !responses.isEmpty()}" class="p-4 sm:p-6 space-y-4">
                         <div th:each="resp : ${responses}" class="border-l-4 pl-4 py-2"
                              th:classappend="${resp.responderRole == 'ADMIN' ? 'border-purple-500' : resp.responderRole == 'INSTRUCTOR' ? 'border-blue-500' : 'border-green-500'}">
-                            <div class="flex items-center gap-2 mb-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
                                 <span class="font-semibold text-sm text-surface-900" th:text="${resp.responderName != null ? resp.responderName : resp.responderEmail}"></span>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold"
                                       th:classappend="${resp.responderRole == 'ADMIN' ? 'bg-purple-100 text-purple-700' : resp.responderRole == 'INSTRUCTOR' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}"
                                       th:text="${resp.responderRole}"></span>
                                 <span class="text-xs text-gray-400" th:text="${resp.createdAt != null ? #temporals.format(resp.createdAt, 'dd MMM yyyy, HH:mm') : ''}"></span>
                             </div>
-                            <p class="text-sm text-surface-800 whitespace-pre-wrap" th:text="${resp.message}"></p>
+                            <p class="text-sm text-surface-800 whitespace-pre-wrap leading-relaxed" th:text="${resp.message}"></p>
                         </div>
                     </div>
 
-                    <div th:unless="${responses != null and !responses.isEmpty()}" class="p-6 text-center text-sm text-gray-400">
-                        No responses yet.
+                    <div th:unless="${responses != null and !responses.isEmpty()}" class="p-8 text-center text-sm text-gray-400">
+                        <i class="bi bi-chat-left text-2xl mb-2 block opacity-50"></i>
+                        No responses yet. Be the first to respond.
                     </div>
 
                     <!-- Respond Form -->
-                    <div id="respond" class="px-6 py-4 border-t border-surface-200 bg-surface-50">
+                    <div id="respond" class="px-4 sm:px-6 py-5 border-t border-surface-200 bg-surface-50">
                         <form th:action="@{/admin/feedback/{id}/respond(id=${feedback.id})}" method="post">
                             <div class="mb-3">
                                 <label class="block text-sm font-semibold text-surface-800 mb-1.5">Your Response</label>
@@ -136,7 +156,7 @@
                             </div>
                             <div class="flex justify-end">
                                 <button type="submit"
-                                        class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold text-sm shadow-sm transition-all">
+                                        class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold text-sm shadow-sm transition-all">
                                     <i class="bi bi-reply"></i> Submit Response
                                 </button>
                             </div>
@@ -146,23 +166,26 @@
 
                 <!-- Status History -->
                 <div th:if="${history != null and !history.isEmpty()}" class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-surface-200 bg-surface-50">
-                        <h2 class="font-bold text-surface-900">Activity History</h2>
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50">
+                        <h2 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-clock-history text-gray-400"></i> Activity History
+                        </h2>
                     </div>
-                    <div class="p-6">
-                        <div class="space-y-3">
+                    <div class="p-4 sm:p-6">
+                        <div class="space-y-4">
                             <div th:each="h : ${history}" class="flex items-start gap-3 text-sm">
-                                <div class="w-2 h-2 rounded-full bg-brand-500 mt-1.5 flex-shrink-0"></div>
-                                <div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0 ring-4 ring-brand-50"></div>
+                                <div class="flex-1">
                                     <p class="text-surface-800">
                                         <span class="font-medium" th:text="${h.changedBy}"></span>
-                                        changed status from
-                                        <span th:if="${h.fromStatus != null}" class="font-medium" th:text="${h.fromStatus}"></span>
-                                        <span th:unless="${h.fromStatus != null}" class="font-medium text-gray-400">-</span>
-                                        to <span class="font-medium" th:text="${h.toStatus}"></span>
+                                        <span class="text-gray-500"> changed status from </span>
+                                        <span th:if="${h.fromStatus != null}" class="font-medium text-surface-900" th:text="${h.fromStatus}"></span>
+                                        <span th:unless="${h.fromStatus != null}" class="text-gray-400 italic">unknown</span>
+                                        <span class="text-gray-500"> to </span>
+                                        <span class="font-medium text-brand-600" th:text="${h.toStatus}"></span>
                                     </p>
-                                    <p th:if="${h.reason != null}" class="text-gray-500 text-xs mt-0.5" th:text="${h.reason}"></p>
-                                    <p class="text-gray-400 text-xs" th:text="${h.createdAt != null ? #temporals.format(h.createdAt, 'dd MMM yyyy, HH:mm') : ''}"></p>
+                                    <p th:if="${h.reason != null and !h.reason.isEmpty()}" class="text-gray-500 text-xs mt-0.5 italic" th:text="${h.reason}"></p>
+                                    <p class="text-gray-400 text-xs mt-0.5" th:text="${h.createdAt != null ? #temporals.format(h.createdAt, 'dd MMM yyyy, HH:mm') : ''}"></p>
                                 </div>
                             </div>
                         </div>
@@ -173,89 +196,135 @@
             <!-- Sidebar -->
             <div class="space-y-6">
                 <!-- Status Actions -->
-                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm p-6">
-                    <h3 class="font-bold text-surface-900 mb-4">Status Actions</h3>
-                    <div class="space-y-2">
-                        <form th:action="@{/admin/feedback/{id}/status(id=${feedback.id})}" method="post" class="space-y-2">
-                            <select name="status" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
-                                <option th:each="s : ${feedbackStatuses}" th:value="${s}" th:text="${s.displayName}" th:selected="${feedback.status == s}"></option>
-                            </select>
-                            <input type="text" name="reason" placeholder="Reason (optional)" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
-                            <button type="submit" class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold transition-colors">
-                                Update Status
+                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50">
+                        <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-gear text-gray-400"></i> Status Actions
+                        </h3>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <form th:action="@{/admin/feedback/{id}/status(id=${feedback.id})}" method="post" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Update Status</label>
+                                <select name="status" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                                    <option th:each="s : ${feedbackStatuses}" th:value="${s}" th:text="${s.displayName}" th:selected="${feedback.status == s}"></option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Reason (optional)</label>
+                                <input type="text" name="reason" placeholder="e.g., Investigated and resolved"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            </div>
+                            <button type="submit" class="w-full px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                                <i class="bi bi-arrow-repeat"></i> Update Status
                             </button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Assign -->
-                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm p-6">
-                    <h3 class="font-bold text-surface-900 mb-4">Assign To</h3>
-                    <form th:action="@{/admin/feedback/{id}/assign(id=${feedback.id})}" method="post">
-                        <input type="email" name="adminEmail" th:value="${feedback.assignedAdminEmail}"
-                               placeholder="Admin email"
-                               class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none mb-2">
-                        <button type="submit" class="w-full px-4 py-2 bg-surface-100 text-surface-700 rounded-lg text-sm font-semibold hover:bg-surface-200 transition-colors">
-                            <i class="bi bi-person-plus"></i> Assign
-                        </button>
-                    </form>
+                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50">
+                        <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-person-plus text-gray-400"></i> Assign To
+                        </h3>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <form th:action="@{/admin/feedback/{id}/assign(id=${feedback.id})}" method="post" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Admin Email</label>
+                                <input type="email" name="adminEmail" th:value="${feedback.assignedAdminEmail}"
+                                       placeholder="admin@edutake.com"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            </div>
+                            <button type="submit" class="w-full px-4 py-2.5 bg-surface-100 text-surface-700 rounded-lg text-sm font-semibold hover:bg-surface-200 transition-colors">
+                                <i class="bi bi-person-plus"></i> Assign
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Internal Notes -->
-                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm p-6">
-                    <h3 class="font-bold text-surface-900 mb-4">Internal Notes</h3>
-                    <div th:if="${notes != null and !notes.isEmpty()}" class="space-y-3 mb-4">
-                        <div th:each="note : ${notes}" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xs font-semibold text-surface-800" th:text="${note.adminName != null ? note.adminName : note.adminEmail}"></span>
-                                <span class="text-[10px] text-gray-400" th:text="${note.createdAt != null ? #temporals.format(note.createdAt, 'dd MMM, HH:mm') : ''}"></span>
-                            </div>
-                            <p class="text-xs text-surface-800" th:text="${note.note}"></p>
-                        </div>
+                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50">
+                        <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-sticky text-gray-400"></i> Internal Notes
+                            <span th:if="${notes != null and !notes.isEmpty()}"
+                                  class="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold"
+                                  th:text="${#lists.size(notes)}"></span>
+                        </h3>
                     </div>
-                    <form th:action="@{/admin/feedback/{id}/note(id=${feedback.id})}" method="post">
-                        <textarea name="note" rows="2" required placeholder="Add internal note..."
-                                  class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none mb-2"></textarea>
-                        <button type="submit" class="w-full px-4 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-semibold hover:bg-yellow-100 transition-colors">
-                            <i class="bi bi-sticky"></i> Add Note
-                        </button>
-                    </form>
+                    <div class="p-4 sm:p-6">
+                        <div th:if="${notes != null and !notes.isEmpty()}" class="space-y-3 mb-4">
+                            <div th:each="note : ${notes}" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-semibold text-surface-800" th:text="${note.adminName != null ? note.adminName : note.adminEmail}"></span>
+                                    <span class="text-xs text-gray-400" th:text="${note.createdAt != null ? #temporals.format(note.createdAt, 'dd MMM, HH:mm') : ''}"></span>
+                                </div>
+                                <p class="text-xs text-surface-800 leading-relaxed" th:text="${note.note}"></p>
+                            </div>
+                        </div>
+                        <form th:action="@{/admin/feedback/{id}/note(id=${feedback.id})}" method="post" class="space-y-2">
+                            <textarea name="note" rows="2" required placeholder="Add internal note..."
+                                      class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"></textarea>
+                            <button type="submit" class="w-full px-4 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg text-sm font-semibold hover:bg-yellow-100 transition-colors">
+                                <i class="bi bi-sticky"></i> Add Note
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Details -->
-                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm p-6">
-                    <h3 class="font-bold text-surface-900 mb-4">Details</h3>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Priority</span>
-                            <span th:text="${feedback.priority != null ? feedback.priority.displayName : 'Medium'}"
-                                  th:classappend="${feedback.priority != null ? feedback.priority.badgeClass : 'bg-gray-100 text-gray-600'}"
-                                  class="px-2 py-0.5 rounded-full text-[10px] font-semibold"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Submitted</span>
-                            <span class="text-surface-800 font-medium" th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'dd MMM yyyy') : '-'}"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Updated</span>
-                            <span class="text-surface-800 font-medium" th:text="${feedback.updatedAt != null ? #temporals.format(feedback.updatedAt, 'dd MMM yyyy') : '-'}"></span>
-                        </div>
-                        <div th:if="${feedback.resolvedAt != null}" class="flex justify-between">
-                            <span class="text-gray-500">Resolved</span>
-                            <span class="text-surface-800 font-medium" th:text="${#temporals.format(feedback.resolvedAt, 'dd MMM yyyy')}"></span>
+                <div class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="px-4 sm:px-6 py-4 border-b border-surface-200 bg-surface-50">
+                        <h3 class="font-bold text-surface-900 flex items-center gap-2">
+                            <i class="bi bi-info-circle text-gray-400"></i> Details
+                        </h3>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500">Priority</span>
+                                <span th:text="${feedback.priority != null ? feedback.priority.displayName : 'Medium'}"
+                                      th:classappend="${feedback.priority != null ? feedback.priority.badgeClass : 'bg-blue-100 text-blue-600'}"
+                                      class="px-2.5 py-0.5 rounded-full text-xs font-semibold"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500">Submitted</span>
+                                <span class="text-surface-800 font-medium" th:text="${feedback.createdAt != null ? #temporals.format(feedback.createdAt, 'dd MMM yyyy') : '-'}"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500">Updated</span>
+                                <span class="text-surface-800 font-medium" th:text="${feedback.updatedAt != null ? #temporals.format(feedback.updatedAt, 'dd MMM yyyy') : '-'}"></span>
+                            </div>
+                            <div th:if="${feedback.resolvedAt != null}" class="flex justify-between items-center">
+                                <span class="text-gray-500">Resolved</span>
+                                <span class="text-surface-800 font-medium" th:text="${#temporals.format(feedback.resolvedAt, 'dd MMM yyyy')}"></span>
+                            </div>
+                            <div th:if="${feedback.assignedAdminEmail != null}" class="flex justify-between items-center">
+                                <span class="text-gray-500">Assigned To</span>
+                                <span class="text-surface-800 font-medium text-xs truncate max-w-[160px]" th:text="${feedback.assignedAdminEmail}"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Danger Zone -->
-                <div class="bg-white border border-red-200 rounded-2xl shadow-sm p-6">
-                    <h3 class="font-bold text-red-600 mb-4">Danger Zone</h3>
-                    <form th:action="@{/admin/feedback/{id}/delete(id=${feedback.id})}" method="post"
-                          onsubmit="return confirm('Are you sure you want to archive this feedback?');">
-                        <button type="submit" class="w-full px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors">
-                            <i class="bi bi-archive"></i> Archive Feedback
-                        </button>
-                    </form>
+                <div class="bg-white border border-red-200 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="px-4 sm:px-6 py-4 border-b border-red-100 bg-red-50/50">
+                        <h3 class="font-bold text-red-600 flex items-center gap-2">
+                            <i class="bi bi-exclamation-triangle"></i> Danger Zone
+                        </h3>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <p class="text-xs text-gray-500 mb-3">Archiving will hide this feedback from the main list. This action can be undone by changing the status.</p>
+                        <form th:action="@{/admin/feedback/{id}/delete(id=${feedback.id})}" method="post"
+                              onsubmit="return confirm('Are you sure you want to archive this feedback?');">
+                            <button type="submit" class="w-full px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors">
+                                <i class="bi bi-archive"></i> Archive Feedback
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

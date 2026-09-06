@@ -1,46 +1,540 @@
-﻿<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Blog Management', ~{::div})}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Blog & Article Management', ~{::div})}">
 <body>
     <div>
-        <div class="mb-6 flex justify-between items-center">
+        <!-- Top Header & Actions -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-200 pb-4">
             <div>
-                <h1 class="text-2xl font-bold text-surface-900 mb-1">Blog Management</h1>
-                <p class="text-gray-500 text-sm">Manage blogs across the platform.</p>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-brand-50 text-brand-600 text-lg">
+                        <i class="bi bi-journal-richtext"></i>
+                    </span>
+                    <h1 class="text-2xl font-bold text-surface-900">Blog & Article Management</h1>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">Author, categorize, schedule, and feature educational tech articles, guides, and career insights.</p>
             </div>
-            <button class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors">
-                <i class="bi bi-plus-lg mr-1.5"></i> Add Blog
-            </button>
+            <div class="flex items-center gap-2.5">
+                <form th:action="@{/admin/blogs/seed-defaults}" method="post" class="inline" th:if="${totalElements == 0}">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-800 text-xs font-semibold rounded-xl border border-surface-200 transition-colors shadow-sm">
+                        <i class="bi bi-magic text-brand-600"></i> Seed Starter Articles
+                    </button>
+                </form>
+                <a th:href="@{/blogs}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-800 text-xs font-semibold rounded-xl border border-surface-200 transition-colors shadow-sm">
+                    <i class="bi bi-globe"></i> View Blog Directory
+                </a>
+                <a th:href="@{/admin/blogs/create}" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md">
+                    <i class="bi bi-plus-lg text-xs"></i> Write New Article
+                </a>
+            </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between gap-3 shadow-sm animate-fade-in">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-check-circle-fill text-emerald-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${successMsg}"></span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between gap-3 shadow-sm animate-fade-in">
+            <div class="flex items-center gap-2.5">
+                <i class="bi bi-exclamation-triangle-fill text-rose-600 text-lg"></i>
+                <span class="text-sm font-medium" th:text="${errorMsg}"></span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700 text-sm"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- KPI Analytics Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 mb-6">
+            <!-- Total Articles -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Articles</span>
+                    <span class="w-7 h-7 rounded-lg bg-surface-100 flex items-center justify-center text-surface-700">
+                        <i class="bi bi-journal-text text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-surface-900" th:text="${analytics != null and analytics['totalCount'] != null ? analytics['totalCount'] : 0}">0</p>
+                <span class="text-[11px] text-gray-400">All authored posts</span>
+            </div>
+
+            <!-- Published -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Published</span>
+                    <span class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <i class="bi bi-broadcast text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-emerald-600" th:text="${analytics != null and analytics['publishedCount'] != null ? analytics['publishedCount'] : 0}">0</p>
+                <span class="text-[11px] text-emerald-600/70">Live on platform</span>
+            </div>
+
+            <!-- Drafts -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Drafts</span>
+                    <span class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                        <i class="bi bi-pencil-square text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-amber-600" th:text="${analytics != null and analytics['draftCount'] != null ? analytics['draftCount'] : 0}">0</p>
+                <span class="text-[11px] text-amber-600/70">Work in progress</span>
+            </div>
+
+            <!-- Scheduled -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Scheduled</span>
+                    <span class="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                        <i class="bi bi-clock-history text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-purple-600" th:text="${analytics != null and analytics['scheduledCount'] != null ? analytics['scheduledCount'] : 0}">0</p>
+                <span class="text-[11px] text-purple-600/70">Upcoming releases</span>
+            </div>
+
+            <!-- Total Reads -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Total Views</span>
+                    <span class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="bi bi-eye text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-blue-600" th:text="${analytics != null and analytics['totalViews'] != null ? analytics['totalViews'] : 0}">0</p>
+                <span class="text-[11px] text-blue-600/70">Student engagements</span>
+            </div>
+        </div>
+
+        <!-- Filter & Search Panel -->
+        <div class="bg-white border border-surface-200 rounded-2xl shadow-sm mb-6">
+            <form method="get" th:action="@{/admin/blogs}" class="p-4 sm:p-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-end">
+                    <!-- Keyword -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-search text-gray-400 mr-1"></i> Search
+                        </label>
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search title, tags, author..."
+                               class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-tag text-gray-400 mr-1"></i> Category
+                        </label>
+                        <select name="categoryId" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            <option value="">All Categories</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${categoryId != null and categoryId == cat.id}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-toggle2-on text-gray-400 mr-1"></i> Status
+                        </label>
+                        <select name="status" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            <option value="">All Statuses</option>
+                            <option th:each="st : ${contentStatuses}" th:value="${st}" th:text="${st.displayName}" th:selected="${status != null and status == st}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Featured -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-star text-gray-400 mr-1"></i> Featured
+                        </label>
+                        <select name="isFeatured" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            <option value="">All Articles</option>
+                            <option value="true" th:selected="${isFeatured != null and isFeatured == true}">Featured Only</option>
+                            <option value="false" th:selected="${isFeatured != null and isFeatured == false}">Standard Only</option>
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5">
+                            <i class="bi bi-funnel-fill text-xs"></i> Filter
+                        </button>
+                        <a th:href="@{/admin/blogs}" class="px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 font-semibold rounded-xl text-sm transition-colors" title="Reset Filters">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden mb-6">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm text-left">
                     <thead>
-                        <tr class="bg-surface-50 text-left text-xs text-gray-400 uppercase tracking-wider border-b border-surface-200">
-                            <th class="px-6 py-3 font-semibold">ID</th>
-                            <th class="px-6 py-3 font-semibold">Details</th>
-                            <th class="px-6 py-3 font-semibold">Actions</th>
+                        <tr class="bg-surface-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-surface-200">
+                            <th class="px-5 py-3.5">Article & Slug</th>
+                            <th class="px-4 py-3.5">Category</th>
+                            <th class="px-4 py-3.5">Status</th>
+                            <th class="px-4 py-3.5">Author</th>
+                            <th class="px-4 py-3.5">Views</th>
+                            <th class="px-4 py-3.5">Last Updated</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-100">
-                        <tr th:each="item : ${items}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 text-surface-900" th:text="${item.id}">1</td>
-                            <td class="px-6 py-4 text-gray-500">Item Details Here</td>
-                            <td class="px-6 py-4">
-                                <button class="text-brand-600 hover:text-brand-800 text-xs font-semibold mr-3">Edit</button>
-                                <button class="text-red-500 hover:text-red-700 text-xs font-semibold">Delete</button>
-                            </td>
-                        </tr>
+                        <th:block th:each="item : ${items}">
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            <img th:if="${item.featuredImage != null and !item.featuredImage.isEmpty()}" th:src="${item.featuredImage}" alt="Thumb" class="w-full h-full object-cover">
+                                            <div th:unless="${item.featuredImage != null and !item.featuredImage.isEmpty()}" class="w-full h-full flex items-center justify-center text-brand-600 bg-brand-50">
+                                                <i class="bi bi-journal-richtext text-lg"></i>
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span th:if="${item.isFeatured}" class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800" title="Featured on Homepage">
+                                                    <i class="bi bi-star-fill text-[9px] text-amber-500"></i> Featured
+                                                </span>
+                                                <a th:href="@{'/admin/blogs/' + ${item.id} + '/edit'}" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1" th:text="${item.title}">
+                                                    Article Title
+                                                </a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md" th:text="'/blog/' + ${item.slug}">/blog/slug</code>
+                                                <button type="button" th:data-slug="${item.slug}" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            <p th:if="${item.excerpt}" class="text-xs text-gray-400 line-clamp-1 mt-1" th:text="${item.excerpt}">Article summary excerpt</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200" th:text="${item.categoryName}">
+                                        Web Development
+                                    </span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span th:if="${item.status != null and item.status.name() == 'PUBLISHED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    <span th:if="${item.status != null and item.status.name() == 'DRAFT'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Draft
+                                    </span>
+                                    <span th:if="${item.status != null and item.status.name() == 'SCHEDULED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                        <i class="bi bi-clock-fill text-[10px]"></i> Scheduled
+                                    </span>
+                                    <span th:if="${item.status != null and item.status.name() == 'ARCHIVED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                                        <i class="bi bi-archive-fill text-[10px]"></i> Archived
+                                    </span>
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900" th:text="${item.author != null ? item.author : 'EduTake Team'}">EduTake Team</div>
+                                    <div class="text-[11px] text-gray-400" th:text="${item.authorEmail != null ? item.authorEmail : 'admin@edutake.com'}">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span th:text="${item.viewCount != null ? item.viewCount : 0}">0</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium" th:text="${item.updatedAt != null ? #temporals.format(item.updatedAt, 'MMM dd, yyyy') : 'N/A'}">Sep 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400" th:text="${item.updatedAt != null ? #temporals.format(item.updatedAt, 'hh:mm a') : ''}">12:00 PM</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a th:href="@{'/blog/' + ${item.slug}}" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" th:data-id="${item.id}" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form th:action="@{'/admin/blogs/' + ${item.id} + '/toggle-featured'}" method="post" class="inline">
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" th:title="${item.isFeatured ? 'Remove from Homepage Featured' : 'Feature on Homepage'}">
+                                                <i th:class="${item.isFeatured ? 'bi bi-star-fill text-sm text-amber-500' : 'bi bi-star text-sm text-gray-400'}"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form th:action="@{'/admin/blogs/' + ${item.id} + '/toggle-status'}" method="post" class="inline">
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" th:title="${item.status != null and item.status.name() == 'PUBLISHED' ? 'Switch to Draft' : 'Publish Article'}">
+                                                <i th:class="${item.status != null and item.status.name() == 'PUBLISHED' ? 'bi bi-pause-circle text-sm text-emerald-600' : 'bi bi-play-circle text-sm text-amber-500'}"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a th:href="@{'/admin/blogs/' + ${item.id} + '/edit'}" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" th:data-id="${item.id}" th:data-title="${item.title}" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+
+                        <!-- Empty State -->
                         <tr th:if="${items == null or items.isEmpty()}">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                <i class="bi bi-inbox text-3xl mb-2 block"></i>
-                                No blogs found. Use the Data Seeder to add sample data.
+                            <td colspan="7" class="px-6 py-14 text-center">
+                                <div class="max-w-sm mx-auto">
+                                    <div class="w-14 h-14 mx-auto rounded-2xl bg-surface-100 flex items-center justify-center text-gray-400 mb-3 text-2xl">
+                                        <i class="bi bi-journal-x"></i>
+                                    </div>
+                                    <h3 class="text-base font-bold text-surface-900 mb-1">No Articles Found</h3>
+                                    <p class="text-xs text-gray-500 mb-4">No blog posts match your filter criteria. Write your first article or seed standard learning and career guides.</p>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a th:href="@{/admin/blogs/create}" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition-colors shadow-sm">
+                                            <i class="bi bi-plus-lg mr-1"></i> Write Article
+                                        </a>
+                                        <form th:action="@{/admin/blogs/seed-defaults}" method="post">
+                                            <button type="submit" class="px-4 py-2 bg-surface-100 text-surface-800 rounded-xl text-xs font-semibold hover:bg-surface-200 transition-colors border border-surface-200">
+                                                <i class="bi bi-magic mr-1 text-brand-600"></i> Seed Starter Articles
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Bar -->
+            <div th:if="${totalPages > 1}" class="px-5 py-4 border-t border-surface-200 bg-surface-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p class="text-xs text-gray-500">
+                    Showing Page <span class="font-bold text-surface-900" th:text="${currentPage + 1}">1</span> of <span class="font-bold text-surface-900" th:text="${totalPages}">1</span>
+                    (<span th:text="${totalElements}">0</span> total articles)
+                </p>
+                <div class="flex items-center gap-1.5">
+                    <a th:if="${currentPage > 0}" th:href="@{/admin/blogs(page=${currentPage - 1}, keyword=${keyword}, status=${status}, categoryId=${categoryId}, isFeatured=${isFeatured}, sort=${sort})}" class="px-3 py-1.5 bg-white border border-surface-200 hover:bg-surface-100 text-surface-700 rounded-lg text-xs font-medium transition-colors">
+                        <i class="bi bi-chevron-left mr-1"></i> Previous
+                    </a>
+                    <span th:unless="${currentPage > 0}" class="px-3 py-1.5 bg-surface-100 text-gray-400 rounded-lg text-xs font-medium cursor-not-allowed">
+                        <i class="bi bi-chevron-left mr-1"></i> Previous
+                    </span>
+
+                    <a th:if="${currentPage + 1 < totalPages}" th:href="@{/admin/blogs(page=${currentPage + 1}, keyword=${keyword}, status=${status}, categoryId=${categoryId}, isFeatured=${isFeatured}, sort=${sort})}" class="px-3 py-1.5 bg-white border border-surface-200 hover:bg-surface-100 text-surface-700 rounded-lg text-xs font-medium transition-colors">
+                        Next <i class="bi bi-chevron-right ml-1"></i>
+                    </a>
+                    <span th:unless="${currentPage + 1 < totalPages}" class="px-3 py-1.5 bg-surface-100 text-gray-400 rounded-lg text-xs font-medium cursor-not-allowed">
+                        Next <i class="bi bi-chevron-right ml-1"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- QUICK VIEW MODAL -->
+        <!-- ================================================================= -->
+        <div id="quickViewModal" class="fixed inset-0 z-50 hidden bg-surface-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-surface-200 overflow-hidden animate-scale-up">
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-surface-200 flex items-center justify-between bg-surface-50">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+                            <i class="bi bi-journal-richtext"></i>
+                        </span>
+                        <div>
+                            <h3 id="modalBlogTitle" class="text-base font-bold text-surface-900 line-clamp-1">Article Title</h3>
+                            <p id="modalBlogSlug" class="text-xs font-mono text-gray-500">/blog/slug</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeQuickViewModal()" class="w-8 h-8 rounded-lg bg-white border border-surface-200 text-gray-400 hover:text-gray-700 flex items-center justify-center text-sm transition-colors">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 overflow-y-auto space-y-6">
+                    <!-- Meta Stats Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Status</span>
+                            <span id="modalStatusBadge" class="text-xs font-bold mt-1 inline-block">Published</span>
+                        </div>
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Category</span>
+                            <span id="modalCategory" class="text-xs font-bold text-surface-800 mt-1 inline-block">Web Dev</span>
+                        </div>
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Author</span>
+                            <span id="modalAuthor" class="text-xs font-medium text-surface-800 mt-1 inline-block truncate">Admin</span>
+                        </div>
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Total Views</span>
+                            <span id="modalViews" class="text-xs font-bold text-blue-600 mt-1 inline-block">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Google SEO Mockup -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                <i class="bi bi-google text-blue-500"></i> Google Search SERP Preview
+                            </span>
+                            <span class="text-[11px] text-slate-400">Desktop snippet mockup</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm font-sans space-y-1">
+                            <div class="flex items-center gap-1.5 text-xs text-slate-600 truncate">
+                                <span class="text-slate-400">https://edutake.com</span>
+                                <span>› blog ›</span>
+                                <span id="modalSeoUrlSnippet" class="text-slate-700 font-medium">slug</span>
+                            </div>
+                            <h4 id="modalSeoTitleSnippet" class="text-blue-700 hover:underline font-semibold text-base leading-snug cursor-pointer">
+                                Article Title
+                            </h4>
+                            <p id="modalSeoDescSnippet" class="text-slate-600 text-xs leading-relaxed line-clamp-2">
+                                Article excerpt description for search engine results...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Rendered HTML Content -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-xs font-bold text-surface-700 uppercase tracking-wider">Article Content Preview</h4>
+                            <span class="text-[11px] text-gray-400">Rendered HTML Output</span>
+                        </div>
+                        <div id="modalContentContainer" class="prose prose-sm max-w-none p-4 rounded-2xl bg-surface-50 border border-surface-200 text-surface-800 max-h-72 overflow-y-auto leading-relaxed">
+                            Content loading...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-3.5 border-t border-surface-200 bg-surface-50 flex items-center justify-between">
+                    <a id="modalPublicLink" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700">
+                        <i class="bi bi-box-arrow-up-right"></i> Open on Live Site
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <a id="modalEditLink" href="#" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-sm">
+                            <i class="bi bi-pencil mr-1"></i> Edit Article
+                        </a>
+                        <button type="button" onclick="closeQuickViewModal()" class="px-4 py-2 bg-surface-200 hover:bg-surface-300 text-surface-700 rounded-xl text-xs font-semibold transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- DELETE CONFIRMATION MODAL -->
+        <!-- ================================================================= -->
+        <div id="deleteModal" class="fixed inset-0 z-50 hidden bg-surface-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-surface-200 animate-scale-up">
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl mx-auto mb-4">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h3 class="text-lg font-bold text-center text-surface-900 mb-1">Delete Article?</h3>
+                <p class="text-xs text-center text-gray-500 mb-5">
+                    Are you sure you want to delete <strong id="deleteBlogTitleName" class="text-surface-900">this article</strong>? It will be removed from the blog directory and homepage.
+                </p>
+                <form id="deleteForm" method="post" action="" class="flex items-center gap-3">
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 bg-surface-100 hover:bg-surface-200 text-surface-700 font-semibold rounded-xl text-xs transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-sm">
+                        <i class="bi bi-trash mr-1"></i> Yes, Delete
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
+
+    <!-- Client-side Scripts -->
+    <script>
+        function copyTextFromBtn(btn) {
+            const slug = btn.getAttribute('data-slug');
+            const url = window.location.origin + '/blog/' + slug;
+            navigator.clipboard.writeText(url).then(() => {
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2 text-emerald-600 font-bold"></i>';
+                setTimeout(() => { btn.innerHTML = original; }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        function openQuickViewModalFromBtn(btn) {
+            const id = btn.getAttribute('data-id');
+            const modal = document.getElementById('quickViewModal');
+            modal.classList.remove('hidden');
+
+            fetch('/admin/blogs/api/' + id)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('modalBlogTitle').textContent = data.title;
+                    document.getElementById('modalBlogSlug').textContent = '/blog/' + data.slug;
+                    document.getElementById('modalStatusBadge').textContent = data.statusDisplayName;
+                    document.getElementById('modalCategory').textContent = data.categoryName;
+                    document.getElementById('modalAuthor').textContent = data.author;
+                    document.getElementById('modalViews').textContent = data.viewCount;
+
+                    // SEO snippet
+                    document.getElementById('modalSeoUrlSnippet').textContent = data.slug;
+                    document.getElementById('modalSeoTitleSnippet').textContent = data.seoTitle || data.title;
+                    document.getElementById('modalSeoDescSnippet').textContent = data.seoDescription || data.excerpt || 'No description provided.';
+
+                    // Content
+                    document.getElementById('modalContentContainer').innerHTML = data.content || '<em class="text-gray-400">No content provided yet.</em>';
+
+                    // Links
+                    document.getElementById('modalPublicLink').href = data.publicUrl;
+                    document.getElementById('modalEditLink').href = '/admin/blogs/' + data.id + '/edit';
+                })
+                .catch(err => {
+                    console.error('Error fetching blog data:', err);
+                    document.getElementById('modalContentContainer').innerHTML = '<span class="text-rose-500">Failed to load preview data.</span>';
+                });
+        }
+
+        function closeQuickViewModal() {
+            document.getElementById('quickViewModal').classList.add('hidden');
+        }
+
+        function openDeleteModalFromBtn(btn) {
+            const id = btn.getAttribute('data-id');
+            const title = btn.getAttribute('data-title');
+            document.getElementById('deleteBlogTitleName').textContent = title;
+            document.getElementById('deleteForm').action = '/admin/blogs/' + id + '/delete';
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeQuickViewModal();
+                closeDeleteModal();
+            }
+        });
+    </script>
 </body>
 </html>

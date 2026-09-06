@@ -67,6 +67,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/index", "/login", "/register", "/regForm", "/health", "/maintenance",
                     "/courses", "/courses/**", "/services", "/about", "/contact", "/faq",
+                    "/page/**", "/p/**",
+                    "/blogs", "/blogs/**", "/blog/**", "/articles", "/articles/**",
                     "/api/coupons/validate",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/uploads/**",
                     "/error", "/error/**"

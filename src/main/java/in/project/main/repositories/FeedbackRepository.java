@@ -22,6 +22,19 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long>, JpaSp
 
     Page<Feedback> findByStudentIdAndDeletedFalse(Long studentId, Pageable pageable);
 
+    @Query(value = "SELECT f FROM Feedback f LEFT JOIN FETCH f.course c LEFT JOIN FETCH f.instructor i LEFT JOIN f.student s WHERE f.deleted = false AND (s.id = :studentId OR (f.userEmail IS NOT NULL AND f.userEmail = :studentEmail))",
+           countQuery = "SELECT COUNT(f) FROM Feedback f LEFT JOIN f.student s WHERE f.deleted = false AND (s.id = :studentId OR (f.userEmail IS NOT NULL AND f.userEmail = :studentEmail))")
+    Page<Feedback> findByStudentIdOrUserEmailAndDeletedFalse(@Param("studentId") Long studentId, @Param("studentEmail") String studentEmail, Pageable pageable);
+
+    @Query("SELECT COUNT(f) FROM Feedback f LEFT JOIN f.student s WHERE f.deleted = false AND (s.id = :studentId OR (f.userEmail IS NOT NULL AND f.userEmail = :studentEmail))")
+    long countByStudentIdOrUserEmailAndDeletedFalse(@Param("studentId") Long studentId, @Param("studentEmail") String studentEmail);
+
+    @Query("SELECT COUNT(f) FROM Feedback f LEFT JOIN f.student s WHERE f.deleted = false AND (s.id = :studentId OR (f.userEmail IS NOT NULL AND f.userEmail = :studentEmail)) AND f.status IN :statuses")
+    long countByStudentIdOrUserEmailAndStatusInAndDeletedFalse(@Param("studentId") Long studentId, @Param("studentEmail") String studentEmail, @Param("statuses") List<FeedbackStatus> statuses);
+
+    @Query("SELECT AVG(f.rating) FROM Feedback f LEFT JOIN f.student s WHERE f.deleted = false AND f.rating IS NOT NULL AND (s.id = :studentId OR (f.userEmail IS NOT NULL AND f.userEmail = :studentEmail))")
+    Double findAverageRatingByStudentIdOrEmail(@Param("studentId") Long studentId, @Param("studentEmail") String studentEmail);
+
     List<Feedback> findByStudentIdAndDeletedFalse(Long studentId);
 
     Optional<Feedback> findByStudentIdAndCourseIdAndDeletedFalse(Long studentId, Long courseId);

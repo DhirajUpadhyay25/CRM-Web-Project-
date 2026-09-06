@@ -171,19 +171,66 @@ public class FeedbackService {
     }
 
     @Transactional(readOnly = true)
+    public Page<Feedback> getStudentFeedback(Long studentId, String studentEmail, Pageable pageable) {
+        if (studentEmail != null && !studentEmail.trim().isEmpty()) {
+            return feedbackRepository.findByStudentIdOrUserEmailAndDeletedFalse(studentId, studentEmail.trim(), pageable);
+        }
+        return feedbackRepository.findByStudentIdAndDeletedFalse(studentId, pageable);
+    }
+
+    @Transactional(readOnly = true)
     public List<Feedback> getStudentFeedbackList(Long studentId) {
         return feedbackRepository.findByStudentIdAndDeletedFalse(studentId);
     }
 
     @Transactional(readOnly = true)
     public Optional<Feedback> getStudentFeedbackById(Long feedbackId, Long studentId) {
+        return getStudentFeedbackById(feedbackId, studentId, null);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Feedback> getStudentFeedbackById(Long feedbackId, Long studentId, String studentEmail) {
         Optional<Feedback> feedback = feedbackRepository.findById(feedbackId);
-        if (feedback.isPresent() && feedback.get().getStudent() != null
-                && feedback.get().getStudent().getId().equals(studentId)
-                && !feedback.get().isDeleted()) {
-            return feedback;
+        if (feedback.isPresent()) {
+            Feedback f = feedback.get();
+            if (!f.isDeleted()) {
+                if (studentId != null && f.getStudent() != null && studentId.equals(f.getStudent().getId())) {
+                    return feedback;
+                }
+                if (studentEmail != null && f.getUserEmail() != null && studentEmail.trim().equalsIgnoreCase(f.getUserEmail().trim())) {
+                    return feedback;
+                }
+            }
         }
         return Optional.empty();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getStudentFeedbackStats(Long studentId, String studentEmail) {
+        Map<String, Object> stats = new HashMap<>();
+        long total = (studentEmail != null && !studentEmail.trim().isEmpty())
+                ? feedbackRepository.countByStudentIdOrUserEmailAndDeletedFalse(studentId, studentEmail.trim())
+                : feedbackRepository.countByDeletedFalse();
+        
+        long responded = (studentEmail != null && !studentEmail.trim().isEmpty())
+                ? feedbackRepository.countByStudentIdOrUserEmailAndStatusInAndDeletedFalse(
+                        studentId, studentEmail.trim(), List.of(FeedbackStatus.RESPONDED, FeedbackStatus.RESOLVED, FeedbackStatus.CLOSED))
+                : 0L;
+
+        long pending = (studentEmail != null && !studentEmail.trim().isEmpty())
+                ? feedbackRepository.countByStudentIdOrUserEmailAndStatusInAndDeletedFalse(
+                        studentId, studentEmail.trim(), List.of(FeedbackStatus.NEW, FeedbackStatus.UNDER_REVIEW, FeedbackStatus.IN_PROGRESS))
+                : 0L;
+
+        Double avgRating = (studentEmail != null && !studentEmail.trim().isEmpty())
+                ? feedbackRepository.findAverageRatingByStudentIdOrEmail(studentId, studentEmail.trim())
+                : null;
+
+        stats.put("totalCount", total);
+        stats.put("respondedCount", responded);
+        stats.put("pendingCount", pending);
+        stats.put("averageRating", avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 0.0);
+        return stats;
     }
 
     // ==========================================

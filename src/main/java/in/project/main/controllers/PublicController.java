@@ -80,6 +80,12 @@ public class PublicController {
     @Autowired(required = false)
     private in.project.main.services.AuditLogService auditLogService;
 
+    @Autowired
+    private in.project.main.services.PageService pageService;
+
+    @Autowired
+    private in.project.main.services.BlogService blogService;
+
     @Value("${app.razorpay.key-id}")
     private String razorpayKeyId;
 
@@ -377,4 +383,126 @@ public class PublicController {
         model.addAttribute("certificateCode", code);
         return "public/verify-certificate";
     }
+
+    // ==========================================
+    // 6. DYNAMIC CMS PAGES
+    // ==========================================
+    @GetMapping({"/page/{slug}", "/p/{slug}"})
+    public String viewPublicPage(@PathVariable("slug") String slug, 
+                                 @AuthenticationPrincipal CustomUserDetails userDetails,
+                                 Model model) {
+        Optional<in.project.main.entities.Page> pageOpt = pageService.findBySlug(slug);
+        if (pageOpt.isEmpty()) {
+            return "error/404";
+        }
+
+        in.project.main.entities.Page page = pageOpt.get();
+        boolean isAdmin = userDetails != null && (
+                userDetails.getAuthorities().stream().anyMatch(a -> 
+                        a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPER_ADMIN"))
+        );
+
+        // If not published and not admin, return 404
+        if (!page.isPublished() && !isAdmin) {
+            return "error/404";
+        }
+
+        // Visibility restrictions
+        if (page.getVisibility() == in.project.main.entities.enums.ContentVisibility.STUDENTS_ONLY && userDetails == null) {
+            return "redirect:/login?redirect=/page/" + slug;
+        }
+
+        // Calculate approximate reading time
+        int wordCount = (page.getContent() != null) ? page.getContent().replaceAll("<[^>]*>", " ").trim().split("\\s+").length : 0;
+        int readingTimeMin = Math.max(1, (int) Math.ceil(wordCount / 200.0));
+
+        model.addAttribute("page", page);
+        model.addAttribute("readingTime", readingTimeMin);
+        model.addAttribute("wordCount", wordCount);
+        model.addAttribute("isAdminPreview", !page.isPublished() && isAdmin);
+
+        return "public/page";
+    }
+
+    // ==========================================
+    // 7. PUBLIC BLOG & ARTICLES
+    // ==========================================
+    @GetMapping({"/blogs", "/blog", "/articles"})
+    public String viewPublicBlogs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size,
+            Model model) {
+
+        // Auto seed if empty
+        blogService.seedDefaultBlogsIfEmpty("admin@edutake.com");
+
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by(Sort.Direction.DESC, "publishedAt"));
+        Page<in.project.main.entities.Blog> blogs = blogService.getBlogsPaged(
+                keyword,
+                in.project.main.entities.enums.ContentStatus.PUBLISHED,
+                categoryId,
+                in.project.main.entities.enums.ContentVisibility.PUBLIC,
+                null,
+                pageable
+        );
+
+        model.addAttribute("blogs", blogs);
+        model.addAttribute("articles", blogs.getContent());
+        model.addAttribute("featuredArticles", blogService.getFeaturedOrLatestPublished(2));
+        model.addAttribute("categories", blogService.getActiveCategories());
+        model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("keyword", keyword != null ? keyword : "");
+        model.addAttribute("currentPage", blogs.getNumber());
+        model.addAttribute("totalPages", blogs.getTotalPages());
+        model.addAttribute("totalElements", blogs.getTotalElements());
+
+        return "public/blogs";
+    }
+
+    @GetMapping("/blog/{slug}")
+    public String viewPublicBlogArticle(@PathVariable("slug") String slug,
+                                        @AuthenticationPrincipal CustomUserDetails userDetails,
+                                        Model model) {
+        Optional<in.project.main.entities.Blog> blogOpt = blogService.findBySlug(slug);
+        if (blogOpt.isEmpty()) {
+            return "error/404";
+        }
+
+        in.project.main.entities.Blog blog = blogOpt.get();
+        boolean isAdmin = userDetails != null && (
+                userDetails.getAuthorities().stream().anyMatch(a ->
+                        a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPER_ADMIN"))
+        );
+
+        // If not published and not admin, return 404
+        if (!blog.isPublished() && !isAdmin) {
+            return "error/404";
+        }
+
+        // Visibility restrictions
+        if (blog.getVisibility() == in.project.main.entities.enums.ContentVisibility.STUDENTS_ONLY && userDetails == null) {
+            return "redirect:/login?redirect=/blog/" + slug;
+        }
+
+        // Increment view count
+        blogService.incrementViewCount(blog.getId());
+
+        // Calculate approximate reading time
+        int wordCount = (blog.getContent() != null) ? blog.getContent().replaceAll("<[^>]*>", " ").trim().split("\\s+").length : 0;
+        int readingTimeMin = Math.max(1, (int) Math.ceil(wordCount / 200.0));
+
+        // Related articles in same category
+        List<in.project.main.entities.Blog> related = blogService.getFeaturedOrLatestPublished(3);
+
+        model.addAttribute("blog", blog);
+        model.addAttribute("readingTime", readingTimeMin);
+        model.addAttribute("wordCount", wordCount);
+        model.addAttribute("relatedArticles", related);
+        model.addAttribute("isAdminPreview", !blog.isPublished() && isAdmin);
+
+        return "public/blog-detail";
+    }
 }
+

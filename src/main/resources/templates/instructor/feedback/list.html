@@ -1,27 +1,79 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{instructor/layout/instructor-layout :: layout('My Feedback', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{instructor/layout/instructor-layout :: layout('Student Feedback', ~{::div})}">
 <body>
     <div>
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
             <a href="/instructor/dashboard" class="hover:text-brand-600 transition-colors">Instructor</a>
             <i class="bi bi-chevron-right text-[10px] text-gray-400"></i>
-            <span class="text-surface-900 font-semibold">Feedback</span>
+            <span class="text-surface-900 font-semibold">Student Feedback</span>
         </nav>
 
         <!-- Header -->
-        <div class="mb-6 pb-5 border-b border-surface-200">
-            <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Student Feedback</h1>
-            <p class="text-gray-500 text-sm mt-0.5">View and respond to feedback for your courses.</p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
+            <div>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">Student Feedback & Reviews</h1>
+                <p class="text-gray-500 text-sm mt-0.5">Review ratings, student comments, and provide official instructor responses for your courses.</p>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Received</span>
+                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-base">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-surface-900 mt-2" th:text="${stats != null ? stats.totalCount : feedbackPage.totalElements}">0</p>
+                <p class="text-xs text-gray-400 mt-0.5">Across your courses</p>
+            </div>
+
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Responded</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-emerald-600 mt-2" th:text="${stats != null ? stats.respondedCount : 0}">0</p>
+                <p class="text-xs text-gray-400 mt-0.5">Answered feedback</p>
+            </div>
+
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Needs Reply</span>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-amber-600 mt-2" th:text="${stats != null ? stats.pendingCount : 0}">0</p>
+                <p class="text-xs text-gray-400 mt-0.5">Awaiting response</p>
+            </div>
+
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Average Rating</span>
+                    <div class="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center text-base">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-1.5 mt-2">
+                    <span class="text-2xl font-bold text-surface-900" th:text="${stats != null ? stats.averageRating : '0.0'}">0.0</span>
+                    <span class="text-xs text-gray-400">/ 5.0</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-0.5">Overall student score</p>
+            </div>
         </div>
 
         <!-- Alerts -->
         <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
-            <i class="bi bi-check-circle-fill"></i>
+            <i class="bi bi-check-circle-fill text-lg flex-shrink-0"></i>
             <span class="text-sm font-medium" th:text="${successMsg}"></span>
         </div>
         <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
-            <i class="bi bi-exclamation-circle-fill"></i>
+            <i class="bi bi-exclamation-circle-fill text-lg flex-shrink-0"></i>
             <span class="text-sm font-medium" th:text="${errorMsg}"></span>
         </div>
 
@@ -30,12 +82,12 @@
             <form method="get" action="/instructor/feedback" class="p-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
-                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search feedback..."
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search student or message..."
                                class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
                     </div>
                     <div>
                         <select name="status" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
-                            <option value="">All Status</option>
+                            <option value="">All Statuses</option>
                             <option th:each="s : ${feedbackStatuses}" th:value="${s}" th:text="${s.displayName}" th:selected="${status != null and status == s}"></option>
                         </select>
                     </div>
@@ -82,10 +134,11 @@
                 <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
                     <i class="bi bi-chat-quote"></i>
                 </div>
-                <h3 class="font-semibold text-surface-900 mb-1">No Feedback Available</h3>
-                <p class="text-sm text-gray-500">No feedback is available for your courses yet.</p>
+                <h3 class="font-semibold text-surface-900 mb-1">No Feedback Found</h3>
+                <p class="text-sm text-gray-500">No feedback matches your filter criteria or none has been submitted yet.</p>
             </div>
 
+            <!-- Table Content -->
             <div th:if="${!#lists.isEmpty(feedbackPage.content)}" class="overflow-x-auto">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-surface-50 border-b border-surface-200 text-gray-500">
@@ -95,43 +148,82 @@
                             <th class="px-6 py-4 font-semibold">Rating</th>
                             <th class="px-6 py-4 font-semibold">Category</th>
                             <th class="px-6 py-4 font-semibold">Status</th>
-                            <th class="px-6 py-4 font-semibold">Date</th>
+                            <th class="px-6 py-4 font-semibold">Response</th>
+                            <th class="px-6 py-4 font-semibold">Submitted</th>
                             <th class="px-6 py-4 font-semibold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-200">
-                        <tr th:each="fb : ${feedbackPage.content}" class="hover:bg-surface-50 transition-colors">
+                        <tr th:each="fb : ${feedbackPage.content}" class="hover:bg-surface-50/80 transition-colors">
                             <td class="px-6 py-4">
-                                <p class="font-medium text-surface-900 text-xs" th:text="${fb.displayName}"></p>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-full bg-surface-200 text-surface-700 flex items-center justify-center text-xs font-bold">
+                                        <i th:if="${fb.anonymous}" class="bi bi-incognito"></i>
+                                        <span th:unless="${fb.anonymous}" th:text="${fb.displayName != null ? fb.displayName.substring(0,1).toUpperCase() : 'S'}">S</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-surface-900 text-xs" th:text="${fb.displayName}">Student Name</p>
+                                        <span th:if="${fb.anonymous}" class="text-[10px] text-gray-400">Anonymous</span>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 text-gray-500 text-xs" th:text="${fb.course != null ? fb.course.name : 'General'}"></td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-0.5">
-                                    <template th:each="i : ${#numbers.sequence(1,5)}">
-                                        <i th:if="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star-fill text-amber-400 text-[10px]"></i>
-                                        <i th:unless="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star text-gray-300 text-[10px]"></i>
-                                    </template>
+                                <p class="text-surface-900 font-medium text-xs truncate max-w-xs" th:text="${fb.course != null ? fb.course.name : 'General Feedback'}">Course Name</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-1">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i th:if="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star-fill text-amber-400 text-xs"></i>
+                                        <i th:unless="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star text-gray-300 text-xs"></i>
+                                    </th:block>
+                                    <span class="text-xs font-semibold text-surface-700 ml-1" th:text="'(' + ${fb.rating} + ')'"></span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-gray-500 text-xs">
-                                <span th:if="${fb.category != null}" th:text="${fb.category}" class="px-2 py-0.5 bg-surface-100 rounded-full text-[10px] font-medium"></span>
+                                <span th:if="${fb.category != null and !fb.category.isEmpty()}" th:text="${fb.category}" class="px-2.5 py-0.5 bg-surface-100 rounded-full text-xs font-medium text-surface-700 inline-block"></span>
+                                <span th:unless="${fb.category != null and !fb.category.isEmpty()}" class="text-gray-400 text-xs">-</span>
                             </td>
                             <td class="px-6 py-4">
                                 <span th:text="${fb.status != null ? fb.status.displayName : 'New'}"
                                       th:classappend="${fb.status != null ? fb.status.badgeClass : 'bg-blue-100 text-blue-700'}"
-                                      class="px-2 py-0.5 rounded-full text-[10px] font-semibold inline-block"></span>
+                                      class="px-2.5 py-1 rounded-full text-xs font-semibold inline-block"></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span th:if="${fb.status != null and (fb.status.name() == 'RESPONDED' or fb.status.name() == 'RESOLVED' or (fb.adminResponse != null and !fb.adminResponse.isEmpty()))}"
+                                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <i class="bi bi-chat-check-fill text-emerald-500"></i> Responded
+                                </span>
+                                <span th:unless="${fb.status != null and (fb.status.name() == 'RESPONDED' or fb.status.name() == 'RESOLVED' or (fb.adminResponse != null and !fb.adminResponse.isEmpty()))}"
+                                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <i class="bi bi-hourglass-split text-amber-500"></i> Needs Reply
+                                </span>
                             </td>
                             <td class="px-6 py-4 text-gray-500 text-xs" th:text="${fb.createdAt != null ? #temporals.format(fb.createdAt, 'dd MMM yyyy') : '-'}"></td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <a th:href="@{/instructor/feedback/{id}(id=${fb.id})}"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-semibold hover:bg-brand-100 transition-colors">
+                                    <!-- View Action Button opening View Window Modal -->
+                                    <button type="button"
+                                            onclick="openInstructorFeedbackModal(this)"
+                                            th:data-id="${fb.id}"
+                                            th:data-student="${fb.displayName}"
+                                            th:data-course="${fb.course != null ? fb.course.name : 'General Feedback'}"
+                                            th:data-rating="${fb.rating != null ? fb.rating : 0}"
+                                            th:data-category="${fb.category != null ? fb.category : 'General'}"
+                                            th:data-subject="${fb.subject != null ? fb.subject : ''}"
+                                            th:data-message="${fb.message != null ? fb.message : ''}"
+                                            th:data-status="${fb.status != null ? fb.status.name() : 'NEW'}"
+                                            th:data-status-name="${fb.status != null ? fb.status.displayName : 'New'}"
+                                            th:data-status-badge="${fb.status != null ? fb.status.badgeClass : 'bg-blue-100 text-blue-700'}"
+                                            th:data-admin-response="${fb.adminResponse != null ? fb.adminResponse : ''}"
+                                            th:data-created-at="${fb.createdAt != null ? #temporals.format(fb.createdAt, 'dd MMM yyyy, hh:mm a') : ''}"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-700 hover:bg-brand-600 hover:text-white rounded-lg text-xs font-semibold shadow-sm transition-all">
                                         <i class="bi bi-eye"></i> View
-                                    </a>
-                                    <a th:href="@{/instructor/feedback/{id}(id=${fb.id})}#respond"
-                                       th:if="${fb.status == null or fb.status.name() == 'NEW' or fb.status.name() == 'UNDER_REVIEW'}"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-green-50 text-green-600 rounded-lg text-xs font-semibold hover:bg-green-100 transition-colors">
-                                        <i class="bi bi-reply"></i> Respond
+                                    </button>
+
+                                    <!-- Quick Link to Detail / Respond Section -->
+                                    <a th:href="@{'/instructor/feedback/' + ${fb.id} + '#respond'}"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-surface-100 text-surface-700 rounded-lg text-xs font-semibold hover:bg-surface-200 transition-colors">
+                                        <i class="bi bi-reply"></i> Reply
                                     </a>
                                 </div>
                             </td>
@@ -161,6 +253,305 @@
                 </div>
             </div>
         </div>
+
+        <!-- =================================================================== -->
+        <!-- INTERACTIVE INSTRUCTOR VIEW MODAL WINDOW                           -->
+        <!-- =================================================================== -->
+        <div id="instructorFeedbackModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-950/60 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true" aria-labelledby="instModalTitle">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-surface-200 animate-slide-down">
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-base">
+                            <i class="bi bi-chat-quote-fill"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 id="instModalTitle" class="text-base font-bold text-surface-900">Student Feedback Details</h3>
+                                <span id="instModalIdBadge" class="px-2 py-0.5 rounded-md bg-surface-200 text-surface-700 text-xs font-semibold">#0</span>
+                            </div>
+                            <p id="instModalDate" class="text-xs text-gray-500 mt-0.5">Submitted date</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="instModalStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">New</span>
+                        <button type="button" onclick="closeInstructorFeedbackModal()" class="w-8 h-8 rounded-lg hover:bg-surface-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="bi bi-x-lg text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Body (Scrollable) -->
+                <div class="p-6 overflow-y-auto space-y-5 custom-scrollbar">
+                    <!-- Student & Course Info -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-surface-50 rounded-xl border border-surface-200/80">
+                        <div>
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Student</span>
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-person text-brand-500 text-sm"></i>
+                                <span id="instModalStudentName" class="font-semibold text-surface-900 text-sm truncate">Student Name</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Course</span>
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-book text-gray-500 text-sm"></i>
+                                <span id="instModalCourseName" class="font-medium text-surface-800 text-sm truncate">Course Name</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating & Category -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-surface-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-gray-500">Student Rating:</span>
+                            <div id="instModalStarContainer" class="flex items-center gap-1">
+                                <!-- Stars -->
+                            </div>
+                            <span id="instModalRatingText" class="text-xs font-bold text-surface-800 ml-1">(5/5)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-gray-500">Category:</span>
+                            <span id="instModalCategoryBadge" class="px-2.5 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs font-semibold">General</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Message -->
+                    <div>
+                        <span class="text-xs font-bold text-surface-800 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
+                            <i class="bi bi-chat-left-text-fill text-brand-500"></i> Student Message
+                        </span>
+                        <div class="p-4 bg-white border border-surface-200 rounded-xl shadow-inner space-y-1.5">
+                            <h4 id="instModalSubjectText" class="text-sm font-bold text-surface-900"></h4>
+                            <p id="instModalMessageText" class="text-sm text-surface-700 whitespace-pre-wrap leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- Conversation / Official Responses Thread -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-surface-900 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="bi bi-shield-check text-emerald-600"></i> Response Thread
+                            </span>
+                            <span id="instModalResponseCountBadge" class="hidden px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">1 Response</span>
+                        </div>
+
+                        <div id="instModalResponseThread" class="space-y-3">
+                            <!-- Thread rendered dynamically -->
+                        </div>
+                        <div id="instModalNoResponseNotice" class="p-4 rounded-xl bg-surface-50 border border-dashed border-surface-300 text-center text-xs text-gray-400">
+                            No responses have been submitted yet.
+                        </div>
+                    </div>
+
+                    <!-- In-Modal Quick Reply Box -->
+                    <div class="p-4 bg-gradient-to-br from-brand-50/50 to-white rounded-xl border border-brand-200/80 shadow-sm">
+                        <h4 class="text-xs font-bold text-surface-900 mb-2 flex items-center gap-1.5">
+                            <i class="bi bi-reply-fill text-brand-600"></i> Post Response as Instructor
+                        </h4>
+                        <form id="instModalReplyForm" method="post" action="">
+                            <textarea name="message" id="instModalReplyText" rows="3" required minlength="5" maxlength="2000"
+                                      placeholder="Write your official reply to this student..."
+                                      class="w-full px-3.5 py-2.5 bg-white border border-surface-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none mb-3 shadow-inner"></textarea>
+                            <div class="flex justify-end">
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-brand-500/20 transition-all">
+                                    <i class="bi bi-send-fill"></i> Submit Reply
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between shrink-0">
+                    <a id="instModalFullPageBtn" href="#" class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline">
+                        <i class="bi bi-box-arrow-up-right"></i> Open Full Details Page
+                    </a>
+                    <button type="button" onclick="closeInstructorFeedbackModal()" class="px-4 py-2 bg-surface-900 hover:bg-surface-800 text-white rounded-xl text-xs font-semibold transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- JAVASCRIPT FOR INSTRUCTOR VIEW MODAL                                -->
+        <!-- =================================================================== -->
+        <script>
+            function openInstructorFeedbackModal(btn) {
+                const id = btn.getAttribute('data-id');
+                const student = btn.getAttribute('data-student') || 'Student';
+                const course = btn.getAttribute('data-course') || 'General Feedback';
+                const rating = parseInt(btn.getAttribute('data-rating') || '0');
+                const category = btn.getAttribute('data-category') || 'General';
+                const subject = btn.getAttribute('data-subject') || '';
+                const message = btn.getAttribute('data-message') || '';
+                const statusName = btn.getAttribute('data-status-name') || 'New';
+                const statusBadge = btn.getAttribute('data-status-badge') || 'bg-blue-100 text-blue-700';
+                const adminResponse = btn.getAttribute('data-admin-response') || '';
+                const createdAt = btn.getAttribute('data-created-at') || '';
+
+                // Fill UI
+                document.getElementById('instModalIdBadge').textContent = '#' + id;
+                document.getElementById('instModalDate').textContent = createdAt ? 'Submitted on ' + createdAt : '';
+                document.getElementById('instModalStudentName').textContent = student;
+                document.getElementById('instModalCourseName').textContent = course;
+
+                // Status
+                const statusEl = document.getElementById('instModalStatusBadge');
+                statusEl.textContent = statusName;
+                statusEl.className = 'px-3 py-1 rounded-full text-xs font-bold ' + statusBadge;
+
+                // Stars
+                const starContainer = document.getElementById('instModalStarContainer');
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= rating) {
+                        starsHtml += '<i class="bi bi-star-fill text-amber-400 text-sm"></i>';
+                    } else {
+                        starsHtml += '<i class="bi bi-star text-gray-300 text-sm"></i>';
+                    }
+                }
+                starContainer.innerHTML = starsHtml;
+                document.getElementById('instModalRatingText').textContent = '(' + rating + '/5)';
+
+                // Category
+                document.getElementById('instModalCategoryBadge').textContent = category;
+
+                // Subject & Message
+                const subjEl = document.getElementById('instModalSubjectText');
+                if (subject && subject.trim().length > 0) {
+                    subjEl.textContent = subject;
+                    subjEl.classList.remove('hidden');
+                } else {
+                    subjEl.textContent = '';
+                    subjEl.classList.add('hidden');
+                }
+                document.getElementById('instModalMessageText').textContent = message || 'No message provided.';
+
+                // Form Action and Details Page Link
+                document.getElementById('instModalFullPageBtn').href = '/instructor/feedback/' + id;
+                document.getElementById('instModalReplyForm').action = '/instructor/feedback/' + id + '/respond';
+                document.getElementById('instModalReplyText').value = '';
+
+                // Initial Response render
+                renderInstructorResponseContent(adminResponse, []);
+
+                // Open modal
+                const modal = document.getElementById('instructorFeedbackModal');
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+
+                // Fetch dynamic API
+                fetch('/instructor/feedback/api/' + id)
+                    .then(res => {
+                        if (!res.ok) throw new Error('API error');
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            renderInstructorResponseContent(data.adminResponse, data.responses || []);
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('Could not fetch instructor feedback details:', err);
+                    });
+            }
+
+            function renderInstructorResponseContent(adminResponse, responses) {
+                const threadContainer = document.getElementById('instModalResponseThread');
+                const noResponseNotice = document.getElementById('instModalNoResponseNotice');
+                const countBadge = document.getElementById('instModalResponseCountBadge');
+
+                const hasResponses = (responses && responses.length > 0);
+                const hasAdminText = (adminResponse && adminResponse.trim().length > 0);
+
+                if (!hasResponses && !hasAdminText) {
+                    threadContainer.innerHTML = '';
+                    noResponseNotice.classList.remove('hidden');
+                    countBadge.classList.add('hidden');
+                    return;
+                }
+
+                noResponseNotice.classList.add('hidden');
+
+                let threadHtml = '';
+                if (hasResponses) {
+                    countBadge.textContent = responses.length + (responses.length === 1 ? ' Response' : ' Responses');
+                    countBadge.classList.remove('hidden');
+
+                    responses.forEach(r => {
+                        const isAdm = r.responderRole === 'ADMIN';
+                        const roleColor = isAdm ? 'bg-purple-100 text-purple-700' : 'bg-brand-100 text-brand-700';
+                        const roleName = isAdm ? 'Admin Team' : (r.responderRole || 'Instructor');
+                        threadHtml += `
+                            <div class="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-200 shadow-sm space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
+                                            <i class="bi bi-person-check-fill"></i>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs font-bold text-surface-900">${escapeHtml(r.responderName || 'EduTake Member')}</span>
+                                            <span class="px-2 py-0.2 rounded-full text-[10px] font-bold ${roleColor} ml-1.5">${escapeHtml(roleName)}</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-gray-400">${escapeHtml(r.createdAt || '')}</span>
+                                </div>
+                                <div class="text-xs text-surface-800 pl-8 whitespace-pre-wrap leading-relaxed">${escapeHtml(r.message || '')}</div>
+                            </div>
+                        `;
+                    });
+                } else if (hasAdminText) {
+                    countBadge.textContent = '1 Response';
+                    countBadge.classList.remove('hidden');
+                    threadHtml = `
+                        <div class="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-200 shadow-sm space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
+                                        <i class="bi bi-person-check-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold text-surface-900">EduTake Official Team</span>
+                                        <span class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 ml-1.5">ADMIN</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-surface-800 pl-8 whitespace-pre-wrap leading-relaxed">${escapeHtml(adminResponse)}</div>
+                        </div>
+                    `;
+                }
+
+                threadContainer.innerHTML = threadHtml;
+            }
+
+            function closeInstructorFeedbackModal() {
+                const modal = document.getElementById('instructorFeedbackModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
+            document.getElementById('instructorFeedbackModal')?.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeInstructorFeedbackModal();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeInstructorFeedbackModal();
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

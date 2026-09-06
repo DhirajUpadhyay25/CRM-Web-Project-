@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('My Feedback', ~{::div})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{student/layout/student-layout :: layout('My Feedback & Responses', ~{::div})}">
 <body>
     <div>
         <!-- Breadcrumbs -->
@@ -12,21 +12,71 @@
         <!-- Page Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-5 border-b border-surface-200">
             <div>
-                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">My Feedback</h1>
-                <p class="text-gray-500 text-sm mt-0.5">View and manage your submitted feedback.</p>
+                <h1 class="text-2xl font-extrabold text-surface-900 tracking-tight">My Feedback & Responses</h1>
+                <p class="text-gray-500 text-sm mt-0.5">Track your submitted feedback, reviews, and official responses from instructors and administrators.</p>
             </div>
-            <a href="/student/feedback/give" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all">
+            <a href="/student/feedback/give" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm shadow-brand-500/20 transition-all">
                 <i class="bi bi-plus-lg"></i> Give Feedback
             </a>
         </div>
 
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Submitted</span>
+                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-base">
+                        <i class="bi bi-chat-quote-fill"></i>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-surface-900 mt-2" th:text="${stats != null ? stats.totalCount : feedbackPage.totalElements}">0</p>
+                <p class="text-xs text-gray-400 mt-0.5">All time feedback</p>
+            </div>
+
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Responses</span>
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                        <i class="bi bi-reply-fill"></i>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-emerald-600 mt-2" th:text="${stats != null ? stats.respondedCount : 0}">0</p>
+                <p class="text-xs text-gray-400 mt-0.5">Answered by admin/team</p>
+            </div>
+
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Under Review</span>
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-amber-600 mt-2" th:text="${stats != null ? stats.pendingCount : 0}">0</p>
+                <p class="text-xs text-gray-400 mt-0.5">Pending response</p>
+            </div>
+
+            <div class="bg-white border border-surface-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Avg Rating Given</span>
+                    <div class="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center text-base">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-1.5 mt-2">
+                    <span class="text-2xl font-bold text-surface-900" th:text="${stats != null ? stats.averageRating : '0.0'}">0.0</span>
+                    <span class="text-xs text-gray-400">/ 5.0</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-0.5">Overall rating score</p>
+            </div>
+        </div>
+
         <!-- Alerts -->
         <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-center gap-3">
-            <i class="bi bi-check-circle-fill"></i>
+            <i class="bi bi-check-circle-fill text-lg flex-shrink-0"></i>
             <span class="text-sm font-medium" th:text="${successMsg}"></span>
         </div>
         <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
-            <i class="bi bi-exclamation-circle-fill"></i>
+            <i class="bi bi-exclamation-circle-fill text-lg flex-shrink-0"></i>
             <span class="text-sm font-medium" th:text="${errorMsg}"></span>
         </div>
 
@@ -35,63 +85,104 @@
             <div class="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4">
                 <i class="bi bi-chat-quote"></i>
             </div>
-            <h3 class="font-semibold text-surface-900 mb-1">No Feedback Yet</h3>
-            <p class="text-sm text-gray-500 mb-4">You haven't submitted any feedback yet. Share your experience!</p>
-            <a href="/student/feedback/give" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all">
-                <i class="bi bi-plus-lg"></i> Give Feedback
+            <h3 class="font-semibold text-surface-900 mb-1">No Feedback Submitted Yet</h3>
+            <p class="text-sm text-gray-500 mb-5 max-w-md mx-auto">Have questions, suggestions, or comments about your enrolled courses? We would love to hear your thoughts!</p>
+            <a href="/student/feedback/give" class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all">
+                <i class="bi bi-plus-lg"></i> Give Feedback Now
             </a>
         </div>
 
-        <!-- Feedback List -->
+        <!-- Feedback List Table -->
         <div th:if="${!#lists.isEmpty(feedbackPage.content)}" class="bg-white border border-surface-200 rounded-2xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-surface-50 border-b border-surface-200 text-gray-500">
                         <tr>
-                            <th class="px-6 py-4 font-semibold">Course</th>
+                            <th class="px-6 py-4 font-semibold">Course & Topic</th>
                             <th class="px-6 py-4 font-semibold">Rating</th>
                             <th class="px-6 py-4 font-semibold">Category</th>
                             <th class="px-6 py-4 font-semibold">Status</th>
+                            <th class="px-6 py-4 font-semibold">Response</th>
                             <th class="px-6 py-4 font-semibold">Submitted</th>
                             <th class="px-6 py-4 font-semibold text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-200">
-                        <tr th:each="fb : ${feedbackPage.content}" class="hover:bg-surface-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-surface-900">
-                                <span th:if="${fb.course != null}" th:text="${fb.course.name}">Course Name</span>
-                                <span th:unless="${fb.course != null}" class="text-gray-400">General</span>
+                        <tr th:each="fb : ${feedbackPage.content}" class="hover:bg-surface-50/80 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
+                                        <i class="bi bi-journal-text text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0 max-w-xs">
+                                        <p class="font-semibold text-surface-900 truncate" th:text="${fb.course != null ? fb.course.name : 'General Feedback'}">Course Name</p>
+                                        <p class="text-xs text-gray-500 truncate" th:text="${fb.subject != null and !fb.subject.isEmpty() ? fb.subject : (fb.message != null ? fb.message : 'No subject')}">Subject/Topic</p>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-1">
-                                    <template th:each="i : ${#numbers.sequence(1,5)}">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
                                         <i th:if="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star-fill text-amber-400 text-xs"></i>
                                         <i th:unless="${i <= (fb.rating != null ? fb.rating : 0)}" class="bi bi-star text-gray-300 text-xs"></i>
-                                    </template>
-                                    <span class="text-xs text-gray-500 ml-1" th:text="'(' + ${fb.rating} + ')'"></span>
+                                    </th:block>
+                                    <span class="text-xs font-semibold text-surface-700 ml-1" th:text="${fb.rating} + '/5'">5/5</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                <span th:if="${fb.category != null}" th:text="${fb.category}" class="px-2 py-0.5 bg-surface-100 rounded-full text-xs font-medium"></span>
-                                <span th:unless="${fb.category != null}" class="text-gray-400">-</span>
+                            <td class="px-6 py-4">
+                                <span th:if="${fb.category != null and !fb.category.isEmpty()}" th:text="${fb.category}"
+                                      class="px-2.5 py-1 bg-surface-100 rounded-full text-xs font-medium text-surface-700 inline-block"></span>
+                                <span th:unless="${fb.category != null and !fb.category.isEmpty()}" class="text-gray-400 text-xs">-</span>
                             </td>
                             <td class="px-6 py-4">
                                 <span th:text="${fb.status != null ? fb.status.displayName : 'New'}"
                                       th:classappend="${fb.status != null ? fb.status.badgeClass : 'bg-blue-100 text-blue-700'}"
                                       class="px-2.5 py-1 rounded-full text-xs font-semibold inline-block"></span>
                             </td>
+                            <td class="px-6 py-4">
+                                <span th:if="${fb.status != null and (fb.status.name() == 'RESPONDED' or fb.status.name() == 'RESOLVED' or (fb.adminResponse != null and !fb.adminResponse.isEmpty()))}"
+                                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm">
+                                    <i class="bi bi-chat-left-text-fill text-emerald-500"></i> Response Received
+                                </span>
+                                <span th:unless="${fb.status != null and (fb.status.name() == 'RESPONDED' or fb.status.name() == 'RESOLVED' or (fb.adminResponse != null and !fb.adminResponse.isEmpty()))}"
+                                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-100 text-gray-500">
+                                    <i class="bi bi-hourglass-split text-gray-400"></i> Under Review
+                                </span>
+                            </td>
                             <td class="px-6 py-4 text-gray-500 text-xs" th:text="${fb.createdAt != null ? #temporals.format(fb.createdAt, 'dd MMM yyyy') : '-'}"></td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <a th:href="@{/student/feedback/{id}(id=${fb.id})}"
-                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-semibold hover:bg-brand-100 transition-colors">
+                                    <!-- View Action Button that triggers View Window Modal -->
+                                    <button type="button"
+                                            onclick="openFeedbackModalFromRow(this)"
+                                            th:data-id="${fb.id}"
+                                            th:data-course="${fb.course != null ? fb.course.name : 'General Feedback'}"
+                                            th:data-instructor="${fb.instructor != null ? fb.instructor.name : (fb.course != null and fb.course.instructorRef != null ? fb.course.instructorRef.name : 'N/A')}"
+                                            th:data-rating="${fb.rating != null ? fb.rating : 0}"
+                                            th:data-category="${fb.category != null ? fb.category : 'General'}"
+                                            th:data-subject="${fb.subject != null ? fb.subject : ''}"
+                                            th:data-message="${fb.message != null ? fb.message : ''}"
+                                            th:data-status="${fb.status != null ? fb.status.name() : 'NEW'}"
+                                            th:data-status-name="${fb.status != null ? fb.status.displayName : 'New'}"
+                                            th:data-status-badge="${fb.status != null ? fb.status.badgeClass : 'bg-blue-100 text-blue-700'}"
+                                            th:data-admin-response="${fb.adminResponse != null ? fb.adminResponse : ''}"
+                                            th:data-created-at="${fb.createdAt != null ? #temporals.format(fb.createdAt, 'dd MMM yyyy, hh:mm a') : ''}"
+                                            th:data-resolved-at="${fb.resolvedAt != null ? #temporals.format(fb.resolvedAt, 'dd MMM yyyy, hh:mm a') : ''}"
+                                            th:data-is-editable="${fb.status != null and fb.status.isEditable()}"
+                                            th:data-is-anonymous="${fb.anonymous}"
+                                            th:data-is-public="${fb.public}"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-600 hover:bg-brand-600 hover:text-white rounded-lg text-xs font-semibold shadow-sm transition-all">
                                         <i class="bi bi-eye"></i> View
-                                    </a>
+                                    </button>
+
+                                    <!-- Edit Button (if editable) -->
                                     <a th:if="${fb.status != null and fb.status.isEditable()}"
                                        th:href="@{/student/feedback/{id}/edit(id=${fb.id})}"
                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-surface-100 text-surface-700 rounded-lg text-xs font-semibold hover:bg-surface-200 transition-colors">
                                         <i class="bi bi-pencil"></i> Edit
                                     </a>
+
+                                    <!-- Withdraw Button (if editable) -->
                                     <form th:if="${fb.status != null and fb.status.isEditable()}"
                                           th:action="@{/student/feedback/{id}/delete(id=${fb.id})}" method="post"
                                           onsubmit="return confirm('Are you sure you want to withdraw this feedback?');" class="inline">
@@ -128,6 +219,329 @@
                 </div>
             </div>
         </div>
+
+        <!-- =================================================================== -->
+        <!-- INTERACTIVE VIEW MODAL WINDOW                                       -->
+        <!-- =================================================================== -->
+        <div id="feedbackViewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-950/60 backdrop-blur-sm transition-opacity" role="dialog" aria-modal="true" aria-labelledby="modalFeedbackTitle">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-surface-200 animate-slide-down">
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-surface-200 bg-surface-50 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-base">
+                            <i class="bi bi-chat-left-text"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 id="modalFeedbackTitle" class="text-base font-bold text-surface-900">Feedback Details</h3>
+                                <span id="modalFeedbackIdBadge" class="px-2 py-0.5 rounded-md bg-surface-200 text-surface-700 text-xs font-semibold">#0</span>
+                            </div>
+                            <p id="modalFeedbackDate" class="text-xs text-gray-500 mt-0.5">Submitted date</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="modalStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">New</span>
+                        <button type="button" onclick="closeFeedbackModal()" class="w-8 h-8 rounded-lg hover:bg-surface-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="bi bi-x-lg text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Body (Scrollable) -->
+                <div class="p-6 overflow-y-auto space-y-5 custom-scrollbar">
+                    <!-- Course & Instructor Info -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-surface-50 rounded-xl border border-surface-200/80">
+                        <div>
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Course</span>
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-book text-brand-500 text-sm"></i>
+                                <span id="modalCourseName" class="font-semibold text-surface-900 text-sm truncate">Course Name</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Instructor</span>
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-person-badge text-gray-500 text-sm"></i>
+                                <span id="modalInstructorName" class="font-medium text-surface-800 text-sm truncate">Instructor Name</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating & Category -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-surface-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-gray-500">Your Rating:</span>
+                            <div id="modalStarContainer" class="flex items-center gap-1">
+                                <!-- Stars generated dynamically -->
+                            </div>
+                            <span id="modalRatingText" class="text-xs font-bold text-surface-800 ml-1">(5/5)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-gray-500">Category:</span>
+                            <span id="modalCategoryBadge" class="px-2.5 py-0.5 bg-brand-50 text-brand-700 rounded-full text-xs font-semibold">General</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Message -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs font-bold text-surface-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="bi bi-chat-quote-fill text-brand-500"></i> Your Feedback
+                            </span>
+                            <span id="modalPrivacyTag" class="text-[11px] text-gray-400"></span>
+                        </div>
+                        <div class="p-4 bg-white border border-surface-200 rounded-xl shadow-inner space-y-1.5">
+                            <h4 id="modalSubjectText" class="text-sm font-bold text-surface-900"></h4>
+                            <p id="modalMessageText" class="text-sm text-surface-700 whitespace-pre-wrap leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- ======================================================= -->
+                    <!-- OFFICIAL ADMIN / INSTRUCTOR RESPONSE SECTION            -->
+                    <!-- ======================================================= -->
+                    <div id="modalResponseContainer" class="pt-2">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-surface-900 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="bi bi-shield-check text-emerald-600"></i> Official Response
+                            </span>
+                            <span id="modalResponseCountBadge" class="hidden px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">1 Response</span>
+                        </div>
+
+                        <!-- Content when response exists -->
+                        <div id="modalResponseExists" class="hidden space-y-3">
+                            <div id="modalResponseThread" class="space-y-3">
+                                <!-- Thread items rendered dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Content when NO response yet -->
+                        <div id="modalNoResponse" class="p-5 rounded-xl bg-surface-50 border border-dashed border-surface-300 text-center">
+                            <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-2 text-lg">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <h4 class="text-xs font-bold text-surface-800">Pending Review & Official Response</h4>
+                            <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                                Our support and academic team is reviewing your feedback. You will receive a notification as soon as an admin or instructor replies.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-surface-200 bg-surface-50 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2">
+                        <a id="modalFullPageBtn" href="#" class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline">
+                            <i class="bi bi-box-arrow-up-right"></i> Open Details Page
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a id="modalEditBtn" href="#" class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 rounded-xl text-xs font-semibold transition-colors">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <button type="button" onclick="closeFeedbackModal()" class="px-4 py-2 bg-surface-900 hover:bg-surface-800 text-white rounded-xl text-xs font-semibold transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- JAVASCRIPT FOR VIEW MODAL WINDOW                                    -->
+        <!-- =================================================================== -->
+        <script>
+            function openFeedbackModalFromRow(btn) {
+                const id = btn.getAttribute('data-id');
+                const course = btn.getAttribute('data-course') || 'General Feedback';
+                const instructor = btn.getAttribute('data-instructor') || 'N/A';
+                const rating = parseInt(btn.getAttribute('data-rating') || '0');
+                const category = btn.getAttribute('data-category') || 'General';
+                const subject = btn.getAttribute('data-subject') || '';
+                const message = btn.getAttribute('data-message') || '';
+                const statusName = btn.getAttribute('data-status-name') || 'New';
+                const statusBadge = btn.getAttribute('data-status-badge') || 'bg-blue-100 text-blue-700';
+                const adminResponse = btn.getAttribute('data-admin-response') || '';
+                const createdAt = btn.getAttribute('data-created-at') || '';
+                const isEditable = btn.getAttribute('data-is-editable') === 'true';
+                const isAnonymous = btn.getAttribute('data-is-anonymous') === 'true';
+                const isPublic = btn.getAttribute('data-is-public') === 'true';
+
+                // Fill immediate UI from row data attributes
+                document.getElementById('modalFeedbackIdBadge').textContent = '#' + id;
+                document.getElementById('modalFeedbackDate').textContent = createdAt ? 'Submitted on ' + createdAt : '';
+                document.getElementById('modalCourseName').textContent = course;
+                document.getElementById('modalInstructorName').textContent = instructor;
+                
+                // Status badge
+                const statusEl = document.getElementById('modalStatusBadge');
+                statusEl.textContent = statusName;
+                statusEl.className = 'px-3 py-1 rounded-full text-xs font-bold ' + statusBadge;
+
+                // Rating stars
+                const starContainer = document.getElementById('modalStarContainer');
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= rating) {
+                        starsHtml += '<i class="bi bi-star-fill text-amber-400 text-sm"></i>';
+                    } else {
+                        starsHtml += '<i class="bi bi-star text-gray-300 text-sm"></i>';
+                    }
+                }
+                starContainer.innerHTML = starsHtml;
+                document.getElementById('modalRatingText').textContent = '(' + rating + '/5)';
+
+                // Category
+                document.getElementById('modalCategoryBadge').textContent = category;
+
+                // Subject & Message
+                const subjEl = document.getElementById('modalSubjectText');
+                if (subject && subject.trim().length > 0) {
+                    subjEl.textContent = subject;
+                    subjEl.classList.remove('hidden');
+                } else {
+                    subjEl.textContent = '';
+                    subjEl.classList.add('hidden');
+                }
+                document.getElementById('modalMessageText').textContent = message || 'No message provided.';
+
+                // Privacy
+                let privacyText = '';
+                if (isAnonymous) privacyText += '🕶️ Anonymous ';
+                if (isPublic) privacyText += '🌐 Public ';
+                document.getElementById('modalPrivacyTag').textContent = privacyText;
+
+                // Links
+                document.getElementById('modalFullPageBtn').href = '/student/feedback/' + id;
+                const editBtn = document.getElementById('modalEditBtn');
+                if (isEditable) {
+                    editBtn.href = '/student/feedback/' + id + '/edit';
+                    editBtn.classList.remove('hidden');
+                } else {
+                    editBtn.classList.add('hidden');
+                }
+
+                // Initial Response render
+                renderResponseContent(adminResponse, []);
+
+                // Open modal
+                const modal = document.getElementById('feedbackViewModal');
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+
+                // Asynchronously fetch latest responses and data from API
+                fetch('/student/feedback/api/' + id)
+                    .then(res => {
+                        if (!res.ok) throw new Error('API error');
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            renderResponseContent(data.adminResponse, data.responses || []);
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('Could not fetch updated feedback details:', err);
+                    });
+            }
+
+            function renderResponseContent(adminResponse, responses) {
+                const responseExistsContainer = document.getElementById('modalResponseExists');
+                const noResponseContainer = document.getElementById('modalNoResponse');
+                const threadContainer = document.getElementById('modalResponseThread');
+                const countBadge = document.getElementById('modalResponseCountBadge');
+
+                const hasResponses = (responses && responses.length > 0);
+                const hasAdminText = (adminResponse && adminResponse.trim().length > 0);
+
+                if (!hasResponses && !hasAdminText) {
+                    responseExistsContainer.classList.add('hidden');
+                    noResponseContainer.classList.remove('hidden');
+                    countBadge.classList.add('hidden');
+                    return;
+                }
+
+                responseExistsContainer.classList.remove('hidden');
+                noResponseContainer.classList.add('hidden');
+
+                let threadHtml = '';
+
+                if (hasResponses) {
+                    countBadge.textContent = responses.length + (responses.length === 1 ? ' Response' : ' Responses');
+                    countBadge.classList.remove('hidden');
+
+                    responses.forEach(r => {
+                        const roleColor = r.responderRole === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-brand-100 text-brand-700';
+                        const roleName = r.responderRole === 'ADMIN' ? 'Admin Team' : (r.responderRole || 'Instructor');
+                        threadHtml += `
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-200 shadow-sm space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
+                                            <i class="bi bi-person-check-fill"></i>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs font-bold text-surface-900">${escapeHtml(r.responderName || 'EduTake Support')}</span>
+                                            <span class="px-2 py-0.2 rounded-full text-[10px] font-bold ${roleColor} ml-1.5">${escapeHtml(roleName)}</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] text-gray-400">${escapeHtml(r.createdAt || '')}</span>
+                                </div>
+                                <div class="text-xs text-surface-800 pl-9 whitespace-pre-wrap leading-relaxed">${escapeHtml(r.message || '')}</div>
+                            </div>
+                        `;
+                    });
+                } else if (hasAdminText) {
+                    countBadge.textContent = '1 Response';
+                    countBadge.classList.remove('hidden');
+                    threadHtml = `
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-200 shadow-sm space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
+                                        <i class="bi bi-person-check-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold text-surface-900">EduTake Official Team</span>
+                                        <span class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 ml-1.5">ADMIN</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-surface-800 pl-9 whitespace-pre-wrap leading-relaxed">${escapeHtml(adminResponse)}</div>
+                        </div>
+                    `;
+                }
+
+                threadContainer.innerHTML = threadHtml;
+            }
+
+            function closeFeedbackModal() {
+                const modal = document.getElementById('feedbackViewModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
+            // Close modal when clicking backdrop
+            document.getElementById('feedbackViewModal')?.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeFeedbackModal();
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeFeedbackModal();
+                }
+            });
+        </script>
     </div>
 </body>
 </html>

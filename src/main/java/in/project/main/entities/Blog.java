@@ -191,7 +191,9 @@ public class Blog {
     public void setVisibility(ContentVisibility visibility) { this.visibility = visibility; }
 
     public boolean isFeatured() { return Boolean.TRUE.equals(isFeatured); }
+    public Boolean getIsFeatured() { return this.isFeatured; }
     public void setFeatured(Boolean isFeatured) { this.isFeatured = (isFeatured != null && isFeatured); }
+    public void setIsFeatured(Boolean isFeatured) { this.isFeatured = (isFeatured != null && isFeatured); }
 
     public String getSeoTitle() { return seoTitle != null && !seoTitle.isBlank() ? seoTitle : title; }
     public void setSeoTitle(String seoTitle) { this.seoTitle = seoTitle; }

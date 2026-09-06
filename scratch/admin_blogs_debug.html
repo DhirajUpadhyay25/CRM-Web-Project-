@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" content="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+    <meta name="_csrf_header" content="X-CSRF-TOKEN"/>
+    <title>Blog &amp; Article Management | EduTake Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81', 950: '#1e1b4b' },
+                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .sidebar-section-items { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .sidebar-section-items.expanded { max-height: 500px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-down { animation: slideDown 0.15s ease-out; }
+    </style>
+</head>
+<body class="bg-surface-50 text-surface-900 antialiased flex h-screen overflow-hidden">
+
+    <!-- ============================================ -->
+    <!-- SIDEBAR -->
+    <!-- ============================================ -->
+    <aside id="sidebar" class="bg-surface-950 text-white w-64 flex-shrink-0 flex flex-col h-full transition-transform duration-300 transform -translate-x-full md:translate-x-0 fixed md:relative z-30">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-5 border-b border-white/10 shrink-0">
+            <a href="/admin/dashboard" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-lg shadow-lg shadow-brand-500/20">E</div>
+                <span class="font-bold text-xl tracking-tight">EduTake<span class="text-brand-400">.</span></span>
+            </a>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 custom-scrollbar">
+            
+            <!-- Dashboard -->
+            <a href="/admin/dashboard" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/dashboard">
+                <i class="bi bi-grid-1x2-fill text-base"></i>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+            
+            <!-- LEARNING Section -->
+            <div class="mt-5">
+                <button onclick="toggleSection('learning')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Learning</span>
+                    <i id="learning-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="learning-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/courses" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/courses">
+                        <i class="bi bi-play-btn-fill text-base"></i>
+                        <span class="text-sm">Courses</span>
+                    </a>
+                    <a href="/admin/categories" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/categories">
+                        <i class="bi bi-collection-fill text-base"></i>
+                        <span class="text-sm">Categories</span>
+                    </a>
+                    <a href="/admin/students" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/students">
+                        <i class="bi bi-mortarboard-fill text-base"></i>
+                        <span class="text-sm">Students</span>
+                    </a>
+                    <a href="/admin/instructors" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/instructors">
+                        <i class="bi bi-person-workspace text-base"></i>
+                        <span class="text-sm">Instructors</span>
+                    </a>
+                    <a href="/admin/enrollments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enrollments">
+                        <i class="bi bi-journal-check text-base"></i>
+                        <span class="text-sm">Enrollments</span>
+                    </a>
+                    <a href="/admin/certificates" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/certificates">
+                        <i class="bi bi-award-fill text-base"></i>
+                        <span class="text-sm">Certificates</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- COMMERCE Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('commerce')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Commerce</span>
+                    <i id="commerce-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="commerce-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/orders" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/orders">
+                        <i class="bi bi-bag-check-fill text-base"></i>
+                        <span class="text-sm">Orders</span>
+                    </a>
+                    <a href="/admin/payments" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/payments">
+                        <i class="bi bi-credit-card-fill text-base"></i>
+                        <span class="text-sm">Payments</span>
+                    </a>
+                    <a href="/admin/coupons" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/coupons">
+                        <i class="bi bi-tag-fill text-base"></i>
+                        <span class="text-sm">Coupons / Discounts</span>
+                    </a>
+                    <a href="/admin/refunds" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/refunds">
+                        <i class="bi bi-arrow-return-left text-base"></i>
+                        <span class="text-sm">Refunds</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CRM Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('crm')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>CRM</span>
+                    <i id="crm-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="crm-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/leads" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/leads">
+                        <i class="bi bi-funnel-fill text-base"></i>
+                        <span class="text-sm">Leads</span>
+                    </a>
+                    <a href="/admin/enquiries" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/enquiries">
+                        <i class="bi bi-question-circle-fill text-base"></i>
+                        <span class="text-sm">Enquiries</span>
+                    </a>
+                    <a href="/admin/follow-ups" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/follow-ups">
+                        <i class="bi bi-telephone-outbound-fill text-base"></i>
+                        <span class="text-sm">Follow-ups</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- COMMUNICATION Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('comm')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Communication</span>
+                    <i id="comm-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="comm-items" class="sidebar-section-items space-y-0.5 mt-1">
+                    <a href="/admin/notifications" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/notifications">
+                        <i class="bi bi-bell-fill text-base"></i>
+                        <span class="text-sm">Notifications</span>
+                    </a>
+                    <a href="/admin/announcements" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/announcements">
+                        <i class="bi bi-megaphone-fill text-base"></i>
+                        <span class="text-sm">Announcements</span>
+                    </a>
+                    <a href="/admin/messages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/messages">
+                        <i class="bi bi-envelope-fill text-base"></i>
+                        <span class="text-sm">Email / Messages</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CONTENT Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('content')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Content</span>
+                    <i id="content-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="content-items" class="sidebar-section-items space-y-0.5 mt-1">
+                    <a href="/admin/feedback" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/feedback">
+                        <i class="bi bi-chat-quote-fill text-base"></i>
+                        <span class="text-sm">Feedback</span>
+                    </a>
+                    <a href="/admin/pages" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/pages">
+                        <i class="bi bi-file-earmark-text-fill text-base"></i>
+                        <span class="text-sm">Pages</span>
+                    </a>
+                    <a href="/admin/blogs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/blogs">
+                        <i class="bi bi-journal-richtext text-base"></i>
+                        <span class="text-sm">Blog / Articles</span>
+                    </a>
+                    <a href="/admin/faqs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/faqs">
+                        <i class="bi bi-patch-question-fill text-base"></i>
+                        <span class="text-sm">FAQs</span>
+                    </a>
+                    <a href="/admin/testimonials" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/testimonials">
+                        <i class="bi bi-star-fill text-base"></i>
+                        <span class="text-sm">Testimonials</span>
+                    </a>
+                    <a href="/admin/media" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/media">
+                        <i class="bi bi-images text-base"></i>
+                        <span class="text-sm">Media Library</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ANALYTICS Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('analytics')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>Analytics</span>
+                    <i id="analytics-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="analytics-items" class="sidebar-section-items space-y-0.5 mt-1">
+                    <a href="/admin/reports" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/reports">
+                        <i class="bi bi-graph-up-arrow text-base"></i>
+                        <span class="text-sm">LMS Reports</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SYSTEM Section -->
+            <div class="mt-3">
+                <button onclick="toggleSection('system')" class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-400 transition-colors">
+                    <span>System</span>
+                    <i id="system-chevron" class="bi bi-chevron-down text-[10px] transition-transform"></i>
+                </button>
+                <div id="system-items" class="sidebar-section-items expanded space-y-0.5 mt-1">
+                    <a href="/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/users">
+                        <i class="bi bi-people-fill text-base"></i>
+                        <span class="text-sm">Users</span>
+                    </a>
+                    <a href="/admin/roles" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/roles">
+                        <i class="bi bi-shield-lock-fill text-base"></i>
+                        <span class="text-sm">Roles &amp; Permissions</span>
+                    </a>
+                    <a href="/admin/audit-logs" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/audit-logs">
+                        <i class="bi bi-clock-history text-base"></i>
+                        <span class="text-sm">Audit Logs</span>
+                    </a>
+                    <a href="/admin/monitoring" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/monitoring">
+                        <i class="bi bi-activity text-base"></i>
+                        <span class="text-sm">System Health</span>
+                    </a>
+                    <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/settings">
+                        <i class="bi bi-gear-fill text-base"></i>
+                        <span class="text-sm">Settings</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="pb-2"></div>
+        </nav>
+        
+        <!-- Bottom User Area -->
+        <div class="p-4 border-t border-white/10 shrink-0">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center font-bold text-sm shadow-lg shadow-brand-500/20">A</div>
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-white truncate">Administrator</p>
+                    <p class="text-xs text-gray-500 truncate">Admin Control</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="/admin/profile" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-white/5 text-gray-400 rounded-lg hover:bg-white/10 hover:text-white transition-colors text-xs font-medium">
+                    <i class="bi bi-person text-sm"></i> Profile
+                </a>
+                <a href="/logout" class="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors text-xs font-medium">
+                    <i class="bi bi-box-arrow-right text-sm"></i> Logout
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT WRAPPER -->
+    <!-- ============================================ -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-surface-50">
+        
+        <!-- ============================================ -->
+        <!-- NAVBAR -->
+        <!-- ============================================ -->
+        <header class="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-4 lg:px-6 z-20 shadow-sm shrink-0">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <!-- Sidebar Toggle -->
+                <button id="sidebarToggle" class="md:hidden text-gray-500 hover:text-brand-600 transition-colors text-xl flex-shrink-0">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <!-- Breadcrumb -->
+                <div class="hidden sm:flex items-center text-sm text-gray-500 gap-1.5 min-w-0">
+                    <a href="/admin/dashboard" class="text-gray-400 hover:text-brand-600 transition-colors"><i class="bi bi-house-fill"></i></a>
+                    <i class="bi bi-chevron-right text-[10px] text-gray-300"></i>
+                    <span id="breadcrumbText" class="font-medium text-surface-800 truncate">Dashboard</span>
+                </div>
+                
+                <!-- Global Search Button -->
+                <button id="searchBtn" class="hidden md:flex ml-4 items-center gap-2 bg-surface-100 hover:bg-surface-200 border border-surface-200 rounded-xl py-1.5 px-3 text-sm text-gray-500 transition-all cursor-pointer max-w-xs" onclick="openSearch()">
+                    <i class="bi bi-search text-xs"></i>
+                    <span>Search...</span>
+                    <kbd class="hidden lg:inline-flex ml-auto text-[10px] bg-white border border-surface-200 rounded px-1.5 py-0.5 text-gray-400 font-mono">Ctrl+K</kbd>
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+                <!-- Mobile Search -->
+                <button class="md:hidden w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors" onclick="openSearch()">
+                    <i class="bi bi-search"></i>
+                </button>
+
+                <!-- Current Time -->
+                <div class="hidden lg:flex flex-col items-end text-right">
+                    <span id="navTime" class="text-xs font-semibold text-surface-800 tabular-nums">--:--</span>
+                    <span id="navDate" class="text-[10px] text-gray-400">---</span>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="relative" id="notifContainer">
+                    <button id="notifBtn" class="relative w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors" onclick="toggleNotifications()">
+                        <i class="bi bi-bell"></i>
+                        <span id="notifBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">0</span>
+                    </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="notifDropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-surface-200 overflow-hidden z-50 animate-slide-down">
+                        <div class="px-4 py-3 border-b border-surface-100 flex items-center justify-between bg-surface-50">
+                            <h3 class="font-semibold text-sm text-surface-900">Notifications</h3>
+                            <button onclick="markAllNotificationsRead()" class="text-xs text-brand-600 hover:text-brand-700 font-medium">Mark all as read</button>
+                        </div>
+                        <div id="notifList" class="max-h-80 overflow-y-auto">
+                            <div class="p-6 text-center text-gray-400 text-sm">
+                                <i class="bi bi-bell-slash text-2xl mb-2 block"></i>
+                                No notifications
+                            </div>
+                        </div>
+                        <div class="px-4 py-2.5 border-t border-surface-100 bg-surface-50 text-center">
+                            <a href="/admin/notifications" class="text-xs text-brand-600 hover:text-brand-700 font-semibold">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile -->
+                <a href="/admin/profile" class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white font-bold text-sm shadow-sm hover:shadow-md transition-shadow">
+                    A
+                </a>
+            </div>
+        </header>
+
+        <!-- ============================================ -->
+        <!-- MAIN SCROLLING CONTENT -->
+        <!-- ============================================ -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <!-- Flash Messages -->
+            
+            
+            
+            <!-- Dynamic Content -->
+            <div>
+        <!-- Top Header & Actions -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-brand-50 text-brand-600 text-lg">
+                        <i class="bi bi-journal-richtext"></i>
+                    </span>
+                    <h1 class="text-2xl font-bold text-surface-900">Blog & Article Management</h1>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">Author, categorize, schedule, and feature educational tech articles, guides, and career insights.</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                
+                <a href="/blogs" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-800 text-xs font-semibold rounded-xl border border-surface-200 transition-colors shadow-sm">
+                    <i class="bi bi-globe"></i> View Blog Directory
+                </a>
+                <a href="/admin/blogs/create" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md">
+                    <i class="bi bi-plus-lg text-xs"></i> Write New Article
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        
+        
+
+        <!-- KPI Analytics Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 mb-6">
+            <!-- Total Articles -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Articles</span>
+                    <span class="w-7 h-7 rounded-lg bg-surface-100 flex items-center justify-center text-surface-700">
+                        <i class="bi bi-journal-text text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-surface-900">6</p>
+                <span class="text-[11px] text-gray-400">All authored posts</span>
+            </div>
+
+            <!-- Published -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Published</span>
+                    <span class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <i class="bi bi-broadcast text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-emerald-600">6</p>
+                <span class="text-[11px] text-emerald-600/70">Live on platform</span>
+            </div>
+
+            <!-- Drafts -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Drafts</span>
+                    <span class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                        <i class="bi bi-pencil-square text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-amber-600">0</p>
+                <span class="text-[11px] text-amber-600/70">Work in progress</span>
+            </div>
+
+            <!-- Scheduled -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Scheduled</span>
+                    <span class="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                        <i class="bi bi-clock-history text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-purple-600">0</p>
+                <span class="text-[11px] text-purple-600/70">Upcoming releases</span>
+            </div>
+
+            <!-- Total Reads -->
+            <div class="bg-white rounded-2xl p-4 border border-surface-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Total Views</span>
+                    <span class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="bi bi-eye text-xs"></i>
+                    </span>
+                </div>
+                <p class="text-2xl font-bold text-blue-600">1819</p>
+                <span class="text-[11px] text-blue-600/70">Student engagements</span>
+            </div>
+        </div>
+
+        <!-- Filter & Search Panel -->
+        <div class="bg-white border border-surface-200 rounded-2xl shadow-sm mb-6">
+            <form method="get" action="/admin/blogs" class="p-4 sm:p-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 items-end">
+                    <!-- Keyword -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-search text-gray-400 mr-1"></i> Search
+                        </label>
+                        <input type="text" name="keyword" value="" placeholder="Search title, tags, author..."
+                               class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-tag text-gray-400 mr-1"></i> Category
+                        </label>
+                        <select name="categoryId" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            <option value="">All Categories</option>
+                            <option value="1">Web Development</option>
+                            <option value="2">Backend &amp; Cloud</option>
+                            <option value="3">Data Science &amp; AI</option>
+                            <option value="4">Career &amp; Interviews</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-toggle2-on text-gray-400 mr-1"></i> Status
+                        </label>
+                        <select name="status" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            <option value="">All Statuses</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="SCHEDULED">Scheduled</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="UNPUBLISHED">Unpublished</option>
+                            <option value="ARCHIVED">Archived</option>
+                        </select>
+                    </div>
+
+                    <!-- Featured -->
+                    <div>
+                        <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">
+                            <i class="bi bi-star text-gray-400 mr-1"></i> Featured
+                        </label>
+                        <select name="isFeatured" class="w-full px-3.5 py-2 bg-surface-50 border border-surface-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                            <option value="">All Articles</option>
+                            <option value="true">Featured Only</option>
+                            <option value="false">Standard Only</option>
+                        </select>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-1.5">
+                            <i class="bi bi-funnel-fill text-xs"></i> Filter
+                        </button>
+                        <a href="/admin/blogs" class="px-3.5 py-2 bg-surface-100 hover:bg-surface-200 text-surface-700 font-semibold rounded-xl text-sm transition-colors" title="Reset Filters">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead>
+                        <tr class="bg-surface-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-surface-200">
+                            <th class="px-5 py-3.5">Article & Slug</th>
+                            <th class="px-4 py-3.5">Category</th>
+                            <th class="px-4 py-3.5">Status</th>
+                            <th class="px-4 py-3.5">Author</th>
+                            <th class="px-4 py-3.5">Views</th>
+                            <th class="px-4 py-3.5">Last Updated</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-100">
+                        
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&amp;w=800" alt="Thumb" class="w-full h-full object-cover">
+                                            
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                
+                                                <a href="/admin/blogs/6/edit" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1">Introduction to Generative AI &amp; LLM Applications with Python</a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md">/blog/intro-to-generative-ai-python</code>
+                                                <button type="button" data-slug="intro-to-generative-ai-python" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-400 line-clamp-1 mt-1">A beginner-friendly guide to Large Language Models, embeddings, vector databases, and building AI agents using Python.</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200">Data Science &amp; AI</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    
+                                    
+                                    
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900">admin@edutake.com</div>
+                                    <div class="text-[11px] text-gray-400">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span>275</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium">Sept 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400">05:08 pm</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a href="/blog/intro-to-generative-ai-python" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" data-id="6" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form action="/admin/blogs/6/toggle-featured" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Feature on Homepage">
+                                                <i class="bi bi-star text-sm text-gray-400"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form action="/admin/blogs/6/toggle-status" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Switch to Draft">
+                                                <i class="bi bi-pause-circle text-sm text-emerald-600"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a href="/admin/blogs/6/edit" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" data-id="6" data-title="Introduction to Generative AI &amp; LLM Applications with Python" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&amp;w=800" alt="Thumb" class="w-full h-full object-cover">
+                                            
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800" title="Featured on Homepage">
+                                                    <i class="bi bi-star-fill text-[9px] text-amber-500"></i> Featured
+                                                </span>
+                                                <a href="/admin/blogs/5/edit" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1">Top 15 System Design &amp; Coding Interview Tips for Tech Jobs</a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md">/blog/top-15-coding-interview-tips</code>
+                                                <button type="button" data-slug="top-15-coding-interview-tips" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-400 line-clamp-1 mt-1">Proven strategies from senior software engineers to clear data structures, algorithms, and system design interviews with confidence.</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200">Career &amp; Interviews</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    
+                                    
+                                    
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900">admin@edutake.com</div>
+                                    <div class="text-[11px] text-gray-400">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span>684</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium">Sept 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400">05:08 pm</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a href="/blog/top-15-coding-interview-tips" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" data-id="5" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form action="/admin/blogs/5/toggle-featured" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Remove from Homepage Featured">
+                                                <i class="bi bi-star-fill text-sm text-amber-500"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form action="/admin/blogs/5/toggle-status" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Switch to Draft">
+                                                <i class="bi bi-pause-circle text-sm text-emerald-600"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a href="/admin/blogs/5/edit" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" data-id="5" data-title="Top 15 System Design &amp; Coding Interview Tips for Tech Jobs" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&amp;w=800" alt="Thumb" class="w-full h-full object-cover">
+                                            
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800" title="Featured on Homepage">
+                                                    <i class="bi bi-star-fill text-[9px] text-amber-500"></i> Featured
+                                                </span>
+                                                <a href="/admin/blogs/4/edit" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1">Mastering Spring Boot 3 &amp; Microservices Architecture</a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md">/blog/mastering-spring-boot-3-microservices</code>
+                                                <button type="button" data-slug="mastering-spring-boot-3-microservices" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-400 line-clamp-1 mt-1">Deep dive into building scalable distributed systems, REST APIs, JPA optimizations, and secure JWT authentication in Spring Boot 3.</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200">Backend &amp; Cloud</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    
+                                    
+                                    
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900">admin@edutake.com</div>
+                                    <div class="text-[11px] text-gray-400">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span>518</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium">Sept 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400">05:08 pm</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a href="/blog/mastering-spring-boot-3-microservices" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" data-id="4" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form action="/admin/blogs/4/toggle-featured" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Remove from Homepage Featured">
+                                                <i class="bi bi-star-fill text-sm text-amber-500"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form action="/admin/blogs/4/toggle-status" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Switch to Draft">
+                                                <i class="bi bi-pause-circle text-sm text-emerald-600"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a href="/admin/blogs/4/edit" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" data-id="4" data-title="Mastering Spring Boot 3 &amp; Microservices Architecture" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&amp;w=800" alt="Thumb" class="w-full h-full object-cover">
+                                            
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800" title="Featured on Homepage">
+                                                    <i class="bi bi-star-fill text-[9px] text-amber-500"></i> Featured
+                                                </span>
+                                                <a href="/admin/blogs/3/edit" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1">Full-Stack Developer Roadmap 2026: From Beginner to Pro</a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md">/blog/full-stack-developer-roadmap-2026</code>
+                                                <button type="button" data-slug="full-stack-developer-roadmap-2026" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-400 line-clamp-1 mt-1">A comprehensive, battle-tested roadmap covering HTML, modern JavaScript/TypeScript, React, Spring Boot, databases, and Docker.</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200">Web Development</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    
+                                    
+                                    
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900">admin@edutake.com</div>
+                                    <div class="text-[11px] text-gray-400">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span>342</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium">Sept 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400">05:08 pm</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a href="/blog/full-stack-developer-roadmap-2026" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" data-id="3" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form action="/admin/blogs/3/toggle-featured" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Remove from Homepage Featured">
+                                                <i class="bi bi-star-fill text-sm text-amber-500"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form action="/admin/blogs/3/toggle-status" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Switch to Draft">
+                                                <i class="bi bi-pause-circle text-sm text-emerald-600"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a href="/admin/blogs/3/edit" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" data-id="3" data-title="Full-Stack Developer Roadmap 2026: From Beginner to Pro" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            
+                                            <div class="w-full h-full flex items-center justify-center text-brand-600 bg-brand-50">
+                                                <i class="bi bi-journal-richtext text-lg"></i>
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                
+                                                <a href="/admin/blogs/1/edit" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1">Top 10 Java Features in 2024</a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md">/blog/top-10-java-features-in-2024</code>
+                                                <button type="button" data-slug="top-10-java-features-in-2024" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200">Uncategorized</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    
+                                    
+                                    
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900">Admin</div>
+                                    <div class="text-[11px] text-gray-400">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span>0</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium">Sept 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400">05:08 pm</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a href="/blog/top-10-java-features-in-2024" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" data-id="1" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form action="/admin/blogs/1/toggle-featured" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Feature on Homepage">
+                                                <i class="bi bi-star text-sm text-gray-400"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form action="/admin/blogs/1/toggle-status" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Switch to Draft">
+                                                <i class="bi bi-pause-circle text-sm text-emerald-600"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a href="/admin/blogs/1/edit" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" data-id="1" data-title="Top 10 Java Features in 2024" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            <tr class="hover:bg-surface-50/75 transition-colors">
+                                <!-- Article Title & Image & Slug -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-surface-100 border border-surface-200 overflow-hidden shrink-0 mt-0.5">
+                                            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="Thumb" class="w-full h-full object-cover">
+                                            
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800" title="Featured on Homepage">
+                                                    <i class="bi bi-star-fill text-[9px] text-amber-500"></i> Featured
+                                                </span>
+                                                <a href="/admin/blogs/2/edit" class="font-bold text-surface-900 hover:text-brand-600 transition-colors text-sm line-clamp-1">Microservices Architecture Patterns in 2026 - Test 4357</a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <code class="text-xs text-gray-500 font-mono bg-surface-100 px-2 py-0.5 rounded-md">/blog/microservices-patterns-test-4357</code>
+                                                <button type="button" data-slug="microservices-patterns-test-4357" onclick="copyTextFromBtn(this)" class="text-gray-400 hover:text-brand-600 text-xs transition-colors" title="Copy public URL">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-gray-400 line-clamp-1 mt-1">An in-depth test overview of event-driven microservices architecture.</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-100 text-surface-800 border border-surface-200">Uncategorized</span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Published
+                                    </span>
+                                    
+                                    
+                                    
+                                </td>
+
+                                <!-- Author -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-medium text-surface-900">EduTake Lead Architect</div>
+                                    <div class="text-[11px] text-gray-400">admin@edutake.com</div>
+                                </td>
+
+                                <!-- Views -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                        <i class="bi bi-eye text-xs"></i> <span>0</span>
+                                    </span>
+                                </td>
+
+                                <!-- Last Updated -->
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-xs text-surface-900 font-medium">Sept 06, 2026</div>
+                                    <div class="text-[11px] text-gray-400">05:07 pm</div>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 whitespace-nowrap text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <!-- View Live in public -->
+                                        <a href="/blog/microservices-patterns-test-4357" target="_blank" class="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Public Article">
+                                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                                        </a>
+
+                                        <!-- Instant Quick Preview Modal -->
+                                        <button type="button" data-id="2" onclick="openQuickViewModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Quick Preview & SEO">
+                                            <i class="bi bi-eye text-sm"></i>
+                                        </button>
+
+                                        <!-- Featured Toggle -->
+                                        <form action="/admin/blogs/2/toggle-featured" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="Remove from Homepage Featured">
+                                                <i class="bi bi-star-fill text-sm text-amber-500"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Status Toggle -->
+                                        <form action="/admin/blogs/2/toggle-status" method="post" class="inline"><input type="hidden" name="_csrf" value="p5GK1L2njjcEHl7Oa2x5VEqdclPD9Jm6fxV93kia-hCluMmRlvXvt4vCuwMpJmn9XUFNYX-uX2qlwaGXHHQeuyuuznbHj6ug"/>
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Switch to Draft">
+                                                <i class="bi bi-pause-circle text-sm text-emerald-600"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Edit -->
+                                        <a href="/admin/blogs/2/edit" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Article">
+                                            <i class="bi bi-pencil text-sm"></i>
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <button type="button" data-id="2" data-title="Microservices Architecture Patterns in 2026 - Test 4357" onclick="openDeleteModalFromBtn(this)" class="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Article">
+                                            <i class="bi bi-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        
+
+                        <!-- Empty State -->
+                        
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- QUICK VIEW MODAL -->
+        <!-- ================================================================= -->
+        <div id="quickViewModal" class="fixed inset-0 z-50 hidden bg-surface-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-surface-200 overflow-hidden animate-scale-up">
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-surface-200 flex items-center justify-between bg-surface-50">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+                            <i class="bi bi-journal-richtext"></i>
+                        </span>
+                        <div>
+                            <h3 id="modalBlogTitle" class="text-base font-bold text-surface-900 line-clamp-1">Article Title</h3>
+                            <p id="modalBlogSlug" class="text-xs font-mono text-gray-500">/blog/slug</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeQuickViewModal()" class="w-8 h-8 rounded-lg bg-white border border-surface-200 text-gray-400 hover:text-gray-700 flex items-center justify-center text-sm transition-colors">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 overflow-y-auto space-y-6">
+                    <!-- Meta Stats Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Status</span>
+                            <span id="modalStatusBadge" class="text-xs font-bold mt-1 inline-block">Published</span>
+                        </div>
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Category</span>
+                            <span id="modalCategory" class="text-xs font-bold text-surface-800 mt-1 inline-block">Web Dev</span>
+                        </div>
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Author</span>
+                            <span id="modalAuthor" class="text-xs font-medium text-surface-800 mt-1 inline-block truncate">Admin</span>
+                        </div>
+                        <div class="bg-surface-50 p-3 rounded-xl border border-surface-200">
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Total Views</span>
+                            <span id="modalViews" class="text-xs font-bold text-blue-600 mt-1 inline-block">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Google SEO Mockup -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                <i class="bi bi-google text-blue-500"></i> Google Search SERP Preview
+                            </span>
+                            <span class="text-[11px] text-slate-400">Desktop snippet mockup</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm font-sans space-y-1">
+                            <div class="flex items-center gap-1.5 text-xs text-slate-600 truncate">
+                                <span class="text-slate-400">https://edutake.com</span>
+                                <span>› blog ›</span>
+                                <span id="modalSeoUrlSnippet" class="text-slate-700 font-medium">slug</span>
+                            </div>
+                            <h4 id="modalSeoTitleSnippet" class="text-blue-700 hover:underline font-semibold text-base leading-snug cursor-pointer">
+                                Article Title
+                            </h4>
+                            <p id="modalSeoDescSnippet" class="text-slate-600 text-xs leading-relaxed line-clamp-2">
+                                Article excerpt description for search engine results...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Rendered HTML Content -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-xs font-bold text-surface-700 uppercase tracking-wider">Article Content Preview</h4>
+                            <span class="text-[11px] text-gray-400">Rendered HTML Output</span>
+                        </div>
+                        <div id="modalContentContainer" class="prose prose-sm max-w-none p-4 rounded-2xl bg-surface-50 border border-surface-200 text-surface-800 max-h-72 overflow-y-auto leading-relaxed">
+                            Content loading...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-3.5 border-t border-surface-200 bg-surface-50 flex items-center justify-between">
+                    <a id="modalPublicLink" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700">
+                        <i class="bi bi-box-arrow-up-right"></i> Open on Live Site
+                    </a>
+                    <div class="flex items-center gap-2">
+                        <a id="modalEditLink" href="#" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-sm">
+                            <i class="bi bi-pencil mr-1"></i> Edit Article
+                        </a>
+                        <button type="button" onclick="closeQuickViewModal()" class="px-4 py-2 bg-surface-200 hover:bg-surface-300 text-surface-700 rounded-xl text-xs font-semibold transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- DELETE CONFIRMATION MODAL -->
+        <!-- ================================================================= -->
+        <div id="deleteModal" class="fixed inset-0 z-50 hidden bg-surface-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-surface-200 animate-scale-up">
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl mx-auto mb-4">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h3 class="text-lg font-bold text-center text-surface-900 mb-1">Delete Article?</h3>
+                <p class="text-xs text-center text-gray-500 mb-5">
+                    Are you sure you want to delete <strong id="deleteBlogTitleName" class="text-surface-900">this article</strong>? It will be removed from the blog directory and homepage.
+                </p>
+                <form id="deleteForm" method="post" action="" class="flex items-center gap-3">
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2.5 bg-surface-100 hover:bg-surface-200 text-surface-700 font-semibold rounded-xl text-xs transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-sm">
+                        <i class="bi bi-trash mr-1"></i> Yes, Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+            
+        </main>
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-surface-900/50 backdrop-blur-sm z-20 hidden md:hidden"></div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- GLOBAL SEARCH MODAL -->
+    <!-- ============================================ -->
+    <div id="searchModal" class="fixed inset-0 bg-surface-900/60 backdrop-blur-sm z-50 hidden flex items-start justify-center pt-[15vh]" onclick="closeSearch(event)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-surface-200" onclick="event.stopPropagation()">
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-surface-100">
+                <i class="bi bi-search text-gray-400"></i>
+                <input id="searchInput" type="text" placeholder="Search courses, students, orders, leads..." class="flex-1 bg-transparent outline-none text-sm text-surface-900 placeholder-gray-400" oninput="handleSearchInput(this.value)">
+                <kbd class="text-[10px] bg-surface-100 border border-surface-200 rounded px-1.5 py-0.5 text-gray-400 font-mono cursor-pointer" onclick="closeSearch()">ESC</kbd>
+            </div>
+            <div id="searchResults" class="max-h-80 overflow-y-auto">
+                <div class="p-8 text-center text-gray-400 text-sm">
+                    <i class="bi bi-search text-3xl mb-3 block opacity-30"></i>
+                    Type to search across the platform
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================ -->
+    <script>
+        // ====== SIDEBAR TOGGLE ======
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            }
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // ====== SIDEBAR SECTION TOGGLE ======
+        function toggleSection(sectionId) {
+            const items = document.getElementById(sectionId + '-items');
+            const chevron = document.getElementById(sectionId + '-chevron');
+            if (items.classList.contains('expanded')) {
+                items.classList.remove('expanded');
+                chevron.style.transform = 'rotate(-90deg)';
+            } else {
+                items.classList.add('expanded');
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // ====== ACTIVE LINK HIGHLIGHTING ======
+        const currentPath = window.location.pathname;
+        const links = document.querySelectorAll('.sidebar-link');
+        const breadcrumbText = document.getElementById('breadcrumbText');
+
+        links.forEach(link => {
+            const path = link.getAttribute('data-path');
+            if (path && (currentPath === path || (currentPath.startsWith(path) && path !== '/admin/dashboard'))) {
+                link.classList.add('bg-brand-600/20', 'text-brand-400');
+                link.classList.remove('text-gray-300');
+                // Set breadcrumb
+                const label = link.querySelector('span');
+                if (label && breadcrumbText) {
+                    breadcrumbText.textContent = label.textContent;
+                }
+                // Expand parent section
+                const section = link.closest('.sidebar-section-items');
+                if (section && !section.classList.contains('expanded')) {
+                    section.classList.add('expanded');
+                    const chevron = document.getElementById(section.id.replace('-items', '-chevron'));
+                    if (chevron) chevron.style.transform = 'rotate(0deg)';
+                }
+            }
+        });
+
+        // ====== LIVE CLOCK ======
+        let clockInterval = null;
+        function updateClock() {
+            const now = new Date();
+            const timeEl = document.getElementById('navTime');
+            const dateEl = document.getElementById('navDate');
+            if (timeEl) {
+                timeEl.textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            }
+            if (dateEl) {
+                dateEl.textContent = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+        }
+        updateClock();
+        clockInterval = setInterval(updateClock, 30000); // Update every 30 seconds
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (clockInterval) clearInterval(clockInterval);
+        });
+
+        // ====== NOTIFICATIONS ======
+        let notifOpen = false;
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifDropdown');
+            notifOpen = !notifOpen;
+            dropdown.classList.toggle('hidden', !notifOpen);
+            if (notifOpen) loadNotifications();
+        }
+
+        // Close notification dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('notifContainer');
+            if (notifOpen && container && !container.contains(e.target)) {
+                document.getElementById('notifDropdown').classList.add('hidden');
+                notifOpen = false;
+            }
+        });
+
+        function loadNotifications() {
+            fetch('/admin/api/notifications/recent')
+                .then(r => r.json())
+                .then(notifications => {
+                    const list = document.getElementById('notifList');
+                    if (!notifications || notifications.length === 0) {
+                        list.innerHTML = '<div class="p-6 text-center text-gray-400 text-sm"><i class="bi bi-bell-slash text-2xl mb-2 block"></i>No notifications yet</div>';
+                        return;
+                    }
+                    list.innerHTML = notifications.map(n => {
+                        const icon = getNotifIcon(n.type);
+                        const timeAgo = getTimeAgo(n.createdAt);
+                        const readClass = n.read ? 'bg-white' : 'bg-brand-50/50';
+                        return `<a href="${n.targetUrl || '#'}" onclick="markNotifRead(${n.id})" class="block px-4 py-3 hover:bg-surface-50 transition-colors border-b border-surface-100 last:border-0 ${readClass}">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full ${icon.bg} flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="bi ${icon.icon} ${icon.color} text-sm"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-surface-900 truncate">${n.title}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">${n.message || ''}</p>
+                                    <p class="text-[10px] text-gray-400 mt-1">${timeAgo}</p>
+                                </div>
+                                ${!n.read ? '<div class="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0 mt-2"></div>' : ''}
+                            </div>
+                        </a>`;
+                    }).join('');
+                })
+                .catch(() => {});
+        }
+
+        function getNotifIcon(type) {
+            const icons = {
+                'NEW_STUDENT': { icon: 'bi-person-plus-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'NEW_STUDENT_REGISTERED': { icon: 'bi-person-check-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'STUDENT_ADDED_BY_ADMIN': { icon: 'bi-person-plus', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'NEW_INSTRUCTOR_CREATED': { icon: 'bi-person-badge-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'INSTRUCTOR_WELCOME': { icon: 'bi-award-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'INSTRUCTOR_STATUS_CHANGED': { icon: 'bi-shield-check', bg: 'bg-indigo-50', color: 'text-indigo-500' },
+                'INSTRUCTOR_COURSE_ASSIGNED': { icon: 'bi-journal-plus', bg: 'bg-brand-50', color: 'text-brand-600' },
+                'COURSE_CREATED': { icon: 'bi-book-half', bg: 'bg-brand-50', color: 'text-brand-600' },
+                'COURSE_PUBLISHED': { icon: 'bi-send-check-fill', bg: 'bg-emerald-50', color: 'text-emerald-600' },
+                'COURSE_UPDATED': { icon: 'bi-pencil-square', bg: 'bg-cyan-50', color: 'text-cyan-600' },
+                'COURSE_ARCHIVED': { icon: 'bi-archive-fill', bg: 'bg-gray-100', color: 'text-gray-600' },
+                'NEW_ORDER': { icon: 'bi-receipt', bg: 'bg-green-50', color: 'text-green-500' },
+                'ORDER_PLACED': { icon: 'bi-bag-check-fill', bg: 'bg-green-50', color: 'text-green-500' },
+                'PAYMENT_RECEIVED': { icon: 'bi-cash-coin', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'PAYMENT_SUCCESS': { icon: 'bi-check-circle-fill', bg: 'bg-emerald-50', color: 'text-emerald-500' },
+                'PAYMENT_FAILED': { icon: 'bi-x-circle-fill', bg: 'bg-red-50', color: 'text-red-500' },
+                'COURSE_ENROLLED': { icon: 'bi-mortarboard-fill', bg: 'bg-blue-50', color: 'text-blue-500' },
+                'QUIZ_CREATED': { icon: 'bi-question-circle-fill', bg: 'bg-amber-50', color: 'text-amber-500' },
+                'ASSIGNMENT_GRADED': { icon: 'bi-check2-all', bg: 'bg-teal-50', color: 'text-teal-500' },
+                'NEW_ANNOUNCEMENT': { icon: 'bi-megaphone-fill', bg: 'bg-violet-50', color: 'text-violet-500' },
+                'NEW_ENQUIRY': { icon: 'bi-question-circle-fill', bg: 'bg-orange-50', color: 'text-orange-500' },
+                'NEW_LEAD': { icon: 'bi-funnel-fill', bg: 'bg-purple-50', color: 'text-purple-500' },
+                'NEW_FEEDBACK': { icon: 'bi-chat-quote-fill', bg: 'bg-cyan-50', color: 'text-cyan-500' },
+                'COURSE_ATTENTION': { icon: 'bi-exclamation-triangle-fill', bg: 'bg-amber-50', color: 'text-amber-500' },
+                'SYSTEM_WARNING': { icon: 'bi-shield-exclamation', bg: 'bg-red-50', color: 'text-red-500' }
+            };
+            return icons[type] || { icon: 'bi-bell-fill', bg: 'bg-gray-50', color: 'text-gray-500' };
+        }
+
+        function getTimeAgo(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' day(s) ago';
+            return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        }
+
+        function getCsrfHeaders() {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers[header] = token;
+            return headers;
+        }
+
+        function markNotifRead(id) {
+            fetch('/admin/api/notifications/' + id + '/read', { method: 'POST', headers: getCsrfHeaders() })
+                .then(() => updateNotifBadge())
+                .catch(() => {});
+        }
+
+        function markAllNotificationsRead() {
+            fetch('/admin/api/notifications/mark-all-read', { method: 'POST', headers: getCsrfHeaders() })
+                .then(() => {
+                    loadNotifications();
+                    updateNotifBadge();
+                }).catch(() => {});
+        }
+
+        function updateNotifBadge() {
+            fetch('/admin/api/notifications/unread-count')
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('notifBadge');
+                    if (badge) {
+                        if (data && data.count > 0) {
+                            badge.textContent = data.count > 99 ? '99+' : data.count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                }).catch(() => {});
+        }
+        // Initial badge load and 15-sec polling
+        updateNotifBadge();
+        setInterval(updateNotifBadge, 15000);
+
+        // ====== GLOBAL SEARCH ======
+        let searchDebounce = null;
+
+        function openSearch() {
+            document.getElementById('searchModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('searchInput').focus(), 100);
+        }
+
+        function closeSearch(e) {
+            if (e && e.target !== document.getElementById('searchModal')) return;
+            document.getElementById('searchModal').classList.add('hidden');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="bi bi-search text-3xl mb-3 block opacity-30"></i>Type to search across the platform</div>';
+        }
+
+        function handleSearchInput(query) {
+            clearTimeout(searchDebounce);
+            const resultsEl = document.getElementById('searchResults');
+
+            if (!query || query.trim().length < 2) {
+                resultsEl.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="bi bi-search text-3xl mb-3 block opacity-30"></i>Type at least 2 characters</div>';
+                return;
+            }
+
+            resultsEl.innerHTML = '<div class="p-6 text-center text-gray-400 text-sm"><div class="inline-block w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2"></div><br>Searching...</div>';
+
+            searchDebounce = setTimeout(() => {
+                fetch('/admin/api/search?q=' + encodeURIComponent(query.trim()))
+                    .then(r => r.json())
+                    .then(data => {
+                        const categories = Object.keys(data);
+                        if (categories.length === 0) {
+                            resultsEl.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm"><i class="bi bi-inbox text-3xl mb-3 block opacity-30"></i>No results found for "' + query + '"</div>';
+                            return;
+                        }
+                        let html = '';
+                        categories.forEach(cat => {
+                            html += '<div class="px-4 pt-3 pb-1"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">' + cat + '</p></div>';
+                            data[cat].forEach(item => {
+                                html += `<a href="${item.url}" class="flex items-center gap-3 px-4 py-2.5 hover:bg-surface-50 transition-colors cursor-pointer" onclick="document.getElementById('searchModal').classList.add('hidden')">
+                                    <div class="w-8 h-8 rounded-lg bg-surface-100 flex items-center justify-center text-gray-400 flex-shrink-0">
+                                        <i class="bi ${getSearchIcon(item.type)}"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-surface-900 truncate">${item.title}</p>
+                                        <p class="text-xs text-gray-400 truncate">${item.subtitle || ''}</p>
+                                    </div>
+                                </a>`;
+                            });
+                        });
+                        resultsEl.innerHTML = html;
+                    })
+                    .catch(() => {
+                        resultsEl.innerHTML = '<div class="p-6 text-center text-red-400 text-sm">Search failed. Please try again.</div>';
+                    });
+            }, 300);
+        }
+
+        function getSearchIcon(type) {
+            const icons = { 'COURSE': 'bi-play-btn-fill', 'STUDENT': 'bi-mortarboard-fill', 'ORDER': 'bi-bag-check-fill', 'LEAD': 'bi-funnel-fill' };
+            return icons[type] || 'bi-search';
+        }
+
+        // Ctrl+K shortcut
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const modal = document.getElementById('searchModal');
+                if (modal.classList.contains('hidden')) {
+                    openSearch();
+                } else {
+                    modal.classList.add('hidden');
+                }
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('searchModal').classList.add('hidden');
+                document.getElementById('notifDropdown').classList.add('hidden');
+                notifOpen = false;
+            }
+        });
+
+        // Close sidebar on mobile after navigation (listen for link clicks)
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('#sidebar a[href]').forEach(link => {
+                if (link.getAttribute('href') !== '#') {
+                    link.addEventListener('click', () => {
+                        sidebar.classList.add('-translate-x-full');
+                        sidebarOverlay.classList.add('hidden');
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
