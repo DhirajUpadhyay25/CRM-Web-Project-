@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${blog.seoTitle != null and !blog.seoTitle.isEmpty() ? blog.seoTitle + ' | EduTake Blog' : blog.title + ' | EduTake Blog'}">Article Title | EduTake Blog</title>
+    
+    <!-- Meta Description & SEO -->
+    <meta name="description" th:content="${blog.seoDescription != null and !blog.seoDescription.isEmpty() ? blog.seoDescription : blog.excerpt}">
+    <meta property="og:title" th:content="${blog.title}">
+    <meta property="og:description" th:content="${blog.excerpt}">
+    <meta property="og:type" content="article">
+    <meta property="og:image" th:if="${blog.featuredImage != null and !blog.featuredImage.isEmpty()}" th:content="${blog.featuredImage}">
+
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            850: '#172033',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Article typography enhancement */
+        .prose-custom {
+            color: #cbd5e1;
+            font-size: 1.0625rem;
+            line-height: 1.8;
+        }
+        .prose-custom h2 {
+            color: #ffffff;
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-top: 2.25rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 0.5rem;
+        }
+        .prose-custom h3 {
+            color: #f8fafc;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+        .prose-custom h4 {
+            color: #e2e8f0;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .prose-custom p {
+            margin-bottom: 1.35rem;
+        }
+        .prose-custom strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .prose-custom a {
+            color: #818cf8;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+        .prose-custom a:hover {
+            color: #a5b4fc;
+        }
+        .prose-custom ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1.35rem;
+        }
+        .prose-custom ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-bottom: 1.35rem;
+        }
+        .prose-custom li {
+            margin-bottom: 0.5rem;
+            padding-left: 0.25rem;
+        }
+        .prose-custom blockquote {
+            border-left: 4px solid #6366f1;
+            padding-left: 1.25rem;
+            font-style: italic;
+            color: #94a3b8;
+            margin: 1.5rem 0;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0 0.75rem 0.75rem 0;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        .prose-custom pre {
+            background-color: #0b1120;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: #e2e8f0;
+        }
+        .prose-custom code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            color: #a5b4fc;
+        }
+        .prose-custom pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        .prose-custom img {
+            border-radius: 1rem;
+            margin: 1.75rem auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+            height: auto;
+        }
+        .prose-custom hr {
+            border-color: rgba(255, 255, 255, 0.08);
+            margin: 2.5rem 0;
+        }
+    </style>
+</head>
+
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
+
+    <!-- Admin Preview Banner -->
+    <div th:if="${isAdminPreview}" class="bg-amber-500/20 border-b border-amber-500/30 text-amber-300 px-4 py-2.5 text-center text-xs font-semibold flex items-center justify-center gap-2">
+        <i class="bi bi-eye-fill"></i>
+        <span>Admin Preview Mode: This article is currently in <strong>DRAFT / UNPUBLISHED</strong> state and is not visible to the public.</span>
+        <a th:href="@{'/admin/blogs/edit/' + ${blog.id}}" class="ml-2 underline font-bold hover:text-white">Edit in Admin</a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 py-10 sm:py-14">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Breadcrumbs -->
+            <nav class="flex items-center gap-2 text-xs text-gray-400 mb-8 overflow-x-auto whitespace-nowrap">
+                <a href="/" class="hover:text-brand-400 transition-colors flex items-center gap-1">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+                <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                <a href="/blogs" class="hover:text-brand-400 transition-colors">Articles</a>
+                <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                <a th:if="${blog.blogCategory != null}" th:href="@{/blogs(categoryId=${blog.blogCategory.id})}" class="hover:text-brand-400 transition-colors" th:text="${blog.blogCategory.name}">Category</a>
+                <span th:unless="${blog.blogCategory != null}">Insights</span>
+                <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
+                <span class="text-gray-200 font-medium truncate max-w-xs" th:text="${blog.title}">Current Title</span>
+            </nav>
+
+            <!-- Article Header -->
+            <header class="mb-10 text-left">
+                <!-- Badges -->
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                    <span th:if="${blog.blogCategory != null}" class="px-3 py-1 bg-brand-600/20 border border-brand-500/30 text-brand-400 text-xs font-bold rounded-full uppercase tracking-wider" th:text="${blog.blogCategory.name}">
+                        Category Name
+                    </span>
+                    <span th:if="${blog.isFeatured()}" class="px-2.5 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
+                        <i class="bi bi-star-fill text-[10px]"></i> Featured
+                    </span>
+                    <span class="px-2.5 py-1 bg-surface-900 border border-white/10 text-gray-400 text-xs rounded-full flex items-center gap-1 font-medium">
+                        <i class="bi bi-clock"></i> <span th:text="${readingTime}">5</span> min read
+                    </span>
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-6" th:text="${blog.title}">
+                    Article Headline Goes Here
+                </h1>
+
+                <!-- Excerpt Lead -->
+                <p th:if="${blog.excerpt != null and !blog.excerpt.isEmpty()}" class="text-base sm:text-lg text-gray-300 leading-relaxed font-normal mb-6" th:text="${blog.excerpt}">
+                    Short excerpt introducing the key insights of this tutorial or article.
+                </p>
+
+                <!-- Author & Metadata Row -->
+                <div class="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-white/10 text-xs text-gray-400">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-600/20 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-sm">
+                            <span th:text="${blog.author != null and blog.author.length() > 0 ? blog.author.substring(0, 1) : 'E'}">E</span>
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold" th:text="${blog.author != null and !blog.author.isEmpty() ? blog.author : 'EduTake Engineering'}">EduTake Team</p>
+                            <p class="text-gray-400 text-[11px]" th:if="${blog.publishedAt != null}">Published on <span class="text-gray-300" th:text="${#temporals.format(blog.publishedAt, 'MMMM dd, yyyy')}">Sep 06, 2026</span></p>
+                            <p class="text-gray-400 text-[11px]" th:unless="${blog.publishedAt != null}">Updated recently</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5 bg-surface-900 px-3 py-1.5 rounded-xl border border-white/5">
+                            <i class="bi bi-eye text-brand-400"></i>
+                            <span class="text-white font-bold" th:text="${blog.viewCount != null ? blog.viewCount : 0}">0</span> views
+                        </span>
+
+                        <!-- Share button -->
+                        <button onclick="copyArticleUrl()" id="shareBtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-800 hover:bg-surface-700 text-white rounded-xl border border-white/10 transition-colors font-medium">
+                            <i class="bi bi-share"></i>
+                            <span>Share</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Featured Cover Image -->
+            <div th:if="${blog.featuredImage != null and !blog.featuredImage.isEmpty()}" class="mb-12 rounded-3xl overflow-hidden border border-white/10 bg-surface-900 shadow-2xl">
+                <img th:src="${blog.featuredImage}" th:alt="${blog.title}" class="w-full max-h-[460px] object-cover">
+            </div>
+
+            <!-- Main Prose Body -->
+            <article class="prose-custom mb-12 bg-surface-900/40 p-6 sm:p-10 rounded-3xl border border-white/5 shadow-xl">
+                <div th:utext="${blog.content}">
+                    <p>Article body content will be rendered here...</p>
+                </div>
+            </article>
+
+            <!-- Tags List -->
+            <div th:if="${blog.tags != null and !blog.tags.isEmpty()}" class="flex flex-wrap items-center gap-2 mb-10 pb-8 border-b border-white/10">
+                <span class="text-xs font-semibold text-gray-400 mr-2"><i class="bi bi-tags-fill text-brand-400 mr-1"></i> Tags:</span>
+                <th:block th:each="tag : ${#strings.arraySplit(blog.tags, ',')}">
+                    <a th:href="@{/blogs(keyword=${#strings.trim(tag)})}"
+                       class="px-3 py-1 bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300 hover:text-white rounded-lg text-xs transition-colors">
+                        #<span th:text="${#strings.trim(tag)}">tag</span>
+                    </a>
+                </th:block>
+            </div>
+
+            <!-- Related Course CTA Box (if attached) -->
+            <div th:if="${blog.relatedCourse != null}" class="bg-gradient-to-r from-brand-950 via-surface-900 to-surface-900 border border-brand-500/30 rounded-3xl p-6 sm:p-8 mb-12 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 text-left">
+                    <span class="px-2.5 py-0.5 bg-brand-500/20 text-brand-300 text-[10px] font-extrabold uppercase tracking-widest rounded-full">Recommended Masterclass</span>
+                    <h3 class="text-xl font-black text-white" th:text="${blog.relatedCourse.name}">Recommended Course Title</h3>
+                    <p class="text-xs text-gray-400 max-w-lg leading-relaxed">
+                        Ready to practice and get certified? Join our comprehensive hands-on program with interactive modules and direct feedback.
+                    </p>
+                </div>
+                <a th:href="@{'/courses/' + ${blog.relatedCourse.slug}}"
+                   class="whitespace-nowrap px-6 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl text-xs transition-all shadow-lg shadow-brand-600/30 hover:scale-105 flex items-center gap-2 flex-shrink-0">
+                    <span>Explore Course</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Author Card -->
+            <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8 mb-14 shadow-xl flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-brand-600/20 border border-brand-500/40 text-brand-400 flex items-center justify-center font-black text-2xl flex-shrink-0">
+                    <span th:text="${blog.author != null and blog.author.length() > 0 ? blog.author.substring(0, 1) : 'E'}">E</span>
+                </div>
+                <div class="space-y-2 text-center sm:text-left flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <h4 class="text-base font-bold text-white" th:text="${blog.author != null and !blog.author.isEmpty() ? blog.author : 'EduTake Engineering Team'}">EduTake Team</h4>
+                        <span class="text-xs font-semibold text-brand-400">Content Lead &amp; Mentor</span>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Contributing practical guides, system architecture breakdowns, and career development insights for the global EduTake tech learner community.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Related Articles Grid -->
+            <div th:if="${relatedArticles != null and !relatedArticles.isEmpty()}" class="mb-14">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-extrabold text-white tracking-tight">More Recommended Reads</h3>
+                    <a href="/blogs" class="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1">
+                        <span>View All Articles</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <th:block th:each="rel : ${relatedArticles}">
+                        <a th:if="${rel.id != blog.id}" th:href="@{'/blog/' + ${rel.slug}}"
+                           class="group bg-surface-900 border border-white/5 hover:border-brand-500/30 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 shadow-md flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider block mb-2" th:text="${rel.categoryName}">Category</span>
+                                <h4 class="text-sm font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-2 mb-2" th:text="${rel.title}">Title</h4>
+                                <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed mb-4" th:text="${rel.excerpt}">Excerpt snippet</p>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px] text-gray-500 pt-3 border-t border-white/5">
+                                <span th:text="${rel.publishedAt != null ? #temporals.format(rel.publishedAt, 'MMM dd, yyyy') : 'Recently'}">Sep 06</span>
+                                <span class="text-brand-400 font-semibold group-hover:translate-x-0.5 transition-transform">Read &rarr;</span>
+                            </div>
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/tw-footer :: footer}"></div>
+
+    <!-- Scripts -->
+    <script>
+        function copyArticleUrl() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const btn = document.getElementById('shareBtn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-lg text-emerald-400"></i> <span class="text-emerald-400">Link Copied!</span>';
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 2500);
+            });
+        }
+    </script>
+</body>
+</html>
