@@ -3,128 +3,162 @@
 
 <head th:replace="~{fragments/base-head :: head(${course.getSeoTitle()} + ' | EduTake')}"></head>
 
-<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col">
+<body class="bg-surface-950 text-white antialiased min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
 
     <!-- Navbar -->
     <div th:replace="~{fragments/tw-navbar :: navbar}"></div>
 
     <!-- Admin Preview Banner -->
     <div th:if="${isPreviewMode}" class="mt-16 bg-amber-500/20 border-b border-amber-500/30 text-amber-300 py-3 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2">
-        <i class="bi bi-shield-lock-fill"></i>
-        <span>Admin Preview Mode: This course is currently <strong th:text="${course.status}">DRAFT</strong> and is hidden from public discovery.</span>
-        <a th:href="@{/admin/courses/{id}/edit(id=${course.id})}" class="underline ml-2 hover:text-white">Edit in Admin Panel</a>
+        <i class="bi bi-shield-lock-fill text-sm"></i>
+        <span>Admin Preview Mode: This course is currently <strong th:text="${course.status}" class="underline">DRAFT</strong> and is hidden from public catalog discovery.</span>
+        <a th:href="@{/admin/courses/{id}/edit(id=${course.id})}" class="ml-3 px-2 py-0.5 rounded bg-amber-500/20 text-white hover:bg-amber-500/30 transition-colors">
+            Edit in Admin Panel <i class="bi bi-arrow-right text-[10px]"></i>
+        </a>
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col" th:classappend="${isPreviewMode} ? 'pt-6' : 'mt-16 pt-8'" pb-24 relative>
+    <main class="flex-1 flex flex-col" th:classappend="${isPreviewMode} ? 'pt-6' : 'mt-16 pt-6'" pb-24 relative>
         
-        <!-- Hero Section -->
+        <!-- Ambient Glowing Elements -->
+        <div class="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
+            <div class="absolute top-0 right-1/4 w-[600px] h-[600px] bg-brand-600/10 rounded-full blur-[160px]"></div>
+            <div class="absolute top-1/3 left-10 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[150px]"></div>
+        </div>
+
+        <!-- Hero Section Header -->
         <div class="relative bg-surface-900/90 border-b border-white/10 pt-8 pb-16 overflow-hidden">
-            <!-- Background Elements -->
+            
+            <!-- Dynamic Background Glow -->
             <div class="absolute inset-0 pointer-events-none">
-                <div th:if="${course.imageUrl}" class="absolute inset-0 opacity-15 blur-2xl transform scale-110">
+                <div th:if="${course.imageUrl}" class="absolute inset-0 opacity-10 blur-3xl transform scale-125">
                     <img th:src="@{${course.imageUrl}}" class="w-full h-full object-cover" alt="Background Blur">
                 </div>
-                <div class="absolute inset-0 bg-gradient-to-b from-surface-950/60 to-surface-900"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-surface-950/70 via-surface-900/90 to-surface-900"></div>
             </div>
 
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
                 
                 <!-- Breadcrumbs -->
-                <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium">
-                    <a href="/" class="hover:text-brand-400 transition-colors">Home</a>
+                <nav class="flex items-center gap-2 text-xs text-gray-400 mb-6 font-medium" aria-label="Breadcrumb">
+                    <a href="/" class="hover:text-brand-400 transition-colors flex items-center gap-1">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
                     <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
                     <a href="/courses" class="hover:text-brand-400 transition-colors">Courses</a>
                     <i class="bi bi-chevron-right text-[10px] text-gray-600"></i>
-                    <span th:if="${course.category}" th:text="${course.category.name}" class="text-gray-400">Category</span>
+                    <a th:if="${course.category}" th:href="@{/courses(categoryId=${course.category.id})}" 
+                       th:text="${course.category.name}" class="hover:text-brand-400 transition-colors">Category</a>
                     <i th:if="${course.category}" class="bi bi-chevron-right text-[10px] text-gray-600"></i>
                     <span class="text-white font-semibold truncate max-w-[200px] sm:max-w-none" th:text="${course.name}">Course Title</span>
                 </nav>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                     
                     <!-- Left Hero Content (7 Cols) -->
-                    <div class="lg:col-span-7 animate-fade-in-up">
+                    <div class="lg:col-span-7">
                         <div class="flex flex-wrap items-center gap-2.5 mb-4">
-                            <span th:if="${course.category}" class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30" th:text="${course.category.name}"></span>
-                            <span th:if="${course.featured}" class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 flex items-center gap-1">
-                                <i class="bi bi-star-fill text-[10px]"></i> Featured
+                            <span th:if="${course.category}" class="px-3 py-1 rounded-lg text-xs font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30" th:text="${course.category.name}"></span>
+                            <span th:if="${course.featured}" class="px-3 py-1 rounded-lg text-xs font-extrabold bg-amber-400 text-amber-950 shadow-md flex items-center gap-1">
+                                <i class="bi bi-star-fill text-[10px]"></i> Featured Program
                             </span>
-                            <span th:if="${course.getDiscountPercentage() != null}" class="px-3 py-1 rounded-full text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30" th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
+                            <span th:if="${course.getDiscountPercentage() != null}" class="px-3 py-1 rounded-lg text-xs font-black bg-red-500 text-white shadow-md">
+                                <span th:text="${course.getDiscountPercentage() + '% OFF'}">20% OFF</span>
+                            </span>
                         </div>
                         
-                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-5 leading-tight" th:text="${course.name}">
+                        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-5 leading-tight" th:text="${course.name}">
                             Course Name
                         </h1>
                         
                         <p class="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed" th:text="${course.shortDescription != null ? course.shortDescription : course.description}">
-                            Short pitch description.
+                            Short pitch description highlighting the value proposition of this comprehensive curriculum.
                         </p>
                         
                         <!-- Metadata Badges -->
-                        <div class="flex flex-wrap items-center gap-5 text-xs sm:text-sm font-medium text-gray-400 mb-8 pb-6 border-b border-white/10">
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm font-medium text-gray-400 mb-8 pb-6 border-b border-white/10">
+                            <!-- Instructor -->
                             <div th:if="${course.instructor}" class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-full bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-300 font-bold text-xs">
-                                    <i class="bi bi-person"></i>
+                                <div class="w-8 h-8 rounded-full bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-300 font-bold text-xs">
+                                    <i class="bi bi-person-fill"></i>
                                 </div>
-                                <span>Instructor: <strong class="text-white" th:text="${course.instructor}">Instructor</strong></span>
+                                <span>Instructor: <strong class="text-white" th:text="${course.instructor}">Lead Mentor</strong></span>
                             </div>
+                            
+                            <!-- Rating -->
+                            <div class="flex items-center gap-1 text-amber-400 font-bold">
+                                <i class="bi bi-star-fill text-xs"></i>
+                                <span>4.9</span>
+                                <span class="text-gray-400 font-normal text-xs">(Verified)</span>
+                            </div>
+
+                            <!-- Level -->
                             <div th:if="${course.level}" class="flex items-center gap-1.5">
                                 <i class="bi bi-bar-chart-fill text-brand-400"></i>
-                                <span class="text-white" th:text="${course.level}">Level</span>
+                                <span class="text-white font-medium" th:text="${course.level}">Level</span>
                             </div>
+
+                            <!-- Duration -->
                             <div th:if="${course.duration}" class="flex items-center gap-1.5">
-                                <i class="bi bi-clock text-brand-400"></i>
-                                <span class="text-white" th:text="${course.duration}">Duration</span>
+                                <i class="bi bi-clock-history text-purple-400"></i>
+                                <span class="text-white font-medium" th:text="${course.duration}">Duration</span>
                             </div>
+
+                            <!-- Language -->
                             <div th:if="${course.language}" class="flex items-center gap-1.5">
-                                <i class="bi bi-translate text-brand-400"></i>
-                                <span class="text-white" th:text="${course.language}">Language</span>
+                                <i class="bi bi-translate text-emerald-400"></i>
+                                <span class="text-white font-medium" th:text="${course.language}">English</span>
                             </div>
                         </div>
 
-                        <!-- Highlights -->
+                        <!-- Core Features Badges -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-gray-300">
-                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
-                                <span>Full Lifetime Access</span>
+                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+                                <i class="bi bi-infinity text-emerald-400 text-sm"></i>
+                                <span>Lifetime Full Access</span>
                             </div>
-                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                <i class="bi bi-device-ssd text-brand-400"></i>
-                                <span>Self-Paced Format</span>
+                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/5 border border-white/5">
+                                <i class="bi bi-laptop text-brand-400 text-sm"></i>
+                                <span>Hands-on Projects</span>
                             </div>
-                            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5 col-span-2 sm:col-span-1">
-                                <i class="bi bi-patch-check-fill text-purple-400"></i>
+                            <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/5 border border-white/5 col-span-2 sm:col-span-1">
+                                <i class="bi bi-patch-check-fill text-purple-400 text-sm"></i>
                                 <span>Verified Certificate</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Right Sticky CTA / Pricing Card (5 Cols) -->
-                    <div class="lg:col-span-5 relative animate-fade-in-up">
+                    <div class="lg:col-span-5 relative">
                         <div class="bg-surface-900 border border-white/15 rounded-3xl overflow-hidden shadow-2xl sticky top-24">
                             
-                            <!-- Thumbnail Preview -->
-                            <div class="relative h-56 bg-surface-800 overflow-hidden">
-                                <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover" alt="Course Image" onerror="this.src='https://via.placeholder.com/600x400'">
-                                <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
-                                    <i class="bi bi-play-btn text-5xl"></i>
+                            <!-- Thumbnail Preview with Play Icon -->
+                            <div class="relative h-56 sm:h-64 bg-surface-800 overflow-hidden group">
+                                <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Course Image" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'">
+                                <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500 bg-surface-800">
+                                    <i class="bi bi-play-circle text-5xl text-brand-400"></i>
                                 </div>
-                                <div class="absolute inset-0 bg-gradient-to-t from-surface-900 to-transparent"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-transparent to-transparent"></div>
+                                <div class="absolute bottom-3 left-4 flex items-center gap-2 text-xs font-semibold text-white/90">
+                                    <span class="px-2 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1">
+                                        <i class="bi bi-play-fill text-brand-400"></i> Course Preview
+                                    </span>
+                                </div>
                             </div>
 
                             <!-- Pricing & Checkout Actions -->
                             <div class="p-6 sm:p-8">
                                 <!-- Price Display -->
                                 <div class="flex items-baseline gap-3 mb-6">
-                                    <div th:if="${course.isFree()}" class="text-4xl font-extrabold text-emerald-400">
-                                        Free
+                                    <div th:if="${course.isFree()}" class="flex items-baseline gap-2">
+                                        <span class="text-4xl font-extrabold text-emerald-400">Free</span>
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">₹0 Enrollment</span>
                                     </div>
                                     <div th:unless="${course.isFree()}" class="flex items-baseline gap-3">
                                         <span class="text-4xl font-extrabold text-white" th:text="${'₹' + course.getEffectivePrice()}">₹999</span>
                                         <span th:if="${course.discountedPrice != null and course.originalPrice != null and course.discountedPrice < course.originalPrice}" 
-                                              class="text-lg text-gray-500 line-through font-medium" th:text="${'₹' + course.originalPrice}">₹1499</span>
-                                        <span th:if="${course.getDiscountPercentage() != null}" class="text-xs font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20" th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
+                                              class="text-lg text-gray-500 line-through font-medium" th:text="${'₹' + course.originalPrice}">₹1999</span>
+                                        <span th:if="${course.getDiscountPercentage() != null}" class="text-xs font-extrabold text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded-full border border-red-500/20" th:text="${course.getDiscountPercentage() + '% OFF'}">20% OFF</span>
                                     </div>
                                 </div>
 
@@ -134,12 +168,12 @@
 
                                 <!-- 1. ANONYMOUS USER -->
                                 <div sec:authorize="!isAuthenticated()" class="space-y-3">
-                                    <a href="/login" class="w-full block text-center py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2">
+                                    <a href="/login" class="w-full block text-center py-4 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2">
                                         <i class="bi bi-box-arrow-in-right"></i>
                                         <span th:text="${course.isFree() ? 'Login to Enroll for Free' : 'Login to Buy Course'}">Login to Buy</span>
                                     </a>
-                                    <p class="text-center text-xs text-gray-500">
-                                        Don't have an account? <a href="/register" class="text-brand-400 hover:underline">Register free</a>
+                                    <p class="text-center text-xs text-gray-400">
+                                        New to EduTake? <a href="/register" class="text-brand-400 hover:underline font-semibold">Create a free account</a>
                                     </p>
                                 </div>
 
@@ -150,13 +184,14 @@
                                     <div sec:authorize="hasRole('STUDENT')">
                                         <!-- Already Purchased / Enrolled -->
                                         <div th:if="${isPurchased}" class="space-y-3">
-                                            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center gap-2 text-emerald-400 text-sm font-semibold">
-                                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
-                                                <span>You are already enrolled in this course!</span>
+                                            <div class="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center gap-2 text-emerald-400 text-sm font-semibold">
+                                                <i class="bi bi-patch-check-fill text-emerald-400 text-base"></i>
+                                                <span>You are enrolled in this course!</span>
                                             </div>
-                                            <a href="/myCourses" class="w-full block text-center py-3.5 bg-surface-800 hover:bg-surface-700 text-white font-bold rounded-2xl transition-all border border-white/10 text-sm flex items-center justify-center gap-2">
-                                                <i class="bi bi-play-circle-fill text-brand-400"></i>
-                                                <span>Go to My Learning Area</span>
+                                            <a th:href="@{/student/courses/{id}/overview(id=${course.id})}" 
+                                               class="w-full block text-center py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-brand-600/25 text-sm flex items-center justify-center gap-2">
+                                                <i class="bi bi-play-circle-fill text-lg"></i>
+                                                <span>Continue Learning</span>
                                             </a>
                                         </div>
 
@@ -167,7 +202,7 @@
                                                 <input type="hidden" name="courseId" th:value="${course.id}">
                                                 <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-600/30 text-base flex items-center justify-center gap-2">
                                                     <i class="bi bi-stars"></i>
-                                                    <span>Enroll for Free Now</span>
+                                                    <span>Enroll Free & Start Learning</span>
                                                 </button>
                                             </form>
 
@@ -179,30 +214,31 @@
                                                     th:data-uphoneno="${sessionUser != null ? sessionUser.phoneno : ''}"
                                                     th:data-uprice="${course.getEffectivePrice()}"
                                                     onclick="purchaseCourseDirect(this.getAttribute('data-cname'), this.getAttribute('data-uname'), this.getAttribute('data-uemail'), this.getAttribute('data-uphoneno'), this.getAttribute('data-uprice'))"
-                                                    class="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2">
-                                                <i class="bi bi-credit-card"></i>
+                                                    class="w-full py-4 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-base flex items-center justify-center gap-2 cursor-pointer">
+                                                <i class="bi bi-credit-card-2-back-fill"></i>
                                                 <span>Buy Course Now</span>
                                             </button>
                                         </div>
                                     </div>
 
                                     <!-- B. ADMIN OR EMPLOYEE ROLE -->
-                                    <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')" class="space-y-2">
-                                        <div class="p-3 bg-surface-800 border border-white/10 rounded-xl text-center text-xs text-gray-400">
+                                    <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE', 'INSTRUCTOR')" class="space-y-2">
+                                        <div class="p-3 bg-surface-800/80 border border-white/10 rounded-xl text-center text-xs text-gray-300">
                                             <span sec:authorize="hasRole('ADMIN')">👑 Logged in as Administrator</span>
                                             <span sec:authorize="hasRole('EMPLOYEE')">👔 Logged in as Staff Member</span>
+                                            <span sec:authorize="hasRole('INSTRUCTOR')">👨‍🏫 Logged in as Instructor</span>
                                         </div>
                                         <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/courses/{id}/edit(id=${course.id})}" class="w-full block text-center py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-xs transition-colors">
-                                            <i class="bi bi-pencil mr-1"></i> Edit in Admin Control Panel
+                                            <i class="bi bi-pencil mr-1"></i> Edit Curriculum in Admin Panel
                                         </a>
                                     </div>
 
                                 </div>
 
                                 <!-- Trust Guarantee -->
-                                <p class="text-center text-xs text-gray-500 mt-4 flex items-center justify-center gap-1.5">
+                                <p class="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1.5">
                                     <i class="bi bi-shield-check text-brand-400"></i>
-                                    <span>30-Day Money-Back Guarantee & Secure Checkout</span>
+                                    <span>30-Day Money-Back Guarantee • Instant Access</span>
                                 </p>
                                 
                                 <!-- Included Features List -->
@@ -211,23 +247,23 @@
                                     <ul class="text-xs text-gray-300 space-y-2.5">
                                         <li class="flex items-center gap-2.5">
                                             <i class="bi bi-play-circle text-brand-400 text-sm"></i>
-                                            <span th:text="${course.duration != null ? course.duration + ' of structured video learning' : 'Comprehensive video lessons'}"></span>
+                                            <span th:text="${course.duration != null ? course.duration + ' of on-demand HD video' : 'Comprehensive video lessons'}"></span>
                                         </li>
                                         <li class="flex items-center gap-2.5">
-                                            <i class="bi bi-file-earmark-arrow-down text-brand-400 text-sm"></i>
-                                            <span>Downloadable source codes & project files</span>
+                                            <i class="bi bi-code-slash text-purple-400 text-sm"></i>
+                                            <span>Full source code and downloadable starter files</span>
                                         </li>
                                         <li class="flex items-center gap-2.5">
-                                            <i class="bi bi-phone text-brand-400 text-sm"></i>
-                                            <span>Access on mobile, tablet and desktop</span>
+                                            <i class="bi bi-phone text-blue-400 text-sm"></i>
+                                            <span>Access across Mobile, Tablet, and Desktop</span>
                                         </li>
                                         <li class="flex items-center gap-2.5">
-                                            <i class="bi bi-infinity text-brand-400 text-sm"></i>
-                                            <span>Full lifetime access with future updates</span>
+                                            <i class="bi bi-infinity text-emerald-400 text-sm"></i>
+                                            <span>Full lifetime access with all future updates</span>
                                         </li>
                                         <li class="flex items-center gap-2.5">
-                                            <i class="bi bi-trophy text-brand-400 text-sm"></i>
-                                            <span>Certificate of completion</span>
+                                            <i class="bi bi-award text-amber-400 text-sm"></i>
+                                            <span>Certificate of completion upon finishing</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -241,76 +277,80 @@
         </div>
 
         <!-- Course Details Body -->
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl mt-16">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl mt-14">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 
                 <!-- Left 7 Columns: Syllabus & Detailed Sections -->
-                <div class="lg:col-span-7 space-y-12 animate-fade-in-up">
+                <div class="lg:col-span-7 space-y-10">
                     
                     <!-- 1. What You'll Learn -->
-                    <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8">
-                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center gap-3">
                             <i class="bi bi-check2-circle text-emerald-400"></i>
-                            <span>What You'll Learn</span>
+                            <span>What You'll Learn in this Course</span>
                         </h2>
                         
                         <div class="grid sm:grid-cols-2 gap-4 text-sm text-gray-300">
                             <div class="flex items-start gap-3">
-                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
-                                <span>Master modern architecture and industry best practices</span>
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0 text-base"></i>
+                                <span>Master architecture fundamentals and industry best practices</span>
                             </div>
                             <div class="flex items-start gap-3">
-                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0 text-base"></i>
                                 <span>Build real-world production-ready portfolio projects</span>
                             </div>
                             <div class="flex items-start gap-3">
-                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
-                                <span>Understand key design patterns and core domain principles</span>
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0 text-base"></i>
+                                <span>Understand key design patterns and high-performance algorithms</span>
                             </div>
                             <div class="flex items-start gap-3">
-                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0"></i>
-                                <span>Gain job-ready confidence and interview preparation</span>
+                                <i class="bi bi-check-lg text-emerald-400 font-bold mt-0.5 flex-shrink-0 text-base"></i>
+                                <span>Gain job-ready confidence for technical coding interviews</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. Course Description & Syllabus -->
-                    <div>
-                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <!-- 2. Course Description -->
+                    <div class="bg-surface-900/60 border border-white/10 rounded-3xl p-6 sm:p-8">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center gap-3">
                             <i class="bi bi-file-earmark-text text-brand-400"></i>
                             <span>Course Overview</span>
                         </h2>
                         
-                        <div class="prose prose-invert prose-brand max-w-none text-gray-300 leading-relaxed text-sm sm:text-base whitespace-pre-line bg-surface-900/50 border border-white/5 p-6 sm:p-8 rounded-3xl" th:text="${course.description != null ? course.description : course.shortDescription}">
+                        <div class="prose prose-invert prose-brand max-w-none text-gray-300 leading-relaxed text-sm sm:text-base whitespace-pre-line" 
+                             th:text="${course.description != null ? course.description : course.shortDescription}">
                             Detailed description of the course.
                         </div>
                     </div>
 
                     <!-- 3. Course Curriculum (Dynamic Syllabus) -->
-                    <div>
-                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
-                            <i class="bi bi-list-nested text-brand-400"></i>
-                            <span>Curriculum Outline</span>
-                            <span class="text-xs font-normal text-gray-400" th:text="'(' + ${totalLessons} + ' Lessons)'"></span>
-                        </h2>
+                    <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-3">
+                                <i class="bi bi-list-nested text-brand-400"></i>
+                                <span>Curriculum Outline</span>
+                            </h2>
+                            <span class="px-3 py-1 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20 text-xs font-semibold" 
+                                  th:text="${totalLessons} + ' Total Lessons'"></span>
+                        </div>
                         
                         <!-- Empty State -->
-                        <div th:if="${#maps.isEmpty(curriculum)}" class="p-8 text-center bg-surface-900 border border-white/5 rounded-2xl text-gray-400">
-                            <i class="bi bi-journal-code text-2xl mb-2"></i>
-                            <p class="text-xs">No lessons added to this course curriculum yet.</p>
+                        <div th:if="${#maps.isEmpty(curriculum)}" class="p-8 text-center bg-surface-950/50 border border-white/5 rounded-2xl text-gray-400">
+                            <i class="bi bi-journal-code text-3xl mb-2 text-brand-400"></i>
+                            <p class="text-sm font-medium">Curriculum modules are being curated for this program.</p>
                         </div>
 
                         <!-- Dynamic Syllabus Modules Accordion -->
-                        <div th:unless="${#maps.isEmpty(curriculum)}" class="space-y-4">
-                            <div th:each="entry, stat : ${curriculum}" class="bg-surface-900 border border-white/10 rounded-2xl overflow-hidden">
+                        <div th:unless="${#maps.isEmpty(curriculum)}" class="space-y-3">
+                            <div th:each="entry, stat : ${curriculum}" class="bg-surface-950/60 border border-white/10 rounded-2xl overflow-hidden transition-all">
                                 <!-- Module Header -->
                                 <button th:onclick="'toggleCurriculumModule(' + ${stat.index} + ')'" 
-                                        class="w-full p-5 flex items-center justify-between text-left hover:bg-white/5 transition-all focus:outline-none">
+                                        class="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-white/5 transition-all focus:outline-none cursor-pointer">
                                     <div class="flex items-center gap-3.5">
                                         <span class="w-8 h-8 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-xs" 
                                               th:text="${#numbers.formatInteger(stat.index + 1, 2)}">01</span>
                                         <div>
-                                            <h4 class="font-bold text-white text-sm" th:text="${entry.key}">Section Name</h4>
+                                            <h4 class="font-bold text-white text-sm sm:text-base" th:text="${entry.key}">Section Name</h4>
                                             <p class="text-xs text-gray-400" th:text="${#lists.size(entry.value)} + ' lessons in this module'"></p>
                                         </div>
                                     </div>
@@ -318,10 +358,10 @@
                                 </button>
                                 
                                 <!-- Module Lessons List (Collapsible) -->
-                                <div th:id="'curr-module-' + ${stat.index}" class="border-t border-white/5 bg-surface-950/40 divide-y divide-white/5 hidden">
-                                    <div th:each="lesson : ${entry.value}" class="p-4 pl-14 flex items-center justify-between hover:bg-white/5 transition-all text-xs sm:text-sm">
+                                <div th:id="'curr-module-' + ${stat.index}" class="border-t border-white/5 bg-surface-950 divide-y divide-white/5 hidden">
+                                    <div th:each="lesson : ${entry.value}" class="p-3.5 pl-14 flex items-center justify-between hover:bg-white/5 transition-all text-xs sm:text-sm">
                                         <div class="flex items-center gap-3">
-                                            <i class="bi bi-play-circle text-brand-400"></i>
+                                            <i class="bi bi-play-circle text-brand-400 text-sm"></i>
                                             <span class="text-gray-200" th:text="${lesson.title}">Lesson Title</span>
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -333,61 +373,81 @@
                         </div>
                     </div>
 
-                    <!-- 4. Requirements & Prerequisites -->
+                    <!-- 4. Certificate Showcase Card -->
+                    <div class="bg-gradient-to-r from-amber-500/10 via-brand-600/10 to-purple-600/10 border border-amber-500/20 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-300 text-3xl flex-shrink-0">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div class="flex-1 text-center sm:text-left">
+                            <h3 class="text-lg font-bold text-white mb-1">Earn an Official Certificate of Completion</h3>
+                            <p class="text-xs sm:text-sm text-gray-300 leading-relaxed mb-2">
+                                Finish all video lessons and practical projects to unlock a shareable, verifiable certificate with unique QR code verification.
+                            </p>
+                            <span class="text-xs font-semibold text-amber-300 flex items-center justify-center sm:justify-start gap-1">
+                                <i class="bi bi-patch-check"></i> Sharable on LinkedIn & Resumes
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 5. Requirements & Prerequisites -->
                     <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8">
-                        <h2 class="text-2xl font-bold mb-4 flex items-center gap-3">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-3">
                             <i class="bi bi-info-circle text-purple-400"></i>
-                            <span>Requirements</span>
+                            <span>Course Prerequisites</span>
                         </h2>
                         <ul class="text-sm text-gray-300 space-y-2 list-disc list-inside">
                             <li>Basic understanding of computer systems and internet browsing</li>
-                            <li>A laptop or desktop with internet connection to access course materials</li>
-                            <li>Enthusiasm and dedication to complete hands-on assignments</li>
+                            <li>A computer (Windows, Mac, or Linux) with an active internet connection</li>
+                            <li>Willingness to learn and practice with hands-on exercises</li>
                         </ul>
                     </div>
 
-                    <!-- 5. FAQ Section -->
-                    <div>
-                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <!-- 6. Frequently Asked Questions -->
+                    <div class="bg-surface-900 border border-white/10 rounded-3xl p-6 sm:p-8">
+                        <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center gap-3">
                             <i class="bi bi-question-circle text-brand-400"></i>
                             <span>Frequently Asked Questions</span>
                         </h2>
                         
                         <div class="space-y-3 text-sm">
-                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5">
-                                <h4 class="font-bold text-white mb-1">When does the course begin and end?</h4>
-                                <p class="text-gray-400 text-xs sm:text-sm">This course is self-paced. You start immediately upon enrolling and can progress at your own convenient schedule.</p>
+                            <div class="bg-surface-950/60 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-bold text-white mb-1.5 flex items-center gap-2">
+                                    <i class="bi bi-patch-question text-brand-400"></i> When do I get access after enrolling?
+                                </h4>
+                                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Access is instantaneous upon successful enrollment or checkout. You can immediately log in to your student learning dashboard and start studying.</p>
                             </div>
-                            <div class="bg-surface-900 border border-white/10 rounded-2xl p-5">
-                                <h4 class="font-bold text-white mb-1">Do I receive a certificate upon completion?</h4>
-                                <p class="text-gray-400 text-xs sm:text-sm">Yes, once all course modules are finished, a verifiable certificate of completion will be generated for your portfolio.</p>
+                            <div class="bg-surface-950/60 border border-white/10 rounded-2xl p-5">
+                                <h4 class="font-bold text-white mb-1.5 flex items-center gap-2">
+                                    <i class="bi bi-patch-question text-brand-400"></i> Can I watch the lessons on mobile devices?
+                                </h4>
+                                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">Yes, EduTake is fully responsive and supports high-speed streaming on iOS, Android, tablets, and desktop browsers.</p>
                             </div>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Right 5 Columns (Related Courses) -->
+                <!-- Right 5 Columns (Related Courses & Instructor) -->
                 <div class="lg:col-span-5 space-y-8">
                     
                     <!-- Related Courses in Category -->
-                    <div th:if="${not #lists.isEmpty(relatedCourses)}" class="bg-surface-900/60 border border-white/10 rounded-3xl p-6">
+                    <div th:if="${not #lists.isEmpty(relatedCourses)}" class="bg-surface-900 border border-white/10 rounded-3xl p-6 shadow-xl">
                         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <i class="bi bi-collection text-brand-400"></i>
-                            <span>Related Courses</span>
+                            <span>Related Courses in this Category</span>
                         </h3>
 
-                        <div class="space-y-4">
-                            <div th:each="rel : ${relatedCourses}" class="flex items-center gap-3.5 p-3 rounded-2xl bg-surface-950/60 border border-white/5 hover:border-brand-500/30 transition-all group">
+                        <div class="space-y-3.5">
+                            <div th:each="rel : ${relatedCourses}" class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-surface-950/60 border border-white/5 hover:border-brand-500/30 transition-all group">
                                 <div class="w-16 h-16 rounded-xl overflow-hidden bg-surface-800 flex-shrink-0">
-                                    <img th:if="${rel.imageUrl}" th:src="@{${rel.imageUrl}}" alt="Rel Course" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.src='https://via.placeholder.com/150'">
-                                    <div th:unless="${rel.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500"><i class="bi bi-play-btn text-xl"></i></div>
+                                    <img th:if="${rel.imageUrl}" th:src="@{${rel.imageUrl}}" alt="Rel Course" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&auto=format&fit=crop&q=80'">
+                                    <div th:unless="${rel.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500"><i class="bi bi-play-circle text-xl text-brand-400"></i></div>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <h4 class="text-xs font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-1">
+                                    <h4 class="text-xs font-bold text-white group-hover:text-brand-300 transition-colors line-clamp-1">
                                         <a th:href="@{/courses/{slug}(slug=${rel.slug})}" th:text="${rel.name}">Course Name</a>
                                     </h4>
-                                    <div class="text-[11px] text-gray-400 mt-0.5" th:text="${rel.instructor != null ? rel.instructor : 'Expert Instructor'}">Instructor</div>
+                                    <div class="text-[11px] text-gray-400 mt-0.5" th:text="${rel.instructor != null ? rel.instructor : 'EduTake Mentor'}">Instructor</div>
                                     <div class="mt-1 font-bold text-xs text-white">
                                         <span th:if="${rel.isFree()}" class="text-emerald-400">Free</span>
                                         <span th:unless="${rel.isFree()}" th:text="${'₹' + rel.getEffectivePrice()}">₹999</span>
@@ -395,6 +455,17 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Trust Banner -->
+                    <div class="bg-surface-900/60 border border-white/10 rounded-3xl p-6 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3 text-2xl">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-white mb-1">100% Risk-Free Guarantee</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">
+                            Enjoy 30 days of risk-free learning with instant certificate validation, 24/7 dedicated mentor support, and verifiable credentials.
+                        </p>
                     </div>
 
                 </div>
@@ -405,30 +476,30 @@
     </main>
 
     <!-- Checkout Modal -->
-    <div id="checkoutModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Overlay -->
-            <div class="fixed inset-0 transition-opacity bg-black bg-opacity-70" onclick="closeCheckoutModal()"></div>
+    <div id="checkoutModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <!-- Overlay Backdrop -->
+            <div class="fixed inset-0 transition-opacity bg-black/80 backdrop-blur-md" onclick="closeCheckoutModal()"></div>
             
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
             
-            <!-- Modal Body -->
-            <div class="inline-block align-bottom bg-slate-900 border border-white/10 text-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <!-- Modal Box -->
+            <div class="inline-block align-bottom bg-surface-900 border border-white/15 text-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10">
                 <div class="p-6 md:p-8 space-y-6">
-                    <div class="flex items-center justify-between border-b border-white/5 pb-4">
-                        <h3 class="text-lg font-bold flex items-center gap-2">
-                            <i class="bi bi-shield-lock-fill text-indigo-400"></i> Secure Checkout
+                    <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2 text-white">
+                            <i class="bi bi-shield-lock-fill text-brand-400"></i> Secure Checkout
                         </h3>
-                        <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-white transition-colors">
+                        <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-white transition-colors p-1" aria-label="Close modal">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
 
                     <!-- Customer Information -->
                     <div>
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Customer Information</h4>
-                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-sm space-y-1.5">
-                            <p class="text-gray-400">Name: <strong class="text-white" id="chkCustomerName">Student</strong></p>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">Learner Details</h4>
+                        <div class="bg-surface-950/70 p-4 rounded-2xl border border-white/10 text-xs space-y-1.5">
+                            <p class="text-gray-400">Name: <strong class="text-white font-semibold" id="chkCustomerName">Student</strong></p>
                             <p class="text-gray-400">Email: <strong class="text-white font-mono" id="chkCustomerEmail">student@email.com</strong></p>
                             <p class="text-gray-400">Phone: <strong class="text-white" id="chkCustomerPhone">—</strong></p>
                         </div>
@@ -436,11 +507,11 @@
 
                     <!-- Promo Code -->
                     <div>
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Have a Promo Coupon?</h4>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Have a Discount Coupon?</h4>
                         <div class="flex gap-2">
-                            <input type="text" id="couponCodeInput" placeholder="Enter coupon code..."
-                                   class="flex-1 min-w-0 px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold">
-                            <button onclick="validateAndApplyCoupon()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors">
+                            <input type="text" id="couponCodeInput" placeholder="Enter coupon (e.g. SAVE20)..."
+                                   class="flex-1 min-w-0 px-3.5 py-2.5 bg-surface-950/70 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 text-xs font-semibold uppercase">
+                            <button onclick="validateAndApplyCoupon()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-brand-600/20">
                                 Apply
                             </button>
                         </div>
@@ -449,29 +520,29 @@
 
                     <!-- Order Summary -->
                     <div>
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Order Summary</h4>
-                        <div class="space-y-2 text-xs">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">Order Breakdown</h4>
+                        <div class="bg-surface-950/70 p-4 rounded-2xl border border-white/10 space-y-2 text-xs">
                             <div class="flex justify-between text-gray-400">
-                                <span>Course Price</span>
-                                <span id="chkOriginalPrice">₹0.00</span>
+                                <span>Course Base Price</span>
+                                <span id="chkOriginalPrice" class="text-white font-semibold">₹0.00</span>
                             </div>
-                            <div class="flex justify-between text-red-400 font-semibold hidden" id="chkDiscountRow">
-                                <span>Applied Coupon Discount</span>
+                            <div class="flex justify-between text-emerald-400 font-semibold hidden" id="chkDiscountRow">
+                                <span>Coupon Discount</span>
                                 <span id="chkDiscountAmount">-₹0.00</span>
                             </div>
                             <div class="flex justify-between text-gray-400">
-                                <span>Tax (0% IGST)</span>
+                                <span>Estimated Taxes (IGST)</span>
                                 <span>₹0.00</span>
                             </div>
-                            <div class="flex justify-between border-t border-white/5 pt-3 text-sm font-extrabold text-white">
-                                <span>Total Payable</span>
-                                <span class="text-indigo-400" id="chkFinalAmount">₹0.00</span>
+                            <div class="flex justify-between border-t border-white/10 pt-3 text-sm font-extrabold text-white">
+                                <span>Total Amount Payable</span>
+                                <span class="text-brand-300" id="chkFinalAmount">₹0.00</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Action Button -->
-                    <button id="paySecurelyBtn" onclick="initiateSecurePayment()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-indigo-600/30 text-sm flex items-center justify-center gap-2">
+                    <button id="paySecurelyBtn" onclick="initiateSecurePayment()" class="w-full py-4 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-600/30 text-sm flex items-center justify-center gap-2 cursor-pointer">
                         <i class="bi bi-credit-card-2-back-fill"></i>
                         <span>Pay Securely with Razorpay</span>
                     </button>
@@ -487,8 +558,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script th:inline="javascript">
-    // Every AJAX call on this page must carry the CSRF token. The payment APIs are no longer
-    // exempt from CSRF, so without this header they would be rejected with 403.
     var csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
     var csrfHeader = /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN';
     $.ajaxSetup({
@@ -545,7 +614,7 @@
         var feedback = document.getElementById('couponFeedback');
         if (!couponCode) {
             feedback.innerText = '⚠️ Please enter a coupon code';
-            feedback.className = 'text-[11px] mt-1 text-amber-400 block';
+            feedback.className = 'text-[11px] mt-1 text-amber-400 block font-medium';
             return;
         }
 
@@ -558,8 +627,8 @@
                 courseName: currentCheckout.courseName
             }),
             success: function(res) {
-                feedback.innerText = '✓ Promo Code Applied Successfully!';
-                feedback.className = 'text-[11px] mt-1 text-emerald-400 block';
+                feedback.innerText = '✓ Coupon Applied Successfully!';
+                feedback.className = 'text-[11px] mt-1 text-emerald-400 block font-semibold';
                 
                 var discount = parseFloat(res.discount);
                 var discountedPrice = parseFloat(res.discountedPrice);
@@ -577,7 +646,7 @@
                     msg = err.responseJSON.error;
                 }
                 feedback.innerText = '❌ ' + msg;
-                feedback.className = 'text-[11px] mt-1 text-red-400 block';
+                feedback.className = 'text-[11px] mt-1 text-red-400 block font-medium';
                 
                 // Reset
                 currentCheckout.finalPrice = currentCheckout.originalPrice;
@@ -592,7 +661,7 @@
         var btn = document.getElementById('paySecurelyBtn');
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Connecting to Secure Gateway...';
+            btn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Connecting to Razorpay Gateway...';
         }
 
         $.ajax({
@@ -604,8 +673,6 @@
                 couponCode: currentCheckout.couponCode
             }),
             success: function(orderData) {
-                // A session that expired while this page was open turns the call above into a
-                // redirect to the login form, which arrives here as HTML instead of an order.
                 if (!orderData || !orderData.orderId || !orderData.amount) {
                     if (btn) {
                         btn.disabled = false;
@@ -630,9 +697,6 @@
                     "name": "EduTake Platform",
                     "description": "Enrollment: " + currentCheckout.courseName,
                     "handler": function (response) {
-                        // Only the three Razorpay handshake values are sent. The course, the
-                        // buyer and the amount are read from the pending order the server
-                        // already stored, so nothing about what is purchased is decided here.
                         var verifyData = {
                             paymentId: response.razorpay_payment_id,
                             orderId: response.razorpay_order_id,
@@ -659,20 +723,19 @@
                         "contact": currentCheckout.uphoneno
                     },
                     "theme": {
-                        "color": "#8b5cf6"
+                        "color": "#6366f1"
                     }
                 };
 
                 var rzp = new Razorpay(options);
                 rzp.on('payment.failed', function (resp) {
-                    // Send to backend fail endpoint
                     $.ajax({
                         type: "POST",
                         url: "/api/failOrder",
                         contentType: "application/json",
                         data: JSON.stringify({ orderId: orderData.orderId })
                     });
-                    alert("Payment Failed / Cancelled: " + resp.error.description);
+                    alert("Payment Failed: " + resp.error.description);
                 });
                 rzp.open();
             },

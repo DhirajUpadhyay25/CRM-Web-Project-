@@ -10,826 +10,736 @@
 
     <main>
 
-        <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
-        <section id="hero" class="relative bg-gradient-to-br from-surface-950 via-surface-900 to-brand-950 overflow-hidden py-16 lg:py-24">
-            <!-- Decorative Background Grid -->
-            <div class="absolute inset-0 opacity-[0.03]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);"></div>
-            <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-brand-600/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-32 -right-32 w-[600px] h-[600px] bg-brand-400/5 rounded-full blur-3xl"></div>
+        <!-- ══════════════════════════════════════════════════
+             SECTION 1 — HERO SECTION (Split-Screen Modern Experience)
+             ══════════════════════════════════════════════════ -->
+        <section id="hero" class="relative bg-gradient-to-b from-surface-950 via-[#070d1e] to-surface-950 overflow-hidden pt-12 pb-16 lg:pt-16 lg:pb-20 border-b border-white/5">
+            
+            <!-- Ambient Subtle Background Highlights -->
+            <div class="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+                <div class="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-brand-600/10 rounded-full blur-[140px]"></div>
+                <div class="absolute top-1/2 right-10 w-[450px] h-[450px] bg-indigo-600/10 rounded-full blur-[150px]"></div>
+                <div class="absolute inset-0 opacity-[0.15]" style="background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px); background-size: 28px 28px;"></div>
+            </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-                    
-                    <!-- Left Content Column -->
-                    <div class="lg:col-span-6 space-y-8 text-left animate-fade-in">
-                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full">
-                            <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                            <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Next-Gen LMS Platform</span>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 xl:gap-12 items-center">
+
+                    <!-- Left Column (50% on Desktop): Purpose, Value, Discovery & CTAs -->
+                    <div class="lg:col-span-6 xl:col-span-6 space-y-6 text-left animate-fade-in">
+                        
+                        <!-- 1. Small Educational Badge -->
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20 backdrop-blur-sm shadow-sm">
+                            <span class="flex items-center justify-center w-4 h-4 rounded-full bg-brand-500/20 text-brand-300 text-[11px]">🎓</span>
+                            <span>Your Skills. A Brighter Tomorrow.</span>
                         </div>
 
-                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
-                            Learn Skills.<br>
-                            Build Your <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Future.</span>
+                        <!-- 2. Main Emotional Headline -->
+                        <h1 class="text-4xl sm:text-5xl lg:text-[3.1rem] xl:text-[3.5rem] font-black text-white tracking-tight leading-[1.12]">
+                            <span>Learn Skills.</span><br>
+                            <span>Build Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-indigo-300 to-amber-300">Future.</span></span>
                         </h1>
 
-                        <p class="text-gray-400 text-base sm:text-lg leading-relaxed max-w-xl">
-                            Unlock structured, expert-led courses on coding, business development, and design. Track your progress dynamically, earn verified certificates, and level up your career workspace.
+                        <!-- 3. Supporting Message (Natural, Trustworthy & Human) -->
+                        <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl font-normal">
+                            Discover high-quality courses from expert instructors, build practical skills, earn certificates, and take the next step toward your career and personal goals.
                         </p>
 
-                        <!-- Dynamic CTAs depending on authentication role -->
-                        <div class="flex flex-wrap gap-3.5">
-                            <div sec:authorize="!isAuthenticated()" class="flex flex-wrap gap-3">
-                                <a href="/courses"
-                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all shadow-md shadow-brand-600/20 hover:shadow-brand-500/35 hover:-translate-y-0.5">
-                                    <span>Explore Courses</span>
-                                    <i class="bi bi-arrow-right"></i>
-                                </a>
+                        <!-- 4. Primary & Secondary CTAs (Intelligent Auth-Routing) -->
+                        <div class="flex flex-wrap items-center gap-3.5 pt-1">
+                            <!-- Primary CTA -->
+                            <a href="/courses"
+                               class="inline-flex items-center gap-2 px-6 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all duration-200 shadow-lg shadow-brand-600/25 hover:shadow-brand-500/35 hover:-translate-y-0.5 text-sm">
+                                <span>Explore Courses</span>
+                                <i class="bi bi-arrow-right text-xs"></i>
+                            </a>
+
+                            <!-- Secondary CTA: Dynamic Role & Auth Routing -->
+                            <div sec:authorize="!isAuthenticated()">
                                 <a href="/register"
-                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-xl transition-all hover:bg-white/10 hover:-translate-y-0.5 shadow-sm">
-                                    <i class="bi bi-person-plus-fill"></i>
-                                    <span>Register Free</span>
+                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/15 hover:border-white/30 transition-all duration-200 hover:-translate-y-0.5 text-sm">
+                                    <i class="bi bi-person-plus"></i>
+                                    <span>Start Learning</span>
                                 </a>
                             </div>
-
-                            <div sec:authorize="isAuthenticated()" class="flex flex-wrap gap-3">
-                                <a sec:authorize="hasRole('STUDENT')" href="/myCourses"
-                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-md shadow-brand-600/20">
-                                    <i class="bi bi-play-circle-fill"></i>
+                            <div sec:authorize="isAuthenticated()">
+                                <a sec:authorize="hasRole('STUDENT')" href="/student/dashboard"
+                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/15 hover:border-white/30 transition-all duration-200 hover:-translate-y-0.5 text-sm">
+                                    <i class="bi bi-play-circle-fill text-brand-400"></i>
                                     <span>Continue Learning</span>
                                 </a>
                                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard"
-                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-md shadow-amber-500/20">
-                                    <i class="bi bi-shield-fill"></i>
+                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/15 hover:border-white/30 transition-all duration-200 hover:-translate-y-0.5 text-sm">
+                                    <i class="bi bi-shield-lock-fill text-amber-400"></i>
                                     <span>Admin Panel</span>
                                 </a>
+                                <a sec:authorize="hasRole('INSTRUCTOR')" href="/instructor/dashboard"
+                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/15 hover:border-white/30 transition-all duration-200 hover:-translate-y-0.5 text-sm">
+                                    <i class="bi bi-mortarboard-fill text-emerald-400"></i>
+                                    <span>Instructor Portal</span>
+                                </a>
                                 <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile"
-                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 shadow-md shadow-blue-500/20">
-                                    <i class="bi bi-people-fill"></i>
-                                    <span>Staff Panel</span>
-                                </a>
-                                <a href="/courses"
-                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-xl transition-all hover:bg-white/10 shadow-sm">
-                                    <span>Browse Catalog</span>
+                                   class="inline-flex items-center gap-2 px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/15 hover:border-white/30 transition-all duration-200 hover:-translate-y-0.5 text-sm">
+                                    <i class="bi bi-person-badge-fill text-blue-400"></i>
+                                    <span>Staff Portal</span>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Dynamic Trust Rating Banner -->
-                        <div class="flex items-center gap-4 pt-4 border-t border-white/5 flex-wrap">
-                            <div class="flex -space-x-2">
-                                <img src="https://i.pravatar.cc/40?img=11" class="w-8 h-8 rounded-full border-2 border-surface-950 shadow-sm" alt="Learner">
-                                <img src="https://i.pravatar.cc/40?img=12" class="w-8 h-8 rounded-full border-2 border-surface-950 shadow-sm" alt="Learner">
-                                <img src="https://i.pravatar.cc/40?img=13" class="w-8 h-8 rounded-full border-2 border-surface-950 shadow-sm" alt="Learner">
-                                <div class="w-8 h-8 rounded-full border-2 border-surface-950 bg-brand-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">+</div>
-                            </div>
-                            <div class="text-xs">
-                                <div class="flex items-center gap-1 text-amber-500 font-bold">
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <i class="bi bi-star-fill"></i>
-                                    <span class="text-white font-extrabold ml-1">4.9/5</span>
+                        <!-- 5. Real Hero Search Box -->
+                        <div class="pt-2 max-w-xl">
+                            <form action="/courses" method="get" class="relative flex items-center group">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-400 transition-colors pointer-events-none">
+                                    <i class="bi bi-search text-base"></i>
                                 </div>
-                                <p class="text-gray-400 mt-0.5">High satisfaction from active professionals</p>
-                            </div>
+                                <input type="text" name="keyword" 
+                                       placeholder="What do you want to learn today?" 
+                                       class="w-full pl-12 pr-28 py-3.5 bg-surface-900/90 border border-white/10 rounded-2xl text-white placeholder-slate-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all shadow-xl"
+                                       aria-label="Search courses" autocomplete="off">
+                                <button type="submit" 
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-brand-600/20">
+                                    Search
+                                </button>
+                            </form>
                         </div>
-                    </div>
 
-                    <!-- Right Column: AI Generated Hero Visual -->
-                    <div class="lg:col-span-6 relative animate-slide-up">
-                        <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-white/5">
-                            <!-- Hero Image -->
-                            <img th:src="@{/images/edutake-hero-learning.jpg}"
-                                 alt="focused online learning"
-                                 class="w-full h-[380px] sm:h-[460px] object-cover">
-                            <!-- Gradient overlay -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent"></div>
+                        <!-- 6. Popular Search Topics (Dynamic from database with fallback) -->
+                        <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-400 max-w-xl pt-1">
+                            <span class="font-semibold text-slate-300 mr-1">Popular:</span>
                             
-                            <!-- Banner text inside overlay -->
-                            <div class="absolute bottom-6 left-6 right-6">
-                                <span class="px-2 py-0.5 bg-brand-500 text-white font-extrabold text-[10px] uppercase rounded shadow-sm">Interactive Sandbox</span>
-                                <h3 class="text-lg font-bold text-white mt-2">Structured Path for Coding &amp; Business</h3>
-                            </div>
+                            <!-- Dynamic database categories -->
+                            <th:block th:if="${categories != null and !categories.isEmpty()}">
+                                <a th:each="cat, cStat : ${categories}" th:if="${cStat.index < 5}"
+                                   th:href="@{/courses(categoryId=${cat.id})}"
+                                   class="px-2.5 py-1 bg-white/5 hover:bg-brand-500/10 hover:text-brand-300 border border-white/5 hover:border-brand-500/30 rounded-lg text-slate-300 text-xs transition-colors"
+                                   th:text="${cat.name}">Category</a>
+                            </th:block>
+
+                            <!-- Fallback popular topics if categories list empty -->
+                            <th:block th:if="${categories == null or categories.isEmpty()}">
+                                <a href="/courses?keyword=Web" class="px-2.5 py-1 bg-white/5 hover:bg-brand-500/10 hover:text-brand-300 border border-white/5 hover:border-brand-500/30 rounded-lg text-slate-300 text-xs transition-colors">Web Development</a>
+                                <a href="/courses?keyword=Data" class="px-2.5 py-1 bg-white/5 hover:bg-brand-500/10 hover:text-brand-300 border border-white/5 hover:border-brand-500/30 rounded-lg text-slate-300 text-xs transition-colors">Data Science</a>
+                                <a href="/courses?keyword=AI" class="px-2.5 py-1 bg-white/5 hover:bg-brand-500/10 hover:text-brand-300 border border-white/5 hover:border-brand-500/30 rounded-lg text-slate-300 text-xs transition-colors">AI & Machine Learning</a>
+                                <a href="/courses?keyword=Cloud" class="px-2.5 py-1 bg-white/5 hover:bg-brand-500/10 hover:text-brand-300 border border-white/5 hover:border-brand-500/30 rounded-lg text-slate-300 text-xs transition-colors">Cloud & DevOps</a>
+                                <a href="/courses?keyword=Business" class="px-2.5 py-1 bg-white/5 hover:bg-brand-500/10 hover:text-brand-300 border border-white/5 hover:border-brand-500/30 rounded-lg text-slate-300 text-xs transition-colors">Business</a>
+                            </th:block>
                         </div>
 
-                        <!-- Floating KPI details cards -->
-                        <div class="absolute -top-4 -left-4 bg-surface-900 border border-white/5 rounded-2xl p-3.5 shadow-xl flex items-center gap-3 animate-pulse">
-                            <div class="w-9 h-9 bg-brand-500/10 text-brand-400 rounded-xl flex items-center justify-center">
-                                <i class="bi bi-people-fill text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Active Students</p>
-                                <p class="text-base font-black text-white" th:text="${totalStudentsCount != null ? totalStudentsCount : '1,200'}">1,200</p>
-                            </div>
-                        </div>
+                    </div>
 
-                        <div class="absolute -bottom-4 -right-4 bg-surface-900 border border-white/5 rounded-2xl p-3.5 shadow-xl flex items-center gap-3">
-                            <div class="w-9 h-9 bg-emerald-500/10 text-emerald-450 rounded-xl flex items-center justify-center">
-                                <i class="bi bi-award-fill text-sm"></i>
+                    <!-- Right Column (50% on Desktop): Relatable Learner Visual + Floating Success Cards -->
+                    <div class="lg:col-span-6 xl:col-span-6 relative animate-slide-up">
+                        <div class="relative max-w-lg lg:max-w-none mx-auto">
+                            
+                            <!-- Ambient Frame Glow -->
+                            <div class="absolute -inset-1 bg-gradient-to-r from-brand-500/20 via-indigo-500/20 to-amber-500/20 rounded-3xl sm:rounded-[2rem] blur-xl opacity-70 group-hover:opacity-100 transition duration-1000 -z-10 pointer-events-none"></div>
+
+                            <!-- Glassmorphism Outer Frame with Refined Border Radius & Padding -->
+                            <div class="p-2 sm:p-2.5 rounded-2xl sm:rounded-3xl bg-surface-900/60 backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.55)]">
+                                
+                                <!-- Inner Picture Canvas Container with Smooth Radius -->
+                                <div class="relative rounded-xl sm:rounded-2xl overflow-hidden bg-surface-950 border border-white/10 group">
+                                    
+                                    <!-- Responsive Hero Image -->
+                                    <img th:src="@{/images/edutake-hero-learner.jpg}" 
+                                         alt="EduTake platform learner gaining skills on laptop" 
+                                         class="w-full h-auto aspect-[16/10] sm:aspect-[3/2] lg:aspect-[16/10] object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-[1.02]" 
+                                         loading="eager">
+                                    
+                                    <!-- Subtle ambient gradient for text contrast -->
+                                    <div class="absolute inset-0 bg-gradient-to-t from-surface-950/80 via-transparent to-surface-950/20 pointer-events-none"></div>
+
+                                    <!-- Top Right Live Badge Tag (Placed at top right to keep face clear on all screens) -->
+                                    <div class="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 px-3 py-1.5 rounded-full bg-surface-950/85 backdrop-blur-md border border-white/15 flex items-center gap-2 shadow-lg z-10">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span class="text-[11px] font-bold text-white tracking-wide">EduTake Learner</span>
+                                    </div>
+
+                                    <!-- Bottom Caption Glass Bar (Compact & Sleek) -->
+                                    <div class="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-3 sm:left-3 sm:right-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-surface-950/80 backdrop-blur-xl border border-white/15 flex items-center justify-between shadow-2xl">
+                                        <div class="min-w-0 pr-2">
+                                            <p class="text-xs sm:text-sm text-white font-bold tracking-tight truncate">Interactive Learning Platform</p>
+                                            <p class="text-[10px] sm:text-[11px] text-slate-300 mt-0.5 font-medium truncate">Real-World Projects & Verified Certificates</p>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 px-2 py-1 rounded-md sm:rounded-lg bg-brand-500/20 border border-brand-500/30 text-brand-300 text-[11px] sm:text-xs font-semibold flex-shrink-0">
+                                            <i class="bi bi-patch-check-fill text-brand-400"></i>
+                                            <span class="hidden xs:inline">Verified</span>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Expert Courses</p>
-                                <p class="text-base font-black text-white" th:text="${totalCoursesCount != null ? totalCoursesCount : '15'}">15</p>
+
+                            <!-- Floating Success Card 1: Learning Community (Top Left) -->
+                            <div class="absolute -top-3 -left-2 sm:-left-4 bg-surface-900/95 backdrop-blur-md border border-white/15 rounded-2xl p-3 shadow-2xl flex items-center gap-3 hidden sm:flex motion-safe:animate-float">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 flex items-center justify-center text-sm flex-shrink-0">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-white">
+                                        <span th:text="${totalStudentsCount != null and totalStudentsCount > 0 ? totalStudentsCount : '50,000'} + '+'">50,000+</span>
+                                    </p>
+                                    <p class="text-[10px] text-slate-400">Active Learners</p>
+                                </div>
                             </div>
+
+                            <!-- Floating Success Card 2: Certification (Bottom Right) -->
+                            <div class="absolute -bottom-3 -right-2 sm:-right-4 bg-surface-900/95 backdrop-blur-md border border-white/15 rounded-2xl p-3 shadow-2xl flex items-center gap-3 hidden sm:flex">
+                                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 flex items-center justify-center text-sm flex-shrink-0">
+                                    <i class="bi bi-award-fill"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-white">🏆 Get Certified</p>
+                                    <p class="text-[10px] text-slate-400">Industry-recognized proof</p>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
                 </div>
+
+                <!-- ══════════════════════════════════════════════════
+                     INTEGRATED TRUST / SOCIAL PROOF BAR
+                     ══════════════════════════════════════════════════ -->
+                <div class="mt-14 pt-8 border-t border-white/10">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center">
+                        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand-500/20 transition-colors">
+                            <span class="text-2xl sm:text-3xl font-black text-white block" 
+                                  th:text="${totalStudentsCount != null and totalStudentsCount > 0 ? totalStudentsCount + '+' : '50,000+'}">50,000+</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">Active Learners</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand-500/20 transition-colors">
+                            <span class="text-2xl sm:text-3xl font-black text-white block" 
+                                  th:text="${totalInstructorsCount != null and totalInstructorsCount > 0 ? totalInstructorsCount + '+' : '120+'}">120+</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">Expert Instructors</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand-500/20 transition-colors">
+                            <span class="text-2xl sm:text-3xl font-black text-white block" 
+                                  th:text="${totalCoursesCount != null and totalCoursesCount > 0 ? totalCoursesCount + '+' : '450+'}">450+</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">Published Courses</span>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-brand-500/20 transition-colors">
+                            <span class="text-2xl sm:text-3xl font-black text-white block" 
+                                  th:text="${totalCertificatesCount != null and totalCertificatesCount > 0 ? totalCertificatesCount + '+' : '15,000+'}">15,000+</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1 block">Certificates Issued</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
-        <!-- ═══════════════════ TRUST & STATS BAR ═══════════════════ -->
-        <section class="border-y border-white/5 bg-surface-900/55 py-8">
+        <!-- ══════════════════════════════════════════════════
+             SECTION 4 — EXPLORE CATEGORIES
+             ══════════════════════════════════════════════════ -->
+        <section class="py-20 bg-surface-900/40 border-y border-white/5">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                    <div>
-                        <span class="text-2xl sm:text-3xl font-black text-white block" th:text="${totalStudentsCount != null ? totalStudentsCount + '+' : '1,200+'}">1,200+</span>
-                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1 block">Active Learners</span>
-                    </div>
-                    <div>
-                        <span class="text-2xl sm:text-3xl font-black text-white block" th:text="${totalCoursesCount != null ? totalCoursesCount : '12'}">12</span>
-                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1 block">Structured Courses</span>
-                    </div>
-                    <div>
-                        <span class="text-2xl sm:text-3xl font-black text-white block" th:text="${totalInstructorsCount != null ? totalInstructorsCount : '5'}">5</span>
-                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1 block">Verified Trainers</span>
-                    </div>
-                    <div>
-                        <span class="text-2xl sm:text-3xl font-black text-white block">7-Day</span>
-                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-1 block">Refund Guarantee</span>
+                <div class="text-center mb-14 space-y-2">
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Browse Topics</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Explore Popular Categories</h2>
+                    <p class="text-gray-400 text-sm max-w-xl mx-auto">Find courses organized by subject area, skill level, and career focus.</p>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div th:each="cat : ${categories}" class="group bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/20 hover:bg-surface-850/30 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+                        <div>
+                            <div class="w-11 h-11 bg-brand-600/10 border border-brand-600/20 text-brand-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <i class="bi bi-collection-play text-lg"></i>
+                            </div>
+                            <h4 class="text-sm font-bold text-white mb-1.5 group-hover:text-brand-400 transition-colors" th:text="${cat.name}">Category</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed line-clamp-2" th:text="${cat.description}">Description</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                            <span class="text-[10px] text-gray-500 font-semibold uppercase" th:text="${cat.courses != null ? cat.courses.size() : 0} + ' courses'">0 courses</span>
+                            <a th:href="@{/courses(categoryId=${cat.id})}" class="text-[11px] font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-0.5 transition-colors">
+                                Browse <i class="bi bi-arrow-right text-[10px]"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ═══════════════════ FEATURED COURSES ═══════════════════ -->
+        <!-- ══════════════════════════════════════════════════
+             SECTION 5 — FEATURED / TRENDING COURSES
+             ══════════════════════════════════════════════════ -->
         <section id="courses" class="py-20 bg-surface-950">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <!-- Section Header -->
-                <div class="text-center mb-14 space-y-2">
-                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Dynamic Course Catalog</span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                        Find Your Next <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Professional Skill</span>
-                    </h2>
-                    <p class="text-gray-400 text-sm max-w-2xl mx-auto">
-                        Choose from our catalog of expert-designed programs and build practical, real-world experience immediately.
-                    </p>
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                    <div class="space-y-2">
+                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Course Catalog</span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                            Find Your Next <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Professional Skill</span>
+                        </h2>
+                        <p class="text-gray-400 text-sm max-w-2xl">Choose from expert-designed programs and build real-world experience immediately.</p>
+                    </div>
+                    <a href="/courses" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-surface-900 hover:bg-brand-600 border border-white/10 text-white font-semibold rounded-xl text-sm transition-all w-fit shadow-sm">
+                        <span>View All</span> <i class="bi bi-arrow-right"></i>
+                    </a>
                 </div>
 
                 <!-- Course Cards Grid -->
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5 flex flex-col h-full relative">
-                        
-                        <!-- Thumbnail Image -->
-                        <div class="relative overflow-hidden h-44 bg-surface-800 flex-shrink-0">
-                            <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}"
-                                 alt="course thumbnail"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                 onerror="this.src='https://via.placeholder.com/400x250'">
+                    <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5 flex flex-col h-full">
+
+                        <!-- Thumbnail -->
+                        <div class="relative overflow-hidden h-44 bg-surface-800 flex-shrink-0 img-zoom">
+                            <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" alt="course thumbnail"
+                                 class="w-full h-full object-cover" loading="lazy"
+                                 onerror="this.style.display='none'">
                             <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
                                 <i class="bi bi-play-btn-fill text-3xl"></i>
                             </div>
                             <div class="absolute inset-0 bg-gradient-to-t from-surface-900/60 to-transparent"></div>
-                            
-                            <!-- Featured / Category badges -->
+
+                            <!-- Badges -->
                             <div class="absolute top-3 left-3 flex flex-col gap-1.5">
                                 <span th:if="${course.featured}" class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-yellow-400 text-yellow-950 shadow-sm flex items-center gap-1 w-max">
                                     <i class="bi bi-star-fill text-[8px]"></i> Featured
                                 </span>
-                                <span th:if="${course.category}" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-black/75 text-white backdrop-blur border border-white/10 w-max" th:text="${course.category.name}"></span>
+                                <span th:if="${course.category}" class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-black/70 text-white backdrop-blur border border-white/10 w-max" th:text="${course.category.name}"></span>
                             </div>
-
-                            <!-- Discount percentage badge -->
-                            <div th:if="${course.getDiscountPercentage() != null}" class="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-black bg-red-500 text-white shadow-sm">
+                            <div th:if="${course.getDiscountPercentage() != null}" class="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-black bg-red-500 text-white">
                                 <span th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
                             </div>
                         </div>
 
-                        <!-- Card Content -->
+                        <!-- Content -->
                         <div class="p-5 flex-1 flex flex-col">
-                            <div class="flex items-center gap-1.5 text-[10px] text-gray-400 font-semibold mb-2">
+                            <div class="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium mb-2">
                                 <span th:if="${course.level != null}" th:text="${course.level}">Level</span>
                                 <span th:if="${course.level != null and course.duration != null}">•</span>
                                 <span th:if="${course.duration != null}" th:text="${course.duration}">Duration</span>
                             </div>
 
-                            <h3 class="font-extrabold text-white text-sm mb-2 line-clamp-1">
+                            <h3 class="font-bold text-white text-sm mb-2 line-clamp-1">
                                 <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="hover:text-brand-400 transition-colors" th:text="${course.name}">Course Name</a>
                             </h3>
                             <p class="text-xs text-gray-400 line-clamp-2 mb-4 leading-relaxed" th:text="${course.shortDescription != null ? course.shortDescription : course.description}">Description</p>
 
-                            <!-- Pricing Info -->
+                            <!-- Instructor -->
+                            <div th:if="${course.instructor}" class="flex items-center gap-2 mb-3 text-xs text-gray-500">
+                                <div class="w-5 h-5 bg-brand-600/20 rounded-full flex items-center justify-center text-brand-400">
+                                    <i class="bi bi-person-fill text-[8px]"></i>
+                                </div>
+                                <span th:text="${course.instructor}">Instructor</span>
+                            </div>
+
+                            <!-- Pricing -->
                             <div class="flex items-baseline gap-2 mb-4 mt-auto">
-                                <div th:if="${course.isFree()}" class="text-base font-extrabold text-emerald-400">Free Enrollment</div>
+                                <div th:if="${course.isFree()}" class="text-sm font-bold text-emerald-400">Free</div>
                                 <div th:unless="${course.isFree()}" class="flex items-baseline gap-1.5">
                                     <span class="text-base font-black text-white" th:text="${'₹' + course.getEffectivePrice()}"></span>
                                     <span th:if="${course.discountedPrice != null and course.originalPrice != null and course.discountedPrice < course.originalPrice}" class="text-[10px] text-gray-500 line-through" th:text="${'₹' + course.originalPrice}"></span>
                                 </div>
                             </div>
 
-                            <!-- Action CTA -->
+                            <!-- CTA -->
                             <div sec:authorize="!isAuthenticated()">
-                                <a href="/login" class="block w-full text-center py-2 text-xs font-bold border border-brand-500/30 text-brand-400 hover:bg-brand-600 hover:text-white rounded-xl transition-all">
-                                    Login to Buy
+                                <a href="/login" class="block w-full text-center py-2.5 text-xs font-semibold border border-brand-500/30 text-brand-400 hover:bg-brand-600 hover:text-white rounded-xl transition-all">
+                                    Login to Enroll
                                 </a>
                             </div>
-
                             <div sec:authorize="isAuthenticated()">
                                 <div sec:authorize="hasRole('STUDENT')" th:if="${#lists.contains(purchasedCoursesNameList, course.name)}">
-                                    <a href="/myCourses" class="flex items-center gap-1.5 justify-center py-2 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/25 transition-colors">
-                                        <i class="bi bi-check-circle-fill"></i>
-                                        <span>Enrolled • Study</span>
+                                    <a href="/student/courses" class="flex items-center gap-1.5 justify-center py-2.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition-colors">
+                                        <i class="bi bi-check-circle-fill"></i> <span>Enrolled</span>
                                     </a>
                                 </div>
                                 <div sec:authorize="hasRole('STUDENT')" th:unless="${#lists.contains(purchasedCoursesNameList, course.name)}">
                                     <form th:if="${course.isFree()}" th:action="@{/courses/free-enroll}" method="post">
                                         <input type="hidden" name="courseId" th:value="${course.id}">
-                                        <button type="submit" class="w-full py-2 text-xs font-bold bg-emerald-650 hover:bg-emerald-550 text-white rounded-xl transition-colors shadow-sm">
+                                        <button type="submit" class="w-full py-2.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition-colors">
                                             Enroll Free
                                         </button>
                                     </form>
-                                    <a th:unless="${course.isFree()}" th:href="@{/courses/{slug}(slug=${course.slug})}" class="block w-full text-center py-2 text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-all shadow-sm shadow-brand-600/10">
-                                        Buy Course
+                                    <a th:unless="${course.isFree()}" th:href="@{/courses/{slug}(slug=${course.slug})}" class="block w-full text-center py-2.5 text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-all shadow-sm">
+                                        View Course
                                     </a>
                                 </div>
-                                <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE')">
-                                    <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="block w-full text-center py-2 text-xs font-semibold text-gray-400 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-colors">
-                                        Inspect Course
+                                <div sec:authorize="hasAnyRole('ADMIN', 'EMPLOYEE', 'INSTRUCTOR')">
+                                    <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="block w-full text-center py-2.5 text-xs font-medium text-gray-400 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-colors">
+                                        View Details
                                     </a>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Card Footer -->
-                        <div class="px-5 py-2.5 border-t border-white/5 bg-surface-950/40 flex items-center justify-between text-[10px] text-gray-500 font-semibold">
-                            <span>
-                                <i class="bi bi-calendar3 mr-1"></i>
-                                <span th:text="${course.updatedAt != null ? #temporals.format(course.updatedAt, 'dd MMM yyyy') : 'Recently updated'}">Recently</span>
-                            </span>
-                            <a th:href="@{/courses/{slug}(slug=${course.slug})}" class="text-brand-400 hover:underline">Syllabus &rarr;</a>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Empty State If No Courses -->
+                <!-- Empty State -->
                 <div th:if="${#lists.isEmpty(coursesList)}" class="text-center py-16">
-                    <div class="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-550 text-xl">
+                    <div class="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-500 text-xl">
                         <i class="bi bi-bookmark-x-fill"></i>
                     </div>
-                    <h3 class="text-sm font-bold text-gray-300">No courses listed</h3>
-                    <p class="text-xs text-gray-500 mt-1">Check back later for newly published learning paths.</p>
+                    <h3 class="text-sm font-bold text-gray-300">No courses available yet</h3>
+                    <p class="text-xs text-gray-500 mt-1">Check back soon for newly published learning programs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════
+             SECTION 6 — LEARN BY GOAL
+             ══════════════════════════════════════════════════ -->
+        <section class="py-20 bg-surface-900/40 border-y border-white/5">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-14 space-y-2">
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Goal-Based Learning</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">What do you want to achieve?</h2>
+                    <p class="text-gray-400 text-sm max-w-xl mx-auto">Choose your learning goal and we'll guide you to the right courses.</p>
                 </div>
 
-                <!-- Catalog CTA -->
-                <div class="text-center mt-12">
-                    <a href="/courses" class="inline-flex items-center gap-1.5 px-6 py-3 bg-surface-900 hover:bg-brand-600 border border-white/10 text-white font-bold rounded-xl text-xs transition-colors shadow-sm">
-                        <span>Browse Complete Catalog</span>
-                        <i class="bi bi-arrow-right"></i>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <a href="/courses?level=BEGINNER" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-11 h-11 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-rocket-takeoff text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1 group-hover:text-brand-400 transition-colors">Start a Career</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Find beginner-friendly courses that build foundational skills for your first tech role.</p>
+                    </a>
+                    <a href="/courses?level=INTERMEDIATE" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-11 h-11 bg-brand-500/10 text-brand-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-graph-up-arrow text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1 group-hover:text-brand-400 transition-colors">Advance Your Skills</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Develop intermediate and professional expertise to take on bigger challenges.</p>
+                    </a>
+                    <a href="/courses?level=ADVANCED" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-11 h-11 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-code-slash text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1 group-hover:text-brand-400 transition-colors">Master Technology</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Deep-dive into advanced programming, AI, cloud, and data engineering topics.</p>
+                    </a>
+                    <a href="/courses" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-11 h-11 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-patch-check text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1 group-hover:text-brand-400 transition-colors">Get Certified</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Complete courses and earn verified certificates to prove your skills to employers.</p>
+                    </a>
+                    <a href="/courses?keyword=project" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-11 h-11 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-tools text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1 group-hover:text-brand-400 transition-colors">Build Projects</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Learn by building real-world projects with hands-on assignments and assessments.</p>
+                    </a>
+                    <a href="/courses?keyword=communication" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-11 h-11 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-chat-dots text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1 group-hover:text-brand-400 transition-colors">Improve Soft Skills</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Build communication, leadership, and professional development skills.</p>
                     </a>
                 </div>
-
             </div>
         </section>
 
-        <!-- ═══════════════════ WHY CHOOSE EDUTAKE ═══════════════════ -->
-        <section id="about" class="py-20 bg-surface-900/50 border-y border-white/5">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
-                    <!-- Left: Text propositions -->
-                    <div class="space-y-8 text-left">
-                        <div>
-                            <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Structured Ecosystem</span>
-                            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2">
-                                Designed for Active <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Skill Mastery</span>
-                            </h2>
-                            <p class="text-gray-400 text-sm mt-3 leading-relaxed">
-                                Unlike unstructured tutorial libraries, EduTake guides you through organized syllabi, direct feedback checkpoints, and practical skill verification.
-                            </p>
-                        </div>
-
-                        <div class="grid sm:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <div class="w-9 h-9 bg-brand-600/10 border border-brand-600/20 text-brand-400 rounded-xl flex items-center justify-center">
-                                    <i class="bi bi-play-btn-fill text-sm"></i>
-                                </div>
-                                <h3 class="text-sm font-bold text-white">Structured Pathing</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed">Courses are organized sequentially so you build mastery step-by-step.</p>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="w-9 h-9 bg-brand-600/10 border border-brand-600/20 text-brand-400 rounded-xl flex items-center justify-center">
-                                    <i class="bi bi-bar-chart-fill text-sm"></i>
-                                </div>
-                                <h3 class="text-sm font-bold text-white">Progress Trackers</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed">Instantly visual indicators show completed lessons and remaining topics.</p>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="w-9 h-9 bg-brand-600/10 border border-brand-600/20 text-brand-400 rounded-xl flex items-center justify-center">
-                                    <i class="bi bi-award-fill text-sm"></i>
-                                </div>
-                                <h3 class="text-sm font-bold text-white">Verified Certificates</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed">Receive high-fidelity completion certificates to share with employers.</p>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="w-9 h-9 bg-brand-600/10 border border-brand-600/20 text-brand-400 rounded-xl flex items-center justify-center">
-                                    <i class="bi bi-shield-check text-sm"></i>
-                                </div>
-                                <h3 class="text-sm font-bold text-white">Secure Payments</h3>
-                                <p class="text-xs text-gray-400 leading-relaxed">Checkout with confidence using standard transaction validation endpoints.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Conceptual image visual -->
-                    <div class="relative">
-                        <div class="rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-surface-900 p-4">
-                            <img th:src="@{/images/edutake-value-prop.jpg}"
-                                 alt="learning value paths"
-                                 class="w-full rounded-2xl object-cover h-[340px]">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ═══════════════════ LEARNING EXPERIENCE ═══════════════════ -->
+        <!-- ══════════════════════════════════════════════════
+             SECTION 7 — WHY LEARN WITH US
+             ══════════════════════════════════════════════════ -->
         <section class="py-20 bg-surface-950">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid lg:grid-cols-12 gap-12 items-center">
-                    
-                    <!-- Left: Online courses visual -->
-                    <div class="lg:col-span-6">
-                        <div class="rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-surface-900 p-4">
-                            <img th:src="@{/images/edutake-online-courses.jpg}"
-                                 alt="online player workspace"
-                                 class="w-full rounded-2xl object-cover h-[340px]">
-                        </div>
-                    </div>
-
-                    <!-- Right: Learning Player description -->
-                    <div class="lg:col-span-6 space-y-6 text-left">
-                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Intuitive Workspace</span>
-                        <h2 class="text-3xl font-extrabold text-white tracking-tight leading-tight">
-                            A High-Fidelity Course Player Built for Focus
-                        </h2>
-                        <p class="text-gray-400 text-sm leading-relaxed">
-                            Our workspace includes structured lessons, video streaming, step-by-step progress tracking, assignments, and integrated quizzes. Access resources, track grades, and resume learning exactly where you paused.
-                        </p>
-                        
-                        <ul class="space-y-3.5 text-xs text-gray-300 font-semibold">
-                            <li class="flex items-center gap-2">
-                                <i class="bi bi-check-circle-fill text-brand-500"></i>
-                                <span>Dynamic sidebar lesson navigation</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <i class="bi bi-check-circle-fill text-brand-500"></i>
-                                <span>Resume where you left off instantly</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <i class="bi bi-check-circle-fill text-brand-500"></i>
-                                <span>Submit assignments and receive grade assessments</span>
-                            </li>
-                        </ul>
-
-                        <div class="pt-4">
-                            <a href="/courses" class="inline-flex items-center gap-1 text-xs font-bold text-brand-400 hover:text-brand-300 transition-colors">
-                                <span>Discover Available Courses</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════ STUDENT BENEFITS SECTION ═══════════════════ -->
-        <section class="py-20 bg-surface-900/50 border-y border-white/5">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid lg:grid-cols-12 gap-12 items-center">
-                    
-                    <!-- Left: Outcomes copy -->
-                    <div class="lg:col-span-6 space-y-6 text-left order-2 lg:order-1">
-                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Tangible Growth</span>
-                        <h2 class="text-3xl font-extrabold text-white tracking-tight leading-tight">
-                            Build Knowledge. Earn Credentials. Move Forward.
-                        </h2>
-                        <p class="text-gray-400 text-sm leading-relaxed">
-                            Every milestone completed on EduTake builds toward tangible professional outcomes. Work through assignments evaluated by verified trainers, test yourself with section assessments, and get print-ready credentials to add directly to your portfolio.
-                        </p>
-
-                        <div class="space-y-4">
-                            <div class="flex gap-3">
-                                <div class="w-8 h-8 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="bi bi-lightbulb-fill text-sm"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-white">Acquire Deep Domain Skills</h4>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed mt-0.5">Move past basic definitions and learn production-quality code and design patterns.</p>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-3 border-t border-white/5 pt-4">
-                                <div class="w-8 h-8 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="bi bi-file-text-fill text-sm"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-white">Build Real Portfolios</h4>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed mt-0.5">Submit code and project documentation evaluated by mentors to showcase in interviews.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Success image visual -->
-                    <div class="lg:col-span-6 order-1 lg:order-2">
-                        <div class="rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-surface-900 p-4">
-                            <img th:src="@{/images/edutake-student-success.jpg}"
-                                 alt="credential success celebration"
-                                 class="w-full rounded-2xl object-cover h-[340px]">
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
-        <section class="py-20 bg-surface-950">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
                 <div class="text-center mb-14 space-y-2">
-                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">The Path to Success</span>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">
-                        How Learning Works on EduTake
-                    </h2>
-                    <p class="text-gray-400 text-sm max-w-xl mx-auto">
-                        We streamline registration and learning so you can achieve goals efficiently.
-                    </p>
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Why EduTake</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Everything You Need to Succeed</h2>
                 </div>
 
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <!-- Step 1 -->
-                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left">
-                        <span class="text-2xl font-black text-brand-600/20 absolute right-6 top-6">01</span>
-                        <div class="w-8 h-8 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4">
-                            <i class="bi bi-search text-sm"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-white mb-1">Explore Courses</h4>
-                        <p class="text-xs text-gray-450 leading-relaxed">Search dynamic subjects and find your targeted path.</p>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/15 transition-all">
+                        <div class="w-10 h-10 bg-brand-600/10 text-brand-400 rounded-xl flex items-center justify-center mb-4"><i class="bi bi-person-check-fill text-lg"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Learn from Experts</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Every course is designed and taught by verified professionals with real industry experience.</p>
                     </div>
-
-                    <!-- Step 2 -->
-                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left">
-                        <span class="text-2xl font-black text-brand-600/20 absolute right-6 top-6">02</span>
-                        <div class="w-8 h-8 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4">
-                            <i class="bi bi-credit-card-fill text-sm"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-white mb-1">Secure Checkout</h4>
-                        <p class="text-xs text-gray-450 leading-relaxed">Apply promo coupons and check out safely with verified transactions.</p>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/15 transition-all">
+                        <div class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center mb-4"><i class="bi bi-clock-history text-lg"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Learn at Your Pace</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Self-paced access to structured lessons, assignments, and assessments. Learn whenever works for you.</p>
                     </div>
-
-                    <!-- Step 3 -->
-                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left">
-                        <span class="text-2xl font-black text-brand-600/20 absolute right-6 top-6">03</span>
-                        <div class="w-8 h-8 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4">
-                            <i class="bi bi-play-circle-fill text-sm"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-white mb-1">Learn &amp; Submit</h4>
-                        <p class="text-xs text-gray-450 leading-relaxed">Access the players, trace lessons, and upload assessment materials.</p>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/15 transition-all">
+                        <div class="w-10 h-10 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center mb-4"><i class="bi bi-journal-check text-lg"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Practice Real Skills</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Hands-on projects, quizzes, and code assessments that mirror actual job requirements.</p>
                     </div>
-
-                    <!-- Step 4 -->
-                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left">
-                        <span class="text-2xl font-black text-brand-600/20 absolute right-6 top-6">04</span>
-                        <div class="w-8 h-8 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4">
-                            <i class="bi bi-patch-check-fill text-sm"></i>
-                        </div>
-                        <h4 class="text-sm font-bold text-white mb-1">Complete &amp; Hold</h4>
-                        <p class="text-xs text-gray-450 leading-relaxed">Fulfill curriculum requirements and download printable tax invoices and credentials.</p>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/15 transition-all">
+                        <div class="w-10 h-10 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center mb-4"><i class="bi bi-bar-chart-line text-lg"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Track Your Progress</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Visual dashboards showing completed lessons, scores, and remaining curriculum.</p>
+                    </div>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/15 transition-all">
+                        <div class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center mb-4"><i class="bi bi-award-fill text-lg"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Earn Certificates</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Receive verified completion certificates you can share with employers and on LinkedIn.</p>
+                    </div>
+                    <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/15 transition-all">
+                        <div class="w-10 h-10 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-4"><i class="bi bi-shield-check text-lg"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Secure Payments</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Industry-standard Razorpay integration with 7-day refund guarantee on all purchases.</p>
                     </div>
                 </div>
-
             </div>
         </section>
 
-        <!-- ═══════════════════ TRUST & COMMUNITY ═══════════════════ -->
-        <section class="py-20 bg-surface-900/50 border-y border-white/5">
+        <!-- ══════════════════════════════════════════════════
+             SECTION 8 — HOW IT WORKS
+             ══════════════════════════════════════════════════ -->
+        <section class="py-20 bg-surface-900/40 border-y border-white/5">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid lg:grid-cols-12 gap-12 items-center">
-                    
-                    <!-- Left: Community visual -->
-                    <div class="lg:col-span-6">
-                        <div class="rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-surface-900 p-4">
-                            <img th:src="@{/images/edutake-learning-community.jpg}"
-                                 alt="group learning community"
-                                 class="w-full rounded-2xl object-cover h-[340px]">
-                        </div>
-                    </div>
+                <div class="text-center mb-14 space-y-2">
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Simple Process</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">How Learning Works on EduTake</h2>
+                </div>
 
-                    <!-- Right: Trust statements -->
-                    <div class="lg:col-span-6 space-y-6 text-left">
-                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Human Connection</span>
-                        <h2 class="text-3xl font-extrabold text-white tracking-tight leading-tight">
-                            Build Connections In A Focused Workspace
-                        </h2>
-                        <p class="text-gray-450 text-sm leading-relaxed">
-                            Learning shouldn't be isolated. EduTake connects you with verified mentors, expert trainers, and classmates to discuss project ideas, evaluate curriculum items, and solve complex problem modules.
-                        </p>
-                        
-                        <div class="p-4 bg-surface-900 border border-white/5 rounded-2xl text-xs space-y-2">
-                            <p class="text-gray-400 font-bold">What learners are saying:</p>
-                            <blockquote class="text-white font-semibold italic">
-                                "The structured format of courses and direct evaluations by verified instructors gave me the knowledge I needed to transition into coding successfully."
-                            </blockquote>
-                            <p class="text-[10px] text-gray-450 font-bold uppercase tracking-wider">— Alumnus Review</p>
-                        </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left hover:border-brand-500/15 transition-all">
+                        <span class="text-3xl font-black text-brand-600/15 absolute right-5 top-5">01</span>
+                        <div class="w-9 h-9 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4"><i class="bi bi-search text-sm"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Discover</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Browse courses by category, level, or keyword to find your ideal program.</p>
                     </div>
-
+                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left hover:border-brand-500/15 transition-all">
+                        <span class="text-3xl font-black text-brand-600/15 absolute right-5 top-5">02</span>
+                        <div class="w-9 h-9 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4"><i class="bi bi-credit-card-fill text-sm"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Enroll</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Sign up, apply coupons, and check out securely — or enroll for free.</p>
+                    </div>
+                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left hover:border-brand-500/15 transition-all">
+                        <span class="text-3xl font-black text-brand-600/15 absolute right-5 top-5">03</span>
+                        <div class="w-9 h-9 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4"><i class="bi bi-play-circle-fill text-sm"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Learn</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Access lessons, submit assignments, take quizzes, and track your progress.</p>
+                    </div>
+                    <div class="relative bg-surface-900 border border-white/5 rounded-2xl p-6 text-left hover:border-brand-500/15 transition-all">
+                        <span class="text-3xl font-black text-brand-600/15 absolute right-5 top-5">04</span>
+                        <div class="w-9 h-9 bg-brand-600/10 text-brand-400 rounded-lg flex items-center justify-center mb-4"><i class="bi bi-patch-check-fill text-sm"></i></div>
+                        <h4 class="text-sm font-bold text-white mb-1">Certify</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed">Complete the curriculum and earn a verified, downloadable certificate.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ═══════════════════ STUDENT SUCCESS STORIES & TESTIMONIALS ═══════════════════ -->
+        <!-- ══════════════════════════════════════════════════
+             SECTION 9 — INSTRUCTOR SPOTLIGHT
+             ══════════════════════════════════════════════════ -->
+        <section th:if="${topInstructors != null and !topInstructors.isEmpty()}" class="py-20 bg-surface-950">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-14 space-y-2">
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Our Experts</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Learn from Industry Professionals</h2>
+                    <p class="text-gray-400 text-sm max-w-xl mx-auto">Our instructors bring years of real-world experience across technology, business, and design.</p>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div th:each="inst : ${topInstructors}" class="group bg-surface-900 border border-white/5 hover:border-brand-500/20 rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-1">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white text-xl font-bold shadow-lg group-hover:scale-110 transition-transform">
+                            <span th:if="${inst.name != null}" th:text="${inst.name.substring(0, 1).toUpperCase()}">I</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-0.5" th:text="${inst.name}">Instructor</h4>
+                        <p class="text-xs text-brand-400 font-medium mb-2" th:text="${inst.specialization != null ? inst.specialization : 'Expert Instructor'}">Specialization</p>
+                        <p class="text-[11px] text-gray-500 line-clamp-2" th:text="${inst.bio != null ? inst.bio : 'Passionate educator with industry experience.'}">Bio</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════
+             SECTION 10 — TESTIMONIALS / SUCCESS STORIES
+             ══════════════════════════════════════════════════ -->
         <section id="testimonials" class="py-24 bg-gradient-to-b from-surface-950 via-surface-900 to-surface-950 relative overflow-hidden">
-            <!-- Background Glows -->
-            <div class="absolute top-1/4 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute bottom-1/4 -right-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute top-1/4 -left-40 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute bottom-1/4 -right-40 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                
-                <!-- Section Header -->
                 <div class="text-center mb-16 space-y-3">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest">
-                        <i class="bi bi-patch-check-fill text-xs"></i>
-                        <span>Proven Career Outcomes</span>
+                        <i class="bi bi-patch-check-fill text-xs"></i> <span>Student Success</span>
                     </div>
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-                        Student Success Stories &amp; <span class="bg-gradient-to-r from-amber-400 via-orange-400 to-brand-400 bg-clip-text text-transparent">Testimonials</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                        What Our Students <span class="bg-gradient-to-r from-amber-400 to-brand-400 bg-clip-text text-transparent">Say</span>
                     </h2>
-                    <p class="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-                        Hear directly from graduates who transformed their skillsets, mastered production architectures, and achieved career breakthroughs across global tech companies.
-                    </p>
+                    <p class="text-gray-400 text-sm max-w-2xl mx-auto">Real feedback from learners who built skills and advanced their careers with EduTake.</p>
                 </div>
 
-                <!-- Testimonials Grid -->
-                <div th:if="${featuredTestimonials != null and !featuredTestimonials.isEmpty()}" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    <div th:each="t : ${featuredTestimonials}" 
-                         class="group bg-surface-900/90 hover:bg-surface-850/90 border border-white/10 hover:border-amber-500/40 rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-xl hover:shadow-amber-500/10 relative overflow-hidden backdrop-blur-sm">
-                        
-                        <!-- Top Header: Stars & Spotlight Badge -->
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-4">
-                                <div class="flex items-center gap-1 text-amber-400 text-xs">
-                                    <i th:each="i : ${#numbers.sequence(1, 5)}" 
-                                       th:class="${i <= t.getStarRatingSafe()} ? 'bi bi-star-fill' : 'bi bi-star text-white/20'"></i>
-                                    <span class="text-[11px] text-white/60 font-semibold ml-1.5" th:text="${t.getStarRatingSafe()} + '.0'">5.0</span>
-                                </div>
+                <div th:if="${featuredTestimonials != null and !featuredTestimonials.isEmpty()}" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div th:each="t : ${featuredTestimonials}"
+                         class="group bg-surface-900/90 border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
 
-                                <span th:if="${t.isFeatured}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
-                                    <i class="bi bi-star-fill text-[8px]"></i> Spotlight
-                                </span>
+                        <div>
+                            <!-- Stars -->
+                            <div class="flex items-center gap-1 text-amber-400 text-xs mb-3">
+                                <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                   th:class="${i <= t.getStarRatingSafe()} ? 'bi bi-star-fill' : 'bi bi-star text-white/20'"></i>
                             </div>
 
-                            <!-- Headline -->
-                            <h3 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors leading-snug mb-3" th:text="${t.title}">
-                                Landed My Dream SWE Role at Google!
-                            </h3>
-
-                            <!-- Review Narrative -->
-                            <p class="text-xs text-gray-300 leading-relaxed italic mb-6 line-clamp-4" th:text="'“' + ${t.getDisplayContent()} + '”'">
-                                “The Java Fullstack Masterclass gave me the architectural understanding and live project confidence that directly mirrored questions in my system design and coding rounds.”
-                            </p>
+                            <h3 class="text-sm font-bold text-white mb-2" th:text="${t.title}">Review Title</h3>
+                            <p class="text-xs text-gray-300 leading-relaxed italic line-clamp-4 mb-4" th:text="'&quot;' + ${t.getDisplayContent()} + '&quot;'">Review</p>
                         </div>
 
-                        <!-- Footer: Student Info & Course Badge -->
-                        <div class="pt-4 border-t border-white/10 space-y-3">
+                        <div class="pt-4 border-t border-white/5">
                             <div class="flex items-center gap-3">
-                                <img th:if="${t.studentPhoto != null and !#strings.isEmpty(t.studentPhoto)}" 
-                                     th:src="${t.studentPhoto}" 
-                                     alt="Student" 
-                                     class="w-10 h-10 rounded-full object-cover border border-white/20 shadow-sm"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
-                                <span th:classappend="${t.studentPhoto != null and !#strings.isEmpty(t.studentPhoto)} ? 'hidden' : 'flex'"
-                                      class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-bold items-center justify-center text-xs shadow-sm"
-                                      th:text="${t.getInitials()}">
-                                    AS
-                                </span>
-                                <div class="min-w-0">
-                                    <div class="text-xs font-bold text-white truncate" th:text="${t.getDisplayStudentName()}">Aarav Sharma</div>
-                                    <div class="text-[11px] text-amber-400 font-medium truncate" th:text="${t.getDesignationOrOrg()}">Software Engineer @ Google India</div>
+                                <span class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-bold flex items-center justify-center text-xs"
+                                      th:text="${t.getInitials()}">AS</span>
+                                <div>
+                                    <div class="text-xs font-bold text-white" th:text="${t.getDisplayStudentName()}">Student</div>
+                                    <div class="text-[11px] text-gray-500" th:text="${t.getDisplayCourseName()}">Course</div>
                                 </div>
                             </div>
-
-                            <div class="flex items-center justify-between text-[11px] text-gray-400">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 text-[10px] font-medium truncate max-w-[200px]">
-                                    <i class="bi bi-journal-bookmark text-brand-400 text-[9px]"></i>
-                                    <span th:text="${t.getDisplayCourseName()}">Java Fullstack Masterclass</span>
-                                </span>
-                                <span class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Verified Alumnus</span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Fallback if empty -->
-                <div th:if="${featuredTestimonials == null or featuredTestimonials.isEmpty()}" class="text-center py-12 bg-surface-900/60 border border-white/5 rounded-3xl p-6">
-                    <p class="text-xs text-gray-400">Verified graduate reviews are currently being synchronized.</p>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ═══════════════════ CATEGORIES SECTION ═══════════════════ -->
-        <section class="py-20 bg-surface-950">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <!-- Section Header -->
-                <div class="text-center mb-14 space-y-2">
-                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Active Domains</span>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">
-                        Explore Popular Categories
-                    </h2>
-                    <p class="text-gray-400 text-sm max-w-xl mx-auto">
-                        Find dynamic topics tailored to tech developers, administrators, and designers.
-                    </p>
-                </div>
-
-                <!-- Categories Grid -->
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div th:each="cat : ${categories}" class="group bg-surface-900 border border-white/5 rounded-2xl p-6 hover:border-brand-500/20 hover:bg-surface-850/30 transition-all shadow-sm flex flex-col justify-between">
-                        <div>
-                            <div class="w-10 h-10 bg-brand-600/10 border border-brand-600/20 text-brand-400 rounded-xl flex items-center justify-center mb-4">
-                                <i class="bi bi-tag-fill text-sm"></i>
-                            </div>
-                            <h4 class="text-sm font-bold text-white mb-1" th:text="${cat.name}">Category Name</h4>
-                            <p class="text-xs text-gray-400 leading-relaxed line-clamp-2" th:text="${cat.description}">Category Description...</p>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                            <span class="text-[10px] text-gray-500 font-bold uppercase" th:text="${cat.courses != null ? cat.courses.size() : 0} + ' courses'">0 courses</span>
-                            <a th:href="@{/courses(categoryId=${cat.id})}" class="text-[10px] font-bold text-brand-400 hover:text-brand-300 flex items-center gap-0.5">
-                                <span>Browse</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </a>
                         </div>
                     </div>
                 </div>
 
+                <div th:if="${featuredTestimonials == null or featuredTestimonials.isEmpty()}" class="text-center py-12 bg-surface-900/60 border border-white/5 rounded-2xl p-6">
+                    <p class="text-xs text-gray-400">Student reviews are being collected. Check back soon!</p>
+                </div>
             </div>
         </section>
 
-        <!-- ═══════════════════ LATEST ARTICLES & INSIGHTS ═══════════════════ -->
-        <section id="articles" class="py-20 bg-surface-900/40 border-t border-white/5">
+        <!-- ══════════════════════════════════════════════════
+             SECTION 11 — CERTIFICATE SHOWCASE
+             ══════════════════════════════════════════════════ -->
+        <section class="py-20 bg-surface-950 border-t border-white/5">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <!-- Section Header -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Verified Credentials</span>
+                        <h2 class="text-3xl font-extrabold text-white tracking-tight leading-tight">Complete a Course.<br>Prove What You Learned.</h2>
+                        <p class="text-gray-400 text-sm leading-relaxed">Every EduTake certificate includes a unique verification code that employers can validate. Share your achievements with confidence.</p>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 text-xs text-gray-300">
+                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
+                                <span>Complete all lessons and assessments</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-gray-300">
+                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
+                                <span>Receive a print-ready verified certificate</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-gray-300">
+                                <i class="bi bi-check-circle-fill text-emerald-400"></i>
+                                <span>Share and verify online with a unique code</span>
+                            </div>
+                        </div>
+
+                        <a href="/verify-certificate" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors">
+                            Verify a Certificate <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="bg-surface-900 border border-white/5 rounded-3xl p-8 text-center">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                            <i class="bi bi-award-fill text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Certificate of Completion</h3>
+                        <p class="text-sm text-gray-400 mb-4">Awarded to graduates who complete the full curriculum and assessments.</p>
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-xl text-xs font-semibold border border-emerald-500/20">
+                            <i class="bi bi-shield-check"></i> Verified & Shareable
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════
+             SECTION 12 — LATEST ARTICLES
+             ══════════════════════════════════════════════════ -->
+        <section id="articles" class="py-20 bg-surface-900/40 border-y border-white/5">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-                    <div class="space-y-2 text-left">
+                    <div class="space-y-2">
                         <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Knowledge Hub</span>
-                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                            Latest Articles &amp; <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Tech Insights</span>
+                        <h2 class="text-3xl font-extrabold text-white tracking-tight">
+                            Latest Articles &amp; <span class="bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent">Insights</span>
                         </h2>
-                        <p class="text-gray-400 text-sm max-w-xl">
-                            Read engineering roadmaps, software architecture guides, and career preparation blueprints curated by verified educators.
-                        </p>
                     </div>
-                    <a href="/blogs" class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-900 hover:bg-brand-600 border border-white/10 hover:border-brand-500 text-white font-bold rounded-xl text-xs transition-all w-fit shadow-sm">
-                        <span>Explore All Articles</span>
-                        <i class="bi bi-arrow-right"></i>
+                    <a href="/blogs" class="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-900 hover:bg-brand-600 border border-white/10 text-white font-semibold rounded-xl text-sm transition-all w-fit">
+                        <span>All Articles</span> <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Articles Grid -->
-                <div th:if="${latestArticles != null and !latestArticles.isEmpty()}" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    <div th:each="art : ${latestArticles}" class="group bg-surface-900 border border-white/5 hover:border-brand-500/30 rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 shadow-lg hover:shadow-brand-500/10">
-                        <div>
-                            <!-- Thumbnail -->
-                            <a th:href="@{'/blog/' + ${art.slug}}" class="block relative aspect-video overflow-hidden bg-surface-950">
-                                <img th:if="${art.featuredImage != null and !art.featuredImage.isEmpty()}" th:src="${art.featuredImage}" th:alt="${art.title}"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                     onerror="this.src='https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80'">
-                                <div th:unless="${art.featuredImage != null and !art.featuredImage.isEmpty()}" class="w-full h-full flex items-center justify-center text-brand-400 bg-brand-950/40">
-                                    <i class="bi bi-journal-code text-4xl"></i>
-                                </div>
-                                <div class="absolute top-3 left-3 flex items-center gap-1.5">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-surface-950/80 backdrop-blur-md text-brand-400 border border-white/10" th:text="${art.categoryName}">
-                                        Engineering
-                                    </span>
-                                    <span th:if="${art.isFeatured()}" class="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500 text-surface-950 flex items-center gap-1 shadow-sm">
-                                        <i class="bi bi-star-fill text-[8px]"></i> Featured
-                                    </span>
-                                </div>
-                            </a>
-
-                            <!-- Body -->
-                            <div class="p-6 text-left">
-                                <div class="flex items-center gap-2.5 text-[11px] text-gray-400 font-medium mb-2.5">
-                                    <span th:if="${art.publishedAt != null}" th:text="${#temporals.format(art.publishedAt, 'MMM dd, yyyy')}">Recent</span>
-                                    <span th:unless="${art.publishedAt != null}">Recently updated</span>
-                                    <span>•</span>
-                                    <span class="flex items-center gap-1"><i class="bi bi-eye"></i> <span th:text="${art.viewCount != null ? art.viewCount : 0}">0</span> views</span>
-                                </div>
-
-                                <h3 class="text-base font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug mb-2.5">
-                                    <a th:href="@{'/blog/' + ${art.slug}}" th:text="${art.title}">
-                                        Article Title
-                                    </a>
-                                </h3>
-
-                                <p class="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-4" th:text="${art.getExcerptOrTruncatedContent()}">
-                                    Short snippet of the article content.
-                                </p>
+                <div th:if="${latestArticles != null and !latestArticles.isEmpty()}" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div th:each="art : ${latestArticles}" class="group bg-surface-900 border border-white/5 hover:border-brand-500/25 rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1">
+                        <a th:href="@{'/blog/' + ${art.slug}}" class="block relative aspect-video overflow-hidden bg-surface-950 img-zoom">
+                            <img th:if="${art.featuredImage != null and !art.featuredImage.isEmpty()}" th:src="${art.featuredImage}" th:alt="${art.title}"
+                                 class="w-full h-full object-cover" loading="lazy">
+                            <div th:unless="${art.featuredImage != null and !art.featuredImage.isEmpty()}" class="w-full h-full flex items-center justify-center text-brand-400 bg-brand-950/40">
+                                <i class="bi bi-journal-code text-4xl"></i>
                             </div>
-                        </div>
+                            <span class="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-surface-950/80 backdrop-blur text-brand-400 border border-white/10" th:text="${art.categoryName}">Category</span>
+                        </a>
 
-                        <!-- Footer -->
-                        <div class="px-6 pb-6 pt-0 flex items-center justify-between border-t border-white/5 pt-4 text-xs">
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-brand-600/20 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-[10px]">
-                                    <span th:text="${art.author != null and art.author.length() > 0 ? art.author.substring(0, 1) : 'E'}">E</span>
-                                </div>
-                                <span class="text-gray-300 font-medium text-[11px] truncate max-w-[110px]" th:text="${art.author != null ? art.author : 'EduTake Team'}">EduTake Team</span>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="flex items-center gap-2 text-[11px] text-gray-500 font-medium mb-2">
+                                <span th:if="${art.publishedAt != null}" th:text="${#temporals.format(art.publishedAt, 'MMM dd, yyyy')}">Date</span>
+                                <span>•</span>
+                                <span th:text="${(art.viewCount != null ? art.viewCount : 0) + ' views'}">0 views</span>
                             </div>
-                            <a th:href="@{'/blog/' + ${art.slug}}" class="text-brand-400 group-hover:text-brand-300 font-semibold text-xs flex items-center gap-1 transition-colors">
-                                <span>Read Guide</span>
-                                <i class="bi bi-arrow-right"></i>
+                            <h3 class="text-sm font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-2 mb-2">
+                                <a th:href="@{'/blog/' + ${art.slug}}" th:text="${art.title}">Title</a>
+                            </h3>
+                            <p class="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-4" th:text="${art.getExcerptOrTruncatedContent()}">Excerpt</p>
+                            <a th:href="@{'/blog/' + ${art.slug}}" class="mt-auto text-brand-400 text-xs font-semibold flex items-center gap-1 hover:text-brand-300 transition-colors">
+                                Read More <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Empty state fallback if no articles yet -->
-                <div th:if="${latestArticles == null or latestArticles.isEmpty()}" class="text-center py-12 bg-surface-900/60 border border-white/5 rounded-3xl p-6">
-                    <p class="text-xs text-gray-400 mb-3">Fresh engineering articles are being drafted by our content team.</p>
-                    <a href="/blogs" class="inline-flex px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition-colors">
-                        Browse Articles
+                <div th:if="${latestArticles == null or latestArticles.isEmpty()}" class="text-center py-12 bg-surface-900/60 border border-white/5 rounded-2xl">
+                    <p class="text-xs text-gray-400 mb-3">New articles are being published regularly.</p>
+                    <a href="/blogs" class="inline-flex px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-500 transition-colors">Browse Articles</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════
+             SECTION 13 — FAQ
+             ══════════════════════════════════════════════════ -->
+        <section th:if="${homepageFaqs != null and !homepageFaqs.isEmpty()}" class="py-20 bg-surface-950">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12 space-y-2">
+                    <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Common Questions</span>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Frequently Asked Questions</h2>
+                </div>
+
+                <div class="space-y-3">
+                    <div th:each="faq, iterStat : ${homepageFaqs}" th:if="${iterStat.index < 8}" class="bg-surface-900 border border-white/5 rounded-2xl overflow-hidden">
+                        <button th:attr="onclick='toggleFaq(' + ${iterStat.index} + ')'" class="w-full flex items-center justify-between p-5 text-left group">
+                            <span class="text-sm font-semibold text-white group-hover:text-brand-400 transition-colors pr-4" th:text="${faq.question}">Question</span>
+                            <i class="bi bi-chevron-down text-gray-500 text-sm accordion-arrow flex-shrink-0" th:id="'faq-arrow-' + ${iterStat.index}"></i>
+                        </button>
+                        <div class="accordion-content px-5 pb-5" th:id="'faq-content-' + ${iterStat.index}">
+                            <p class="text-xs text-gray-400 leading-relaxed" th:utext="${faq.answer}">Answer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <a href="/faq" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors">
+                        View All FAQs <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
-
             </div>
         </section>
 
-        <!-- ═══════════════════ LEARN ANYWHERE ═══════════════════ -->
-        <section class="py-20 bg-surface-900/80 border-t border-white/5 text-white relative overflow-hidden">
-            <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
-            
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="grid lg:grid-cols-12 gap-12 items-center">
-                    
-                    <!-- Left: Feature copy -->
-                    <div class="lg:col-span-5 space-y-6 text-left">
-                        <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Total Flexibility</span>
-                        <h2 class="text-3xl font-extrabold tracking-tight leading-tight">
-                            Learn Anytime, Anywhere on Any Device
-                        </h2>
-                        <p class="text-gray-400 text-sm leading-relaxed">
-                            Our LMS template features fully responsive structures. Take lessons, read code files, check grades, and submit assignments on your laptop, tablet, or mobile phone.
-                        </p>
-                        
-                        <div class="space-y-3.5 text-xs text-gray-300">
-                            <div class="flex items-center gap-2">
-                                <i class="bi bi-laptop text-brand-400"></i>
-                                <span>Desktop layout for focused studying</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="bi bi-tablet text-brand-400"></i>
-                                <span>Tablet view for readings and syllabus previews</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <i class="bi bi-phone text-brand-400"></i>
-                                <span>Mobile companion for checking notifications and progress</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Responsive preview image -->
-                    <div class="lg:col-span-7">
-                        <div class="rounded-3xl overflow-hidden shadow-2xl border border-white/5 bg-slate-800 p-3">
-                            <img th:src="@{/images/edutake-learn-anywhere.jpg}"
-                                 alt="responsive dashboard mockups"
-                                 class="w-full rounded-2xl object-cover h-[340px]">
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════ FINAL CALL TO ACTION ═══════════════════ -->
-        <section class="py-24 bg-surface-950 relative overflow-hidden">
+        <!-- ══════════════════════════════════════════════════
+             SECTION 14 — FINAL CTA
+             ══════════════════════════════════════════════════ -->
+        <section class="py-24 bg-gradient-to-b from-surface-900/50 to-surface-950 relative overflow-hidden border-t border-white/5">
             <div class="absolute -top-32 -right-32 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl"></div>
-            
+
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6 animate-fade-in">
                 <span class="text-xs font-bold tracking-[0.2em] uppercase text-brand-400">Start Today</span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none">
-                    Your Next Skill Starts Here
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                    Your Next Skill Could<br>Change Your Future
                 </h2>
                 <p class="text-gray-400 text-base max-w-xl mx-auto leading-relaxed">
-                    Explore expert-designed online course modules and start building your learning journey today.
+                    Join thousands of learners building real skills with expert-led courses on EduTake.
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-3.5 pt-4">
@@ -839,18 +749,17 @@
                             Create Free Account
                         </a>
                         <a href="/courses"
-                           class="px-7 py-4 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-2xl text-sm transition-all hover:bg-white/10 hover:-translate-y-0.5 shadow-sm">
-                            Explore All Courses
+                           class="px-7 py-4 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-2xl text-sm transition-all hover:bg-white/10 hover:-translate-y-0.5">
+                            Explore Courses
                         </a>
                     </div>
-
                     <div sec:authorize="isAuthenticated()" class="flex flex-wrap justify-center gap-3">
-                        <a sec:authorize="hasRole('STUDENT')" href="/myCourses"
-                           class="px-7 py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl text-sm transition-all hover:-translate-y-0.5 shadow-md shadow-brand-600/20">
-                            Open My Learning Area
+                        <a sec:authorize="hasRole('STUDENT')" href="/student/dashboard"
+                           class="px-7 py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl text-sm transition-all hover:-translate-y-0.5 shadow-md">
+                            Go to My Dashboard
                         </a>
                         <a href="/courses"
-                           class="px-7 py-4 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-2xl text-sm transition-all hover:bg-white/10 shadow-sm">
+                           class="px-7 py-4 bg-white/5 border border-white/10 hover:border-white/20 text-white font-bold rounded-2xl text-sm transition-all hover:bg-white/10">
                             Browse Catalog
                         </a>
                     </div>
@@ -864,6 +773,31 @@
     <div th:replace="~{fragments/tw-footer :: footer}"></div>
 
     <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+    // FAQ Accordion Toggle
+    function toggleFaq(index) {
+        const content = document.getElementById('faq-content-' + index);
+        const arrow = document.getElementById('faq-arrow-' + index);
+        content.classList.toggle('open');
+        arrow.classList.toggle('open');
+    }
+
+    // Scroll-reveal animation (Intersection Observer)
+    document.addEventListener('DOMContentLoaded', function() {
+        const revealEls = document.querySelectorAll('.reveal');
+        if (revealEls.length > 0 && 'IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+            revealEls.forEach(function(el) { observer.observe(el); });
+        }
+    });
+    </script>
+
 </body>
 </html>

@@ -3,7 +3,8 @@
 <head></head>
 <body>
 <!-- ═══════════════════════════════════════════════════════════════════
-     UNIFIED NAVBAR — Adapts based on Spring Security Roles with Scrollspy
+     UNIFIED NAVBAR — Premium responsive navigation with search,
+     category dropdown, auth-aware links, and notification bell.
      ═══════════════════════════════════════════════════════════════════ -->
 <header th:fragment="navbar">
     <nav class="fixed top-0 left-0 right-0 z-50 bg-surface-950/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300" id="main-nav">
@@ -11,7 +12,7 @@
             <div class="flex items-center justify-between h-16">
 
                 <!-- Brand -->
-                <a href="/index" class="flex items-center gap-2.5 group">
+                <a href="/index" class="flex items-center gap-2.5 group flex-shrink-0">
                     <div class="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform duration-300">
                         <span class="text-white font-black text-base">E</span>
                     </div>
@@ -19,101 +20,209 @@
                 </a>
 
                 <!-- Desktop Nav Links -->
-                <div class="hidden md:flex items-center gap-1.5">
-                    <a href="/index" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Home</a>
-                    <a href="/courses" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Courses</a>
-                    <a href="/blogs" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Articles</a>
-                    <a href="/services" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Services</a>
-                    <a href="/about" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">About</a>
-                    <a href="/contact" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Contact</a>
-                    
-                    <!-- Student specific -->
-                    <a sec:authorize="hasRole('STUDENT')" href="/myCourses" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">My Courses</a>
-                    <a sec:authorize="hasRole('STUDENT')" href="/provideFeedback" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Feedback</a>
+                <div class="hidden lg:flex items-center gap-1">
+                    <a href="/index" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200">Home</a>
 
-                    <!-- Admin specific -->
-                    <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-amber-400 hover:text-amber-300 hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Admin Dashboard</a>
-                    
-                    <!-- Employee specific -->
-                    <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile" class="desktop-nav-link px-3.5 py-2 text-xs font-bold text-blue-400 hover:text-blue-300 hover:bg-white/5 rounded-lg border border-transparent transition-all duration-200">Employee Portal</a>
+                    <!-- Explore Dropdown -->
+                    <div class="relative" id="explore-dropdown">
+                        <button onclick="toggleExploreMenu()" class="desktop-nav-link nav-link-item flex items-center gap-1 px-3 py-2 text-[13px] font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200">
+                            <span>Explore</span>
+                            <i class="bi bi-chevron-down text-[10px] transition-transform duration-200" id="explore-arrow"></i>
+                        </button>
+                        <div id="explore-menu" class="hidden absolute top-full left-0 mt-2 w-72 bg-surface-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/30 p-2 z-50">
+                            <a href="/courses" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
+                                <div class="w-9 h-9 bg-brand-500/10 text-brand-400 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-collection-play text-sm"></i>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-semibold text-white group-hover:text-brand-400 transition-colors">All Courses</span>
+                                    <p class="text-xs text-gray-500">Browse the full catalog</p>
+                                </div>
+                            </a>
+                            <a href="/blogs" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
+                                <div class="w-9 h-9 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-journal-richtext text-sm"></i>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-semibold text-white group-hover:text-purple-400 transition-colors">Articles & Blog</span>
+                                    <p class="text-xs text-gray-500">Tech insights & career guides</p>
+                                </div>
+                            </a>
+                            <a href="/faq" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
+                                <div class="w-9 h-9 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-question-circle text-sm"></i>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-semibold text-white group-hover:text-amber-400 transition-colors">FAQ</span>
+                                    <p class="text-xs text-gray-500">Common questions answered</p>
+                                </div>
+                            </a>
+                            <div class="border-t border-white/5 mt-1 pt-1">
+                                <a href="/about" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-sm text-gray-400 hover:text-white">
+                                    <i class="bi bi-info-circle text-xs"></i> About Us
+                                </a>
+                                <a href="/contact" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-sm text-gray-400 hover:text-white">
+                                    <i class="bi bi-envelope text-xs"></i> Contact
+                                </a>
+                                <a href="/services" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-sm text-gray-400 hover:text-white">
+                                    <i class="bi bi-briefcase text-xs"></i> Services
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="/courses" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200">Courses</a>
+                    <a href="/blogs" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200">Articles</a>
+
+                    <!-- Role-specific links -->
+                    <a sec:authorize="hasRole('STUDENT')" href="/student/dashboard" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-brand-400 hover:text-brand-300 hover:bg-white/5 rounded-lg transition-all duration-200">My Learning</a>
+                    <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-amber-400 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-all duration-200">Admin</a>
+                    <a sec:authorize="hasRole('INSTRUCTOR')" href="/instructor/dashboard" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-white/5 rounded-lg transition-all duration-200">Instructor</a>
+                    <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile" class="desktop-nav-link nav-link-item px-3 py-2 text-[13px] font-semibold text-blue-400 hover:text-blue-300 hover:bg-white/5 rounded-lg transition-all duration-200">Staff</a>
                 </div>
 
-                <!-- Auth Buttons / User Profile -->
-                <div class="hidden md:flex items-center gap-4">
-                    <!-- Unauthenticated -->
-                    <div sec:authorize="!isAuthenticated()" class="flex items-center gap-3">
+                <!-- Right Section: Search + Auth -->
+                <div class="hidden lg:flex items-center gap-3">
+
+                    <!-- Search Toggle -->
+                    <button onclick="toggleDesktopSearch()" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all" aria-label="Search courses">
+                        <i class="bi bi-search text-sm"></i>
+                    </button>
+
+                    <!-- Authenticated: Notification Bell + Profile -->
+                    <div sec:authorize="isAuthenticated()" class="flex items-center gap-2">
+
+                        <!-- Notification Bell (Students) -->
+                        <a sec:authorize="hasRole('STUDENT')" href="/student/notifications" class="relative p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all" aria-label="Notifications">
+                            <i class="bi bi-bell text-sm"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full badge-pulse" th:if="${unreadNotifications != null and unreadNotifications > 0}"></span>
+                        </a>
+
+                        <!-- Profile Chip -->
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/5 hover:border-white/10 rounded-xl transition-all cursor-default">
+                            <div class="w-6 h-6 bg-gradient-to-br from-brand-500 to-brand-700 rounded-full flex items-center justify-center">
+                                <span class="text-white font-bold text-[10px]" sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}" th:remove="tag">U</span>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-200 max-w-[100px] truncate" sec:authentication="name">User</span>
+                        </div>
+
+                        <a href="/logout" class="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/5 rounded-lg transition-all" aria-label="Logout" title="Sign out">
+                            <i class="bi bi-box-arrow-right text-sm"></i>
+                        </a>
+                    </div>
+
+                    <!-- Unauthenticated: Login + Register -->
+                    <div sec:authorize="!isAuthenticated()" class="flex items-center gap-2.5">
                         <a href="/login"
-                           class="px-4 py-2 text-xs font-bold text-gray-300 border border-white/10 hover:border-white/35 hover:text-white rounded-xl transition-all">
+                           class="px-4 py-2 text-[13px] font-semibold text-gray-300 border border-white/10 hover:border-white/25 hover:text-white rounded-xl transition-all">
                             Log In
                         </a>
                         <a href="/register"
-                           class="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 rounded-xl transition-all shadow-md shadow-brand-600/20 hover:shadow-brand-500/35 hover:-translate-y-0.5">
+                           class="px-4 py-2 text-[13px] font-semibold text-white bg-brand-600 hover:bg-brand-500 rounded-xl transition-all shadow-md shadow-brand-600/20 hover:shadow-brand-500/30 hover:-translate-y-0.5">
                             Get Started
-                        </a>
-                    </div>
-                    
-                    <!-- Authenticated User Profile & Logout -->
-                    <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
-                        <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/5 hover:border-white/10 rounded-xl transition-all">
-                            <div class="w-6 h-6 bg-brand-600 rounded-full flex items-center justify-center">
-                                <i class="bi bi-person-fill text-white text-xs"></i>
-                            </div>
-                            <span class="text-xs font-bold text-gray-200" sec:authentication="name">User</span>
-                        </div>
-                        <a href="/logout"
-                           class="px-4 py-2 text-xs font-bold text-red-400 border border-red-500/10 hover:bg-red-500/10 rounded-xl transition-all">
-                            Logout
                         </a>
                     </div>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button onclick="toggleMobileMenu()"
-                        class="md:hidden p-2 text-gray-400 hover:text-white focus:outline-none transition-colors"
-                        id="mobile-btn">
-                    <i class="bi bi-list text-2xl" id="menu-icon"></i>
-                </button>
+                <!-- Mobile: Search + Menu Button -->
+                <div class="flex items-center gap-2 lg:hidden">
+                    <button onclick="toggleMobileSearch()" class="p-2 text-gray-400 hover:text-white transition-colors" aria-label="Search">
+                        <i class="bi bi-search text-lg"></i>
+                    </button>
+                    <button onclick="toggleMobileMenu()"
+                            class="p-2 text-gray-400 hover:text-white focus:outline-none transition-colors"
+                            id="mobile-btn" aria-label="Toggle menu">
+                        <i class="bi bi-list text-2xl" id="menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Search Overlay -->
+        <div id="desktop-search" class="hidden border-t border-white/5 bg-surface-950/95 backdrop-blur-2xl">
+            <div class="max-w-3xl mx-auto px-4 py-4">
+                <form action="/courses" method="get" class="relative">
+                    <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" name="keyword" placeholder="Search courses, topics, instructors..."
+                           class="w-full pl-12 pr-12 py-3 bg-surface-900 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm"
+                           id="desktop-search-input" autocomplete="off">
+                    <button type="button" onclick="toggleDesktopSearch()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors" aria-label="Close search">
+                        <i class="bi bi-x-lg text-sm"></i>
+                    </button>
+                </form>
+                <!-- Quick suggestion chips -->
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <a href="/courses?keyword=Java" class="px-3 py-1 text-xs font-medium text-gray-400 bg-white/5 border border-white/5 hover:border-brand-500/30 hover:text-brand-400 rounded-full transition-all">Java</a>
+                    <a href="/courses?keyword=Python" class="px-3 py-1 text-xs font-medium text-gray-400 bg-white/5 border border-white/5 hover:border-brand-500/30 hover:text-brand-400 rounded-full transition-all">Python</a>
+                    <a href="/courses?keyword=Web Development" class="px-3 py-1 text-xs font-medium text-gray-400 bg-white/5 border border-white/5 hover:border-brand-500/30 hover:text-brand-400 rounded-full transition-all">Web Development</a>
+                    <a href="/courses?keyword=Data Science" class="px-3 py-1 text-xs font-medium text-gray-400 bg-white/5 border border-white/5 hover:border-brand-500/30 hover:text-brand-400 rounded-full transition-all">Data Science</a>
+                    <a href="/courses?keyword=Design" class="px-3 py-1 text-xs font-medium text-gray-400 bg-white/5 border border-white/5 hover:border-brand-500/30 hover:text-brand-400 rounded-full transition-all">Design</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Search Overlay -->
+        <div id="mobile-search" class="hidden lg:hidden border-t border-white/5 bg-surface-950/95 backdrop-blur-2xl">
+            <div class="px-4 py-3">
+                <form action="/courses" method="get" class="relative">
+                    <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" name="keyword" placeholder="Search courses..."
+                           class="w-full pl-11 pr-4 py-2.5 bg-surface-900 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-sm"
+                           id="mobile-search-input" autocomplete="off">
+                </form>
             </div>
         </div>
 
         <!-- Mobile Menu Drawer -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-surface-950/95 backdrop-blur-2xl transition-all duration-300">
-            <div class="px-4 py-4 space-y-2">
-                <a href="/index" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Home</a>
-                <a href="/courses" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Courses</a>
-                <a href="/blogs" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Articles</a>
-                <a href="/services" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Services</a>
-                <a href="/about" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">About</a>
-                <a href="/contact" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Contact</a>
-                <a sec:authorize="hasRole('STUDENT')" href="/myCourses" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">My Courses</a>
-                <a sec:authorize="hasRole('STUDENT')" href="/provideFeedback" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Feedback</a>
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-white/5 bg-surface-950/95 backdrop-blur-2xl transition-all duration-300 max-h-[70vh] overflow-y-auto">
+            <div class="px-4 py-4 space-y-1">
+                <a href="/index" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Home</a>
+                <a href="/courses" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Courses</a>
+                <a href="/blogs" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Articles</a>
+                <a href="/about" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">About</a>
+                <a href="/contact" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Contact</a>
+                <a href="/faq" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">FAQ</a>
 
-                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-amber-400 hover:bg-white/5 rounded-xl">Admin Dashboard</a>
-                <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-blue-400 hover:bg-white/5 rounded-xl">Employee Portal</a>
-
-                <!-- Unauthenticated Mobile -->
-                <div sec:authorize="!isAuthenticated()" class="pt-4 border-t border-white/5 space-y-2">
-                    <a href="/login" class="block w-full py-3 text-center text-sm font-bold text-gray-300 border border-white/10 rounded-xl hover:bg-white/5 transition-all">Log In</a>
-                    <a href="/register" class="block w-full py-3 text-center text-sm font-bold text-white bg-brand-600 rounded-xl hover:bg-brand-500 transition-all shadow-lg">Get Started</a>
+                <!-- Role-specific -->
+                <div sec:authorize="hasRole('STUDENT')" class="border-t border-white/5 mt-2 pt-2">
+                    <p class="px-4 py-1 text-[10px] font-bold text-gray-600 uppercase tracking-widest">Learning</p>
+                    <a href="/student/dashboard" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-brand-400 hover:bg-white/5 rounded-xl transition-all">My Dashboard</a>
+                    <a href="/student/courses" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">My Courses</a>
+                    <a href="/student/certificates" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Certificates</a>
+                    <a href="/student/notifications" class="mobile-nav-link block px-4 py-2.5 text-sm font-semibold text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all">Notifications</a>
                 </div>
-                
-                <!-- Authenticated Mobile -->
-                <div sec:authorize="isAuthenticated()" class="pt-4 border-t border-white/5 space-y-2">
+
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-amber-400 hover:bg-white/5 rounded-xl border-t border-white/5 mt-2 pt-4">Admin Dashboard</a>
+                <a sec:authorize="hasRole('INSTRUCTOR')" href="/instructor/dashboard" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-emerald-400 hover:bg-white/5 rounded-xl border-t border-white/5 mt-2 pt-4">Instructor Panel</a>
+                <a sec:authorize="hasRole('EMPLOYEE')" href="/employeeProfile" class="mobile-nav-link block px-4 py-2.5 text-sm font-bold text-blue-400 hover:bg-white/5 rounded-xl border-t border-white/5 mt-2 pt-4">Employee Portal</a>
+
+                <!-- Auth actions -->
+                <div sec:authorize="!isAuthenticated()" class="pt-3 border-t border-white/5 space-y-2 mt-2">
+                    <a href="/login" class="block w-full py-3 text-center text-sm font-semibold text-gray-300 border border-white/10 rounded-xl hover:bg-white/5 transition-all">Log In</a>
+                    <a href="/register" class="block w-full py-3 text-center text-sm font-semibold text-white bg-brand-600 rounded-xl hover:bg-brand-500 transition-all shadow-lg">Get Started</a>
+                </div>
+
+                <div sec:authorize="isAuthenticated()" class="pt-3 border-t border-white/5 space-y-2 mt-2">
                     <div class="flex items-center gap-2.5 px-4 py-2.5 bg-white/5 rounded-xl">
-                        <i class="bi bi-person-fill text-brand-400"></i>
-                        <span class="text-sm font-bold text-gray-250" sec:authentication="name">Profile</span>
+                        <div class="w-7 h-7 bg-gradient-to-br from-brand-500 to-brand-700 rounded-full flex items-center justify-center">
+                            <i class="bi bi-person-fill text-white text-xs"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-200" sec:authentication="name">Profile</span>
                     </div>
-                    <a href="/logout" class="block w-full py-3 text-center text-sm font-bold text-red-400 border border-red-500/10 hover:bg-red-500/10 rounded-xl transition-all">Logout</a>
+                    <a href="/logout" class="block w-full py-3 text-center text-sm font-semibold text-red-400 border border-red-500/10 hover:bg-red-500/10 rounded-xl transition-all">Sign Out</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Scrollspy & Scroll Effects Script -->
+    <!-- Navbar Scripts -->
     <script th:inline="javascript">
+    // Mobile menu toggle
     function toggleMobileMenu() {
         const menu = document.getElementById('mobile-menu');
         const icon = document.getElementById('menu-icon');
+        const search = document.getElementById('mobile-search');
+        if (search && !search.classList.contains('hidden')) search.classList.add('hidden');
         if (menu.classList.contains('hidden')) {
             menu.classList.remove('hidden');
             icon.className = 'bi bi-x-lg text-2xl';
@@ -123,105 +232,69 @@
         }
     }
 
+    // Desktop search toggle
+    function toggleDesktopSearch() {
+        const el = document.getElementById('desktop-search');
+        el.classList.toggle('hidden');
+        if (!el.classList.contains('hidden')) {
+            document.getElementById('desktop-search-input').focus();
+        }
+    }
+
+    // Mobile search toggle
+    function toggleMobileSearch() {
+        const el = document.getElementById('mobile-search');
+        const menu = document.getElementById('mobile-menu');
+        if (menu && !menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+            document.getElementById('menu-icon').className = 'bi bi-list text-2xl';
+        }
+        el.classList.toggle('hidden');
+        if (!el.classList.contains('hidden')) {
+            document.getElementById('mobile-search-input').focus();
+        }
+    }
+
+    // Explore dropdown toggle
+    function toggleExploreMenu() {
+        const menu = document.getElementById('explore-menu');
+        const arrow = document.getElementById('explore-arrow');
+        menu.classList.toggle('hidden');
+        arrow.classList.toggle('rotate-180');
+    }
+
+    // Close explore dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('explore-dropdown');
+        if (dropdown && !dropdown.contains(e.target)) {
+            document.getElementById('explore-menu').classList.add('hidden');
+            document.getElementById('explore-arrow').classList.remove('rotate-180');
+        }
+    });
+
+    // Close search on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const ds = document.getElementById('desktop-search');
+            const ms = document.getElementById('mobile-search');
+            if (ds && !ds.classList.contains('hidden')) ds.classList.add('hidden');
+            if (ms && !ms.classList.contains('hidden')) ms.classList.add('hidden');
+        }
+    });
+
+    // Scroll effects
     document.addEventListener("DOMContentLoaded", function() {
         const nav = document.getElementById('main-nav');
-        
-        // Scroll navigation shadow effects
+
         window.addEventListener("scroll", function() {
             if (window.scrollY > 20) {
-                nav.classList.add('bg-surface-950/95', 'shadow-lg', 'shadow-brand-950/5');
+                nav.classList.add('bg-surface-950/95', 'shadow-lg', 'shadow-black/5');
                 nav.classList.remove('bg-surface-950/80');
             } else {
                 nav.classList.add('bg-surface-950/80');
-                nav.classList.remove('bg-surface-950/95', 'shadow-lg', 'shadow-brand-950/5');
+                nav.classList.remove('bg-surface-950/95', 'shadow-lg', 'shadow-black/5');
             }
         });
-
-        // Dynamic Scrollspy Highlight
-        const navLinks = document.querySelectorAll(".desktop-nav-link");
-        const mobileLinks = document.querySelectorAll(".mobile-nav-link");
-        const sections = document.querySelectorAll("section[id]");
-        
-        const isIndexPage = window.location.pathname === "/" || window.location.pathname === "/index" || window.location.pathname.endsWith("/");
-
-        if (isIndexPage) {
-            // Map multi-page relative targets to single-page scroll points on index page
-            const linksMap = {
-                "/courses": "courses",
-                "/about": "about"
-            };
-
-            function handleLinkRewrite(link) {
-                const href = link.getAttribute("href");
-                const anchorTarget = linksMap[href];
-                if (anchorTarget) {
-                    const section = document.getElementById(anchorTarget);
-                    if (section) {
-                        link.setAttribute("href", "#" + anchorTarget);
-                        link.addEventListener("click", function(e) {
-                            e.preventDefault();
-                            section.scrollIntoView({ behavior: "smooth", block: "start" });
-                            
-                            // Close mobile menu if open
-                            const mobileMenu = document.getElementById('mobile-menu');
-                            const icon = document.getElementById('menu-icon');
-                            if (mobileMenu) {
-                                mobileMenu.classList.add('hidden');
-                                if (icon) icon.className = 'bi bi-list text-2xl';
-                            }
-                        });
-                    }
-                }
-            }
-
-            navLinks.forEach(handleLinkRewrite);
-            mobileLinks.forEach(handleLinkRewrite);
-
-            // Smooth scroll for Home link specifically
-            const homeLinks = document.querySelectorAll("a[href='/index']");
-            homeLinks.forEach(link => {
-                link.setAttribute("href", "#hero");
-                link.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                    
-                    const mobileMenu = document.getElementById('mobile-menu');
-                    const icon = document.getElementById('menu-icon');
-                    if (mobileMenu) {
-                        mobileMenu.classList.add('hidden');
-                        if (icon) icon.className = 'bi bi-list text-2xl';
-                    }
-                });
-            });
-
-            // Tracking scroll position for active highlights
-            window.addEventListener("scroll", function() {
-                let currentSec = "hero";
-                const scrollPos = window.scrollY + 100; // Offset navbar height
-
-                sections.forEach(sec => {
-                    const secTop = sec.offsetTop;
-                    const secHeight = sec.offsetHeight;
-                    if (scrollPos >= secTop && scrollPos < secTop + secHeight) {
-                        currentSec = sec.getAttribute("id");
-                    }
-                });
-
-                function updateHighlight(link) {
-                    link.classList.remove('text-brand-400', 'bg-white/5', 'border-white/10');
-                    link.classList.add('border-transparent');
-                    
-                    const href = link.getAttribute("href");
-                    if (href === "#" + currentSec) {
-                        link.classList.add('text-brand-400', 'bg-white/5', 'border-white/10');
-                        link.classList.remove('border-transparent');
-                    }
-                }
-
-                navLinks.forEach(updateHighlight);
-                mobileLinks.forEach(updateHighlight);
-            });
-        }
     });
     </script>
 </header>

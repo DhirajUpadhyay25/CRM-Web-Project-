@@ -69,6 +69,15 @@ public class UserController
 	private in.project.main.services.BlogService blogService;
 
 	@Autowired
+	private in.project.main.services.InstructorService instructorService;
+
+	@Autowired
+	private in.project.main.services.FaqService faqService;
+
+	@Autowired
+	private in.project.main.repositories.CertificateRepository certificateRepository;
+
+	@Autowired
 	private in.project.main.services.TestimonialService testimonialService;
 	
 	@Value("${app.razorpay.key-id}")
@@ -115,6 +124,31 @@ public class UserController
 		// Supply featured & published testimonials for Homepage Success Stories Section
 		List<in.project.main.entities.Testimonial> featuredTestimonials = testimonialService.getFeaturedOrPublished(6);
 		model.addAttribute("featuredTestimonials", featuredTestimonials);
+
+		// Supply top instructors for Homepage Instructor Spotlight Section
+		try {
+			List<in.project.main.entities.Instructor> topInstructors = instructorService.getActiveInstructors();
+			if (topInstructors != null && topInstructors.size() > 4) {
+				topInstructors = topInstructors.subList(0, 4);
+			}
+			model.addAttribute("topInstructors", topInstructors);
+		} catch (Exception e) {
+			model.addAttribute("topInstructors", java.util.Collections.emptyList());
+		}
+
+		// Supply FAQs for Homepage FAQ Section
+		try {
+			model.addAttribute("homepageFaqs", faqService.getActiveFaqs());
+		} catch (Exception e) {
+			model.addAttribute("homepageFaqs", java.util.Collections.emptyList());
+		}
+
+		// Certificate count for trust section
+		try {
+			model.addAttribute("totalCertificatesCount", certificateRepository.count());
+		} catch (Exception e) {
+			model.addAttribute("totalCertificatesCount", 0L);
+		}
 		
 		if(userDetails != null && userDetails.getRole() == Role.STUDENT)
 		{

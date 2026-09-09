@@ -3,75 +3,107 @@
 <head></head>
 <body>
 <!-- ═══════════════════════════════════════════════════════════════════
-     UNIFIED FOOTER
+     UNIFIED FOOTER — Premium 5-column responsive footer
      ═══════════════════════════════════════════════════════════════════ -->
-<footer th:fragment="footer" class="bg-surface-950 border-t border-white/5 pt-16 pb-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+<footer th:fragment="footer" class="bg-surface-950 border-t border-white/5 relative overflow-hidden">
+
+    <!-- Ambient background glow -->
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-brand-600/5 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8 relative z-10">
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 lg:gap-8 mb-14">
+
             <!-- Brand Column -->
-            <div class="space-y-4">
-                <a href="/index" class="flex items-center gap-2 group inline-flex">
-                    <div class="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">E</span>
+            <div class="col-span-2 md:col-span-3 lg:col-span-1 space-y-5">
+                <a href="/index" class="flex items-center gap-2.5 group inline-flex">
+                    <div class="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/15">
+                        <span class="text-white font-black text-base">E</span>
                     </div>
-                    <span class="text-white font-bold text-xl tracking-tight group-hover:text-brand-400 transition-colors">EduTake</span>
+                    <span class="text-white font-extrabold text-xl tracking-tight group-hover:text-brand-400 transition-colors">EduTake<span class="text-brand-500">.</span></span>
                 </a>
                 <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
-                    Empowering careers through practical learning, expert guidance, and professional development programs.
+                    Empowering careers through structured learning, expert guidance, and verified professional credentials.
                 </p>
-                <div class="flex gap-4 pt-2">
-                    <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 transition-all">
+                <div class="flex gap-3 pt-1">
+                    <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 hover:border-brand-600 transition-all" aria-label="Twitter">
                         <i class="bi bi-twitter-x text-sm"></i>
                     </a>
-                    <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 transition-all">
+                    <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 hover:border-brand-600 transition-all" aria-label="LinkedIn">
                         <i class="bi bi-linkedin text-sm"></i>
                     </a>
-                    <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 transition-all">
+                    <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 hover:border-brand-600 transition-all" aria-label="YouTube">
                         <i class="bi bi-youtube text-sm"></i>
+                    </a>
+                    <a href="#" class="w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-brand-600 hover:border-brand-600 transition-all" aria-label="GitHub">
+                        <i class="bi bi-github text-sm"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- Explore Column -->
+            <!-- Platform Column -->
             <div>
-                <h3 class="text-white font-semibold mb-4">Explore</h3>
+                <h3 class="text-white font-bold text-sm mb-5 tracking-wide">Platform</h3>
                 <ul class="space-y-3">
                     <li><a href="/courses" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">All Courses</a></li>
-                    <li><a href="/blogs" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Blog &amp; Articles</a></li>
+                    <li><a href="/blogs" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Blog & Articles</a></li>
+                    <li><a href="/verify-certificate" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Verify Certificate</a></li>
                     <li><a href="/services" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Our Services</a></li>
-                    <li><a href="/about" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">About Us</a></li>
                 </ul>
             </div>
 
-            <!-- Support Column -->
+            <!-- Resources Column -->
             <div>
-                <h3 class="text-white font-semibold mb-4">Support</h3>
+                <h3 class="text-white font-bold text-sm mb-5 tracking-wide">Resources</h3>
                 <ul class="space-y-3">
-                    <li><a href="/contact" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Contact Us</a></li>
                     <li><a href="/faq" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">FAQ</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Terms of Service</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Privacy Policy</a></li>
+                    <li><a href="/contact" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Contact Us</a></li>
+                    <li><a href="/about" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">About Us</a></li>
+                    <li><a href="/blogs" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Career Guides</a></li>
                 </ul>
             </div>
 
-            <!-- CTA Column -->
+            <!-- Company Column -->
             <div>
-                <h3 class="text-white font-semibold mb-4">Ready to start?</h3>
-                <p class="text-gray-400 text-sm mb-4">
-                    Join thousands of students learning on EduTake today.
-                </p>
-                <a href="/register" class="inline-flex items-center justify-center px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-brand-600/20 w-full sm:w-auto">
-                    Get Started Free
-                </a>
+                <h3 class="text-white font-bold text-sm mb-5 tracking-wide">Company</h3>
+                <ul class="space-y-3">
+                    <li><a href="/about" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">About EduTake</a></li>
+                    <li><a href="/contact" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Careers</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-brand-400 text-sm transition-colors">Terms of Service</a></li>
+                </ul>
             </div>
         </div>
 
+        <!-- Newsletter / CTA Strip -->
+        <div class="bg-surface-900/60 border border-white/5 rounded-2xl p-6 sm:p-8 mb-12">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="text-center sm:text-left">
+                    <h3 class="text-lg font-bold text-white mb-1">Ready to start learning?</h3>
+                    <p class="text-gray-400 text-sm">Join our growing community of learners and unlock your potential.</p>
+                </div>
+                <div class="flex gap-3 flex-shrink-0">
+                    <a href="/register" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30 hover:-translate-y-0.5">
+                        Get Started Free
+                    </a>
+                    <a href="/courses" class="px-6 py-3 bg-white/5 border border-white/10 hover:border-white/20 text-white font-semibold rounded-xl text-sm transition-all hover:bg-white/10">
+                        Browse Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
         <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
             <p class="text-gray-500 text-sm">
-                &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2024</span> EduTake. All rights reserved.
+                &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</span> EduTake. All rights reserved.
             </p>
-            <div class="flex items-center gap-6 text-sm text-gray-500">
-                <span>Designed for professionals</span>
+            <div class="flex items-center gap-6 text-sm text-gray-600">
+                <a href="#" class="hover:text-gray-400 transition-colors">Privacy</a>
+                <a href="#" class="hover:text-gray-400 transition-colors">Terms</a>
+                <span class="text-gray-700">•</span>
+                <span>Built for professionals</span>
             </div>
         </div>
     </div>
