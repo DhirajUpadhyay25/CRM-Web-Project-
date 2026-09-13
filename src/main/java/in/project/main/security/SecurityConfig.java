@@ -71,7 +71,7 @@ public class SecurityConfig {
                     "/page/**", "/p/**",
                     "/blogs", "/blogs/**", "/blog/**", "/articles", "/articles/**",
                     "/verify/**", "/verify/certificate/**", "/verify-certificate/**",
-                    "/api/coupons/validate",
+                    "/api/coupons/validate", "/api/support/**",
                     "/css/**", "/js/**", "/images/**", "/upload/**", "/uploads/**",
                     "/error", "/error/**"
                 ).permitAll()
