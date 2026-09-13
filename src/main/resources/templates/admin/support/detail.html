@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Support Ticket ' + ${ticket.ticketNumber}, ~{::div})}">
+<body>
+    <div>
+
+        <!-- Back Navigation & Top Bar -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-200 pb-4">
+            <div class="flex items-center gap-3">
+                <a th:href="@{/admin/support}" class="w-9 h-9 rounded-xl bg-surface-100 hover:bg-surface-200 text-gray-500 hover:text-surface-900 flex items-center justify-center transition-colors">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-mono text-sm font-bold text-brand-600" th:text="${ticket.ticketNumber}">TCK-10001</span>
+                        <span th:class="${'px-2 py-0.5 rounded-full text-[10px] font-semibold border ' + ticket.status.badgeClass}" th:text="${ticket.status.displayName}">Open</span>
+                        <span th:class="${'px-2 py-0.5 rounded-full text-[10px] font-semibold border ' + ticket.priority.badgeClass}" th:text="${ticket.priority.displayName}">Medium</span>
+                    </div>
+                    <h1 class="text-xl font-bold text-surface-900 mt-1" th:text="${ticket.subject}">Ticket Subject</h1>
+                </div>
+            </div>
+
+            <!-- WhatsApp Direct Action -->
+            <div class="flex items-center gap-2">
+                <a href="https://wa.me/918130279213" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
+                    <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                </a>
+            </div>
+        </div>
+
+        <!-- Feedback / Alerts -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill text-emerald-600"></i>
+            <span class="text-sm font-medium" th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill text-rose-600"></i>
+            <span class="text-sm font-medium" th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Grid Layout: Left Details/Conversation (8 cols), Right Context/Management (4 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- LEFT: Conversation Thread -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- Original Ticket Description Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-6 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-surface-100 pb-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-brand-500/10 text-brand-600 flex items-center justify-center font-bold text-sm">
+                                <span th:text="${ticket.userName.substring(0, 1).toUpperCase()}">U</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-surface-900 text-sm" th:text="${ticket.userName}">User Name</h3>
+                                <p class="text-xs text-gray-400">
+                                    <span th:text="${ticket.userEmail}">email@example.com</span> &bull;
+                                    <span class="font-medium text-brand-600" th:text="${ticket.userRole}">STUDENT</span>
+                                </p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-gray-400 tabular-nums" th:text="${#temporals.format(ticket.createdAt, 'dd MMM yyyy, HH:mm')}">
+                            12 May 2026, 14:20
+                        </span>
+                    </div>
+
+                    <div class="prose max-w-none text-surface-800 text-sm leading-relaxed whitespace-pre-wrap" th:text="${ticket.description}">
+                        Detailed description of the problem submitted by the learner.
+                    </div>
+                </div>
+
+                <!-- Replies Thread -->
+                <div th:if="${not #lists.isEmpty(replies)}" class="space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 px-1">Conversation History</h3>
+                    
+                    <div th:each="r : ${replies}"
+                         th:class="${r.senderType == 'ADMIN' or r.senderType == 'SUPPORT_AGENT' ? 'bg-brand-50/50 border border-brand-200/60 rounded-2xl p-5 ml-4 sm:ml-8' : (r.senderType == 'SYSTEM' ? 'bg-surface-50 border border-surface-200 rounded-xl p-3 text-xs text-gray-500 italic text-center' : 'bg-white border border-surface-200 rounded-2xl p-5 mr-4 sm:mr-8')}">
+                        
+                        <!-- Header for User/Admin replies -->
+                        <div th:unless="${r.senderType == 'SYSTEM'}" class="flex items-center justify-between border-b border-surface-100/80 pb-2 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-surface-900" th:text="${r.senderName}">Sender Name</span>
+                                <span th:if="${r.senderType == 'ADMIN' or r.senderType == 'SUPPORT_AGENT'}" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-600 text-white">Staff</span>
+                                <span th:if="${r.senderType == 'USER'}" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700">Learner</span>
+                            </div>
+                            <span class="text-[11px] text-gray-400 tabular-nums" th:text="${#temporals.format(r.createdAt, 'dd MMM, HH:mm')}">12 May, 14:35</span>
+                        </div>
+
+                        <!-- Message Body -->
+                        <div class="text-sm leading-relaxed whitespace-pre-wrap" th:text="${r.message}">
+                            Reply message text.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Staff Reply Box -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-6 shadow-sm">
+                    <h3 class="text-sm font-bold text-surface-900 mb-3 flex items-center gap-2">
+                        <i class="bi bi-reply-fill text-brand-600"></i> Post Staff Reply
+                    </h3>
+
+                    <form method="post" th:action="@{/admin/support/{id}/reply(id=${ticket.id})}">
+                        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <div class="mb-4">
+                            <textarea name="message" rows="4" required class="w-full p-3 text-sm rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800" placeholder="Type your response to the learner here..."></textarea>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400">Sending a reply will transition the ticket status to 'In Progress'.</span>
+                            <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+                                <i class="bi bi-send-fill"></i> Send Reply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: Context Snapshot & Management Actions -->
+            <div class="lg:col-span-4 space-y-6">
+
+                <!-- Status & Lifecycle Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Ticket Lifecycle</h3>
+
+                    <form method="post" th:action="@{/admin/support/{id}/status(id=${ticket.id})}" class="space-y-3">
+                        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Update Status</label>
+                            <select name="newStatus" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                                <option th:each="st : ${statuses}" th:value="${st}" th:text="${st.displayName}" th:selected="${st == ticket.status}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Resolution Summary</label>
+                            <textarea name="resolution" rows="2" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800" placeholder="Required if marking Resolved..." th:text="${ticket.resolution}"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-2 bg-surface-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-colors">
+                            Update Lifecycle Status
+                        </button>
+                    </form>
+
+                    <div th:if="${ticket.resolvedAt != null}" class="mt-3 pt-3 border-t border-surface-100 text-xs text-emerald-600 flex items-center gap-1.5">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>Resolved on <strong th:text="${#temporals.format(ticket.resolvedAt, 'dd MMM yyyy, HH:mm')}"></strong></span>
+                    </div>
+                </div>
+
+                <!-- Assignment Card -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Staff Assignment</h3>
+
+                    <form method="post" th:action="@{/admin/support/{id}/assign(id=${ticket.id})}" class="space-y-3">
+                        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Assignee Email</label>
+                            <input type="email" name="adminEmail" th:value="${ticket.assignedToEmail}" required placeholder="staff@edutake.com" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Assignee Name</label>
+                            <input type="text" name="adminName" th:value="${ticket.assignedTo}" placeholder="Staff Member Name" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                        </div>
+
+                        <button type="submit" class="w-full py-2 bg-surface-100 hover:bg-surface-200 text-gray-800 rounded-xl text-xs font-semibold transition-colors">
+                            Save Assignment
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Captured LMS Context Snapshot -->
+                <div class="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5">
+                        <i class="bi bi-hdd-network"></i> Captured Context
+                    </h3>
+
+                    <div class="space-y-2.5 text-xs">
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase">Category</span>
+                            <span class="font-medium text-surface-900" th:text="${ticket.category.displayName}">Category</span>
+                        </div>
+
+                        <div th:if="${ticket.courseName != null or ticket.courseId != null}">
+                            <span class="text-gray-400 block text-[10px] uppercase">Course</span>
+                            <span class="font-medium text-brand-600" th:text="${ticket.courseName != null ? ticket.courseName : 'ID: ' + ticket.courseId}">Course</span>
+                        </div>
+
+                        <div th:if="${ticket.lessonTitle != null or ticket.lessonId != null}">
+                            <span class="text-gray-400 block text-[10px] uppercase">Lesson</span>
+                            <span class="font-medium text-surface-900" th:text="${ticket.lessonTitle != null ? ticket.lessonTitle : 'ID: ' + ticket.lessonId}">Lesson</span>
+                        </div>
+
+                        <div th:if="${ticket.pageUrl != null}">
+                            <span class="text-gray-400 block text-[10px] uppercase">Origin Page URL</span>
+                            <a th:href="${ticket.pageUrl}" target="_blank" class="text-brand-600 hover:underline break-all font-mono text-[11px]" th:text="${ticket.pageUrl}">/url</a>
+                        </div>
+
+                        <div th:if="${ticket.deviceInfo != null}">
+                            <span class="text-gray-400 block text-[10px] uppercase">Screen Resolution</span>
+                            <span class="text-surface-700 font-mono text-[11px]" th:text="${ticket.deviceInfo}">1920x1080</span>
+                        </div>
+
+                        <div th:if="${ticket.browserInfo != null}">
+                            <span class="text-gray-400 block text-[10px] uppercase">Browser Agent</span>
+                            <span class="text-gray-600 text-[10px] break-all block" th:text="${ticket.browserInfo}">User Agent</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>

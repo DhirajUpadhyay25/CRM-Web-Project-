@@ -164,6 +164,10 @@
                         <i class="bi bi-envelope-fill text-base"></i>
                         <span class="text-sm">Email / Messages</span>
                     </a>
+                    <a href="/admin/support" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300 hover:text-white" data-path="/admin/support">
+                        <i class="bi bi-headset text-base text-brand-400"></i>
+                        <span class="text-sm">Support Tickets</span>
+                    </a>
                 </div>
             </div>
 
@@ -691,5 +695,8 @@
             });
         }
     </script>
+
+    <!-- Global "Need Help?" AI Support & Assistance System -->
+    <div th:replace="~{fragments/need-help-widget :: needHelpWidget}"></div>
 </body>
 </html>

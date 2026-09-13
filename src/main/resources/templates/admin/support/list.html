@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout/admin-layout :: layout('Support Tickets Management', ~{::div})}">
+<body>
+    <div>
+        <!-- Top Header -->
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-200 pb-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <h1 class="text-2xl font-bold text-surface-900 tracking-tight">Support Tickets &amp; Help Desk</h1>
+                </div>
+                <p class="text-gray-500 text-sm">Review, assign, respond to, and resolve learner support requests across EduTake.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="https://wa.me/918130279213" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
+                    <i class="bi bi-whatsapp"></i> WhatsApp Console
+                </a>
+            </div>
+        </div>
+
+        <!-- Feedback / Alerts -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+            <i class="bi bi-check-circle-fill text-emerald-600"></i>
+            <span class="text-sm font-medium" th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill text-rose-600"></i>
+            <span class="text-sm font-medium" th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white rounded-xl p-3 sm:p-4 border border-surface-200 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-lg bg-surface-100 flex items-center justify-center text-surface-700 text-xs">
+                        <i class="bi bi-ticket-detailed-fill"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">Total</p>
+                </div>
+                <p class="text-2xl font-black text-surface-900" th:text="${stats.total}">0</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-3 sm:p-4 border border-surface-200 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 text-xs">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">Open</p>
+                </div>
+                <p class="text-2xl font-black text-amber-600" th:text="${stats.open}">0</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-3 sm:p-4 border border-surface-200 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-xs">
+                        <i class="bi bi-gear-wide-connected"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">In Progress</p>
+                </div>
+                <p class="text-2xl font-black text-blue-600" th:text="${stats.inProgress}">0</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-3 sm:p-4 border border-surface-200 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 text-xs">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">Waiting</p>
+                </div>
+                <p class="text-2xl font-black text-purple-600" th:text="${stats.waiting}">0</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-3 sm:p-4 border border-surface-200 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 text-xs">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">Resolved</p>
+                </div>
+                <p class="text-2xl font-black text-emerald-600" th:text="${stats.resolved}">0</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-3 sm:p-4 border border-surface-200 shadow-sm">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600 text-xs">
+                        <i class="bi bi-fire"></i>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">Urgent</p>
+                </div>
+                <p class="text-2xl font-black text-rose-600" th:text="${stats.urgent}">0</p>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="bg-white rounded-2xl border border-surface-200 p-4 mb-6 shadow-sm">
+            <form method="get" th:action="@{/admin/support}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
+                <!-- Keyword -->
+                <div>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search ticket #, subject, user..." class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <select name="status" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                        <option value="">All Statuses</option>
+                        <option th:each="st : ${statuses}" th:value="${st}" th:text="${st.displayName}" th:selected="${st == selectedStatus}"></option>
+                    </select>
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <select name="category" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat.displayName}" th:selected="${cat == selectedCategory}"></option>
+                    </select>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <select name="priority" class="w-full px-3 py-2 text-xs rounded-xl border border-surface-200 focus:outline-none focus:border-brand-600 text-surface-800">
+                        <option value="">All Priorities</option>
+                        <option th:each="pr : ${priorities}" th:value="${pr}" th:text="${pr.displayName}" th:selected="${pr == selectedPriority}"></option>
+                    </select>
+                </div>
+
+                <!-- Submit & Clear -->
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <a th:href="@{/admin/support}" class="py-2 px-3 bg-surface-100 hover:bg-surface-200 text-gray-600 rounded-xl text-xs font-semibold transition-colors">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tickets Table Card -->
+        <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-surface-50 border-b border-surface-200 text-xs uppercase tracking-wider text-gray-500 font-semibold">
+                        <tr>
+                            <th class="py-3.5 px-4">Ticket</th>
+                            <th class="py-3.5 px-4">User</th>
+                            <th class="py-3.5 px-4">Category</th>
+                            <th class="py-3.5 px-4">Subject</th>
+                            <th class="py-3.5 px-4">Status</th>
+                            <th class="py-3.5 px-4">Priority</th>
+                            <th class="py-3.5 px-4">Created</th>
+                            <th class="py-3.5 px-4">Assigned</th>
+                            <th class="py-3.5 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-100 text-surface-800">
+                        <tr th:if="${#lists.isEmpty(tickets)}">
+                            <td colspan="9" class="py-12 text-center text-gray-400">
+                                <i class="bi bi-inbox text-3xl mb-2 block text-gray-300"></i>
+                                No support tickets found matching your filter criteria.
+                            </td>
+                        </tr>
+                        <tr th:each="t : ${tickets}" class="hover:bg-surface-50/75 transition-colors">
+                            <!-- Ticket # -->
+                            <td class="py-3.5 px-4 font-mono text-xs font-bold text-brand-600">
+                                <a th:href="@{/admin/support/{id}(id=${t.id})}" th:text="${t.ticketNumber}">TCK-10001</a>
+                            </td>
+
+                            <!-- User -->
+                            <td class="py-3.5 px-4">
+                                <div class="font-medium text-surface-900 text-xs" th:text="${t.userName}">John Doe</div>
+                                <div class="text-[11px] text-gray-400 truncate max-w-[150px]" th:text="${t.userEmail}">john@example.com</div>
+                            </td>
+
+                            <!-- Category -->
+                            <td class="py-3.5 px-4 text-xs font-medium text-gray-600">
+                                <span class="inline-flex items-center gap-1">
+                                    <i th:class="${'bi ' + t.category.iconClass + ' text-gray-400 text-xs'}"></i>
+                                    <span th:text="${t.category.displayName}">Category</span>
+                                </span>
+                            </td>
+
+                            <!-- Subject -->
+                            <td class="py-3.5 px-4 max-w-[240px]">
+                                <a th:href="@{/admin/support/{id}(id=${t.id})}" class="font-medium text-surface-900 hover:text-brand-600 transition-colors text-xs truncate block" th:text="${t.subject}">Subject</a>
+                                <span th:if="${t.courseName != null}" class="text-[11px] text-brand-600 truncate block" th:text="${'Course: ' + t.courseName}"></span>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="py-3.5 px-4">
+                                <span th:class="${'px-2 py-0.5 rounded-full text-[10px] font-semibold border ' + t.status.badgeClass}" th:text="${t.status.displayName}">Open</span>
+                            </td>
+
+                            <!-- Priority -->
+                            <td class="py-3.5 px-4">
+                                <span th:class="${'px-2 py-0.5 rounded-full text-[10px] font-semibold border ' + t.priority.badgeClass}" th:text="${t.priority.displayName}">Medium</span>
+                            </td>
+
+                            <!-- Created -->
+                            <td class="py-3.5 px-4 text-xs text-gray-500 tabular-nums" th:text="${#temporals.format(t.createdAt, 'dd MMM, HH:mm')}">
+                                12 May, 14:20
+                            </td>
+
+                            <!-- Assigned -->
+                            <td class="py-3.5 px-4 text-xs text-gray-500">
+                                <span th:if="${t.assignedTo != null}" class="font-medium text-surface-800" th:text="${t.assignedTo}">Admin</span>
+                                <span th:unless="${t.assignedTo != null}" class="text-gray-400 italic">Unassigned</span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="py-3.5 px-4 text-right">
+                                <a th:href="@{/admin/support/{id}(id=${t.id})}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-100 hover:bg-brand-50 hover:text-brand-600 text-gray-600 text-xs font-medium transition-colors">
+                                    <span>Manage</span>
+                                    <i class="bi bi-chevron-right text-[10px]"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="p-4 border-t border-surface-200 flex items-center justify-between text-xs text-gray-500">
+                <span th:text="${'Showing page ' + (currentPage + 1) + ' of ' + totalPages + ' (' + totalElements + ' tickets)'}"></span>
+                <div class="flex gap-1">
+                    <a th:if="${currentPage > 0}" th:href="@{/admin/support(page=${currentPage - 1}, keyword=${keyword}, status=${selectedStatus}, category=${selectedCategory}, priority=${selectedPriority})}" class="px-3 py-1.5 bg-surface-100 hover:bg-surface-200 rounded-lg text-surface-800 transition-colors">
+                        Previous
+                    </a>
+                    <a th:if="${currentPage < totalPages - 1}" th:href="@{/admin/support(page=${currentPage + 1}, keyword=${keyword}, status=${selectedStatus}, category=${selectedCategory}, priority=${selectedPriority})}" class="px-3 py-1.5 bg-surface-100 hover:bg-surface-200 rounded-lg text-surface-800 transition-colors">
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

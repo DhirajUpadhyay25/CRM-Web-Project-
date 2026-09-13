@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         EduTake LMS — Global "Need Help?" AI Support & Assistance System
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div th:fragment="needHelpWidget">
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" th:href="@{/css/need-help-widget.css}">
+
+        <!-- Floating Launcher Button -->
+        <button id="need-help-launcher"
+                type="button"
+                aria-label="Open Need Help Support and Learning Assistant"
+                aria-haspopup="dialog"
+                aria-expanded="false">
+            <span class="nh-launcher-pulse" aria-hidden="true"></span>
+            <span class="nh-launcher-icon" aria-hidden="true">
+                <i class="bi bi-chat-dots-fill"></i>
+            </span>
+            <span class="nh-launcher-label">Need Help?</span>
+        </button>
+
+        <!-- Compact Floating Support Card (Anchored above button, no full right drawer, no screen blur) -->
+        <aside id="need-help-drawer"
+               role="dialog"
+               aria-modal="false"
+               aria-label="EduTake Support & Learning Assistant">
+
+            <!-- Card Header -->
+            <div class="nh-drawer-header">
+                <div class="nh-header-title-wrap">
+                    <div class="nh-header-icon" aria-hidden="true">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <h2 class="nh-header-title">Need Help?</h2>
+                        <div class="nh-header-subtitle">
+                            <span class="nh-status-badge">
+                                <span class="nh-status-dot"></span> Support available
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nh-header-actions">
+                    <a id="nh-header-whatsapp-btn"
+                       href="https://wa.me/918130279213"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="nh-header-whatsapp-btn"
+                       title="Chat directly on WhatsApp (+91 81302 79213)">
+                        <i class="bi bi-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                    <button id="nh-close-btn"
+                            type="button"
+                            class="nh-close-btn"
+                            aria-label="Close Need Help Card">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Intelligent Context Banner -->
+            <div class="nh-context-banner" id="nh-context-banner">
+                <div class="nh-context-icon">
+                    <i class="bi bi-compass"></i>
+                </div>
+                <div class="nh-context-content">
+                    <div class="nh-context-label" id="nh-context-label">CURRENT CONTEXT</div>
+                    <div class="nh-context-title" id="nh-context-title">EduTake Learning Platform</div>
+                    <div class="nh-context-desc" id="nh-context-desc">How can we help you continue learning?</div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="nh-nav-tabs" aria-label="Support Sections">
+                <button type="button" class="nh-tab-btn active" data-tab="quick">
+                    <i class="bi bi-lightning-charge-fill text-amber-400"></i> Quick Help
+                </button>
+                <button type="button" class="nh-tab-btn" data-tab="ai">
+                    <i class="bi bi-robot text-brand-400"></i> Ask AI
+                </button>
+                <button type="button" class="nh-tab-btn" data-tab="faq">
+                    <i class="bi bi-patch-question-fill text-blue-400"></i> FAQs
+                </button>
+                <button type="button" class="nh-tab-btn" data-tab="ticket">
+                    <i class="bi bi-ticket-detailed-fill text-purple-400"></i> Support Ticket
+                </button>
+                <button type="button" class="nh-tab-btn" data-tab="report">
+                    <i class="bi bi-bug-fill text-rose-400"></i> Report Problem
+                </button>
+                <a id="nh-tab-whatsapp"
+                   href="https://wa.me/918130279213"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="nh-tab-btn nh-tab-whatsapp"
+                   title="Open WhatsApp Chat (+91 81302 79213)">
+                    <i class="bi bi-whatsapp text-emerald-400"></i> WhatsApp
+                </a>
+            </nav>
+
+            <!-- Drawer Body / Views -->
+            <div class="nh-drawer-body">
+
+                <!-- 1. Quick Help View -->
+                <div class="nh-tab-view active" id="nh-view-quick">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Suggested For This Page</p>
+                    
+                    <!-- Dynamic Context Quick Action Chips -->
+                    <div class="nh-chips-grid" id="nh-chips-grid">
+                        <button type="button" class="nh-action-chip" onclick="window.EduTakeSupport.openTab('ai')">
+                            <div class="nh-chip-icon"><i class="bi bi-robot"></i></div>
+                            <span class="flex-1">Ask LMS Assistant</span>
+                            <i class="bi bi-arrow-right text-xs opacity-40"></i>
+                        </button>
+                        <button type="button" class="nh-action-chip" onclick="window.EduTakeSupport.openTab('faq')">
+                            <div class="nh-chip-icon"><i class="bi bi-search"></i></div>
+                            <span class="flex-1">Search Knowledge Base</span>
+                            <i class="bi bi-arrow-right text-xs opacity-40"></i>
+                        </button>
+                        <button type="button" class="nh-action-chip" onclick="window.EduTakeSupport.openTab('ticket')">
+                            <div class="nh-chip-icon"><i class="bi bi-ticket-detailed"></i></div>
+                            <span class="flex-1">Submit a Support Ticket</span>
+                            <i class="bi bi-arrow-right text-xs opacity-40"></i>
+                        </button>
+                    </div>
+
+                    <!-- WhatsApp Support Channel -->
+                    <div class="nh-whatsapp-card">
+                        <div class="flex items-start gap-2.5">
+                            <i class="bi bi-whatsapp text-emerald-400 text-xl mt-0.5"></i>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Direct WhatsApp Assistance</h4>
+                                <p class="text-xs text-slate-300 mt-0.5">Need immediate human help? Chat directly with our support team on WhatsApp.</p>
+                            </div>
+                        </div>
+                        <a id="nh-whatsapp-btn"
+                           href="https://wa.me/918130279213"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="nh-whatsapp-btn">
+                            <i class="bi bi-whatsapp text-base"></i> Chat on WhatsApp (+91 81302 79213)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2. Ask AI View -->
+                <div class="nh-tab-view" id="nh-view-ai">
+                    <div class="nh-chat-thread" id="nh-chat-thread">
+                        <!-- Messages dynamically appended -->
+                    </div>
+                    <div class="nh-chat-input-bar">
+                        <input type="text"
+                               id="nh-chat-input"
+                               class="nh-chat-input"
+                               placeholder="Ask about navigation, video, certificate..."
+                               aria-label="Ask LMS Assistant">
+                        <button type="button"
+                                id="nh-chat-send"
+                                class="nh-chat-send-btn"
+                                aria-label="Send query">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. FAQs View -->
+                <div class="nh-tab-view" id="nh-view-faq">
+                    <div class="nh-search-wrap">
+                        <i class="bi bi-search nh-search-icon"></i>
+                        <input type="search"
+                               id="nh-faq-search"
+                               class="nh-search-input"
+                               placeholder="Search for help, certificates, videos..."
+                               aria-label="Search FAQs">
+                    </div>
+                    <div id="nh-faq-container">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- 4. Support Ticket View -->
+                <div class="nh-tab-view" id="nh-view-ticket">
+                    <div id="nh-ticket-alert" class="nh-alert hidden"></div>
+
+                    <form id="nh-ticket-form">
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-ticket-name">Your Name</label>
+                            <input type="text" id="nh-ticket-name" name="name" class="nh-form-input" placeholder="Your full name" required>
+                        </div>
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-ticket-email">Your Email</label>
+                            <input type="email" id="nh-ticket-email" name="email" class="nh-form-input" placeholder="email@example.com" required>
+                        </div>
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-ticket-category">Category</label>
+                            <select id="nh-ticket-category" name="category" class="nh-form-select">
+                                <option value="COURSE_ACCESS">Course Access</option>
+                                <option value="LESSON_VIDEO">Lesson / Video Issue</option>
+                                <option value="QUIZ_ASSESSMENT">Quiz / Assessment</option>
+                                <option value="ASSIGNMENT">Assignment</option>
+                                <option value="CERTIFICATE">Certificate</option>
+                                <option value="PROGRESS_TRACKING">Progress Tracking</option>
+                                <option value="PAYMENT_SUBSCRIPTION">Payment & Subscription</option>
+                                <option value="ACCOUNT_LOGIN">Account & Login</option>
+                                <option value="TECHNICAL_ISSUE">Technical Issue</option>
+                                <option value="INSTRUCTOR_CONTENT">Instructor / Course Content</option>
+                                <option value="FEEDBACK">Feedback & Suggestion</option>
+                                <option value="OTHER" selected>Other Inquiry</option>
+                            </select>
+                        </div>
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-ticket-subject">Subject</label>
+                            <input type="text" id="nh-ticket-subject" name="subject" class="nh-form-input" placeholder="Brief summary of your issue" required>
+                        </div>
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-ticket-desc">Description</label>
+                            <textarea id="nh-ticket-desc" name="description" class="nh-form-textarea" placeholder="Please describe what you need help with..." required></textarea>
+                        </div>
+                        <button type="submit" id="nh-ticket-submit-btn" class="nh-submit-btn">
+                            <i class="bi bi-send-fill"></i> Submit Support Request
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 5. Report Problem View -->
+                <div class="nh-tab-view" id="nh-view-report">
+                    <div id="nh-report-alert" class="nh-alert hidden"></div>
+
+                    <form id="nh-report-form">
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-report-issue">What went wrong?</label>
+                            <select id="nh-report-issue" name="issueType" class="nh-form-select">
+                                <option value="VIDEO_ISSUE">Video playback stalled or won't play</option>
+                                <option value="BROKEN_PAGE">Page error / 404 / broken link</option>
+                                <option value="QUIZ_ISSUE">Quiz question or scoring glitch</option>
+                                <option value="ASSIGNMENT_ISSUE">Assignment upload problem</option>
+                                <option value="UI_BUG">Layout or button glitch</option>
+                                <option value="INCORRECT_CONTENT">Typo or inaccurate curriculum content</option>
+                                <option value="OTHER">Other technical issue</option>
+                            </select>
+                        </div>
+                        <div class="nh-form-group">
+                            <label class="nh-form-label" for="nh-report-desc">Problem Details</label>
+                            <textarea id="nh-report-desc" name="description" class="nh-form-textarea" placeholder="Please describe what happened so our team can resolve it quickly..." required></textarea>
+                        </div>
+                        <div class="text-[11px] text-slate-400 mb-3 flex items-center gap-1.5">
+                            <i class="bi bi-shield-check text-emerald-400"></i> Technical diagnostics (URL & device) will be safely attached.
+                        </div>
+                        <button type="submit" id="nh-report-submit-btn" class="nh-submit-btn">
+                            <i class="bi bi-flag-fill"></i> Submit Problem Report
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- Persistent Bottom WhatsApp CTA Bar -->
+            <div class="nh-persistent-footer">
+                <a id="nh-persistent-whatsapp-btn"
+                   href="https://wa.me/918130279213"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="nh-persistent-whatsapp-link">
+                    <i class="bi bi-whatsapp text-emerald-400 text-sm"></i>
+                    <span>Need instant help? <strong>Chat on WhatsApp (+91 81302 79213)</strong></span>
+                    <i class="bi bi-box-arrow-up-right text-[10px] opacity-70"></i>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Javascript Engine -->
+        <script th:src="@{/js/need-help-widget.js}" defer></script>
+    </div>
+
+</body>
+</html>
