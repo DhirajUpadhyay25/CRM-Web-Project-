@@ -1,0 +1,17 @@
+target/
+*.log
+cookies.txt
+admin_cookies.txt
+inst_cookies.txt
+stu_cookies.txt
+reg_cookies.txt
+*.html
+*.txt
+application-secrets.properties
+.git/
+.vscode/
+.idea/
+.settings/
+.classpath
+.project
+scratch/

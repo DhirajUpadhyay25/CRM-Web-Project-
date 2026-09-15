@@ -32,8 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-### Secrets & Production Config ###
-application-prod.properties
+### Secrets & Local Overrides (Do NOT commit) ###
 application-secrets.properties
 *.env
 .env.*

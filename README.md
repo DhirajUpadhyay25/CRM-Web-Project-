@@ -1,135 +1,148 @@
 <div align="center">
-  <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="EduTake Logo" width="120">
+  <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="EduTake Logo" width="100">
   
-  # EduTake CRM & LMS Platform
+  # EduTake LMS & Education CRM
   
-  **A powerful, modern Education Platform + LMS + CRM built with Spring Boot.**
+  **An enterprise-grade, full-stack Learning Management System and CRM platform built with Spring Boot 3 & Thymeleaf.**
   
   [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.1-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
-  [![Java](https://img.shields.io/badge/Java-21+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/)
-  [![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Java](https://img.shields.io/badge/Java-17_LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+  [![Spring Security](https://img.shields.io/badge/Spring_Security-6.3-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)](https://spring.io/projects/spring-security)
+  [![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+  [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+  [![Render](https://img.shields.io/badge/Deploy_on-Render-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://render.com)
   
 </div>
 
 <br />
 
-## 📖 About The Project
+## 📖 About EduTake
 
-**EduTake** is a comprehensive Customer Relationship Management (CRM) and Learning Management System (LMS) web application. Designed for educational businesses, it provides a centralized platform for managing courses, tracking sales, handling customer inquiries, and delivering a premium learning experience to students.
+**EduTake** is a full-featured Learning Management System (LMS) combined with an Education Customer Relationship Management (CRM) platform. Designed for universities, online academies, and educational businesses, EduTake provides an end-to-end operational platform connecting administrators, instructors, students, and staff in a unified, modern web portal.
 
-The platform is architected with a robust **Controller-Service-Repository** pattern and secured with a unified **Spring Security 6** role-based authentication system, ensuring that Admins, Employees, and Students experience tailored, secure workflows.
-
----
-
-## ✨ Key Features
-
-- 🔐 **Unified Role-Based Security**: Seamless authentication utilizing Spring Security 6 with `CustomUserDetails`, seamlessly routing `ADMIN`, `EMPLOYEE`, and `STUDENT` roles to their respective dashboards.
-- 💳 **Razorpay Integration**: End-to-end secure online payment processing for seamless course purchasing and transaction tracking.
-- 🎨 **Premium UI/UX**: A state-of-the-art frontend crafted with **Tailwind CSS**, featuring dark mode, glassmorphism, responsive navigation, and dynamic visual feedback.
-- 📊 **Admin Dashboard**: Real-time business intelligence metrics tracking sales, course distributions, customer registrations, and overall performance.
-- 👥 **Employee Management**: Dedicated workflows for staff to handle customer follow-ups, inquiries, and offline sales.
-- 📚 **Course Management**: Complete CRUD operations for courses, including thumbnail uploads, pricing management, and descriptive metadata.
+### Core Capabilities:
+- 🎓 **Student Learning Portal:** Course enrollment, interactive lesson player, curriculum navigation, assignments, progress tracking, and certificate generation.
+- 👨‍🏫 **Instructor Workstation:** Curriculum authoring, module & lesson management, assignment grading, batch assignments, and learner engagement metrics.
+- 🛠️ **Unified Admin Control Center:** 33+ comprehensive operational subsystems including course catalog moderation, category management, financial reports, coupon engine, inquiry tracking, support tickets, dynamic RBAC permission matrices, and audit logging.
+- 🔒 **Spring Security 6 RBAC:** Granular authorization, BCrypt password hashing, session fixation guards, HttpOnly cookie policies, and CSRF protection on all stateful forms.
+- 💳 **Payment Engine:** Razorpay payments workflow with server-side amount calculation, coupon validation, and order reconciliation.
+- 🚀 **Cloud-Native & Production Hardened:** Environment-variable-driven configuration, health check monitoring (`/health`), dynamic port binding for cloud platforms (Render/Heroku), container-safe file storage, and connection pool optimization.
 
 ---
 
 ## 🛠️ Technology Stack
 
-**Backend System**
-- **Core**: Java
-- **Framework**: Spring Boot 3.3.1 (Spring MVC, Spring Web)
-- **Security**: Spring Security 6 (BCrypt Password Encoding, CSRF Protection)
-- **Data Persistence**: Spring Data JPA / Hibernate
-- **Database**: MySQL 8+
-- **Build Tool**: Maven
-
-**Frontend System**
-- **Templating Engine**: Thymeleaf (with Spring Security Dialect)
-- **Styling**: Tailwind CSS & Bootstrap 5
-- **Icons**: Bootstrap Icons
-- **Interactive UI**: Custom Vanilla JavaScript
-
-**Third-Party Integrations**
-- **Payments**: Razorpay API
+| Layer | Technologies |
+|---|---|
+| **Backend Framework** | Java 17, Spring Boot 3.3.1 (Spring MVC, Spring Data JPA, Spring Validation) |
+| **Security Layer** | Spring Security 6.3.1 (Form Login, Method Security `@PreAuthorize`, BCrypt) |
+| **Template Engine** | Thymeleaf 3.1 + Thymeleaf Extras Spring Security 6 |
+| **Relational Database** | MySQL 8.x + Hibernate 6.5.2 ORM + HikariCP Connection Pooling |
+| **Payments Integration** | Razorpay Java SDK 1.4.3 |
+| **Observability** | REST Health Probe (`/health`), Database Audit Logger, System Error Registry |
+| **Build & Packaging** | Apache Maven 3.9.9, Multi-stage Docker Alpine Container |
+| **Styling & UI** | Tailwind CSS (Dark Mode, Glassmorphism), Bootstrap 5, Bootstrap Icons |
 
 ---
 
-## 🚀 Installation & Setup
+## 🏛️ Application Architecture
 
-Follow these steps to run EduTake locally on your machine.
-
-### Prerequisites
-- JDK 21 or higher installed
-- MySQL Server installed and running
-- Maven installed
-
-### 1. Database Configuration
-Create a new MySQL database named `CrmData`:
-```sql
-CREATE DATABASE CrmData;
+```text
+[ Browser / Client ] ──HTTPS──> [ Render Cloud Router / Dynamic $PORT ]
+                                                │
+                                    [ Spring Security 6 ]
+                                    (Auth, CSRF, RBAC Filter)
+                                                │
+                                      [ Spring MVC Layer ]
+                      ┌─────────────────────────┼─────────────────────────┐
+                      ▼                         ▼                         ▼
+              [ Public / Student ]       [ Instructor ]             [ Admin CRM ]
+              (Catalog, Learning)     (Course Authoring)        (33 Mgmt Subsystems)
+                      └─────────────────────────┬─────────────────────────┘
+                                                ▼
+                                    [ Service Layer (@Transactional) ]
+                                                │
+                                    [ Spring Data JPA (52 Repos) ]
+                                                │
+                                    [ Hikari Connection Pool ]
+                                                │
+                                    [ MySQL 8.x Cloud Database ]
 ```
 
-### 2. Clone the Repository
+---
+
+## 🚀 Quick Start (Local Development)
+
+### Prerequisites
+- **JDK 17** or higher installed (`java -version`)
+- **MySQL 8.x** running locally
+- **Git**
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/DhirajUpadhyay25/CRM-Web-Project-.git
 cd CRM-Web-Project-
 ```
 
-### 3. Application Properties
-Configure your `src/main/resources/application.properties` with your MySQL credentials and Razorpay keys:
+### 2. Configure Local Database
+Create the MySQL database:
+```sql
+CREATE DATABASE CrmData CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Optionally create `application-secrets.properties` in the project root for local development (git-ignored):
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/CrmData
-spring.datasource.username=root
-spring.datasource.password=YOUR_MYSQL_PASSWORD
-
-# Admin Default Credentials
-app.admin.email=admin@gmail.com
-app.admin.password=admin123
-
-# Razorpay Keys
-app.razorpay.key-id=YOUR_RAZORPAY_KEY
-app.razorpay.key-secret=YOUR_RAZORPAY_SECRET
+spring.datasource.password=your_mysql_password
+app.razorpay.key-id=rzp_test_placeholder
+app.razorpay.key-secret=placeholder_secret
 ```
 
-### 4. Build and Run
-Use Maven to build and run the Spring Boot application:
+### 3. Build & Run
 ```bash
-mvn clean install
-mvn spring-boot:run
+# Using Maven Wrapper
+./mvnw clean package -DskipTests
+java -jar target/EducationCrmProject-1.0.jar
 ```
 
-The application will start on `http://localhost:8080/`.
+Access the application in your browser:
+- Landing Page: `http://localhost:8080`
+- Health Probe: `http://localhost:8080/health`
+- Course Catalog: `http://localhost:8080/courses`
+- Login Portal: `http://localhost:8080/login`
 
 ---
 
-## 🏗️ Architecture overview
+## 🌐 Cloud Deployment (GitHub + Render)
 
-The application strictly follows a modular, layered MVC architecture:
-- **`controllers/`**: Handles HTTP requests, manages model data, and returns Thymeleaf views.
-- **`services/`**: Encapsulates core business logic and transaction management.
-- **`repositories/`**: Interfaces extending `JpaRepository` for seamless database interaction.
-- **`entities/`**: JPA data models (User, Course, Orders, Inquiry, etc.).
-- **`security/`**: Houses the `SecurityConfig`, custom success handlers, and dynamic password encoders bridging legacy plaintext with secure BCrypt hashes.
+EduTake is configured for zero-friction continuous deployment from **GitHub to Render**.
 
----
+### 1. Deploy via Docker (Recommended)
+1. In Render, select **New +** → **Web Service**.
+2. Connect your repository.
+3. Select **Docker** environment (Render automatically uses the multi-stage [Dockerfile](Dockerfile)).
+4. Set **Health Check Path** to `/health`.
+5. Supply environment variables:
+   - `SPRING_PROFILES_ACTIVE=prod`
+   - `DATABASE_URL=jdbc:mysql://<host>:<port>/<dbname>?sslMode=REQUIRED`
+   - `DATABASE_USERNAME=<user>`
+   - `DATABASE_PASSWORD=<password>`
+   - `SEED_ADMIN_PASSWORD=<strong_admin_password>`
 
-## 📸 Screenshots
-
-*(Replace these placeholder links with actual screenshots of your application)*
-
-| Unified Login Page | Admin Dashboard |
-|:---:|:---:|
-| <img src="https://via.placeholder.com/600x400.png?text=Login+Page" alt="Login Page" width="400"/> | <img src="https://via.placeholder.com/600x400.png?text=Admin+Dashboard" alt="Admin Dashboard" width="400"/> |
-
-| Course Catalog | Student Profile |
-|:---:|:---:|
-| <img src="https://via.placeholder.com/600x400.png?text=Course+Catalog" alt="Course Catalog" width="400"/> | <img src="https://via.placeholder.com/600x400.png?text=Student+Profile" alt="Student Profile" width="400"/> |
+For complete step-by-step instructions and free MySQL provisioning, refer to:
+👉 **[DEPLOYMENT.md](DEPLOYMENT.md)**
 
 ---
 
-## 📝 License & Contact
+## 📋 Comprehensive Documentation
 
-Developed by **Dhiraj Upadhyay**.
+- **[PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md)**: Deep-dive architecture audit, technology versions, resolved blockers, and security audit.
+- **[DEPLOYMENT.md](DEPLOYMENT.md)**: Complete Render & cloud database deployment handbook.
+- **[PRODUCTION_TEST_CHECKLIST.md](PRODUCTION_TEST_CHECKLIST.md)**: Verification checklist covering functional, RBAC, and operational testing.
 
-- **GitHub**: [@DhirajUpadhyay25](https://github.com/DhirajUpadhyay25)
-- **Project Link**: [https://github.com/DhirajUpadhyay25/CRM-Web-Project-](https://github.com/DhirajUpadhyay25/CRM-Web-Project-)
+---
+
+## 👤 Author & Maintainer
+
+Developed by **Dhiraj Upadhyay**  
+- **GitHub:** [@DhirajUpadhyay25](https://github.com/DhirajUpadhyay25)  
+- **Repository:** [CRM-Web-Project-](https://github.com/DhirajUpadhyay25/CRM-Web-Project-)
