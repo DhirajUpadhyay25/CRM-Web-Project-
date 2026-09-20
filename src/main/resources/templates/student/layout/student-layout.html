@@ -163,21 +163,45 @@
         </header>
 
         <!-- MAIN SCROLLING CONTENT -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 custom-scrollbar">
             <!-- Flash Messages -->
-            <div th:if="${successMsg}" class="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-start gap-3 shadow-sm animate-fade-in">
+            <div th:if="${successMsg}" class="mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-start gap-3 shadow-sm animate-fade-in text-xs sm:text-sm">
                 <i class="bi bi-check-circle-fill text-green-500 mt-0.5"></i>
-                <p class="font-medium text-sm" th:text="${successMsg}"></p>
+                <p class="font-medium" th:text="${successMsg}"></p>
             </div>
-            <div th:if="${errorMsg}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-3 shadow-sm animate-fade-in">
+            <div th:if="${errorMsg}" class="mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-3 shadow-sm animate-fade-in text-xs sm:text-sm">
                 <i class="bi bi-exclamation-triangle-fill text-red-500 mt-0.5"></i>
-                <p class="font-medium text-sm" th:text="${errorMsg}"></p>
+                <p class="font-medium" th:text="${errorMsg}"></p>
             </div>
             
             <div th:replace="${content}"></div>
         </main>
+
+        <!-- App-Like Mobile Bottom Navigation Bar (Sticky Native UX) -->
+        <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-surface-200 py-2 px-2 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.06)]">
+            <a href="/student/dashboard" data-mobile-path="/student/dashboard" class="mobile-bottom-link flex flex-col items-center gap-1 text-gray-400 hover:text-brand-600 transition-colors flex-1 py-1 text-center">
+                <i class="bi bi-grid-1x2-fill text-lg transition-transform"></i>
+                <span class="text-[10px] font-semibold leading-none">Home</span>
+            </a>
+            <a href="/student/courses" data-mobile-path="/student/courses" class="mobile-bottom-link flex flex-col items-center gap-1 text-gray-400 hover:text-brand-600 transition-colors flex-1 py-1 text-center">
+                <i class="bi bi-play-circle-fill text-lg transition-transform"></i>
+                <span class="text-[10px] font-semibold leading-none">My Courses</span>
+            </a>
+            <a href="/courses" data-mobile-path="/courses" class="mobile-bottom-link flex flex-col items-center gap-1 text-gray-400 hover:text-brand-600 transition-colors flex-1 py-1 text-center">
+                <i class="bi bi-compass-fill text-lg transition-transform"></i>
+                <span class="text-[10px] font-semibold leading-none">Catalog</span>
+            </a>
+            <a href="/student/certificates" data-mobile-path="/student/certificates" class="mobile-bottom-link flex flex-col items-center gap-1 text-gray-400 hover:text-brand-600 transition-colors flex-1 py-1 text-center">
+                <i class="bi bi-award-fill text-lg transition-transform"></i>
+                <span class="text-[10px] font-semibold leading-none">Certificates</span>
+            </a>
+            <a href="/student/profile" data-mobile-path="/student/profile" class="mobile-bottom-link flex flex-col items-center gap-1 text-gray-400 hover:text-brand-600 transition-colors flex-1 py-1 text-center">
+                <i class="bi bi-person-fill text-lg transition-transform"></i>
+                <span class="text-[10px] font-semibold leading-none">Profile</span>
+            </a>
+        </nav>
         
-        <div id="sidebarOverlay" class="fixed inset-0 bg-surface-900/50 backdrop-blur-sm z-20 hidden md:hidden"></div>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-surface-950/60 backdrop-blur-sm z-20 hidden md:hidden transition-opacity duration-300"></div>
     </div>
 
     <script>
@@ -214,6 +238,22 @@
                 if (label && breadcrumbText) {
                     breadcrumbText.textContent = label.textContent;
                 }
+            }
+        });
+
+        // ACTIVE MOBILE BOTTOM NAV HIGHLIGHTING
+        document.querySelectorAll('.mobile-bottom-link').forEach(btn => {
+            const target = btn.getAttribute('data-mobile-path');
+            if (target && (currentPath === target || (target !== '/student/dashboard' && currentPath.startsWith(target)))) {
+                btn.classList.add('text-brand-600', 'font-bold');
+                btn.classList.remove('text-gray-400');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.add('scale-110');
+                }
+            } else {
+                btn.classList.add('text-gray-400');
+                btn.classList.remove('text-brand-600', 'font-bold');
             }
         });
 

@@ -52,10 +52,10 @@
                     </div>
                 </div>
 
-                <div class="lg:col-span-4 lg:text-right">
+                <div class="lg:col-span-4 lg:text-right mt-2 lg:mt-0">
                     <a th:href="@{/student/courses/{cId}/player(cId=${continueCourse.id}, lessonId=${continueLesson != null ? continueLesson.id : null})}" 
-                       class="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-surface-950 hover:bg-brand-50 font-bold rounded-2xl text-sm shadow-lg transition-all hover:scale-105 active:scale-95">
-                        Continue Learning <i class="bi bi-arrow-right-short text-lg"></i>
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-surface-950 hover:bg-brand-50 font-bold rounded-2xl text-sm shadow-lg transition-all hover:scale-105 active:scale-95">
+                        <span>Continue Learning</span> <i class="bi bi-arrow-right-short text-xl"></i>
                     </a>
                 </div>
             </div>

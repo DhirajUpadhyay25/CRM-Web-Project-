@@ -203,8 +203,8 @@
                             <!-- In Progress: Continue Learning -->
                             <a th:if="${course.actionType == 'CONTINUE'}"
                                th:href="@{/student/courses/{cId}/player(cId=${course.courseId}, lessonId=${course.targetLessonId})}" 
-                               class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 group/btn">
-                                <i class="bi bi-play-circle-fill"></i>
+                               class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 group/btn">
+                                <i class="bi bi-play-circle-fill text-sm"></i>
                                 <span>Continue Learning</span>
                                 <i class="bi bi-arrow-right group-hover/btn:translate-x-1 transition-transform"></i>
                             </a>
@@ -212,8 +212,8 @@
                             <!-- Not Started: Start Course -->
                             <a th:if="${course.actionType == 'START'}"
                                th:href="@{/student/courses/{cId}/player(cId=${course.courseId}, lessonId=${course.targetLessonId})}" 
-                               class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 group/btn">
-                                <i class="bi bi-play-fill text-sm"></i>
+                               class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 group/btn">
+                                <i class="bi bi-play-fill text-base"></i>
                                 <span>Start Course</span>
                                 <i class="bi bi-arrow-right group-hover/btn:translate-x-1 transition-transform"></i>
                             </a>
@@ -221,18 +221,18 @@
                             <!-- Completed: Review Workspace & Claim Certificate -->
                             <div th:if="${course.actionType == 'REVIEW'}" class="grid grid-cols-2 gap-2">
                                 <a th:href="@{/student/courses/{cId}/player(cId=${course.courseId}, lessonId=${course.targetLessonId})}" 
-                                   class="py-2.5 px-3 bg-surface-100 hover:bg-surface-200 text-surface-800 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5">
+                                   class="py-2.5 px-3 bg-surface-100 hover:bg-surface-200 active:scale-[0.98] text-surface-800 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5">
                                     <i class="bi bi-eye"></i> Review
                                 </a>
                                 <a th:href="@{/student/certificates}" 
-                                   class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 shadow-sm">
+                                   class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 shadow-sm">
                                     <i class="bi bi-award"></i> Certificate
                                 </a>
                             </div>
 
                             <!-- Overview Link -->
                             <a th:href="@{/student/courses/{id}/overview(id=${course.courseId})}" 
-                               class="block text-center text-[11px] font-semibold text-gray-500 hover:text-brand-600 py-1 transition-colors">
+                               class="block text-center text-[11px] font-semibold text-gray-500 hover:text-brand-600 py-1.5 transition-colors">
                                 View Course Syllabus & Details <i class="bi bi-chevron-right text-[9px]"></i>
                             </a>
                         </div>
