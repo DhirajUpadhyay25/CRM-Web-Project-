@@ -249,18 +249,25 @@ public class StudentDashboardController {
 
     @GetMapping("/courses")
     public String myCourses(
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "filter", required = false, defaultValue = "ALL") String filter,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         addCommonStudentAttributes(userDetails, model);
 
         String email = userDetails.getUsername();
-        List<Enrollment> enrollments = enrollmentRepository.findByUserEmailOrderByEnrolledAtDesc(email);
-        model.addAttribute("enrollments", enrollments);
+        List<in.project.main.dto.StudentEnrolledCourseDTO> enrolledCourses = 
+                learningService.getStudentEnrolledCoursesOverview(email, search, filter);
+        model.addAttribute("enrolledCourses", enrolledCourses);
 
-        long activeCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.ACTIVE);
-        long completedCount = enrollmentRepository.countByUserEmailAndStatus(email, EnrollmentStatus.COMPLETED);
-        model.addAttribute("activeCount", activeCount);
-        model.addAttribute("completedCount", completedCount);
+        Map<String, Long> metrics = learningService.getStudentCourseMetrics(email);
+        model.addAttribute("totalCount", metrics.get("totalCount"));
+        model.addAttribute("inProgressCount", metrics.get("inProgressCount"));
+        model.addAttribute("notStartedCount", metrics.get("notStartedCount"));
+        model.addAttribute("completedCount", metrics.get("completedCount"));
+
+        model.addAttribute("currentSearch", search != null ? search : "");
+        model.addAttribute("currentFilter", filter != null ? filter.toUpperCase() : "ALL");
 
         return "student/courses";
     }

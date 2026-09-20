@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${lesson.title + ' | EduTake Player'}">EduTake Course Player</title>
+    <title th:text="${lesson.title + ' | EduTake LMS Player'}">EduTake Course Player</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -24,40 +24,55 @@
         body { font-family: 'Inter', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
     </style>
 </head>
 <body class="bg-surface-50 text-surface-900 antialiased flex flex-col h-screen overflow-hidden">
 
     <!-- 1. TOP NAVBAR (PLAYER HEADER) -->
-    <header class="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0">
-        <div class="flex items-center gap-3 min-w-0">
-            <a th:href="@{/student/courses/{id}/overview(id=${course.id})}" class="w-9 h-9 rounded-xl bg-surface-100 hover:bg-surface-200 text-gray-500 hover:text-surface-900 flex items-center justify-center transition-colors">
-                <i class="bi bi-arrow-left"></i>
+    <header class="h-14 bg-white border-b border-surface-200 flex items-center justify-between px-3 sm:px-6 z-20 shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <a th:href="@{/student/courses/{id}/overview(id=${course.id})}" 
+               class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-surface-100 hover:bg-surface-200 text-gray-600 hover:text-surface-900 flex items-center justify-center transition-colors shrink-0"
+               title="Back to Course Overview">
+                <i class="bi bi-arrow-left text-sm sm:text-base"></i>
             </a>
             <div class="min-w-0">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider hidden sm:block">Currently Learning</p>
-                <h1 class="text-sm font-extrabold text-surface-900 truncate" th:text="${course.name}">Course Title</h1>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider hidden sm:block truncate" th:text="${course.name}">Course Title</p>
+                <h1 class="text-xs sm:text-sm font-extrabold text-surface-900 truncate flex items-center gap-1.5">
+                    <span class="truncate" th:text="${lesson.title}">Current Lesson</span>
+                </h1>
             </div>
         </div>
 
-        <!-- Progress Widget -->
-        <div class="flex items-center gap-4 flex-shrink-0">
+        <!-- Header Actions & Progress -->
+        <div class="flex items-center gap-2 sm:gap-3.5 flex-shrink-0">
+            <!-- Bookmark Button -->
+            <button id="bookmarkBtn" onclick="toggleBookmark()"
+                    class="px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all"
+                    th:classappend="${isBookmarked ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-surface-50 border-surface-200 text-gray-600 hover:bg-surface-100'}">
+                <i id="bookmarkIcon" class="bi text-xs" th:classappend="${isBookmarked ? 'bi-bookmark-star-fill text-amber-500' : 'bi-bookmark'}"></i>
+                <span id="bookmarkText" class="hidden md:inline" th:text="${isBookmarked ? 'Saved' : 'Save'}">Save</span>
+            </button>
+
+            <!-- Course Progress Bar -->
             <div class="hidden md:block text-right">
                 <p class="text-[9px] text-gray-400 font-bold uppercase">Course Progress</p>
                 <p class="text-xs font-black text-brand-600" th:text="${progressStats.percent + '%'}">0%</p>
             </div>
-            <div class="w-24 h-1.5 bg-surface-200 rounded-full overflow-hidden hidden md:block">
+            <div class="w-20 lg:w-28 h-1.5 bg-surface-200 rounded-full overflow-hidden hidden md:block">
                 <div class="h-full bg-brand-500 rounded-full transition-all duration-300" th:style="'width: ' + ${progressStats.percent} + '%'"></div>
             </div>
             
+            <!-- Mobile Syllabus Drawer Toggle -->
             <button id="mobileMenuToggle" class="lg:hidden px-3 py-1.5 bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-1">
-                <i class="bi bi-list-nested"></i> Syllabus
+                <i class="bi bi-list-nested"></i> <span class="hidden sm:inline">Syllabus</span>
             </button>
 
-            <a th:href="@{/student/courses/{id}/overview(id=${course.id})}" class="px-3.5 py-1.5 text-xs font-bold text-gray-500 hover:text-surface-900 border border-surface-200 hover:bg-surface-100 rounded-xl transition-all">
-                Exit Player
+            <!-- Exit Button -->
+            <a th:href="@{/student/courses}" class="px-3 sm:px-3.5 py-1.5 text-xs font-bold text-gray-500 hover:text-surface-900 border border-surface-200 hover:bg-surface-100 rounded-xl transition-all">
+                Exit
             </a>
         </div>
     </header>
@@ -66,10 +81,15 @@
     <div class="flex-1 flex overflow-hidden relative">
 
         <!-- A. SYLLABUS SIDEBAR (LEFT) -->
-        <aside id="syllabusSidebar" class="w-80 bg-white border-r border-surface-200 flex flex-col h-full shrink-0 transition-transform duration-300 transform -translate-x-full lg:translate-x-0 absolute lg:relative z-30">
-            <div class="px-5 py-4 border-b border-surface-100 shrink-0">
-                <h2 class="font-bold text-sm text-surface-900">Syllabus Outline</h2>
-                <p class="text-[10px] text-gray-400 mt-0.5" th:text="${progressStats.completedLessons + ' of ' + progressStats.totalLessons + ' lessons completed'}">0 of 0 completed</p>
+        <aside id="syllabusSidebar" class="w-80 bg-white border-r border-surface-200 flex flex-col h-full shrink-0 transition-transform duration-300 transform -translate-x-full lg:translate-x-0 absolute lg:relative z-30 shadow-xl lg:shadow-none">
+            <div class="px-5 py-3.5 border-b border-surface-100 shrink-0 flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-sm text-surface-900">Course Syllabus</h2>
+                    <p class="text-[10px] text-gray-400 mt-0.5" th:text="${progressStats.completedLessons + ' of ' + progressStats.totalLessons + ' lessons completed'}">0 of 0 completed</p>
+                </div>
+                <button id="closeSidebarBtn" class="lg:hidden text-gray-400 hover:text-gray-600 p-1">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
 
             <!-- Scrollable Lessons Accordion -->
@@ -115,57 +135,246 @@
         <!-- B. CONTENT VIEWER (CENTER / RIGHT) -->
         <main class="flex-1 flex flex-col h-full overflow-hidden bg-surface-50">
             <!-- Scrollable content area -->
-            <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 custom-scrollbar">
                 
                 <div class="max-w-4xl mx-auto space-y-6">
 
-                    <!-- Flash messages inside player -->
+                    <!-- Flash Messages -->
                     <div th:if="${successMsg}" class="p-3.5 rounded-xl bg-green-50 border border-green-200 text-green-700 flex items-start gap-2.5 shadow-sm text-xs font-semibold">
-                        <i class="bi bi-check-circle-fill text-green-500"></i>
+                        <i class="bi bi-check-circle-fill text-green-500 mt-0.5"></i>
                         <span th:text="${successMsg}">Success</span>
                     </div>
                     <div th:if="${errorMsg}" class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-2.5 shadow-sm text-xs font-semibold">
-                        <i class="bi bi-exclamation-triangle-fill text-red-500"></i>
+                        <i class="bi bi-exclamation-triangle-fill text-red-500 mt-0.5"></i>
                         <span th:text="${errorMsg}">Error</span>
                     </div>
 
-                    <!-- 1. Rich Video Stream Mock -->
-                    <div class="relative bg-surface-950 aspect-video rounded-3xl overflow-hidden shadow-xl border border-white/10 group">
-                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-gradient-to-t from-surface-950 via-surface-950/40 to-transparent">
-                            <!-- Overlay Content -->
-                            <div class="w-16 h-16 bg-brand-600 hover:bg-brand-500 hover:scale-105 active:scale-95 text-white rounded-full flex items-center justify-center text-xl shadow-lg cursor-pointer transition-all shadow-brand-500/20">
-                                <i class="bi bi-play-fill text-3xl ml-1"></i>
+                    <!-- 1. VIDEO PLAYER CONTAINER -->
+                    <div class="relative bg-surface-950 aspect-video rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-surface-800">
+                        <!-- Direct HTML5 Video Player -->
+                        <video th:if="${lesson.videoUrl != null and !lesson.videoUrl.contains('youtube') and !lesson.videoUrl.contains('youtu.be')}" 
+                               id="lmsVideo" 
+                               th:src="${lesson.videoUrl}" 
+                               controls 
+                               playsinline
+                               class="w-full h-full object-contain bg-black">
+                            Your browser does not support HTML5 video streaming.
+                        </video>
+
+                        <!-- YouTube Embed Player -->
+                        <div th:if="${lesson.videoUrl != null and (lesson.videoUrl.contains('youtube') or lesson.videoUrl.contains('youtu.be'))}" class="w-full h-full">
+                            <iframe id="ytPlayer"
+                                    th:src="${lesson.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}"
+                                    class="w-full h-full border-0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allowfullscreen></iframe>
+                        </div>
+
+                        <!-- Reading Guide / Video Placeholder when no videoUrl configured -->
+                        <div th:if="${lesson.videoUrl == null or lesson.videoUrl.isEmpty()}" 
+                             class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-surface-900 via-surface-950 to-brand-950 text-white">
+                            <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl mb-3 text-brand-400 border border-white/10 shadow-lg">
+                                <i class="bi bi-file-earmark-text-fill"></i>
                             </div>
-                            <h3 class="font-extrabold text-sm sm:text-base text-white mt-4 tracking-tight" th:text="${lesson.title}">Lesson Video Title</h3>
-                            <p class="text-gray-400 text-xs mt-1.5 max-w-sm">EduTake Mock Player. Click to start streaming high-definition content.</p>
+                            <h3 class="font-extrabold text-base sm:text-lg text-white tracking-tight" th:text="${lesson.title}">Lesson Reading Guide</h3>
+                            <p class="text-gray-400 text-xs mt-1 max-w-md">Interactive reading lesson. Read the study materials below and click 'Complete & Continue' when finished.</p>
+                        </div>
+
+                        <!-- Completed Badge Overlay on video if finished -->
+                        <div th:if="${currentProgress != null and currentProgress.completed}" 
+                             class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-bold shadow-md flex items-center gap-1 z-10 pointer-events-none">
+                            <i class="bi bi-check-circle-fill"></i> Completed
                         </div>
                     </div>
 
-                    <!-- 2. Tabs Navigation -->
+                    <!-- 2. PLAYER TABS NAVIGATION -->
                     <div class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden">
-                        <div class="border-b border-surface-100 flex text-xs font-semibold text-gray-500 bg-surface-50/50">
-                            <button onclick="switchTab('contentTab')" id="btn-contentTab" class="flex-1 py-3 text-center border-b-2 border-brand-600 text-brand-600 transition-colors">Lesson Materials</button>
-                            <button onclick="switchTab('quizTab')" id="btn-quizTab" class="flex-1 py-3 text-center border-b-2 border-transparent hover:text-surface-900 transition-colors">Quizzes</button>
-                            <button onclick="switchTab('assignmentTab')" id="btn-assignmentTab" class="flex-1 py-3 text-center border-b-2 border-transparent hover:text-surface-900 transition-colors">Assignments</button>
+                        <div class="border-b border-surface-100 flex text-xs font-semibold text-gray-500 bg-surface-50/50 overflow-x-auto scrollbar-none">
+                            <button onclick="switchTab('contentTab')" id="btn-contentTab" class="flex-1 py-3 px-3 text-center border-b-2 border-brand-600 text-brand-600 transition-colors shrink-0">
+                                <i class="bi bi-book"></i> Materials
+                            </button>
+                            <button onclick="switchTab('notesTab')" id="btn-notesTab" class="flex-1 py-3 px-3 text-center border-b-2 border-transparent hover:text-surface-900 transition-colors shrink-0">
+                                <i class="bi bi-pencil-square"></i> My Notes <span th:if="${notes != null and !notes.isEmpty()}" class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-brand-100 text-brand-700" th:text="${notes.size()}">0</span>
+                            </button>
+                            <button onclick="switchTab('discussionTab')" id="btn-discussionTab" class="flex-1 py-3 px-3 text-center border-b-2 border-transparent hover:text-surface-900 transition-colors shrink-0">
+                                <i class="bi bi-chat-dots"></i> Q&A Discussions <span th:if="${discussions != null and !discussions.isEmpty()}" class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-surface-200 text-surface-700" th:text="${discussions.size()}">0</span>
+                            </button>
+                            <button onclick="switchTab('quizTab')" id="btn-quizTab" class="flex-1 py-3 px-3 text-center border-b-2 border-transparent hover:text-surface-900 transition-colors shrink-0">
+                                <i class="bi bi-patch-question"></i> Quizzes <span th:if="${quizChecks != null and !quizChecks.isEmpty()}" class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-amber-100 text-amber-800" th:text="${quizChecks.size()}">0</span>
+                            </button>
+                            <button onclick="switchTab('assignmentTab')" id="btn-assignmentTab" class="flex-1 py-3 px-3 text-center border-b-2 border-transparent hover:text-surface-900 transition-colors shrink-0">
+                                <i class="bi bi-journal-code"></i> Assignments <span th:if="${assignments != null and !assignments.isEmpty()}" class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] bg-purple-100 text-purple-800" th:text="${assignments.size()}">0</span>
+                            </button>
                         </div>
 
-                        <!-- Tab Content 1: Lesson Materials -->
-                        <div id="tab-contentTab" class="p-6 tab-pane">
-                            <span class="text-[10px] text-brand-600 font-extrabold uppercase bg-brand-50 px-2 py-0.5 rounded-full" th:text="${lesson.sectionName}">Section</span>
-                            <h2 class="text-lg font-black text-surface-900 mt-2 mb-3" th:text="${lesson.title}">Lesson Title</h2>
-                            <div class="text-xs text-gray-600 leading-relaxed space-y-4">
-                                <p>Welcome to the structured content of this lesson! Below is the detailed study material designed to help you master this section.</p>
-                                <div class="p-4 bg-surface-50 border border-surface-100 rounded-2xl space-y-2">
-                                    <h4 class="font-bold text-surface-900 text-xs flex items-center gap-1.5"><i class="bi bi-file-text-fill text-brand-500"></i> Core Concepts Guide</h4>
-                                    <p class="text-[11px] leading-relaxed">This lesson covers the primary foundations. Make sure to download the additional resource handouts, view the recorded walkthrough carefully, and perform the coding exercises locally before moving on.</p>
+                        <!-- TAB 1: LESSON MATERIALS -->
+                        <div id="tab-contentTab" class="p-5 sm:p-6 tab-pane">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-[10px] text-brand-600 font-extrabold uppercase bg-brand-50 px-2.5 py-0.5 rounded-full" th:text="${lesson.sectionName}">Section</span>
+                                <span th:if="${lesson.duration != null}" class="text-[10px] text-gray-400 font-semibold flex items-center gap-1">
+                                    <i class="bi bi-clock"></i> <span th:text="${lesson.duration}">15m</span>
+                                </span>
+                            </div>
+                            <h2 class="text-base sm:text-lg font-black text-surface-900 mb-3" th:text="${lesson.title}">Lesson Title</h2>
+                            
+                            <!-- Custom Text / Article Content -->
+                            <div class="text-xs sm:text-sm text-gray-600 leading-relaxed space-y-3 mb-6">
+                                <div th:if="${lesson.textContent != null and !lesson.textContent.isEmpty()}" class="whitespace-pre-line bg-surface-50 p-4 rounded-2xl border border-surface-200" th:text="${lesson.textContent}">
                                 </div>
+                                <div th:unless="${lesson.textContent != null and !lesson.textContent.isEmpty()}" class="p-4 bg-surface-50 border border-surface-100 rounded-2xl space-y-2">
+                                    <h4 class="font-bold text-surface-900 text-xs flex items-center gap-1.5"><i class="bi bi-file-text-fill text-brand-500"></i> Lesson Walkthrough & Foundations</h4>
+                                    <p class="text-xs leading-relaxed text-gray-500">Welcome to this structured learning module. Complete the instructional video or practice the concepts locally. Once you understand the fundamentals, click 'Complete & Continue' to track your progress towards certification.</p>
+                                </div>
+                            </div>
+
+                            <!-- Downloadable Resource Card -->
+                            <div th:if="${lesson.resourceFileUrl != null and !lesson.resourceFileUrl.isEmpty()}" 
+                                 class="p-4 bg-brand-50/60 border border-brand-200/60 rounded-2xl flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-lg shrink-0">
+                                        <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-bold text-surface-900 truncate">Supplementary Lesson Resource</p>
+                                        <p class="text-[11px] text-gray-500">PDF handout, notes, or exercise files for this lesson</p>
+                                    </div>
+                                </div>
+                                <a th:href="${lesson.resourceFileUrl}" target="_blank" download
+                                   class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-sm">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
                             </div>
                         </div>
 
-                        <!-- Tab Content 2: Quizzes -->
-                        <div id="tab-quizTab" class="p-6 tab-pane hidden">
-                            <h3 class="font-bold text-sm text-surface-900 mb-3">Course Quizzes</h3>
-                            <p class="text-xs text-gray-500 mb-4">Passing all quizzes with at least 70% is required to complete this course and unlock the certificate.</p>
+                        <!-- TAB 2: MY NOTES -->
+                        <div id="tab-notesTab" class="p-5 sm:p-6 tab-pane hidden">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="font-bold text-sm text-surface-900">Personal Lesson Notes</h3>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">Notes are private to you and saved to your student account.</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Note Form -->
+                            <form th:action="@{/student/courses/{cId}/lessons/{lId}/notes(cId=${course.id}, lId=${lesson.id})}" method="post" class="mb-6">
+                                <div class="space-y-2.5">
+                                    <textarea name="content" rows="3" required placeholder="Type your personal notes, insights, or reminders here..." 
+                                              class="w-full p-3.5 bg-surface-50 border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:border-brand-500 focus:bg-white transition-all"></textarea>
+                                    <input type="hidden" name="timestamp" id="noteTimestamp" value="0">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="captureTimestamp()" class="text-[11px] font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                                            <i class="bi bi-stopwatch"></i> Tag current video time (<span id="currentTimeDisplay">00:00</span>)
+                                        </button>
+                                        <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                                            Save Note
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- Existing Notes List -->
+                            <div th:if="${notes != null and !notes.isEmpty()}" class="space-y-3">
+                                <div th:each="n : ${notes}" class="p-3.5 bg-surface-50 border border-surface-200 rounded-xl flex items-start justify-between gap-3">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span th:if="${n.timestampSeconds != null and n.timestampSeconds > 0}" 
+                                                  class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-100 text-brand-700 cursor-pointer hover:bg-brand-200"
+                                                  th:onclick="'seekVideo(' + ${n.timestampSeconds} + ')'"
+                                                  th:text="${#numbers.formatInteger(n.timestampSeconds / 60, 2) + ':' + #numbers.formatInteger(n.timestampSeconds % 60, 2)}">00:00</span>
+                                            <span class="text-[10px] text-gray-400" th:text="${#temporals.format(n.createdAt, 'dd MMM yyyy, hh:mm a')}">Date</span>
+                                        </div>
+                                        <p class="text-xs text-surface-800 leading-relaxed whitespace-pre-line" th:text="${n.content}">Note text</p>
+                                    </div>
+                                    <form th:action="@{/student/courses/{cId}/lessons/{lId}/notes/{nId}/delete(cId=${course.id}, lId=${lesson.id}, nId=${n.id})}" method="post">
+                                        <button type="submit" class="text-gray-400 hover:text-red-500 p-1 text-xs" title="Delete note" onclick="return confirm('Delete this note?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div th:if="${notes == null or notes.isEmpty()}" class="text-center py-6 text-gray-400">
+                                <i class="bi bi-journal-text text-2xl mb-1 block text-gray-300"></i>
+                                <p class="text-xs">You haven't taken any notes for this lesson yet.</p>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: Q&A DISCUSSIONS -->
+                        <div id="tab-discussionTab" class="p-5 sm:p-6 tab-pane hidden">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="font-bold text-sm text-surface-900">Lesson Q&A</h3>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">Ask questions about this lesson and get help from instructors and peers.</p>
+                                </div>
+                            </div>
+
+                            <!-- Post Question Form -->
+                            <form th:action="@{/student/courses/{cId}/lessons/{lId}/questions(cId=${course.id}, lId=${lesson.id})}" method="post" class="mb-6 space-y-3 p-4 bg-surface-50 rounded-2xl border border-surface-200">
+                                <h4 class="font-bold text-xs text-surface-900">Ask a Question</h4>
+                                <input type="text" name="questionTitle" required placeholder="What is your question about?" 
+                                       class="w-full p-2.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:border-brand-500 transition-all">
+                                <textarea name="content" rows="3" required placeholder="Provide details or context on where you are stuck..." 
+                                          class="w-full p-2.5 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:border-brand-500 transition-all"></textarea>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                                        Post Question
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Threaded Discussions List -->
+                            <div th:if="${discussions != null and !discussions.isEmpty()}" class="space-y-4">
+                                <div th:each="q : ${discussions}" class="p-4 bg-surface-50 border border-surface-200 rounded-2xl space-y-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="font-bold text-xs text-surface-900" th:text="${q.authorName}">Student Name</span>
+                                                <span th:if="${q.authorRole == 'INSTRUCTOR'}" class="px-2 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700">Mentor</span>
+                                                <span class="text-[10px] text-gray-400" th:text="${q.timeAgo}">2h ago</span>
+                                            </div>
+                                            <h4 class="font-bold text-xs text-surface-900" th:text="${q.questionTitle}">Question Title</h4>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-600 leading-relaxed whitespace-pre-line" th:text="${q.content}">Question content text</p>
+
+                                    <!-- Replies -->
+                                    <div th:if="${q.replies != null and !q.replies.isEmpty()}" class="pl-4 border-l-2 border-brand-200 space-y-2 mt-3">
+                                        <div th:each="rep : ${q.replies}" class="p-2.5 bg-white rounded-xl border border-surface-100 text-xs">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="font-bold text-[11px] text-surface-900" th:text="${rep.authorName}">Instructor</span>
+                                                <span th:if="${rep.authorRole == 'INSTRUCTOR'}" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-purple-100 text-purple-700">Instructor</span>
+                                                <span class="text-[10px] text-gray-400" th:text="${rep.timeAgo}">1h ago</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600" th:text="${rep.content}">Reply text</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reply Box Toggle -->
+                                    <details class="text-xs group">
+                                        <summary class="cursor-pointer font-bold text-brand-600 hover:text-brand-700 select-none text-[11px]">
+                                            Reply to this question...
+                                        </summary>
+                                        <form th:action="@{/student/courses/{cId}/lessons/{lId}/questions/{qId}/reply(cId=${course.id}, lId=${lesson.id}, qId=${q.id})}" method="post" class="mt-2 space-y-2">
+                                            <textarea name="content" rows="2" required placeholder="Write your reply..." 
+                                                      class="w-full p-2 bg-white border border-surface-200 rounded-xl text-xs text-surface-900 focus:outline-none focus:border-brand-500"></textarea>
+                                            <div class="flex justify-end">
+                                                <button type="submit" class="px-3 py-1.5 bg-surface-800 hover:bg-surface-700 text-white rounded-lg text-xs font-bold">
+                                                    Submit Reply
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </details>
+                                </div>
+                            </div>
+                            <div th:if="${discussions == null or discussions.isEmpty()}" class="text-center py-6 text-gray-400">
+                                <i class="bi bi-chat-left-dots text-2xl mb-1 block text-gray-300"></i>
+                                <p class="text-xs">No questions posted yet. Be the first to start a discussion!</p>
+                            </div>
+                        </div>
+
+                        <!-- TAB 4: QUIZZES -->
+                        <div id="tab-quizTab" class="p-5 sm:p-6 tab-pane hidden">
+                            <h3 class="font-bold text-sm text-surface-900 mb-1">Course Quizzes</h3>
+                            <p class="text-xs text-gray-500 mb-4">Passing all quizzes with at least 70% is required to unlock your course completion certificate.</p>
                             
                             <div th:if="${quizChecks != null and !quizChecks.isEmpty()}" class="space-y-3">
                                 <div th:each="qCheck : ${quizChecks}" class="p-4 bg-surface-50 border border-surface-200 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -190,10 +399,10 @@
                             </div>
                         </div>
 
-                        <!-- Tab Content 3: Assignments -->
-                        <div id="tab-assignmentTab" class="p-6 tab-pane hidden">
-                            <h3 class="font-bold text-sm text-surface-900 mb-3">Course Assignments</h3>
-                            <p class="text-xs text-gray-500 mb-4">Complete the capstone deliverables below. Submit your files directly for instructor review.</p>
+                        <!-- TAB 5: ASSIGNMENTS -->
+                        <div id="tab-assignmentTab" class="p-5 sm:p-6 tab-pane hidden">
+                            <h3 class="font-bold text-sm text-surface-900 mb-1">Course Assignments</h3>
+                            <p class="text-xs text-gray-500 mb-4">Complete project deliverables and upload work for instructor evaluation.</p>
                             
                             <div th:if="${assignments != null and !assignments.isEmpty()}" class="space-y-3">
                                 <div th:each="ass : ${assignments}" class="p-4 bg-surface-50 border border-surface-200 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -220,24 +429,25 @@
 
             </div>
 
-            <!-- 3. FOOTER PLAYER CONTROL BUTTONS -->
+            <!-- 3. FOOTER PLAYER CONTROLS BAR -->
             <footer class="h-16 bg-white border-t border-surface-200 flex items-center justify-between px-4 sm:px-6 shrink-0">
-                <!-- Prev Button -->
+                <!-- Previous Button -->
                 <div>
                     <a th:if="${prevLesson != null}" th:href="@{/student/courses/{cId}/player(cId=${course.id}, lessonId=${prevLesson.id})}"
-                       class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-gray-600 hover:text-surface-900 border border-surface-200 hover:bg-surface-50 rounded-xl transition-all">
-                        <i class="bi bi-chevron-left"></i> Previous
+                       class="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 text-xs font-bold text-gray-600 hover:text-surface-900 border border-surface-200 hover:bg-surface-50 rounded-xl transition-all">
+                        <i class="bi bi-chevron-left"></i> <span class="hidden sm:inline">Previous</span>
                     </a>
-                    <button th:unless="${prevLesson != null}" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-gray-300 border border-surface-100 rounded-xl cursor-not-allowed select-none bg-surface-50/50" disabled>
-                        <i class="bi bi-chevron-left"></i> Previous
+                    <button th:unless="${prevLesson != null}" class="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 text-xs font-bold text-gray-300 border border-surface-100 rounded-xl cursor-not-allowed select-none bg-surface-50/50" disabled>
+                        <i class="bi bi-chevron-left"></i> <span class="hidden sm:inline">Previous</span>
                     </button>
                 </div>
 
-                <!-- Complete / Progress Button -->
+                <!-- Complete & Continue Button -->
                 <div>
                     <form th:action="@{/student/courses/{cId}/lessons/{lId}/complete(cId=${course.id}, lId=${lesson.id})}" method="post">
-                        <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/10 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
-                            <i class="bi bi-check-circle-fill"></i> Complete & Continue
+                        <button type="submit" class="px-4 sm:px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-emerald-500/10 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span th:text="${currentProgress != null and currentProgress.completed ? 'Completed (Next)' : 'Complete & Continue'}">Complete & Continue</span>
                         </button>
                     </form>
                 </div>
@@ -245,11 +455,11 @@
                 <!-- Next Button -->
                 <div>
                     <a th:if="${nextLesson != null and !nextLesson.locked}" th:href="@{/student/courses/{cId}/player(cId=${course.id}, lessonId=${nextLesson.id})}"
-                       class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-brand-600 hover:text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl transition-all">
-                        Next <i class="bi bi-chevron-right"></i>
+                       class="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 text-xs font-bold text-brand-600 hover:text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-xl transition-all">
+                        <span class="hidden sm:inline">Next</span> <i class="bi bi-chevron-right"></i>
                     </a>
-                    <button th:if="${nextLesson == null or nextLesson.locked}" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-gray-300 border border-surface-100 rounded-xl cursor-not-allowed select-none bg-surface-50/50" disabled>
-                        Next <i class="bi bi-chevron-right"></i>
+                    <button th:if="${nextLesson == null or nextLesson.locked}" class="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 text-xs font-bold text-gray-300 border border-surface-100 rounded-xl cursor-not-allowed select-none bg-surface-50/50" disabled>
+                        <span class="hidden sm:inline">Next</span> <i class="bi bi-chevron-right"></i>
                     </button>
                 </div>
             </footer>
@@ -259,42 +469,136 @@
         <div id="menuOverlay" class="fixed inset-0 bg-surface-900/50 backdrop-blur-sm z-25 hidden"></div>
     </div>
 
-    <!-- Script to handle responsive syllabus and tab switching -->
-    <script>
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const syllabusSidebar = document.getElementById('syllabusSidebar');
-        const menuOverlay = document.getElementById('menuOverlay');
-
-        if (mobileMenuToggle && syllabusSidebar && menuOverlay) {
-            mobileMenuToggle.addEventListener('click', () => {
-                syllabusSidebar.classList.remove('-translate-x-full');
-                menuOverlay.classList.remove('hidden');
-            });
-
-            menuOverlay.addEventListener('click', () => {
-                syllabusSidebar.classList.add('-translate-x-full');
-                menuOverlay.classList.add('hidden');
-            });
-        }
-
+    <!-- Video Heartbeat, Bookmarking & Navigation Scripts -->
+    <script th:inline="javascript">
+        const courseId = /*[[${course.id}]]*/ 0;
+        const lessonId = /*[[${lesson.id}]]*/ 0;
+        const initialPlaybackPos = /*[[${currentProgress != null ? currentProgress.playbackPosition : 0.0}]]*/ 0.0;
+        
+        // Tab switcher
         function switchTab(tabId) {
-            // Hide all tab content
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
-            
-            // Deactivate all tab buttons
             document.querySelectorAll('[id^="btn-"]').forEach(btn => {
                 btn.classList.remove('border-brand-600', 'text-brand-600');
                 btn.classList.add('border-transparent');
             });
-
-            // Show current tab content
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            
-            // Activate current tab button
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
             const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.remove('border-transparent');
-            activeBtn.classList.add('border-brand-600', 'text-brand-600');
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent');
+                activeBtn.classList.add('border-brand-600', 'text-brand-600');
+            }
         }
+
+        // Bookmark Toggle via AJAX
+        function toggleBookmark() {
+            fetch(`/student/courses/${courseId}/lessons/${lessonId}/bookmark`, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const btn = document.getElementById('bookmarkBtn');
+                const icon = document.getElementById('bookmarkIcon');
+                const text = document.getElementById('bookmarkText');
+                if (data.bookmarked) {
+                    btn.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-700');
+                    btn.classList.remove('bg-surface-50', 'border-surface-200', 'text-gray-600');
+                    icon.className = 'bi bi-bookmark-star-fill text-amber-500 text-xs';
+                    text.innerText = 'Saved';
+                } else {
+                    btn.classList.remove('bg-amber-50', 'border-amber-200', 'text-amber-700');
+                    btn.classList.add('bg-surface-50', 'border-surface-200', 'text-gray-600');
+                    icon.className = 'bi bi-bookmark text-xs';
+                    text.innerText = 'Save';
+                }
+            })
+            .catch(err => console.error('Bookmark toggle error:', err));
+        }
+
+        // HTML5 Video Playback Tracking & Resume
+        const videoElem = document.getElementById('lmsVideo');
+        if (videoElem) {
+            // Resume from previous position
+            if (initialPlaybackPos > 0) {
+                videoElem.currentTime = initialPlaybackPos;
+            }
+
+            let lastHeartbeat = 0;
+            videoElem.addEventListener('timeupdate', () => {
+                const now = Math.floor(videoElem.currentTime);
+                // Update note timestamp indicator
+                const mins = Math.floor(now / 60).toString().padStart(2, '0');
+                const secs = (now % 60).toString().padStart(2, '0');
+                const disp = document.getElementById('currentTimeDisplay');
+                if (disp) disp.innerText = `${mins}:${secs}`;
+
+                // Send heartbeat every 10 seconds
+                if (now > 0 && now - lastHeartbeat >= 10) {
+                    lastHeartbeat = now;
+                    sendPlaybackHeartbeat(videoElem.currentTime, videoElem.duration);
+                }
+            });
+
+            videoElem.addEventListener('pause', () => {
+                sendPlaybackHeartbeat(videoElem.currentTime, videoElem.duration);
+            });
+
+            videoElem.addEventListener('ended', () => {
+                sendPlaybackHeartbeat(videoElem.currentTime, videoElem.duration);
+            });
+        }
+
+        function sendPlaybackHeartbeat(currTime, duration) {
+            if (!duration || duration <= 0) return;
+            const percent = Math.min(100, Math.floor((currTime / duration) * 100));
+            const formData = new FormData();
+            formData.append('seconds', currTime);
+            formData.append('percent', percent);
+
+            fetch(`/student/courses/${courseId}/lessons/${lessonId}/playback`, {
+                method: 'POST',
+                body: formData
+            }).catch(err => console.log('Playback sync error:', err));
+        }
+
+        function captureTimestamp() {
+            let cur = 0;
+            if (videoElem) cur = Math.floor(videoElem.currentTime);
+            document.getElementById('noteTimestamp').value = cur;
+        }
+
+        function seekVideo(seconds) {
+            if (videoElem) {
+                videoElem.currentTime = seconds;
+                videoElem.play();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Mobile Sidebar Drawer Handlers
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const syllabusSidebar = document.getElementById('syllabusSidebar');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function openDrawer() {
+            if (syllabusSidebar && menuOverlay) {
+                syllabusSidebar.classList.remove('-translate-x-full');
+                menuOverlay.classList.remove('hidden');
+            }
+        }
+        function closeDrawer() {
+            if (syllabusSidebar && menuOverlay) {
+                syllabusSidebar.classList.add('-translate-x-full');
+                menuOverlay.classList.add('hidden');
+            }
+        }
+
+        if (mobileMenuToggle) mobileMenuToggle.addEventListener('click', openDrawer);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeDrawer);
+        if (menuOverlay) menuOverlay.addEventListener('click', closeDrawer);
     </script>
 
     <!-- Global "Need Help?" AI Support & Assistance System -->

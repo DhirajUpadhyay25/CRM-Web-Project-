@@ -85,7 +85,19 @@ public class StudentLearningController {
         }
         model.addAttribute("totalModules", modules.size());
 
-        // Find the last accessed lesson ID for Continue Learning button target
+        // Pass lesson completion status map
+        List<LessonProgress> allProgs = progressRepo.findByUserEmailAndCourseId(email, courseId);
+        Map<Long, String> lessonStatusMap = new HashMap<>();
+        for (LessonProgress lp : allProgs) {
+            if (Boolean.TRUE.equals(lp.getCompleted())) {
+                lessonStatusMap.put(lp.getLessonId(), "COMPLETED");
+            } else if (lp.getPlaybackPosition() != null && lp.getPlaybackPosition() > 0) {
+                lessonStatusMap.put(lp.getLessonId(), "IN_PROGRESS");
+            }
+        }
+        model.addAttribute("lessonStatusMap", lessonStatusMap);
+
+        // Find target lesson (last incomplete/accessed, or first lesson)
         LessonProgress lastProg = progressRepo.findFirstByUserEmailAndCourseIdOrderByLastAccessedAtDesc(email, courseId);
         Long targetLessonId = null;
         if (lastProg != null) {
@@ -203,10 +215,18 @@ public class StudentLearningController {
         }
 
         Map<String, Object> progressStats = learningService.getCourseProgressDetails(email, courseId);
+        Optional<LessonProgress> currentProgress = progressRepo.findByUserEmailAndLessonId(email, lessonId);
+        List<StudentLessonNote> notes = learningService.getStudentNotes(email, lessonId);
+        boolean isBookmarked = learningService.isLessonBookmarked(email, lessonId);
+        List<in.project.main.dto.LessonDiscussionDTO> discussions = learningService.getLessonDiscussions(lessonId);
 
         model.addAttribute("enrollment", enrollmentOpt.get());
         model.addAttribute("course", enrollmentOpt.get().getCourse());
         model.addAttribute("lesson", currentLesson);
+        model.addAttribute("currentProgress", currentProgress.orElse(null));
+        model.addAttribute("notes", notes);
+        model.addAttribute("isBookmarked", isBookmarked);
+        model.addAttribute("discussions", discussions);
         model.addAttribute("syllabus", syllabus);
         model.addAttribute("prevLesson", prevLesson);
         model.addAttribute("nextLesson", nextLesson);
@@ -215,6 +235,134 @@ public class StudentLearningController {
         model.addAttribute("progressStats", progressStats);
 
         return "student/course-player";
+    }
+
+    // ----------------------------------------------------
+    // VIDEO PLAYBACK HEARTBEAT
+    // ----------------------------------------------------
+    @PostMapping("/courses/{courseId}/lessons/{lessonId}/playback")
+    @ResponseBody
+    public Map<String, Object> updatePlayback(
+            @PathVariable Long courseId,
+            @PathVariable Long lessonId,
+            @RequestParam(name = "seconds", defaultValue = "0") double seconds,
+            @RequestParam(name = "percent", defaultValue = "0") int percent,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        
+        Map<String, Object> res = new HashMap<>();
+        String email = userDetails.getUsername();
+        if (!learningService.checkCourseAccess(email, courseId)) {
+            res.put("status", "error");
+            res.put("message", "Access denied");
+            return res;
+        }
+
+        learningService.updateVideoProgress(email, courseId, lessonId, seconds, percent);
+        res.put("status", "ok");
+        res.put("completed", percent >= 85);
+        return res;
+    }
+
+    // ----------------------------------------------------
+    // LESSON NOTES API
+    // ----------------------------------------------------
+    @PostMapping("/courses/{courseId}/lessons/{lessonId}/notes")
+    public String addNote(
+            @PathVariable Long courseId,
+            @PathVariable Long lessonId,
+            @RequestParam("content") String content,
+            @RequestParam(name = "timestamp", required = false, defaultValue = "0") Double timestamp,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes ra) {
+
+        String email = userDetails.getUsername();
+        if (learningService.checkCourseAccess(email, courseId) && content != null && !content.trim().isEmpty()) {
+            learningService.saveStudentNote(email, courseId, lessonId, content.trim(), timestamp);
+            ra.addFlashAttribute("successMsg", "Note saved successfully.");
+        }
+        return "redirect:/student/courses/" + courseId + "/player?lessonId=" + lessonId;
+    }
+
+    @PostMapping("/courses/{courseId}/lessons/{lessonId}/notes/{noteId}/delete")
+    public String deleteNote(
+            @PathVariable Long courseId,
+            @PathVariable Long lessonId,
+            @PathVariable Long noteId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes ra) {
+
+        String email = userDetails.getUsername();
+        if (learningService.checkCourseAccess(email, courseId)) {
+            learningService.deleteStudentNote(email, noteId);
+            ra.addFlashAttribute("successMsg", "Note deleted.");
+        }
+        return "redirect:/student/courses/" + courseId + "/player?lessonId=" + lessonId;
+    }
+
+    // ----------------------------------------------------
+    // LESSON BOOKMARK TOGGLE
+    // ----------------------------------------------------
+    @PostMapping("/courses/{courseId}/lessons/{lessonId}/bookmark")
+    @ResponseBody
+    public Map<String, Object> toggleBookmark(
+            @PathVariable Long courseId,
+            @PathVariable Long lessonId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        Map<String, Object> res = new HashMap<>();
+        String email = userDetails.getUsername();
+        if (!learningService.checkCourseAccess(email, courseId)) {
+            res.put("status", "error");
+            return res;
+        }
+
+        Lesson l = lessonRepo.findById(lessonId).orElse(null);
+        String title = (l != null) ? l.getTitle() : "Lesson " + lessonId;
+        boolean isBookmarked = learningService.toggleLessonBookmark(email, courseId, lessonId, title);
+        res.put("status", "ok");
+        res.put("bookmarked", isBookmarked);
+        return res;
+    }
+
+    // ----------------------------------------------------
+    // LESSON Q&A DISCUSSIONS
+    // ----------------------------------------------------
+    @PostMapping("/courses/{courseId}/lessons/{lessonId}/questions")
+    public String postQuestion(
+            @PathVariable Long courseId,
+            @PathVariable Long lessonId,
+            @RequestParam("questionTitle") String questionTitle,
+            @RequestParam("content") String content,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes ra) {
+
+        String email = userDetails.getUsername();
+        if (learningService.checkCourseAccess(email, courseId) && content != null && !content.trim().isEmpty()) {
+            User user = userRepo.findByEmail(email);
+            String authorName = (user != null && user.getName() != null) ? user.getName() : email;
+            learningService.postLessonQuestion(email, authorName, "STUDENT", courseId, lessonId, questionTitle, content.trim(), null);
+            ra.addFlashAttribute("successMsg", "Question posted to course discussion.");
+        }
+        return "redirect:/student/courses/" + courseId + "/player?lessonId=" + lessonId;
+    }
+
+    @PostMapping("/courses/{courseId}/lessons/{lessonId}/questions/{questionId}/reply")
+    public String postReply(
+            @PathVariable Long courseId,
+            @PathVariable Long lessonId,
+            @PathVariable Long questionId,
+            @RequestParam("content") String content,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes ra) {
+
+        String email = userDetails.getUsername();
+        if (learningService.checkCourseAccess(email, courseId) && content != null && !content.trim().isEmpty()) {
+            User user = userRepo.findByEmail(email);
+            String authorName = (user != null && user.getName() != null) ? user.getName() : email;
+            learningService.postLessonQuestion(email, authorName, "STUDENT", courseId, lessonId, null, content.trim(), questionId);
+            ra.addFlashAttribute("successMsg", "Reply submitted.");
+        }
+        return "redirect:/student/courses/" + courseId + "/player?lessonId=" + lessonId;
     }
 
     // ----------------------------------------------------

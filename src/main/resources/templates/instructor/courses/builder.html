@@ -83,12 +83,23 @@
                                 <!-- Module Lessons -->
                                 <div class="divide-y divide-surface-200">
                                     <div th:each="lesson : ${entry.value}" class="p-3.5 pl-12 flex items-center justify-between hover:bg-surface-50/50 transition-colors text-sm">
-                                        <div class="flex items-center gap-2">
-                                            <i class="bi bi-play-circle text-brand-600"></i>
+                                        <div class="flex items-center gap-2.5">
+                                            <i class="bi" th:classappend="${lesson.contentType == 'VIDEO' ? 'bi-play-circle text-brand-600' : (lesson.contentType == 'QUIZ' ? 'bi-patch-question text-amber-600' : (lesson.contentType == 'ASSIGNMENT' ? 'bi-journal-code text-purple-600' : 'bi-file-earmark-text text-blue-600'))}"></i>
                                             <span class="text-surface-700 font-medium" th:text="${lesson.title}">Lesson Name</span>
+                                            <span th:if="${lesson.contentType != null}" 
+                                                  class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-surface-100 text-surface-700" 
+                                                  th:text="${lesson.contentType}">VIDEO</span>
+                                            <span th:if="${lesson.duration != null and !lesson.duration.isEmpty()}" 
+                                                  class="text-[10px] text-gray-400 font-semibold" th:text="${lesson.duration}">10m</span>
                                         </div>
                                         <div class="flex items-center gap-3 text-xs text-gray-400">
                                             <span class="font-semibold text-gray-500" th:text="'Index: ' + ${lesson.orderIndex}">Index: 1</span>
+                                            <form th:action="@{/instructor/courses/{cId}/lessons/{lId}/delete(cId=${course.id}, lId=${lesson.id})}" method="post" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this lesson?');" class="inline">
+                                                <button type="submit" class="text-red-500 hover:text-red-700 p-1" title="Delete Lesson">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -104,27 +115,70 @@
                             <i class="bi bi-plus-circle-fill text-brand-600"></i> Add Lesson
                         </h3>
 
-                        <form th:action="@{/instructor/courses/{id}/lessons/add(id=${course.id})}" method="post" class="space-y-4">
+                        <form th:action="@{/instructor/courses/{id}/lessons/add(id=${course.id})}" method="post" class="space-y-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Lesson Title</label>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Lesson Title</label>
                                 <input type="text" name="title" required placeholder="e.g. Introduction to JVM Mechanics"
                                        class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Module / Section Name</label>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Module / Section Name</label>
                                 <input type="text" name="sectionName" required placeholder="e.g. Module 1: Core Mechanics"
                                        class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
-                                <p class="text-[10px] text-gray-400 mt-1">If the module name matches an existing one, the lesson will be appended under it.</p>
+                                <p class="text-[10px] text-gray-400 mt-0.5">Existing section will group this lesson under it.</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Content Type</label>
+                                    <select name="contentType" class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm font-semibold">
+                                        <option value="VIDEO">Video</option>
+                                        <option value="ARTICLE">Article</option>
+                                        <option value="PDF">PDF Document</option>
+                                        <option value="QUIZ">Quiz</option>
+                                        <option value="ASSIGNMENT">Assignment</option>
+                                        <option value="RESOURCE">Resource / Link</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Order Index</label>
+                                    <input type="number" name="orderIndex" required min="1" value="1"
+                                           class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm font-semibold">
+                                </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1.5">Order Index</label>
-                                <input type="number" name="orderIndex" required min="1" value="1"
-                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm font-semibold">
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Video Stream URL</label>
+                                <input type="url" name="videoUrl" placeholder="https://youtube.com/watch?v=... or MP4 URL"
+                                       class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
                             </div>
 
-                            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Duration</label>
+                                    <input type="text" name="duration" placeholder="e.g. 15m or 1h 20m"
+                                           class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Resource Link / File</label>
+                                    <input type="text" name="resourceFileUrl" placeholder="Link / Doc URL"
+                                           class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-surface-700 uppercase tracking-wider mb-1">Article / Guide Content</label>
+                                <textarea name="textContent" rows="3" placeholder="Lesson reading guide, summary, or code samples..."
+                                          class="w-full px-3 py-2 bg-surface-50 border border-surface-200 rounded-xl text-surface-900 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 text-sm"></textarea>
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-1">
+                                <input type="checkbox" id="isFreePreview" name="isFreePreview" value="true" class="rounded text-brand-600 focus:ring-brand-500">
+                                <label for="isFreePreview" class="text-xs font-medium text-surface-700">Free Preview Lesson</label>
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5 mt-2">
                                 <i class="bi bi-check-lg"></i>
                                 <span>Save Lesson</span>
                             </button>

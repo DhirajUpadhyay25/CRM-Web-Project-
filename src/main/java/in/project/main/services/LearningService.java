@@ -29,6 +29,9 @@ public class LearningService {
     @Autowired private NotificationRepository notificationRepo;
     @Autowired private UserRepository userRepo;
     @Autowired private CourseRepository courseRepo;
+    @Autowired private StudentLessonNoteRepository noteRepo;
+    @Autowired private LessonBookmarkRepository bookmarkRepo;
+    @Autowired private LessonDiscussionRepository discussionRepo;
 
     public boolean checkCourseAccess(String email, Long courseId) {
         User user = userRepo.findByEmail(email);
@@ -281,5 +284,285 @@ public class LearningService {
         logActivity(email, "ASSIGNMENT_SUBMIT", "Submitted assignment: " + assignment.getTitle());
 
         return submission;
+    }
+
+    // ----------------------------------------------------
+    // ENRICHED MY COURSES DASHBOARD
+    // ----------------------------------------------------
+    public List<in.project.main.dto.StudentEnrolledCourseDTO> getStudentEnrolledCoursesOverview(String email, String search, String filter) {
+        List<Enrollment> enrollments = enrollmentRepo.findByUserEmailOrderByEnrolledAtDesc(email);
+        List<in.project.main.dto.StudentEnrolledCourseDTO> dtos = new ArrayList<>();
+
+        String searchLower = (search != null) ? search.trim().toLowerCase() : "";
+
+        for (Enrollment e : enrollments) {
+            Course c = e.getCourse();
+            if (c == null) continue;
+
+            // Search filter
+            if (!searchLower.isEmpty()) {
+                boolean matchTitle = c.getName() != null && c.getName().toLowerCase().contains(searchLower);
+                boolean matchInstructor = c.getInstructor() != null && c.getInstructor().toLowerCase().contains(searchLower);
+                boolean matchCategory = c.getCategory() != null && c.getCategory().getName() != null && c.getCategory().getName().toLowerCase().contains(searchLower);
+                if (!matchTitle && !matchInstructor && !matchCategory) {
+                    continue;
+                }
+            }
+
+            in.project.main.dto.StudentEnrolledCourseDTO dto = new in.project.main.dto.StudentEnrolledCourseDTO();
+            dto.setEnrollmentId(e.getId());
+            dto.setCourseId(c.getId());
+            dto.setCourseName(c.getName());
+            dto.setCourseSlug(c.getSlug());
+            dto.setShortDescription(c.getShortDescription() != null ? c.getShortDescription() : c.getDescription());
+            dto.setImageUrl(c.getImageUrl());
+            dto.setCategoryName(c.getCategory() != null ? c.getCategory().getName() : "General");
+            dto.setLevel(c.getLevel() != null ? c.getLevel().name() : "ALL_LEVELS");
+            dto.setDuration(c.getDuration());
+            dto.setInstructorName(c.getInstructor() != null ? c.getInstructor() : "EduTake Mentor");
+            dto.setEnrolledAt(e.getEnrolledAt());
+            dto.setLastAccessedAt(e.getLastAccessedAt());
+            dto.setEnrollmentStatus(e.getStatus() != null ? e.getStatus().name() : "ACTIVE");
+
+            List<Lesson> lessons = lessonRepo.findByCourseIdOrderByOrderIndexAsc(String.valueOf(c.getId()));
+            dto.setTotalLessonsCount(lessons.size());
+
+            long completedCount = progressRepo.countByUserEmailAndCourseIdAndCompleted(email, c.getId(), true);
+            dto.setCompletedLessonsCount((int) completedCount);
+
+            int percent = 0;
+            if (e.getStatus() == EnrollmentStatus.COMPLETED) {
+                percent = 100;
+            } else if (!lessons.isEmpty()) {
+                percent = (int) ((completedCount * 100) / lessons.size());
+            }
+            dto.setProgressPercentage(percent);
+
+            boolean isCompleted = (e.getStatus() == EnrollmentStatus.COMPLETED || percent >= 100);
+            boolean isStarted = (completedCount > 0 || e.getLastAccessedAt() != null);
+            dto.setCompleted(isCompleted);
+            dto.setStarted(isStarted);
+            dto.setCertificateEligible(isCompleted);
+
+            // Status Filter logic: ALL, IN_PROGRESS, NOT_STARTED, COMPLETED
+            if (filter != null && !filter.isEmpty() && !"ALL".equalsIgnoreCase(filter)) {
+                if ("COMPLETED".equalsIgnoreCase(filter) && !isCompleted) continue;
+                if ("NOT_STARTED".equalsIgnoreCase(filter) && (isStarted || isCompleted)) continue;
+                if ("IN_PROGRESS".equalsIgnoreCase(filter) && (!isStarted || isCompleted)) continue;
+            }
+
+            // Find last accessed lesson and target lesson
+            LessonProgress lastProg = progressRepo.findFirstByUserEmailAndCourseIdOrderByLastAccessedAtDesc(email, c.getId());
+            Long targetLessonId = null;
+            if (lastProg != null) {
+                dto.setLastAccessedLessonId(lastProg.getLessonId());
+                lessonRepo.findById(lastProg.getLessonId()).ifPresent(l -> dto.setLastAccessedLessonTitle(l.getTitle()));
+                targetLessonId = lastProg.getLessonId();
+            }
+
+            if (targetLessonId == null && !lessons.isEmpty()) {
+                targetLessonId = lessons.get(0).getId();
+            }
+            dto.setTargetLessonId(targetLessonId);
+
+            if (isCompleted) {
+                dto.setActionType("REVIEW");
+            } else if (isStarted) {
+                dto.setActionType("CONTINUE");
+            } else {
+                dto.setActionType("START");
+            }
+
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
+    public Map<String, Long> getStudentCourseMetrics(String email) {
+        List<Enrollment> enrollments = enrollmentRepo.findByUserEmailOrderByEnrolledAtDesc(email);
+        long totalCount = enrollments.size();
+        long completedCount = 0;
+        long inProgressCount = 0;
+        long notStartedCount = 0;
+
+        for (Enrollment e : enrollments) {
+            Course c = e.getCourse();
+            if (c == null) continue;
+            if (e.getStatus() == EnrollmentStatus.COMPLETED) {
+                completedCount++;
+            } else {
+                long completedLessons = progressRepo.countByUserEmailAndCourseIdAndCompleted(email, c.getId(), true);
+                if (completedLessons > 0 || e.getLastAccessedAt() != null) {
+                    inProgressCount++;
+                } else {
+                    notStartedCount++;
+                }
+            }
+        }
+
+        Map<String, Long> metrics = new HashMap<>();
+        metrics.put("totalCount", totalCount);
+        metrics.put("completedCount", completedCount);
+        metrics.put("inProgressCount", inProgressCount);
+        metrics.put("notStartedCount", notStartedCount);
+        return metrics;
+    }
+
+    // ----------------------------------------------------
+    // VIDEO PLAYBACK TRACKING
+    // ----------------------------------------------------
+    @Transactional
+    public void updateVideoProgress(String email, Long courseId, Long lessonId, double seconds, int percent) {
+        LessonProgress progress = progressRepo.findByUserEmailAndLessonId(email, lessonId)
+                .orElseGet(() -> {
+                    LessonProgress newProg = new LessonProgress();
+                    newProg.setUserEmail(email);
+                    newProg.setCourseId(courseId);
+                    newProg.setLessonId(lessonId);
+                    newProg.setStartedAt(LocalDateTime.now());
+                    return newProg;
+                });
+
+        progress.setPlaybackPosition(seconds);
+        progress.setWatchPercentage(Math.max(progress.getWatchPercentage() != null ? progress.getWatchPercentage() : 0, percent));
+        progress.setLastAccessedAt(LocalDateTime.now());
+        if (progress.getStartedAt() == null) {
+            progress.setStartedAt(LocalDateTime.now());
+        }
+
+        // Automatic completion rule: if video watch percentage is >= 85%, mark complete!
+        if (percent >= 85 && !progress.isCompleted()) {
+            progress.setCompleted(true);
+            progress.setCompletedAt(LocalDateTime.now());
+            progress.setStatus("COMPLETED");
+            progressRepo.save(progress);
+
+            Lesson lesson = lessonRepo.findById(lessonId).orElse(null);
+            String title = lesson != null ? lesson.getTitle() : "Lesson " + lessonId;
+            logActivity(email, "LESSON_COMPLETE", "Completed lesson: " + title);
+
+            checkAndUpdateCourseCompletion(email, courseId);
+        } else {
+            if (!progress.isCompleted()) {
+                progress.setStatus("IN_PROGRESS");
+            }
+            progressRepo.save(progress);
+        }
+
+        enrollmentRepo.findByUserEmailAndCourseId(email, courseId).ifPresent(e -> {
+            e.setLastAccessedAt(LocalDateTime.now());
+            enrollmentRepo.save(e);
+        });
+    }
+
+    // ----------------------------------------------------
+    // STUDENT LESSON NOTES
+    // ----------------------------------------------------
+    @Transactional
+    public StudentLessonNote saveStudentNote(String email, Long courseId, Long lessonId, String content, Double timestampSeconds) {
+        StudentLessonNote note = new StudentLessonNote();
+        note.setUserEmail(email);
+        note.setCourseId(courseId);
+        note.setLessonId(lessonId);
+        note.setContent(content);
+        note.setTimestampSeconds(timestampSeconds != null ? timestampSeconds : 0.0);
+        return noteRepo.save(note);
+    }
+
+    public List<StudentLessonNote> getStudentNotes(String email, Long lessonId) {
+        return noteRepo.findByUserEmailAndLessonIdOrderByCreatedAtDesc(email, lessonId);
+    }
+
+    @Transactional
+    public boolean deleteStudentNote(String email, Long noteId) {
+        Optional<StudentLessonNote> noteOpt = noteRepo.findById(noteId);
+        if (noteOpt.isPresent() && noteOpt.get().getUserEmail().equalsIgnoreCase(email)) {
+            noteRepo.delete(noteOpt.get());
+            return true;
+        }
+        return false;
+    }
+
+    // ----------------------------------------------------
+    // LESSON BOOKMARKS
+    // ----------------------------------------------------
+    @Transactional
+    public boolean toggleLessonBookmark(String email, Long courseId, Long lessonId, String lessonTitle) {
+        Optional<LessonBookmark> b = bookmarkRepo.findByUserEmailAndLessonId(email, lessonId);
+        if (b.isPresent()) {
+            bookmarkRepo.delete(b.get());
+            return false; // Removed
+        } else {
+            LessonBookmark newB = new LessonBookmark();
+            newB.setUserEmail(email);
+            newB.setCourseId(courseId);
+            newB.setLessonId(lessonId);
+            newB.setLessonTitle(lessonTitle);
+            bookmarkRepo.save(newB);
+            return true; // Added
+        }
+    }
+
+    public boolean isLessonBookmarked(String email, Long lessonId) {
+        return bookmarkRepo.existsByUserEmailAndLessonId(email, lessonId);
+    }
+
+    public List<LessonBookmark> getStudentBookmarks(String email) {
+        return bookmarkRepo.findByUserEmailOrderByCreatedAtDesc(email);
+    }
+
+    // ----------------------------------------------------
+    // LESSON Q&A / DISCUSSIONS
+    // ----------------------------------------------------
+    @Transactional
+    public LessonDiscussion postLessonQuestion(String email, String authorName, String role, Long courseId, Long lessonId, String title, String content, Long parentId) {
+        LessonDiscussion d = new LessonDiscussion();
+        d.setCourseId(courseId);
+        d.setLessonId(lessonId);
+        d.setAuthorEmail(email);
+        d.setAuthorName(authorName != null ? authorName : email);
+        d.setAuthorRole(role != null ? role : "STUDENT");
+        d.setQuestionTitle(title);
+        d.setContent(content);
+        d.setParentId(parentId);
+        return discussionRepo.save(d);
+    }
+
+    public List<in.project.main.dto.LessonDiscussionDTO> getLessonDiscussions(Long lessonId) {
+        List<LessonDiscussion> rootQuestions = discussionRepo.findByLessonIdAndParentIdIsNullOrderByCreatedAtDesc(lessonId);
+        List<in.project.main.dto.LessonDiscussionDTO> result = new ArrayList<>();
+
+        for (LessonDiscussion q : rootQuestions) {
+            in.project.main.dto.LessonDiscussionDTO dto = toDiscussionDTO(q);
+            List<LessonDiscussion> replies = discussionRepo.findByParentIdOrderByCreatedAtAsc(q.getId());
+            for (LessonDiscussion r : replies) {
+                dto.getReplies().add(toDiscussionDTO(r));
+            }
+            result.add(dto);
+        }
+        return result;
+    }
+
+    private in.project.main.dto.LessonDiscussionDTO toDiscussionDTO(LessonDiscussion d) {
+        in.project.main.dto.LessonDiscussionDTO dto = new in.project.main.dto.LessonDiscussionDTO();
+        dto.setId(d.getId());
+        dto.setCourseId(d.getCourseId());
+        dto.setLessonId(d.getLessonId());
+        dto.setAuthorEmail(d.getAuthorEmail());
+        dto.setAuthorName(d.getAuthorName());
+        dto.setAuthorRole(d.getAuthorRole());
+        dto.setQuestionTitle(d.getQuestionTitle());
+        dto.setContent(d.getContent());
+        dto.setParentId(d.getParentId());
+        dto.setCreatedAt(d.getCreatedAt());
+        if (d.getCreatedAt() != null) {
+            long mins = java.time.Duration.between(d.getCreatedAt(), LocalDateTime.now()).toMinutes();
+            if (mins < 1) dto.setTimeAgo("Just now");
+            else if (mins < 60) dto.setTimeAgo(mins + "m ago");
+            else if (mins < 1440) dto.setTimeAgo((mins / 60) + "h ago");
+            else dto.setTimeAgo((mins / 1440) + "d ago");
+        }
+        return dto;
     }
 }

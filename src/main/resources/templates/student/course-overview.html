@@ -67,41 +67,84 @@
 
         <!-- Syllabus & Detail Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Left Pane: Course Syllabus (8 Cols) -->
+            <!-- Left Pane: Course Syllabus & Description (8 Cols) -->
             <div class="lg:col-span-8 space-y-6">
                 <!-- Description Card -->
                 <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6">
-                    <h2 class="text-base font-bold text-surface-900 mb-3">Course Description</h2>
-                    <div class="text-xs text-gray-600 leading-relaxed space-y-2 whitespace-pre-line" th:text="${course.description}">
+                    <h2 class="text-base font-bold text-surface-900 mb-3 flex items-center gap-2">
+                        <i class="bi bi-info-circle text-brand-600"></i> Course Overview
+                    </h2>
+                    <div class="text-xs text-gray-600 leading-relaxed space-y-2 whitespace-pre-line" th:text="${course.description != null ? course.description : course.shortDescription}">
                         Full description text.
                     </div>
                 </div>
 
                 <!-- Course Content Syllabus -->
                 <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6">
-                    <h2 class="text-base font-bold text-surface-900 mb-4">Course Syllabus</h2>
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h2 class="text-base font-bold text-surface-900 flex items-center gap-2">
+                                <i class="bi bi-collection-play text-brand-600"></i> Course Curriculum
+                            </h2>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Click any lesson to jump directly into the workspace</p>
+                        </div>
+                        <div class="text-xs font-semibold text-gray-500">
+                            <span th:text="${lessons != null ? lessons.size() : 0}">0</span> Lessons Total
+                        </div>
+                    </div>
                     
-                    <div th:if="${lessons != null and !lessons.isEmpty()}" class="space-y-4">
-                        <!-- We will list lessons grouped by sectionName dynamically, or just render them sequentially with sections -->
-                        <div class="relative border-l border-surface-200 pl-6 ml-3 space-y-4">
-                            <div th:each="lesson : ${lessons}" class="relative flex items-center justify-between gap-3 p-3 bg-surface-50 hover:bg-surface-100/50 rounded-xl border border-surface-100 transition-all">
-                                <div class="absolute -left-9.5 w-6 h-6 rounded-full border-4 border-white bg-brand-600 text-white flex items-center justify-center text-[10px]">
-                                    <span th:text="${lesson.orderIndex}">1</span>
+                    <div th:if="${lessons != null and !lessons.isEmpty()}" class="space-y-3">
+                        <div th:each="lesson, iter : ${lessons}" 
+                             class="group relative flex items-center justify-between gap-4 p-3.5 bg-surface-50/70 hover:bg-brand-50/40 rounded-xl border border-surface-100 hover:border-brand-200 transition-all">
+                            <div class="flex items-center gap-3.5 min-w-0">
+                                <!-- Order / Status Icon -->
+                                <div th:if="${lessonStatusMap != null and lessonStatusMap.get(lesson.id) == 'COMPLETED'}" 
+                                     class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                    <i class="bi bi-check-lg"></i>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <span class="text-[10px] text-gray-400 font-semibold block" th:text="${lesson.sectionName}">Section</span>
-                                    <p class="font-bold text-xs text-surface-900 truncate" th:text="${lesson.title}">Lesson Title</p>
+                                <div th:if="${lessonStatusMap != null and lessonStatusMap.get(lesson.id) == 'IN_PROGRESS'}" 
+                                     class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                    <i class="bi bi-play-fill text-sm"></i>
                                 </div>
-                                <div class="flex-shrink-0 text-xs">
-                                    <i class="bi bi-play-circle text-gray-400 text-lg"></i>
+                                <div th:if="${lessonStatusMap == null or (lessonStatusMap.get(lesson.id) != 'COMPLETED' and lessonStatusMap.get(lesson.id) != 'IN_PROGRESS')}" 
+                                     class="w-8 h-8 rounded-lg bg-white border border-surface-200 text-gray-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                    <span th:text="${iter.count}">1</span>
                                 </div>
+
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider" th:text="${lesson.sectionName != null ? lesson.sectionName : 'Curriculum'}">Section</span>
+                                        <span th:if="${lesson.contentType != null}" 
+                                              class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                                              th:classappend="${lesson.contentType == 'VIDEO' ? 'bg-blue-100 text-blue-700' : (lesson.contentType == 'QUIZ' ? 'bg-amber-100 text-amber-700' : (lesson.contentType == 'ASSIGNMENT' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'))}"
+                                              th:text="${lesson.contentType}">VIDEO</span>
+                                        <span th:if="${lesson.duration != null and !lesson.duration.isEmpty()}" 
+                                              class="text-[10px] text-gray-400 font-medium">
+                                            <i class="bi bi-clock text-[9px]"></i> <span th:text="${lesson.duration}">10m</span>
+                                        </span>
+                                    </div>
+                                    <p class="font-bold text-xs text-surface-900 truncate mt-0.5 group-hover:text-brand-600 transition-colors" th:text="${lesson.title}">Lesson Title</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2.5 flex-shrink-0">
+                                <span th:if="${lessonStatusMap != null and lessonStatusMap.get(lesson.id) == 'COMPLETED'}" 
+                                      class="hidden sm:inline-block px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-md border border-emerald-200/60">
+                                    Done
+                                </span>
+                                <a th:href="@{/student/courses/{cId}/player(cId=${course.id}, lessonId=${lesson.id})}" 
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-brand-600 hover:text-white border border-surface-200 text-surface-800 text-xs font-bold rounded-lg transition-all shadow-sm">
+                                    <i class="bi bi-play-circle text-xs"></i> <span>Open</span>
+                                </a>
                             </div>
                         </div>
                     </div>
+
                     <!-- Empty State -->
-                    <div th:if="${lessons == null or lessons.isEmpty()}" class="py-8 text-center text-gray-400">
-                        <i class="bi bi-journal-x text-2xl mb-1.5 block text-gray-300"></i>
-                        <p class="text-xs font-semibold">No syllabus available</p>
+                    <div th:if="${lessons == null or lessons.isEmpty()}" class="py-12 text-center text-gray-400">
+                        <i class="bi bi-journal-x text-3xl mb-2 block text-gray-300"></i>
+                        <p class="text-xs font-semibold text-gray-600">No lessons published yet</p>
+                        <p class="text-[11px] text-gray-400 mt-0.5">The instructor is preparing course curriculum. Check back shortly.</p>
                     </div>
                 </div>
             </div>
@@ -110,22 +153,31 @@
             <div class="lg:col-span-4 space-y-6">
                 <!-- Learning CTA Card -->
                 <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-6 text-center">
-                    <h3 class="font-bold text-surface-900 mb-2">Workspace Controls</h3>
+                    <h3 class="font-bold text-surface-900 mb-1">Learning Progress</h3>
+                    <p class="text-[11px] text-gray-500 mb-4">Track completion across all modules and tests</p>
                     
                     <div class="mb-5 flex flex-col items-center">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Status</p>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold"
-                              th:classappend="${enrollment.status.name() == 'COMPLETED' ? 'bg-green-500 text-white' : 'bg-brand-500 text-white'}"
-                              th:text="${enrollment.status.name() == 'COMPLETED' ? 'Completed' : 'In Progress'}">In Progress</span>
+                        <span class="px-3.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5"
+                              th:classappend="${enrollment.status.name() == 'COMPLETED' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-brand-50 text-brand-700 border border-brand-200'}">
+                            <i class="bi" th:classappend="${enrollment.status.name() == 'COMPLETED' ? 'bi-check-circle-fill text-emerald-600' : 'bi-hourglass-split text-brand-600'}"></i>
+                            <span th:text="${enrollment.status.name() == 'COMPLETED' ? 'Course Completed' : 'In Progress'}">In Progress</span>
+                        </span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-surface-100 rounded-full h-2 mb-4 overflow-hidden">
+                        <div class="h-2 rounded-full transition-all duration-500"
+                             th:classappend="${progress.percent == 100 ? 'bg-emerald-500' : 'bg-brand-600'}"
+                             th:style="'width: ' + ${progress.percent} + '%'"></div>
                     </div>
 
                     <a th:href="@{/student/courses/{cId}/player(cId=${course.id}, lessonId=${targetLessonId})}" 
                        class="w-full inline-flex items-center justify-center gap-2 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm shadow-md transition-all">
                         <i class="bi bi-play-fill text-lg"></i>
-                        <span th:text="${progress.percent > 0 ? 'Continue Learning' : 'Start Course'}">Start Learning</span>
+                        <span th:text="${progress.percent == 100 ? 'Review Course' : (progress.percent > 0 ? 'Continue Learning' : 'Start Course')}">Start Learning</span>
                     </a>
 
-                    <div class="mt-4 pt-4 border-t border-surface-100 grid grid-cols-2 gap-3 text-center text-xs">
+                    <div class="mt-5 pt-4 border-t border-surface-100 grid grid-cols-2 gap-3 text-center text-xs">
                         <div>
                             <p class="text-gray-400 font-medium">Modules</p>
                             <p class="font-black text-surface-900 mt-0.5" th:text="${progress.completedModules + ' / ' + totalModules}">0 / 0</p>
@@ -133,6 +185,37 @@
                         <div>
                             <p class="text-gray-400 font-medium">Lessons</p>
                             <p class="font-black text-surface-900 mt-0.5" th:text="${progress.completedLessons + ' / ' + progress.totalLessons}">0 / 0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Inclusions & Highlights -->
+                <div class="bg-white rounded-2xl border border-surface-200 shadow-sm p-5 space-y-3.5">
+                    <h4 class="text-xs font-bold text-surface-900 uppercase tracking-wider text-gray-500">Course Includes</h4>
+                    <div class="space-y-2.5 text-xs text-gray-700">
+                        <div class="flex items-center gap-2.5">
+                            <i class="bi bi-play-btn text-brand-600 text-sm"></i>
+                            <span>HD Video Lessons & Playback Resuming</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <i class="bi bi-patch-question text-amber-600 text-sm"></i>
+                            <span>Interactive Quizzes & Assessments</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <i class="bi bi-journal-code text-purple-600 text-sm"></i>
+                            <span>Hands-on Assignments & Submissions</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <i class="bi bi-chat-dots text-emerald-600 text-sm"></i>
+                            <span>Lesson Q&A Discussion Forum</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <i class="bi bi-bookmark text-blue-600 text-sm"></i>
+                            <span>Personalized Notes & Bookmarks</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <i class="bi bi-award text-yellow-600 text-sm"></i>
+                            <span>Verified Certificate of Completion</span>
                         </div>
                     </div>
                 </div>

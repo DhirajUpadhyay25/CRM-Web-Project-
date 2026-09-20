@@ -400,6 +400,12 @@ public class InstructorDashboardController {
             @RequestParam String title,
             @RequestParam String sectionName,
             @RequestParam(defaultValue = "1") Integer orderIndex,
+            @RequestParam(defaultValue = "VIDEO") String contentType,
+            @RequestParam(required = false) String videoUrl,
+            @RequestParam(required = false) String duration,
+            @RequestParam(required = false) String textContent,
+            @RequestParam(required = false) String resourceFileUrl,
+            @RequestParam(required = false, defaultValue = "false") Boolean isFreePreview,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes ra) {
 
@@ -410,6 +416,12 @@ public class InstructorDashboardController {
         lesson.setTitle(title);
         lesson.setSectionName(sectionName);
         lesson.setOrderIndex(orderIndex);
+        lesson.setContentType(contentType != null ? contentType.trim().toUpperCase() : "VIDEO");
+        lesson.setVideoUrl(videoUrl != null && !videoUrl.isBlank() ? videoUrl.trim() : null);
+        lesson.setDuration(duration != null && !duration.isBlank() ? duration.trim() : null);
+        lesson.setTextContent(textContent != null && !textContent.isBlank() ? textContent.trim() : null);
+        lesson.setResourceFileUrl(resourceFileUrl != null && !resourceFileUrl.isBlank() ? resourceFileUrl.trim() : null);
+        lesson.setIsFreePreview(Boolean.TRUE.equals(isFreePreview));
         Lesson saved = lessonRepository.save(lesson);
 
         if (auditLogService != null) {
@@ -417,7 +429,7 @@ public class InstructorDashboardController {
                 userDetails.getUsername(),
                 in.project.main.entities.enums.AuditEventType.LESSON_CREATED,
                 "LESSON_CREATED",
-                "Instructor added lesson '" + title + "' to course '" + course.getName() + "' (Section: " + sectionName + ")."
+                "Instructor added lesson '" + title + "' to course '" + course.getName() + "' (Section: " + sectionName + ", Type: " + contentType + ")."
             )
             .withActor(null, userDetails.getUsername(), userDetails.getName(), "INSTRUCTOR")
             .withEntity("LESSON", String.valueOf(saved.getId()), title)
@@ -428,6 +440,25 @@ public class InstructorDashboardController {
         }
 
         ra.addFlashAttribute("successMsg", "Lesson added successfully!");
+        return "redirect:/instructor/courses/" + id + "/builder";
+    }
+
+    @PostMapping("/courses/{id}/lessons/{lessonId}/delete")
+    public String deleteLesson(
+            @PathVariable Long id,
+            @PathVariable Long lessonId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes ra) {
+
+        checkCourseOwnership(id, userDetails.getUsername());
+        
+        lessonRepository.findById(lessonId).ifPresent(l -> {
+            if (String.valueOf(id).equals(l.getCourseId())) {
+                lessonRepository.delete(l);
+            }
+        });
+
+        ra.addFlashAttribute("successMsg", "Lesson deleted successfully!");
         return "redirect:/instructor/courses/" + id + "/builder";
     }
 
