@@ -41,7 +41,7 @@ public class Lesson {
     private String resourceFileUrl; // PDF or asset download link
 
     @Column
-    private boolean isFreePreview = false;
+    private Boolean isFreePreview = Boolean.FALSE;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -73,8 +73,8 @@ public class Lesson {
     public String getResourceFileUrl() { return resourceFileUrl; }
     public void setResourceFileUrl(String resourceFileUrl) { this.resourceFileUrl = resourceFileUrl; }
 
-    public boolean isFreePreview() { return isFreePreview; }
-    public void setFreePreview(boolean freePreview) { isFreePreview = freePreview; }
-    public Boolean getIsFreePreview() { return isFreePreview; }
-    public void setIsFreePreview(Boolean isFreePreview) { this.isFreePreview = isFreePreview != null && isFreePreview; }
+    public Boolean isFreePreview() { return Boolean.TRUE.equals(isFreePreview); }
+    public void setFreePreview(Boolean freePreview) { this.isFreePreview = freePreview != null ? freePreview : false; }
+    public Boolean getIsFreePreview() { return Boolean.TRUE.equals(isFreePreview); }
+    public void setIsFreePreview(Boolean isFreePreview) { this.isFreePreview = isFreePreview != null ? isFreePreview : false; }
 }

@@ -261,6 +261,20 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 log.debug("Notice on normalizing content and communication tables: {}", e.getMessage());
             }
 
+            // 7. Ensure lesson and lesson_progress null columns are normalized
+            try {
+                jdbcTemplate.execute("UPDATE lesson SET is_free_preview = FALSE WHERE is_free_preview IS NULL");
+                jdbcTemplate.execute("UPDATE lesson SET content_type = 'VIDEO' WHERE content_type IS NULL");
+                jdbcTemplate.execute("UPDATE lesson_progress SET completed = FALSE WHERE completed IS NULL");
+                jdbcTemplate.execute("UPDATE lesson_progress SET status = 'NOT_STARTED' WHERE status IS NULL");
+                jdbcTemplate.execute("UPDATE lesson_progress SET playback_position = 0.0 WHERE playback_position IS NULL");
+                jdbcTemplate.execute("UPDATE lesson_progress SET watch_percentage = 0 WHERE watch_percentage IS NULL");
+                jdbcTemplate.execute("UPDATE lesson_progress SET time_spent_seconds = 0 WHERE time_spent_seconds IS NULL");
+                log.info("Successfully normalized lesson and lesson_progress columns.");
+            } catch (Exception e) {
+                log.debug("Notice on normalizing lesson and lesson_progress columns: {}", e.getMessage());
+            }
+
         } catch (Exception e) {
             log.warn("Database schema fix runner completed with note: {}", e.getMessage());
         }

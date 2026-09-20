@@ -31,7 +31,7 @@ public class LessonProgress {
     private Long lessonId;
 
     @Column(nullable = false)
-    private boolean completed = false;
+    private Boolean completed = Boolean.FALSE;
 
     @Column
     private LocalDateTime lastAccessedAt;
@@ -66,11 +66,11 @@ public class LessonProgress {
     public Long getLessonId() { return lessonId; }
     public void setLessonId(Long lessonId) { this.lessonId = lessonId; }
 
-    public boolean isCompleted() { return completed; }
-    public Boolean getCompleted() { return completed; }
-    public void setCompleted(boolean completed) { 
-        this.completed = completed;
-        if (completed) {
+    public boolean isCompleted() { return Boolean.TRUE.equals(completed); }
+    public Boolean getCompleted() { return Boolean.TRUE.equals(completed); }
+    public void setCompleted(Boolean completed) { 
+        this.completed = Boolean.TRUE.equals(completed);
+        if (this.completed) {
             this.status = "COMPLETED";
             this.watchPercentage = 100;
         }
