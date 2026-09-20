@@ -133,8 +133,8 @@
                         <div class="bg-surface-900 border border-white/15 rounded-3xl overflow-hidden shadow-2xl sticky top-24">
                             
                             <!-- Thumbnail Preview with Play Icon -->
-                            <div class="relative h-56 sm:h-64 bg-surface-950 overflow-hidden group flex items-center justify-center p-2">
-                                <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" alt="Course Image" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'">
+                            <div class="relative h-56 sm:h-64 bg-surface-900 overflow-hidden group">
+                                <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" alt="Course Image" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'">
                                 <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500 bg-surface-900">
                                     <i class="bi bi-play-circle text-5xl text-brand-400"></i>
                                 </div>

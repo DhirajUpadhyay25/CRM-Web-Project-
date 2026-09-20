@@ -196,9 +196,9 @@
                      class="group bg-surface-900/90 border border-white/10 rounded-3xl overflow-hidden hover:border-brand-500/50 hover:shadow-2xl hover:shadow-brand-500/10 transition-all duration-300 hover:-translate-y-1.5 flex flex-col h-full relative">
                     
                     <!-- Thumbnail Container -->
-                    <div class="relative h-48 sm:h-52 overflow-hidden bg-surface-950 flex items-center justify-center p-2">
+                    <div class="relative h-48 sm:h-52 overflow-hidden bg-surface-900">
                         <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" alt="Course Image" 
-                             class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" 
+                             class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" 
                              onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80'">
                         <div th:unless="${course.imageUrl}" class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-surface-800 to-surface-900 text-gray-500 gap-2">
                             <i class="bi bi-play-circle text-4xl text-brand-400/60"></i>

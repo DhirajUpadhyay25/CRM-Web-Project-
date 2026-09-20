@@ -78,8 +78,8 @@
         <div th:if="${coursesPage != null and coursesPage.hasContent()}" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
             <div th:each="course : ${coursesPage.content}" class="bg-white rounded-2xl border border-surface-200 shadow-sm overflow-hidden hover:shadow-md transition-all group flex flex-col">
                 <!-- Course Image -->
-                <div class="h-44 bg-surface-950 relative overflow-hidden flex items-center justify-center p-2">
-                    <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" alt="Course" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="h-44 bg-surface-900 relative overflow-hidden">
+                    <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300" alt="Course" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                     <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
                         <i class="bi bi-play-btn text-5xl"></i>
                     </div>

@@ -287,9 +287,9 @@
                     <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5 flex flex-col h-full">
 
                         <!-- Thumbnail -->
-                        <div class="relative overflow-hidden h-44 bg-surface-950 flex items-center justify-center p-2 flex-shrink-0 img-zoom">
+                        <div class="relative overflow-hidden h-48 sm:h-52 bg-surface-900 flex-shrink-0 img-zoom">
                             <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" alt="course thumbnail"
-                                 class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy"
+                                 class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" loading="lazy"
                                  onerror="this.style.display='none'">
                             <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
                                 <i class="bi bi-play-btn-fill text-3xl"></i>
