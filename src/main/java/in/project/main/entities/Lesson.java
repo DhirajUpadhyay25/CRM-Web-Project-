@@ -43,6 +43,12 @@ public class Lesson {
     @Column
     private Boolean isFreePreview = Boolean.FALSE;
 
+    @jakarta.persistence.Transient
+    private boolean locked = false;
+
+    public boolean isLocked() { return locked; }
+    public void setLocked(boolean locked) { this.locked = locked; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

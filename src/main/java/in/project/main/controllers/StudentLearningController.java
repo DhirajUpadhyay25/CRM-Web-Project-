@@ -49,6 +49,27 @@ public class StudentLearningController {
         model.addAttribute("studentImage", user.getImageName());
     }
 
+    private String formatVideoEmbedUrl(String videoUrl) {
+        if (videoUrl == null || videoUrl.isBlank()) return null;
+        String url = videoUrl.trim();
+        if (url.contains("youtube.com/watch") || url.contains("youtu.be/")) {
+            String videoId = null;
+            if (url.contains("v=")) {
+                int start = url.indexOf("v=") + 2;
+                int end = url.indexOf("&", start);
+                videoId = (end == -1) ? url.substring(start) : url.substring(start, end);
+            } else if (url.contains("youtu.be/")) {
+                int start = url.indexOf("youtu.be/") + 9;
+                int end = url.indexOf("?", start);
+                videoId = (end == -1) ? url.substring(start) : url.substring(start, end);
+            }
+            if (videoId != null && !videoId.isBlank()) {
+                return "https://www.youtube.com/embed/" + videoId + "?enablejsapi=1&rel=0";
+            }
+        }
+        return url;
+    }
+
     // ----------------------------------------------------
     // COURSE OVERVIEW
     // ----------------------------------------------------
@@ -97,12 +118,16 @@ public class StudentLearningController {
         }
         model.addAttribute("lessonStatusMap", lessonStatusMap);
 
-        // Find target lesson (last incomplete/accessed, or first lesson)
-        LessonProgress lastProg = progressRepo.findFirstByUserEmailAndCourseIdOrderByLastAccessedAtDesc(email, courseId);
+        // Target lesson logic (Phase 5): find first incomplete lesson, or if all completed, first lesson
         Long targetLessonId = null;
-        if (lastProg != null) {
-            targetLessonId = lastProg.getLessonId();
-        } else if (!lessons.isEmpty()) {
+        for (Lesson l : lessons) {
+            Optional<LessonProgress> lp = progressRepo.findByUserEmailAndLessonId(email, l.getId());
+            if (lp.isEmpty() || !lp.get().isCompleted()) {
+                targetLessonId = l.getId();
+                break;
+            }
+        }
+        if (targetLessonId == null && !lessons.isEmpty()) {
             targetLessonId = lessons.get(0).getId();
         }
         model.addAttribute("targetLessonId", targetLessonId);
@@ -137,10 +162,19 @@ public class StudentLearningController {
             return "redirect:/student/courses/" + courseId + "/overview";
         }
 
-        // Continue Learning Engine redirection if no lessonId provided
+        // Continue Learning Engine redirection if no lessonId provided: find first incomplete lesson
         if (lessonId == null) {
-            LessonProgress lastProg = progressRepo.findFirstByUserEmailAndCourseIdOrderByLastAccessedAtDesc(email, courseId);
-            Long nextLessonId = (lastProg != null) ? lastProg.getLessonId() : lessons.get(0).getId();
+            Long nextLessonId = null;
+            for (Lesson l : lessons) {
+                Optional<LessonProgress> lp = progressRepo.findByUserEmailAndLessonId(email, l.getId());
+                if (lp.isEmpty() || !lp.get().isCompleted()) {
+                    nextLessonId = l.getId();
+                    break;
+                }
+            }
+            if (nextLessonId == null) {
+                nextLessonId = lessons.get(0).getId();
+            }
             return "redirect:/student/courses/" + courseId + "/player?lessonId=" + nextLessonId;
         }
 
@@ -156,8 +190,15 @@ public class StudentLearningController {
         // Security Check: Lesson locking bypass (sequential check)
         if (learningService.isLessonLocked(email, courseId, lessonId)) {
             ra.addFlashAttribute("errorMsg", "This lesson is locked. Please complete previous lessons first.");
-            // Find the last completed lesson or fall back to first lesson
-            return "redirect:/student/courses/" + courseId + "/player";
+            Long firstUnlockedId = lessons.get(0).getId();
+            for (Lesson l : lessons) {
+                if (!learningService.isLessonLocked(email, courseId, l.getId())) {
+                    firstUnlockedId = l.getId();
+                } else {
+                    break;
+                }
+            }
+            return "redirect:/student/courses/" + courseId + "/player?lessonId=" + firstUnlockedId;
         }
 
         // Record lesson access
@@ -175,11 +216,14 @@ public class StudentLearningController {
         // Group syllabus structure for player sidebar
         Map<String, List<Map<String, Object>>> syllabus = new LinkedHashMap<>();
         for (Lesson l : lessons) {
-            String section = l.getSectionName() != null ? l.getSectionName() : "General";
+            String section = (l.getSectionName() != null && !l.getSectionName().trim().isEmpty()) ? l.getSectionName().trim() : "General";
             Map<String, Object> lMap = new HashMap<>();
             lMap.put("id", l.getId());
             lMap.put("title", l.getTitle());
             lMap.put("orderIndex", l.getOrderIndex());
+            lMap.put("contentType", l.getContentType());
+            lMap.put("duration", l.getDuration());
+            lMap.put("isFreePreview", l.getIsFreePreview());
             lMap.put("completed", completedLessonIds.contains(l.getId()));
             lMap.put("locked", learningService.isLessonLocked(email, courseId, l.getId()));
             lMap.put("active", l.getId().equals(lessonId));
@@ -196,6 +240,13 @@ public class StudentLearningController {
                 if (i < lessons.size() - 1) nextLesson = lessons.get(i + 1);
                 break;
             }
+        }
+        boolean nextLessonLocked = (nextLesson != null) && learningService.isLessonLocked(email, courseId, nextLesson.getId());
+        if (nextLesson != null) {
+            nextLesson.setLocked(nextLessonLocked);
+        }
+        if (prevLesson != null) {
+            prevLesson.setLocked(false);
         }
 
         // Course completion checklist (Passed quizzes & assignments check)
@@ -223,6 +274,7 @@ public class StudentLearningController {
         model.addAttribute("enrollment", enrollmentOpt.get());
         model.addAttribute("course", enrollmentOpt.get().getCourse());
         model.addAttribute("lesson", currentLesson);
+        model.addAttribute("embedVideoUrl", formatVideoEmbedUrl(currentLesson.getVideoUrl()));
         model.addAttribute("currentProgress", currentProgress.orElse(null));
         model.addAttribute("notes", notes);
         model.addAttribute("isBookmarked", isBookmarked);
@@ -230,6 +282,7 @@ public class StudentLearningController {
         model.addAttribute("syllabus", syllabus);
         model.addAttribute("prevLesson", prevLesson);
         model.addAttribute("nextLesson", nextLesson);
+        model.addAttribute("nextLessonLocked", nextLessonLocked);
         model.addAttribute("quizChecks", quizChecks);
         model.addAttribute("assignments", assignments);
         model.addAttribute("progressStats", progressStats);

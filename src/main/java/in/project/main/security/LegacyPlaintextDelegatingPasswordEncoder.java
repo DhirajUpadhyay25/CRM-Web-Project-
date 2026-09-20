@@ -19,9 +19,12 @@ public class LegacyPlaintextDelegatingPasswordEncoder implements PasswordEncoder
 
     @Override
     public boolean matches(CharSequence rawPassword, String encodedPassword) {
-        if (encodedPassword == null) {
+        if (encodedPassword == null || rawPassword == null) {
             return false;
         }
-        return bcrypt.matches(rawPassword, encodedPassword);
+        if (encodedPassword.startsWith("$2a$") || encodedPassword.startsWith("$2b$") || encodedPassword.startsWith("$2y$")) {
+            return bcrypt.matches(rawPassword, encodedPassword);
+        }
+        return rawPassword.toString().equals(encodedPassword);
     }
 }

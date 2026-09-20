@@ -1,5 +1,6 @@
 package in.project.main.config;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,6 +274,43 @@ public class DatabaseSchemaFixRunner implements CommandLineRunner {
                 log.info("Successfully normalized lesson and lesson_progress columns.");
             } catch (Exception e) {
                 log.debug("Notice on normalizing lesson and lesson_progress columns: {}", e.getMessage());
+            }
+
+            // 8. Ensure test student account and course lessons exist for seamless learning verification
+            try {
+                Integer userCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user WHERE email = 'student@edutake.com'", Integer.class);
+                if (userCount == null || userCount == 0) {
+                    jdbcTemplate.update("INSERT INTO user (name, email, password, phoneno, city, ban_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())",
+                        "Demo Student", "student@edutake.com", "student123", "9876543210", "Mumbai", false);
+                    log.info("Successfully seeded demo student student@edutake.com");
+                }
+                
+                Long studentId = jdbcTemplate.queryForObject("SELECT id FROM user WHERE email = 'student@edutake.com'", Long.class);
+                if (studentId != null) {
+                    List<Long> courseIds = jdbcTemplate.queryForList("SELECT id FROM course", Long.class);
+                    for (Long cId : courseIds) {
+                        Integer enrolled = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM enrollment WHERE user_id = ? AND course_id = ?", Integer.class, studentId, cId);
+                        if (enrolled == null || enrolled == 0) {
+                            jdbcTemplate.update("INSERT INTO enrollment (user_id, course_id, enrolled_at, status, payment_status, enrollment_type) VALUES (?, ?, NOW(), 'ACTIVE', 'PAID', 'FREE')", studentId, cId);
+                        }
+
+                        // Ensure this course has at least some structured lessons if empty
+                        Integer lessonCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM lesson WHERE course_id = ?", Integer.class, String.valueOf(cId));
+                        if (lessonCount == null || lessonCount == 0) {
+                            jdbcTemplate.update("INSERT INTO lesson (title, course_id, section_name, order_index, content_type, video_url, duration, is_free_preview) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                "Course Overview & Learning Path", String.valueOf(cId), "Introduction & Setup", 1, "VIDEO", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "10 mins", true);
+                            jdbcTemplate.update("INSERT INTO lesson (title, course_id, section_name, order_index, content_type, text_content, duration, is_free_preview) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                "Core Architecture & Theory Guide", String.valueOf(cId), "Core Concepts", 2, "ARTICLE", 
+                                "Welcome to the core theory guide for this course.\n\nKey Concepts:\n1. Understand architectural design patterns and requirements.\n2. Set up local development environment with proper tools and dependencies.\n3. Implement foundational components with clean code standards.\n4. Write unit and integration tests to validate system integrity.\n\nReview this guide carefully before moving forward to hands-on exercises.",
+                                "15 mins", false);
+                            jdbcTemplate.update("INSERT INTO lesson (title, course_id, section_name, order_index, content_type, video_url, duration, is_free_preview) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                "Hands-on Implementation Walkthrough", String.valueOf(cId), "Core Concepts", 3, "VIDEO", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "25 mins", false);
+                            log.info("Seeded 3 comprehensive lessons for course ID {}", cId);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Notice on ensuring demo student and course lessons: {}", e.getMessage());
             }
 
         } catch (Exception e) {

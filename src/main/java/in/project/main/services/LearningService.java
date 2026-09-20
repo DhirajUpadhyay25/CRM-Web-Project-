@@ -157,6 +157,12 @@ public class LearningService {
             return false;
         }
 
+        // Free preview is always unlocked
+        Lesson target = lessonRepo.findById(lessonId).orElse(null);
+        if (target != null && Boolean.TRUE.equals(target.getIsFreePreview())) {
+            return false;
+        }
+
         // Find current lesson index
         int idx = -1;
         for (int i = 0; i < lessons.size(); i++) {
@@ -351,17 +357,26 @@ public class LearningService {
                 if ("IN_PROGRESS".equalsIgnoreCase(filter) && (!isStarted || isCompleted)) continue;
             }
 
-            // Find last accessed lesson and target lesson
+            // Record last accessed lesson title if present
             LessonProgress lastProg = progressRepo.findFirstByUserEmailAndCourseIdOrderByLastAccessedAtDesc(email, c.getId());
-            Long targetLessonId = null;
             if (lastProg != null) {
                 dto.setLastAccessedLessonId(lastProg.getLessonId());
                 lessonRepo.findById(lastProg.getLessonId()).ifPresent(l -> dto.setLastAccessedLessonTitle(l.getTitle()));
-                targetLessonId = lastProg.getLessonId();
             }
 
+            // Target lesson logic (Phase 5):
+            // 1. If course is not completed, target the first incomplete lesson!
+            // 2. If all lessons are completed, target first lesson for review.
+            Long targetLessonId = null;
+            for (Lesson l : lessons) {
+                Optional<LessonProgress> lp = progressRepo.findByUserEmailAndLessonId(email, l.getId());
+                if (lp.isEmpty() || !lp.get().isCompleted()) {
+                    targetLessonId = l.getId();
+                    break;
+                }
+            }
             if (targetLessonId == null && !lessons.isEmpty()) {
-                targetLessonId = lessons.get(0).getId();
+                targetLessonId = (lastProg != null) ? lastProg.getLessonId() : lessons.get(0).getId();
             }
             dto.setTargetLessonId(targetLessonId);
 
