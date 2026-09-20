@@ -287,29 +287,30 @@
                     <div th:each="course : ${coursesList}" class="group bg-surface-900 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/5 flex flex-col h-full">
 
                         <!-- Thumbnail -->
-                        <div class="relative overflow-hidden h-48 sm:h-52 bg-surface-900 flex-shrink-0 img-zoom">
+                        <div class="relative overflow-hidden aspect-video bg-surface-950 flex items-center justify-center flex-shrink-0 img-zoom">
+                            <!-- Ambient blurred background fill covering the entire div with image's own colors -->
+                            <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" 
+                                 class="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35 select-none pointer-events-none" 
+                                 aria-hidden="true" alt="">
+                            <!-- 100% fully visible uncropped sharp image -->
                             <img th:if="${course.imageUrl}" th:src="@{${course.imageUrl}}" alt="course thumbnail"
-                                 class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" loading="lazy"
+                                 class="relative z-[1] w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy"
                                  onerror="this.style.display='none'">
                             <div th:unless="${course.imageUrl}" class="w-full h-full flex items-center justify-center text-gray-500">
                                 <i class="bi bi-play-btn-fill text-3xl"></i>
-                            </div>
-
-                            <!-- Badges (Featured Star & Discount Only) -->
-                            <div th:if="${course.featured}" class="absolute top-3 left-3 z-10">
-                                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-yellow-400 text-yellow-950 shadow-sm flex items-center gap-1 w-max">
-                                    <i class="bi bi-star-fill text-[8px]"></i> Featured
-                                </span>
-                            </div>
-                            <div th:if="${course.getDiscountPercentage() != null}" class="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-black bg-red-500 text-white z-10">
-                                <span th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
                             </div>
                         </div>
 
                         <!-- Content -->
                         <div class="p-5 flex-1 flex flex-col">
                             <div class="flex items-center gap-2 text-[10px] text-gray-400 font-medium mb-2 flex-wrap">
+                                <span th:if="${course.featured}" class="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center gap-1">
+                                    <i class="bi bi-star-fill text-[8px] text-amber-400"></i> Featured
+                                </span>
                                 <span th:if="${course.category}" class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-brand-500/15 text-brand-300 border border-brand-500/25" th:text="${course.category.name}"></span>
+                                <span th:if="${course.getDiscountPercentage() != null}" class="px-2 py-0.5 rounded-md text-[9px] font-black bg-red-500/20 text-red-400 border border-red-500/30">
+                                    <span th:text="${course.getDiscountPercentage() + '% OFF'}"></span>
+                                </span>
                                 <span th:if="${course.level != null}" th:text="${course.level}">Level</span>
                                 <span th:if="${course.level != null and course.duration != null}">•</span>
                                 <span th:if="${course.duration != null}" th:text="${course.duration}">Duration</span>
