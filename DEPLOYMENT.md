@@ -101,8 +101,8 @@ Configure these in the Render Dashboard under **Environment**:
 | `DATABASE_PASSWORD` | Database password | `<your_db_password>` | **Yes** |
 | `SEED_ADMIN_PASSWORD` | Password for root admin `admin@edutake.com` | `<choose_a_strong_password>` | **Recommended** |
 | `SPRING_JPA_HIBERNATE_DDL_AUTO` | Schema creation mode | `update` (initial deploy) | **Optional** (defaults to `update`) |
-| `RAZORPAY_KEY_ID` | Razorpay Merchant Key ID | `rzp_test_xxxx` | Optional (falls back to demo placeholder) |
-| `RAZORPAY_KEY_SECRET` | Razorpay Key Secret | `<secret_key>` | Optional (falls back to demo placeholder) |
+| `RAZORPAY_KEY_ID` | Razorpay Merchant Key ID | `rzp_test_xxxx` | **Required for Checkout** (from Razorpay Dashboard) |
+| `RAZORPAY_KEY_SECRET` | Razorpay Key Secret | `<secret_key>` | **Required for Checkout** (from Razorpay Dashboard) |
 | `DB_MAX_POOL_SIZE` | Max database connections for free tier | `5` | Optional (defaults to `5`) |
 
 ---

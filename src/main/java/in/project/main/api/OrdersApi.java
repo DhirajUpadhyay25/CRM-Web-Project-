@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
 
 import in.project.main.entities.Coupon;
 import in.project.main.entities.Course;
@@ -155,7 +156,14 @@ public class OrdersApi {
                         .body(Map.of("error", "This coupon reduces the price to zero. Please use free enrollment."));
             }
 
-            RazorpayClient client = new RazorpayClient(keyId, keySecret);
+            if (keyId == null || keyId.trim().isEmpty() || "rzp_test_placeholder".equalsIgnoreCase(keyId.trim())
+                    || keySecret == null || keySecret.trim().isEmpty() || "rzp_secret_placeholder".equalsIgnoreCase(keySecret.trim())) {
+                log.error("Razorpay payment gateway credentials are not configured (still placeholder or blank). keyId={}", keyId);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(Map.of("error", "Payment gateway is not configured on the server. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your Render Environment Variables."));
+            }
+
+            RazorpayClient client = new RazorpayClient(keyId.trim(), keySecret.trim());
             JSONObject orderRequest = new JSONObject();
             orderRequest.put("amount", amountInPaise);
             orderRequest.put("currency", "INR");
@@ -181,14 +189,19 @@ public class OrdersApi {
             response.put("amount", order.get("amount"));
             response.put("courseName", course.getName());
             response.put("effectivePrice", payable.toPlainString());
+            response.put("razorpayKeyId", keyId.trim());
             return ResponseEntity.ok(response);
 
         } catch (CouponRejectedException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RazorpayException e) {
+            log.error("Razorpay API error creating order for course '{}': {}", payload.get("courseName"), e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Razorpay Payment Gateway Error: " + (e.getMessage() != null ? e.getMessage() : "Authentication or order initiation failed.")));
         } catch (Exception e) {
             log.error("Failed to create order for course '{}'", payload.get("courseName"), e);
             return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "We could not start the payment. Please try again."));
+                    .body(Map.of("error", "We could not start the payment: " + (e.getMessage() != null ? e.getMessage() : "Please try again.")));
         }
     }
 
@@ -252,7 +265,8 @@ public class OrdersApi {
 
             // Check the signature before touching the database so this endpoint cannot be
             // used to probe which order ids exist.
-            String expectedSignature = hmacSHA256(orderId + "|" + paymentId, keySecret);
+            String secretToUse = keySecret != null ? keySecret.trim() : "";
+            String expectedSignature = hmacSHA256(orderId + "|" + paymentId, secretToUse);
             if (!MessageDigest.isEqual(
                     expectedSignature.getBytes(StandardCharsets.UTF_8),
                     signature.getBytes(StandardCharsets.UTF_8))) {
@@ -421,7 +435,7 @@ public class OrdersApi {
     private void assertPaymentMatchesOrder(String paymentId, Orders storedOrder) {
         com.razorpay.Payment remotePayment;
         try {
-            RazorpayClient client = new RazorpayClient(keyId, keySecret);
+            RazorpayClient client = new RazorpayClient(keyId != null ? keyId.trim() : "", keySecret != null ? keySecret.trim() : "");
             remotePayment = client.payments.fetch(paymentId);
         } catch (Exception e) {
             log.warn("Could not fetch payment {} from Razorpay for cross-checking; relying on signature only",

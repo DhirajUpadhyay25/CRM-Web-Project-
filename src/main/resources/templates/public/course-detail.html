@@ -554,12 +554,19 @@
     <!-- Footer -->
     <div th:replace="~{fragments/tw-footer :: footer}"></div>
 
+    <!-- Hidden Payment & CSRF Data (Avoids Thymeleaf inline-script serialization crash) -->
+    <input type="hidden" id="pageCsrfToken" th:if="${_csrf != null}" th:value="${_csrf.token}">
+    <input type="hidden" id="pageCsrfHeader" th:if="${_csrf != null}" th:value="${_csrf.headerName}">
+    <input type="hidden" id="pageRazorpayKey" th:value="${razorpayKeyId}">
+
     <!-- Razorpay Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script th:inline="javascript">
-    var csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
-    var csrfHeader = /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN';
+    <script>
+    var csrfToken = document.getElementById('pageCsrfToken')?.value || document.querySelector('meta[name="_csrf"]')?.content || '';
+    var csrfHeader = document.getElementById('pageCsrfHeader')?.value || document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+    var pageRazorpayKey = document.getElementById('pageRazorpayKey')?.value || '';
+
     $.ajaxSetup({
         beforeSend: function (xhr) {
             if (csrfToken) {
@@ -689,8 +696,14 @@
                     btn.innerHTML = '<i class="bi bi-credit-card-2-back-fill"></i> <span>Pay Securely with Razorpay</span>';
                 }
 
+                var activeKey = orderData.razorpayKeyId || pageRazorpayKey;
+                if (!activeKey || activeKey === 'rzp_test_placeholder') {
+                    alert("⚠️ Razorpay API key is not configured on the server. Please set RAZORPAY_KEY_ID in Render environment variables.");
+                    return;
+                }
+
                 var options = {
-                    "key": /*[[${razorpayKeyId}]]*/ "",
+                    "key": activeKey,
                     "amount": orderData.amount,
                     "currency": "INR",
                     "order_id": orderData.orderId,
