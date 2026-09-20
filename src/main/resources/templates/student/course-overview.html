@@ -235,26 +235,6 @@
             </div>
         </div>
 
-        <!-- Sticky Floating Action Bar for Mobile (< lg) -->
-        <div class="lg:hidden fixed bottom-16 left-0 right-0 z-20 px-3 py-2 pointer-events-none animate-slide-down">
-            <div class="bg-surface-900/95 backdrop-blur-md text-white p-3 rounded-2xl shadow-2xl border border-surface-700 flex items-center justify-between gap-3 pointer-events-auto">
-                <div class="min-w-0 flex-1">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase truncate" th:text="${course.name}">Course</p>
-                    <div class="flex items-center gap-2 mt-0.5">
-                        <div class="w-16 bg-white/20 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-brand-400 h-full rounded-full" th:style="'width: ' + ${progress.percent} + '%'"></div>
-                        </div>
-                        <span class="text-xs font-black text-brand-300" th:text="${progress.percent + '%'}">0%</span>
-                    </div>
-                </div>
-                <a th:href="@{/student/courses/{cId}/player(cId=${course.id}, lessonId=${targetLessonId})}"
-                   class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5 shrink-0">
-                    <i class="bi bi-play-fill text-base"></i>
-                    <span th:text="${progress.percent == 100 ? 'Review' : (progress.percent > 0 ? 'Resume' : 'Start')}">Resume</span>
-                </a>
-            </div>
-        </div>
-
     </div>
 </body>
 </html>

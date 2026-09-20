@@ -733,20 +733,44 @@
 }
 
 /* --- Mobile Responsive Rules --- */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     #need-help-launcher {
-        bottom: 16px;
-        right: 16px;
-        padding: 9px 14px;
-        font-size: 12.5px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        right: 14px;
+        padding: 8px 14px;
+        font-size: 12px;
+        gap: 7px;
     }
 
     #need-help-drawer {
-        bottom: 66px;
-        right: 12px;
-        left: 12px;
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+        right: 10px;
+        left: 10px;
         width: auto;
-        max-width: none;
-        height: calc(100vh - 84px);
+        max-width: calc(100vw - 20px);
+        height: calc(100dvh - 80px - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100vh - 80px);
+    }
+
+    /* Elevated Alignment when Mobile Bottom Navigation or Footer is Present */
+    body.has-mobile-bottom-nav #need-help-launcher,
+    body:has(#mobileBottomNav) #need-help-launcher,
+    body:has(nav[id*="mobileBottom"]) #need-help-launcher {
+        bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 14px !important;
+        box-shadow: 0 4px 20px rgba(76, 110, 245, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    body.has-mobile-bottom-nav #need-help-drawer,
+    body:has(#mobileBottomNav) #need-help-drawer,
+    body:has(nav[id*="mobileBottom"]) #need-help-drawer {
+        bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
+        right: 10px !important;
+        left: 10px !important;
+        width: auto !important;
+        max-width: calc(100vw - 20px) !important;
+        height: calc(100dvh - 84px - env(safe-area-inset-bottom, 0px)) !important;
+        max-height: calc(100vh - 84px) !important;
     }
 }
+

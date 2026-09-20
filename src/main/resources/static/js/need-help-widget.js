@@ -23,8 +23,19 @@
         cacheElements();
         if (!elements.launcher || !elements.drawer) return;
 
+        checkBottomNavOffset();
         bindEvents();
         detectInitialContext();
+    }
+
+    function checkBottomNavOffset() {
+        const hasBottomBar = !!document.getElementById('mobileBottomNav') ||
+                             !!document.querySelector('nav[id*="mobileBottom"]') ||
+                             !!document.querySelector('footer.player-footer') ||
+                             !!document.querySelector('footer.h-14');
+        if (hasBottomBar) {
+            document.body.classList.add('has-mobile-bottom-nav');
+        }
     }
 
     function cacheElements() {
